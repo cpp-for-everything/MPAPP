@@ -2,18 +2,18 @@
 type: task
 id: T-0006
 title: GitHub Actions skeleton with budget-aware sharding and self-hosted runner
-status: todo
+status: in-progress
 milestone: M-02
 owner: ""
 area: tooling
 blockedBy:
   - T-0001
-coveragePercent: 0
+coveragePercent: 100
 hasScreenshots: false
 hasRecordings: false
 tags:
   - type/task
-  - status/todo
+  - status/in-progress
   - area/tooling
   - area/build
   - phase/p1
@@ -49,3 +49,6 @@ Action minutes budget is in [[CI Strategy]]. If a job grows past its allocation,
 
 - Milestone: [[M-02-Infrastructure]]
 - Related: [[CI Strategy]], [[Build System]], [[CLAUDE]] rule 8
+- Workflows: [`.github/workflows/pr.yml`](../../../.github/workflows/pr.yml), [`.github/workflows/release.yml`](../../../.github/workflows/release.yml)
+- Runner setup: [[runner-setup]]
+- Zig install: [[zig-install]]
