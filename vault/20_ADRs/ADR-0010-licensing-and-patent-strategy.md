@@ -2,7 +2,7 @@
 type: adr
 id: ADR-0010
 title: Licensing and patent strategy
-status: proposed
+status: accepted
 decisionDate: 2026-05-12
 deciders:
   - Alex Tsvetanov
@@ -11,14 +11,14 @@ supersededBy: ""
 area: legal
 tags:
   - type/adr
-  - status/proposed
+  - status/accepted
   - area/legal
 ---
 
 # ADR-0010 — Licensing and patent strategy
 
-> [!info] Status
-> **proposed** — awaiting review.
+> [!success] Status
+> **accepted** on 2026-05-12.
 
 ## Context
 

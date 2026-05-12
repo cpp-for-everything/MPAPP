@@ -2,7 +2,7 @@
 type: rfc
 id: RFC-0002
 title: Cross-compilation toolchain — Zig vs LLVM/Clang + per-platform sysroots
-status: draft
+status: accepted
 author: Alex Tsvetanov
 created: 2026-05-12
 area: build
@@ -11,17 +11,17 @@ relatedADRs:
   - ADR-0011
 tags:
   - type/rfc
-  - status/draft
+  - status/accepted
   - area/build
 ---
 
 # RFC-0002 — Cross-compilation toolchain
 
-> [!info] Status
-> **draft** — under discussion.
+> [!success] Status
+> **accepted** on 2026-05-12. Decision lives in [[ADR-0011-cross-compilation-toolchain]].
 
 > [!success] Closed by
-> [[ADR-0011-cross-compilation-toolchain]] — Zig (`zig cc`) is locked in as the primary cross-compilation toolchain. This RFC is retained for the evaluation record; the formal decision lives in the ADR.
+> [[ADR-0011-cross-compilation-toolchain]] — Zig (`zig cc`) is locked in as the primary cross-compilation toolchain (accepted 2026-05-12). This RFC is retained for the evaluation record; the formal decision lives in the ADR.
 
 ## Problem
 

@@ -31,3 +31,10 @@ Two RFCs opened the same day:
 
 - [[ADR-0010-licensing-and-patent-strategy]] (proposed) — promotes [[RFC-0001-licensing-and-patent-strategy]]'s recommendations: Apache 2.0 + commercial dual license, Apache-style CLA via cla-assistant.io, individual copyright assignee, LGPL-dynamic-only dependency posture, deferred patent filing after a prior-art audit.
 - [[ADR-0011-cross-compilation-toolchain]] (proposed) — Zig (`zig cc`) locked in as the cross-compilation toolchain, closing [[RFC-0002-cross-compilation-toolchain]].
+
+## 2026-W19 — ADRs accepted
+
+Both proposed ADRs from earlier in the week were promoted to `accepted` on 2026-05-12, and their source RFCs flipped from `draft` to `accepted`:
+
+- [[ADR-0010-licensing-and-patent-strategy]] (accepted) — Apache 2.0 + commercial dual license, Apache-style CLA enforced via cla-assistant.io, copyright held by Alex Tsvetanov with reserved LLC transfer, LGPL-only-via-dynamic-linking dependency posture, patent filing deferred until P3 with mandatory prior-art audit. Closes [[RFC-0001-licensing-and-patent-strategy]].
+- [[ADR-0011-cross-compilation-toolchain]] (accepted) — Zig (`zig cc`) is the official cross-compilation toolchain; pinned via `cmake/toolchains/zig.cmake`, auto-installed by the `mpapp` CLI to `~/.mpapp/toolchains/zig-<version>/`. Closes [[RFC-0002-cross-compilation-toolchain]].

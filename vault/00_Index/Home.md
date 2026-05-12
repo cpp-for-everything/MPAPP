@@ -23,7 +23,7 @@ Welcome to the MPAPP vault. **AI agents:** start with [[CLAUDE]]. **Humans:** se
 > 2. **Diagnostic quality determines adoption.** Source-mapped errors every phase.
 > 3. **CI minutes are scarce.** Shard aggressively. See [[CI Strategy]].
 > 4. **Apple platform automation** — UI tests must be human-free from P1.
-> 5. **License contagion.** GTK4 LGPL — dynamic linking only. See [[RFC-0001-licensing-and-patent-strategy]].
+> 5. **License contagion.** GTK4 LGPL — dynamic linking only. See [[ADR-0010-licensing-and-patent-strategy]].
 > 6. **Interop parity drift.** Every PR lists which platforms it affects. See [[Interop Parity]].
 > 7. **MAUI component surface is large.** 55 components × 5 platforms = lots of work.
 > 8. **Patent prior-art audit** required before any filing.
@@ -89,8 +89,8 @@ See [[CLAUDE]] for the full text.
 
 ## Quick navigation
 
-- 9 accepted ADRs: see [[Decisions MOC]] or [[_Bases/ADRs.base]]
-- 2 open RFCs: [[RFC-0001-licensing-and-patent-strategy]], [[RFC-0002-cross-compilation-toolchain]]
+- 11 accepted ADRs: see [[Decisions MOC]] or [[_Bases/ADRs.base]]
+- 0 open RFCs (RFC-0001 and RFC-0002 both accepted): see [[_Bases/RFCs.base]]
 - 10 milestones (M-01 active): [[Roadmap MOC]] or [[_Canvases/Phase-Roadmap.canvas|Phase Roadmap canvas]]
 - 56 component stubs: [[Components MOC]] or [[Controls Inventory]]
 - 10 active tasks: [[_Bases/Tasks.base]]

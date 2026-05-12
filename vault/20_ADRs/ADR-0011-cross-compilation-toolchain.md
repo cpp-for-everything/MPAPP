@@ -2,7 +2,7 @@
 type: adr
 id: ADR-0011
 title: Cross-compilation toolchain is Zig (zig cc)
-status: proposed
+status: accepted
 decisionDate: 2026-05-12
 deciders:
   - Alex Tsvetanov
@@ -11,14 +11,14 @@ supersededBy: ""
 area: build
 tags:
   - type/adr
-  - status/proposed
+  - status/accepted
   - area/build
 ---
 
 # ADR-0011 — Cross-compilation toolchain is Zig (zig cc)
 
-> [!info] Status
-> **proposed** on 2026-05-12 — awaiting acceptance.
+> [!success] Status
+> **accepted** on 2026-05-12.
 
 ## Context
 
