@@ -26,3 +26,7 @@ Two RFCs opened the same day:
 
 - [[RFC-0001-licensing-and-patent-strategy]] — dual license + CLA + patent prior-art audit (draft).
 - [[RFC-0002-cross-compilation-toolchain]] — Zig vs LLVM + per-platform sysroots (draft).
+
+## 2026-W19 — ADR-0010 proposed
+
+- [[ADR-0010-licensing-and-patent-strategy]] (proposed) — promotes [[RFC-0001-licensing-and-patent-strategy]]'s recommendations (Apache 2.0 + commercial dual license, Apache-style CLA via cla-assistant.io, individual copyright assignee, LGPL-dynamic-only dependency posture, deferred patent filing after a prior-art audit).
