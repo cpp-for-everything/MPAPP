@@ -2,17 +2,17 @@
 type: task
 id: T-0005
 title: Populate Controls Inventory and per-component docs from MAUI source
-status: todo
+status: done
 milestone: M-01
 owner: ""
 area: docs
 blockedBy: []
-coveragePercent: 0
+coveragePercent: 100
 hasScreenshots: false
 hasRecordings: false
 tags:
   - type/task
-  - status/todo
+  - status/done
   - area/docs
   - phase/p0
 ---
@@ -45,3 +45,10 @@ This is a large but mechanical task. Could be split into batches (10 components 
 - Milestone: [[M-01-Foundations]]
 - Related: [[Controls Inventory]], [[Components/README]], [[XAML Compatibility]]
 - Source: `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\`, `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\`
+
+## Closure notes
+
+- **Closed:** 2026-05-12
+- **Merged commits:** Day-1 inventory stubs (vault init) plus Batch 1 component-doc population — `f5f462c` (inputs, 9), `222c9d2` (pickers/images, 8), `0e16288` (navigation, 6), `1e60b8d` (menus/toolbars, 9), `a003f84` (app-level, 8), `b5a2f96` (layout, 7), `c9ce958` (collections/complex, 9), and downstream merges `cff83de`, `532ef93`, `a0bdb04`, `c7a0169`, `5cde621`, `d98267d`, `6f28fbc`.
+- **Delivered:** All 56 per-component docs under `vault/10_Architecture/Components/` populated from MAUI source with overview, MAUI reference paths, common properties/events, and representative XAML side-by-side examples. Controls Inventory snapshot kept in sync.
+- **Coverage:** docs-only task — no code coverage applicable; gate set to `100%` per the task spec.

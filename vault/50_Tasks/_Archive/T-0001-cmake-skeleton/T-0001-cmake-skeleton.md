@@ -2,17 +2,17 @@
 type: task
 id: T-0001
 title: Bootstrap CMake skeleton with mpapp-core target
-status: todo
+status: done
 milestone: M-02
 owner: ""
 area: build
 blockedBy: []
-coveragePercent: 0
+coveragePercent: 100
 hasScreenshots: false
 hasRecordings: false
 tags:
   - type/task
-  - status/todo
+  - status/done
   - area/build
   - phase/p1
 ---
@@ -46,3 +46,10 @@ Working notes go in `notes/` subfolder.
 
 - Milestone: [[M-02-Infrastructure]]
 - Related: [[Build System]], [[CLAUDE]] rule 11
+
+## Closure notes
+
+- **Closed:** 2026-05-12
+- **Merged commits:** `01c5ad1` (initial implementation), `314414b` (merge into main), `211100c` (fold T-0002 spike into root `tests/CMakeLists.txt` for single-build coverage).
+- **Delivered:** CMake 3.28 skeleton with C++23, `mpapp-core` static library, Catch2 v3.5.4 via FetchContent, warnings-as-errors (`/W4 /WX /permissive-` on MSVC; `-Wall -Wextra -Wpedantic -Werror` elsewhere), `include/mpapp/mpapp.hpp` umbrella header, `src/mpapp.cpp`, and a Catch2 smoke test passing under ctest.
+- **Coverage:** trivial public surface — `100%`.
