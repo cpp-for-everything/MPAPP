@@ -32,21 +32,36 @@ Per [[ADR-0011-cross-compilation-toolchain]], **Zig (`zig cc`) is locked in** as
 
 ## CMake structure
 
+The cross-compilation toolchain files live under `cmake/toolchains/`. The
+first five targets are landed; additional architectures and the
+`-simulator` variants follow the same pattern and will be added as they
+come online. See [`cmake/toolchains/README.md`](../../cmake/toolchains/README.md)
+for invocation conventions, the Zig auto-location story, and the unsigned-
+Apple caveat.
+
+| Toolchain file | Target |
+|---|---|
+| [`cmake/toolchains/zig.cmake`](../../cmake/toolchains/zig.cmake) | Shared helper (pins Zig version, defines `mpapp_use_zig_target`) |
+| [`cmake/toolchains/windows-x64.cmake`](../../cmake/toolchains/windows-x64.cmake) | `x86_64-windows-gnu` |
+| [`cmake/toolchains/linux-x64.cmake`](../../cmake/toolchains/linux-x64.cmake) | `x86_64-linux-gnu` |
+| [`cmake/toolchains/linux-arm64.cmake`](../../cmake/toolchains/linux-arm64.cmake) | `aarch64-linux-gnu` |
+| [`cmake/toolchains/android-arm64.cmake`](../../cmake/toolchains/android-arm64.cmake) | `aarch64-linux-android.24` |
+| [`cmake/toolchains/macos-arm64.cmake`](../../cmake/toolchains/macos-arm64.cmake) | `aarch64-macos-none` (unsigned on non-Mac hosts) |
+| [`cmake/toolchains/ios-arm64.cmake`](../../cmake/toolchains/ios-arm64.cmake) | `aarch64-ios-none` (unsigned on non-Mac hosts) |
+
 ```
 MPAPP/
 ├── CMakeLists.txt                  # Top-level: include modules, define targets
 ├── cmake/
 │   ├── toolchains/
+│   │   ├── README.md
+│   │   ├── zig.cmake               # Shared helper
 │   │   ├── windows-x64.cmake
-│   │   ├── windows-arm64.cmake
 │   │   ├── linux-x64.cmake
 │   │   ├── linux-arm64.cmake
 │   │   ├── android-arm64.cmake
-│   │   ├── android-x86_64.cmake    # Emulator
 │   │   ├── macos-arm64.cmake
-│   │   ├── macos-x64.cmake
-│   │   ├── ios-arm64.cmake
-│   │   └── ios-simulator.cmake
+│   │   └── ios-arm64.cmake
 │   ├── presets/
 │   │   └── CMakePresets.json       # User-facing build presets
 │   └── modules/
