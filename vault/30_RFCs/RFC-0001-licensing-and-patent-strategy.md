@@ -2,24 +2,24 @@
 type: rfc
 id: RFC-0001
 title: Licensing and patent strategy for MPAPP
-status: draft
+status: accepted
 author: Alex Tsvetanov
 created: 2026-05-12
 area: legal
 relatedADRs: [ADR-0010]
 tags:
   - type/rfc
-  - status/draft
+  - status/accepted
   - area/legal
 ---
 
 # RFC-0001 — Licensing and patent strategy for MPAPP
 
-> [!info] Status
-> **draft** — under discussion.
+> [!success] Status
+> **accepted** on 2026-05-12. Decision lives in [[ADR-0010-licensing-and-patent-strategy]].
 
-> [!note] Closed by
-> Recommendations promoted to [[ADR-0010-licensing-and-patent-strategy]] (proposed 2026-05-12). This RFC stays `draft` until ADR-0010 is accepted.
+> [!success] Closed by
+> Recommendations promoted to [[ADR-0010-licensing-and-patent-strategy]] (accepted 2026-05-12).
 
 ## Problem
 
