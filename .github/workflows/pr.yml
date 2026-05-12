@@ -1,0 +1,235 @@
+name: PR
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Per CLAUDE rule 8 and vault/10_Architecture/CI Strategy.md:
+# - Cloud minutes are scarce; shard aggressively, cache aggressively.
+# - Cross-compilation uses Zig (see RFC-0002).
+# - Long Android emulator runs go to the self-hosted runner labeled mpapp-windows-self.
+# - macOS-hosted jobs live in release.yml, not here, until the self-hosted Mac runner is online.
+
+env:
+  ZIG_VERSION: "0.13.0"
+  CMAKE_BUILD_TYPE: Release
+
+jobs:
+  windows-native:
+    name: windows-native
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSBuild (MSVC)
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup sccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          variant: sccache
+          key: windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+
+      - name: Cache build directory
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: build-windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+          restore-keys: |
+            build-windows-native-
+
+      - name: Configure
+        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --parallel
+
+      - name: Test
+        run: ctest --test-dir build -C ${{ env.CMAKE_BUILD_TYPE }} --output-on-failure
+
+  windows-cross:
+    name: windows-cross
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Cache Zig toolchain
+        id: zig-cache
+        uses: actions/cache@v4
+        with:
+          path: C:\zig
+          key: zig-${{ env.ZIG_VERSION }}-windows
+
+      - name: Install Zig (pinned)
+        if: steps.zig-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $url = "https://ziglang.org/download/$env:ZIG_VERSION/zig-windows-x86_64-$env:ZIG_VERSION.zip"
+          Invoke-WebRequest -Uri $url -OutFile zig.zip
+          Expand-Archive zig.zip -DestinationPath C:\zig-tmp
+          Move-Item "C:\zig-tmp\zig-windows-x86_64-$env:ZIG_VERSION" C:\zig
+          Remove-Item zig.zip
+
+      - name: Add Zig to PATH
+        shell: pwsh
+        run: Add-Content $env:GITHUB_PATH "C:\zig"
+
+      - name: Cache build (linux-x64 cross)
+        uses: actions/cache@v4
+        with:
+          path: build-linux-x64
+          key: build-windows-cross-linux-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+
+      - name: Configure linux-x64 (Zig cross)
+        # NOTE: cmake/toolchains/linux-x64.cmake does not exist yet — placeholder
+        # until T-0009 (cross-compilation matrix) lands the toolchain files.
+        run: cmake -S . -B build-linux-x64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/linux-x64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+        continue-on-error: true
+
+      - name: Build linux-x64
+        run: cmake --build build-linux-x64 --parallel
+        continue-on-error: true
+
+      - name: Cache build (android-arm64 cross)
+        uses: actions/cache@v4
+        with:
+          path: build-android-arm64
+          key: build-windows-cross-android-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+
+      - name: Configure android-arm64 (Zig cross)
+        # NOTE: cmake/toolchains/android-arm64.cmake placeholder — pending T-0009.
+        run: cmake -S . -B build-android-arm64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+        continue-on-error: true
+
+      - name: Build android-arm64
+        run: cmake --build build-android-arm64 --parallel
+        continue-on-error: true
+
+  linux-native:
+    name: linux-native
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Clang + build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang lld ninja-build cmake
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: linux-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+
+      - name: Cache build directory
+        uses: actions/cache@v4
+        with:
+          path: build
+          key: build-linux-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+          restore-keys: |
+            build-linux-native-
+
+      - name: Configure
+        env:
+          CC: clang
+          CXX: clang++
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+  linux-cross:
+    name: linux-cross
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Cache Zig toolchain
+        id: zig-cache
+        uses: actions/cache@v4
+        with:
+          path: /opt/zig
+          key: zig-${{ env.ZIG_VERSION }}-linux
+
+      - name: Install Zig (pinned)
+        if: steps.zig-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -fsSL "https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz" -o zig.tar.xz
+          sudo mkdir -p /opt/zig
+          sudo tar -xJf zig.tar.xz -C /opt/zig --strip-components=1
+          rm zig.tar.xz
+
+      - name: Add Zig to PATH
+        run: echo "/opt/zig" >> "$GITHUB_PATH"
+
+      - name: Cache build (windows-x64 cross)
+        uses: actions/cache@v4
+        with:
+          path: build-windows-x64
+          key: build-linux-cross-windows-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+
+      - name: Configure windows-x64 (Zig cross)
+        # NOTE: cmake/toolchains/windows-x64.cmake placeholder — pending T-0009.
+        run: cmake -S . -B build-windows-x64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/windows-x64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+        continue-on-error: true
+
+      - name: Build windows-x64
+        run: cmake --build build-windows-x64 --parallel
+        continue-on-error: true
+
+      - name: Cache build (android-arm64 cross)
+        uses: actions/cache@v4
+        with:
+          path: build-android-arm64
+          key: build-linux-cross-android-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+
+      - name: Configure android-arm64 (Zig cross)
+        # NOTE: cmake/toolchains/android-arm64.cmake placeholder — pending T-0009.
+        run: cmake -S . -B build-android-arm64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+        continue-on-error: true
+
+      - name: Build android-arm64
+        run: cmake --build build-android-arm64 --parallel
+        continue-on-error: true
+
+  android-emulator:
+    name: android-emulator
+    runs-on: [self-hosted, mpapp-windows-self]
+    # Only run for in-repo PRs, never for fork PRs (security boundary per runner-setup.md).
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure android-arm64
+        # NOTE: toolchain file pending T-0009.
+        shell: pwsh
+        run: cmake -S . -B build-android -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+
+      - name: Build android-arm64
+        shell: pwsh
+        run: cmake --build build-android --parallel
+
+      - name: Run Android emulator smoke tests
+        shell: pwsh
+        run: |
+          Write-Host "Android emulator harness pending T-0008 / T-0009"
