@@ -10,10 +10,16 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+option(MPAPP_BUILD_EXAMPLES "Build MPAPP example programs" ON)
+
 # mpapp-core static library
-add_library(mpapp-core STATIC
-    src/mpapp.cpp
-)
+set(MPAPP_CORE_SOURCES src/mpapp.cpp)
+
+if(WIN32)
+    list(APPEND MPAPP_CORE_SOURCES src/hot_reload/windows.cpp)
+endif()
+
+add_library(mpapp-core STATIC ${MPAPP_CORE_SOURCES})
 
 target_include_directories(mpapp-core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -26,6 +32,11 @@ target_compile_options(mpapp-core PRIVATE
     $<$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic -Werror>
     $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/W4 /WX /permissive- /Zc:__cplusplus>
 )
+
+# Examples (Windows-only spikes today; see examples/CMakeLists.txt).
+if(MPAPP_BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()
 
 # Testing
 include(CTest)
