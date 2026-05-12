@@ -1,0 +1,12 @@
+[submodule "maui"]
+	path = maui
+	url = https://github.com/dotnet/maui
+[submodule "maui-toolkit"]
+	path = maui-toolkit
+	url = https://github.com/syncfusion/maui-toolkit
+[submodule "maui-community-toolkit"]
+	path = maui-community-toolkit
+	url = https://github.com/CommunityToolkit/Maui
+[submodule "dotnet-community-toolkit"]
+	path = dotnet-community-toolkit
+	url = https://github.com/CommunityToolkit/dotnet
