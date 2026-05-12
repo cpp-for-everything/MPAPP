@@ -1,0 +1,28 @@
+filters:
+  and:
+    - 'note.type == "task"'
+    - 'note.status != "done"'
+    - 'note.status != "abandoned"'
+    - 'note.blockedBy.length() > 0'
+properties:
+  note.status:
+    displayName: Status
+  note.owner:
+    displayName: Owner
+  note.milestone:
+    displayName: Milestone
+  note.blockedBy:
+    displayName: Blocked by
+  note.area:
+    displayName: Area
+views:
+  - type: table
+    name: "Currently blocked"
+    order:
+      - file.name
+      - note.owner
+      - note.blockedBy
+      - note.milestone
+      - note.area
+    groupBy:
+      property: note.area

@@ -1,0 +1,36 @@
+filters:
+  and:
+    - 'note.type == "adr"'
+properties:
+  note.status:
+    displayName: Status
+  note.decisionDate:
+    displayName: Decided
+  note.area:
+    displayName: Area
+  note.deciders:
+    displayName: Deciders
+  note.supersededBy:
+    displayName: Superseded by
+views:
+  - type: table
+    name: "All ADRs by status"
+    order:
+      - file.name
+      - note.status
+      - note.area
+      - note.decisionDate
+    sort:
+      - property: note.decisionDate
+        direction: DESC
+    groupBy:
+      property: note.status
+  - type: cards
+    name: "Accepted"
+    filters:
+      and:
+        - 'note.status == "accepted"'
+    order:
+      - file.name
+      - note.area
+      - note.decisionDate

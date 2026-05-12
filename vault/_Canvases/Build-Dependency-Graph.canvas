@@ -1,0 +1,39 @@
+{
+	"nodes": [
+		{"id": "title", "type": "text", "text": "# Build Dependency Graph\n\nCMake module-level dependencies. Each box is a CMake target.", "x": -400, "y": -500, "width": 720, "height": 100},
+
+		{"id": "core", "type": "text", "text": "**mpapp-core**\nC++23, no platform deps\n`include/mpapp/*.hpp`", "x": -100, "y": -340, "width": 240, "height": 110, "color": "1"},
+
+		{"id": "executor-win", "type": "text", "text": "**mpapp-executor-windows**\nIOCP impl", "x": -400, "y": -160, "width": 200, "height": 80},
+		{"id": "executor-android", "type": "text", "text": "**mpapp-executor-android**\nALooper impl", "x": -180, "y": -160, "width": 200, "height": 80},
+		{"id": "executor-linux", "type": "text", "text": "**mpapp-executor-linux**\nio_uring + epoll impls", "x": 40, "y": -160, "width": 200, "height": 80},
+		{"id": "executor-apple", "type": "text", "text": "**mpapp-executor-apple**\nkqueue impl (macOS+iOS)", "x": 260, "y": -160, "width": 200, "height": 80},
+
+		{"id": "handlers-win", "type": "text", "text": "**mpapp-handlers-windows**\nC++/WinRT", "x": -400, "y": -40, "width": 200, "height": 80, "color": "1"},
+		{"id": "handlers-android", "type": "text", "text": "**mpapp-handlers-android**\nfbjni", "x": -180, "y": -40, "width": 200, "height": 80, "color": "2"},
+		{"id": "handlers-linux", "type": "text", "text": "**mpapp-handlers-linux**\nGTK4", "x": 40, "y": -40, "width": 200, "height": 80, "color": "3"},
+		{"id": "handlers-macos", "type": "text", "text": "**mpapp-handlers-macos**\nAppKit Obj-C++", "x": 260, "y": -40, "width": 200, "height": 80, "color": "4"},
+		{"id": "handlers-ios", "type": "text", "text": "**mpapp-handlers-ios**\nUIKit Obj-C++", "x": 480, "y": -40, "width": 200, "height": 80, "color": "5"},
+
+		{"id": "mpapp-xc", "type": "text", "text": "**mpapp-xc**\nXAML compiler tool", "x": -100, "y": 120, "width": 240, "height": 80, "color": "6"},
+		{"id": "mpapp-cli", "type": "text", "text": "**mpapp** (CLI)\nC++23, depends on core + xc", "x": 160, "y": 120, "width": 240, "height": 80, "color": "6"},
+		{"id": "examples", "type": "text", "text": "**examples/**\ncalculator, todo, gallery", "x": -400, "y": 120, "width": 240, "height": 80},
+		{"id": "tests", "type": "text", "text": "**tests/**\nCatch2 / GTest\nmock + conformance + UI smoke", "x": 420, "y": 120, "width": 240, "height": 100}
+	],
+	"edges": [
+		{"id": "e1", "fromNode": "core", "toNode": "executor-win"},
+		{"id": "e2", "fromNode": "core", "toNode": "executor-android"},
+		{"id": "e3", "fromNode": "core", "toNode": "executor-linux"},
+		{"id": "e4", "fromNode": "core", "toNode": "executor-apple"},
+		{"id": "e5", "fromNode": "core", "toNode": "handlers-win"},
+		{"id": "e6", "fromNode": "core", "toNode": "handlers-android"},
+		{"id": "e7", "fromNode": "core", "toNode": "handlers-linux"},
+		{"id": "e8", "fromNode": "core", "toNode": "handlers-macos"},
+		{"id": "e9", "fromNode": "core", "toNode": "handlers-ios"},
+		{"id": "e10", "fromNode": "core", "toNode": "examples"},
+		{"id": "e11", "fromNode": "core", "toNode": "tests"},
+		{"id": "e12", "fromNode": "core", "toNode": "mpapp-xc"},
+		{"id": "e13", "fromNode": "mpapp-xc", "toNode": "mpapp-cli"},
+		{"id": "e14", "fromNode": "core", "toNode": "mpapp-cli"}
+	]
+}

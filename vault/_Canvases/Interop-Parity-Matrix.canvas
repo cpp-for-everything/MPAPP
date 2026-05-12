@@ -1,0 +1,11 @@
+{
+	"nodes": [
+		{"id": "title", "type": "text", "text": "# Interop Parity Matrix\n\nRows = controls. Columns = platforms.\nCells colored by porting status.\n\nLive view: open [[_Bases/Components.base]] instead — that's the authoritative source.", "x": -300, "y": -200, "width": 700, "height": 160},
+
+		{"id": "components-link", "type": "file", "file": "10_Architecture/Controls Inventory.md", "x": -300, "y": 0, "width": 340, "height": 120},
+		{"id": "base-link", "type": "file", "file": "_Bases/Components.base", "x": 60, "y": 0, "width": 340, "height": 120},
+
+		{"id": "legend", "type": "text", "text": "**Status colors**\n\n- 🔘 not-started\n- 🟡 mock\n- 🟢 <platform>-real\n- ✅ parity-complete", "x": -300, "y": 160, "width": 340, "height": 160}
+	],
+	"edges": []
+}

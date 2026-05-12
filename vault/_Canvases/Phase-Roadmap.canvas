@@ -1,0 +1,38 @@
+{
+	"nodes": [
+		{"id": "title", "type": "text", "text": "# Phase Roadmap\n\nSequential through P5. No dates — order only.", "x": -560, "y": -640, "width": 1200, "height": 80},
+
+		{"id": "p0", "type": "text", "text": "## P0 — Foundations", "x": -560, "y": -520, "width": 220, "height": 60, "color": "6"},
+		{"id": "p1", "type": "text", "text": "## P1 — Infrastructure", "x": -320, "y": -520, "width": 220, "height": 60, "color": "6"},
+		{"id": "p2", "type": "text", "text": "## P2 — Mock Surface", "x": -80, "y": -520, "width": 220, "height": 60, "color": "6"},
+		{"id": "p3", "type": "text", "text": "## P3 — Windows", "x": 160, "y": -520, "width": 220, "height": 60, "color": "1"},
+		{"id": "p4", "type": "text", "text": "## P4 — Android", "x": 400, "y": -520, "width": 220, "height": 60, "color": "2"},
+		{"id": "p5", "type": "text", "text": "## P5 — Linux", "x": 640, "y": -520, "width": 220, "height": 60, "color": "3"},
+		{"id": "p6", "type": "text", "text": "## P6 — macOS", "x": 880, "y": -520, "width": 220, "height": 60, "color": "4"},
+		{"id": "p7", "type": "text", "text": "## P7 — iOS", "x": 1120, "y": -520, "width": 220, "height": 60, "color": "5"},
+		{"id": "p8", "type": "text", "text": "## P8 — Tooling", "x": 1360, "y": -520, "width": 220, "height": 60, "color": "6"},
+		{"id": "p9", "type": "text", "text": "## P9 — Ecosystem", "x": 1600, "y": -520, "width": 220, "height": 60, "color": "6"},
+
+		{"id": "m01", "type": "file", "file": "40_Roadmap/M-01-Foundations.md", "x": -560, "y": -420, "width": 220, "height": 100},
+		{"id": "m02", "type": "file", "file": "40_Roadmap/M-02-Infrastructure.md", "x": -320, "y": -420, "width": 220, "height": 100},
+		{"id": "m03", "type": "file", "file": "40_Roadmap/M-03-Mock-Surface.md", "x": -80, "y": -420, "width": 220, "height": 100},
+		{"id": "m04", "type": "file", "file": "40_Roadmap/M-04-Windows-Real.md", "x": 160, "y": -420, "width": 220, "height": 100},
+		{"id": "m05", "type": "file", "file": "40_Roadmap/M-05-Android-Real.md", "x": 400, "y": -420, "width": 220, "height": 100},
+		{"id": "m06", "type": "file", "file": "40_Roadmap/M-06-Linux-Real.md", "x": 640, "y": -420, "width": 220, "height": 100},
+		{"id": "m07", "type": "file", "file": "40_Roadmap/M-07-macOS-Real.md", "x": 880, "y": -420, "width": 220, "height": 100},
+		{"id": "m08", "type": "file", "file": "40_Roadmap/M-08-iOS-Real.md", "x": 1120, "y": -420, "width": 220, "height": 100},
+		{"id": "m09", "type": "file", "file": "40_Roadmap/M-09-Tooling-DX.md", "x": 1360, "y": -420, "width": 220, "height": 100},
+		{"id": "m10", "type": "file", "file": "40_Roadmap/M-10-Ecosystem.md", "x": 1600, "y": -420, "width": 220, "height": 100}
+	],
+	"edges": [
+		{"id": "e1", "fromNode": "m01", "toNode": "m02"},
+		{"id": "e2", "fromNode": "m02", "toNode": "m03"},
+		{"id": "e3", "fromNode": "m03", "toNode": "m04"},
+		{"id": "e4", "fromNode": "m04", "toNode": "m05"},
+		{"id": "e5", "fromNode": "m05", "toNode": "m06"},
+		{"id": "e6", "fromNode": "m06", "toNode": "m07"},
+		{"id": "e7", "fromNode": "m07", "toNode": "m08"},
+		{"id": "e8", "fromNode": "m08", "toNode": "m09"},
+		{"id": "e9", "fromNode": "m09", "toNode": "m10"}
+	]
+}

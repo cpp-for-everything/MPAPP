@@ -1,0 +1,44 @@
+filters:
+  and:
+    - 'note.type == "task"'
+    - 'note.status != "done"'
+    - 'note.status != "abandoned"'
+properties:
+  note.status:
+    displayName: Status
+  note.milestone:
+    displayName: Milestone
+  note.owner:
+    displayName: Owner
+  note.area:
+    displayName: Area
+  note.blockedBy:
+    displayName: Blocked by
+  note.coveragePercent:
+    displayName: Cov %
+  note.hasScreenshots:
+    displayName: Shots
+  note.hasRecordings:
+    displayName: Rec
+views:
+  - type: table
+    name: "Open tasks by area"
+    order:
+      - file.name
+      - note.status
+      - note.milestone
+      - note.owner
+      - note.coveragePercent
+      - note.hasScreenshots
+      - note.hasRecordings
+    groupBy:
+      property: note.area
+  - type: table
+    name: "By milestone"
+    order:
+      - file.name
+      - note.status
+      - note.area
+      - note.owner
+    groupBy:
+      property: note.milestone

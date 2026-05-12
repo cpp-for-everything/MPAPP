@@ -1,7 +1,28 @@
+---
+type: research
+subject: ".NET MAUI Architecture Deep-Dive"
+framework: maui
+created: 2026-05-12
+applicableTo:
+  - "[[Type System]]"
+  - "[[Handlers]]"
+  - "[[Markup]]"
+  - "[[Controls Inventory]]"
+  - "[[Platform Interop]]"
+  - "[[Async Executor and Event Loops]]"
+recommendation: adapt
+tags:
+  - type/research
+  - framework/maui
+---
+
 # .NET MAUI Architecture & Platform Fundamentals: Comprehensive Research Guide
 
-**Document Date:** May 2026  
-**Current MAUI Version:** .NET 10  
+> [!important] Why this document lives here
+> This is the **authoritative reference** for MAUI's architecture. MPAPP mirrors MAUI's structure 1:1 (per [[ADR-0004-maui-xaml-superset-compat]]), so understanding MAUI is foundational. Per [[CLAUDE]] rule 7, behavior questions resolve against `D:\GitHub\MPAPP\maui\src\` first, then this document.
+
+**Document Date:** May 2026
+**Current MAUI Version:** .NET 10
 **Focus:** Cross-platform framework design, embedded server capabilities, and .NET ecosystem integration
 
 ---

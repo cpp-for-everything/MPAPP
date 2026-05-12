@@ -1,0 +1,39 @@
+filters:
+  and:
+    - 'note.type == "component"'
+properties:
+  note.mauiHandler:
+    displayName: MAUI handler
+  note.mpappStatus:
+    displayName: Status
+  note.platformWindows:
+    displayName: Win
+  note.platformAndroid:
+    displayName: Android
+  note.platformLinux:
+    displayName: Linux
+  note.platformMacos:
+    displayName: macOS
+  note.platformIos:
+    displayName: iOS
+views:
+  - type: table
+    name: "Components by status"
+    order:
+      - file.name
+      - note.mpappStatus
+      - note.platformWindows
+      - note.platformAndroid
+      - note.platformLinux
+      - note.platformMacos
+      - note.platformIos
+    groupBy:
+      property: note.mpappStatus
+  - type: cards
+    name: "Parity-complete"
+    filters:
+      and:
+        - 'note.mpappStatus == "parity-complete"'
+    order:
+      - file.name
+      - note.mauiHandler

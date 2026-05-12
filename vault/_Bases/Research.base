@@ -1,0 +1,21 @@
+filters:
+  and:
+    - 'note.type == "research"'
+properties:
+  note.framework:
+    displayName: Framework
+  note.recommendation:
+    displayName: Recommendation
+  note.applicableTo:
+    displayName: Applicable to
+  note.created:
+    displayName: Created
+views:
+  - type: table
+    name: "Research by framework"
+    order:
+      - file.name
+      - note.framework
+      - note.recommendation
+    groupBy:
+      property: note.framework

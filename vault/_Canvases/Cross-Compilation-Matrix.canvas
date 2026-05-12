@@ -1,0 +1,36 @@
+{
+	"nodes": [
+		{"id": "title", "type": "text", "text": "# Cross-Compilation Matrix\n\nHost × Target. ✅ = full signed binary. ⚠️ = unsigned only (Apple targets from non-Mac hosts).", "x": -480, "y": -440, "width": 1120, "height": 80},
+
+		{"id": "hdr-target", "type": "text", "text": "**Target →**", "x": -480, "y": -320, "width": 160, "height": 60},
+		{"id": "hdr-win", "type": "text", "text": "**Windows**", "x": -300, "y": -320, "width": 160, "height": 60},
+		{"id": "hdr-linux", "type": "text", "text": "**Linux**", "x": -120, "y": -320, "width": 160, "height": 60},
+		{"id": "hdr-android", "type": "text", "text": "**Android**", "x": 60, "y": -320, "width": 160, "height": 60},
+		{"id": "hdr-macos", "type": "text", "text": "**macOS**", "x": 240, "y": -320, "width": 160, "height": 60},
+		{"id": "hdr-ios", "type": "text", "text": "**iOS**", "x": 420, "y": -320, "width": 160, "height": 60},
+
+		{"id": "row-win", "type": "text", "text": "**Host: Windows**", "x": -480, "y": -240, "width": 160, "height": 60},
+		{"id": "c-w-w", "type": "text", "text": "✅\nnative\nMSVC/Clang", "x": -300, "y": -240, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-w-l", "type": "text", "text": "✅\nClang/Zig + sysroot", "x": -120, "y": -240, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-w-a", "type": "text", "text": "✅\nNDK/Zig", "x": 60, "y": -240, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-w-m", "type": "text", "text": "⚠️\nunsigned\nvia osxcross", "x": 240, "y": -240, "width": 160, "height": 60, "color": "3"},
+		{"id": "c-w-i", "type": "text", "text": "⚠️\nunsigned\nvia osxcross", "x": 420, "y": -240, "width": 160, "height": 60, "color": "3"},
+
+		{"id": "row-linux", "type": "text", "text": "**Host: Linux**", "x": -480, "y": -160, "width": 160, "height": 60},
+		{"id": "c-l-w", "type": "text", "text": "✅\nMinGW/Zig", "x": -300, "y": -160, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-l-l", "type": "text", "text": "✅\nnative", "x": -120, "y": -160, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-l-a", "type": "text", "text": "✅\nNDK/Zig", "x": 60, "y": -160, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-l-m", "type": "text", "text": "⚠️\nunsigned", "x": 240, "y": -160, "width": 160, "height": 60, "color": "3"},
+		{"id": "c-l-i", "type": "text", "text": "⚠️\nunsigned", "x": 420, "y": -160, "width": 160, "height": 60, "color": "3"},
+
+		{"id": "row-mac", "type": "text", "text": "**Host: macOS**", "x": -480, "y": -80, "width": 160, "height": 60},
+		{"id": "c-m-w", "type": "text", "text": "✅\nMinGW/Zig", "x": -300, "y": -80, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-m-l", "type": "text", "text": "✅\nClang/Zig", "x": -120, "y": -80, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-m-a", "type": "text", "text": "✅\nNDK/Zig", "x": 60, "y": -80, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-m-m", "type": "text", "text": "✅\nnative", "x": 240, "y": -80, "width": 160, "height": 60, "color": "4"},
+		{"id": "c-m-i", "type": "text", "text": "✅\nnative", "x": 420, "y": -80, "width": 160, "height": 60, "color": "4"},
+
+		{"id": "note", "type": "text", "text": "**Note.** Apple ⚠️ cells produce binaries that compile but cannot be signed — Apple's SDK/Gatekeeper requires macOS for signing. Useful for sanity-check compilation only.", "x": -480, "y": 20, "width": 1120, "height": 80, "color": "3"}
+	],
+	"edges": []
+}

@@ -1,0 +1,27 @@
+filters:
+  and:
+    - 'note.type == "rfc"'
+properties:
+  note.status:
+    displayName: Status
+  note.author:
+    displayName: Author
+  note.created:
+    displayName: Created
+  note.area:
+    displayName: Area
+  note.relatedADRs:
+    displayName: Related ADRs
+views:
+  - type: table
+    name: "All RFCs by status"
+    order:
+      - file.name
+      - note.status
+      - note.area
+      - note.created
+    sort:
+      - property: note.created
+        direction: DESC
+    groupBy:
+      property: note.status

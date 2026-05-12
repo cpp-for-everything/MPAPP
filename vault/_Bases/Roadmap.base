@@ -1,0 +1,29 @@
+filters:
+  and:
+    - 'note.type == "milestone"'
+properties:
+  note.phase:
+    displayName: Phase
+  note.status:
+    displayName: Status
+  note.deliverables:
+    displayName: Deliverables
+  note.exitCriteria:
+    displayName: Exit criteria
+views:
+  - type: table
+    name: "Milestones by phase"
+    order:
+      - file.name
+      - note.phase
+      - note.status
+    groupBy:
+      property: note.phase
+  - type: cards
+    name: "Active milestones"
+    filters:
+      and:
+        - 'note.status == "active"'
+    order:
+      - file.name
+      - note.phase

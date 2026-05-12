@@ -1,0 +1,29 @@
+filters:
+  and:
+    - 'note.type == "task"'
+    - 'file.inFolder("50_Tasks/_Archive")'
+properties:
+  note.status:
+    displayName: Status
+  note.milestone:
+    displayName: Milestone
+  note.area:
+    displayName: Area
+  note.owner:
+    displayName: Owner
+  note.coveragePercent:
+    displayName: Cov %
+views:
+  - type: table
+    name: "Closed tasks by milestone"
+    order:
+      - file.name
+      - note.status
+      - note.area
+      - note.owner
+      - note.coveragePercent
+    groupBy:
+      property: note.milestone
+    sort:
+      - property: file.mtime
+        direction: DESC

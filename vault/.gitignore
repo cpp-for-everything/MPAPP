@@ -1,0 +1,15 @@
+# Obsidian workspace state — local to each developer, not committed
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/workspaces.json
+
+# Obsidian cache and runtime artifacts
+.obsidian/cache/
+.obsidian/plugins/*/data.json
+
+# Excalidraw scratchpad
+*.excalidraw.tmp
+
+# OS noise
+.DS_Store
+Thumbs.db

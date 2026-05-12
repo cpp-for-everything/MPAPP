@@ -1,0 +1,38 @@
+{
+	"nodes": [
+		{"id": "title", "type": "text", "text": "# MPAPP Architecture Overview\n\nThree lanes: Public API → Core → Platform Backends.", "x": -400, "y": -560, "width": 720, "height": 100},
+
+		{"id": "lane-api", "type": "text", "text": "## Public API", "x": -400, "y": -400, "width": 200, "height": 60},
+		{"id": "api-widgets", "type": "file", "file": "10_Architecture/Controls Inventory.md", "x": -180, "y": -400, "width": 240, "height": 80},
+		{"id": "api-markup", "type": "file", "file": "10_Architecture/Markup.md", "x": 80, "y": -400, "width": 240, "height": 80},
+		{"id": "api-mvvm", "type": "file", "file": "10_Architecture/Observable Properties.md", "x": 340, "y": -400, "width": 240, "height": 80},
+
+		{"id": "lane-core", "type": "text", "text": "## Core", "x": -400, "y": -260, "width": 200, "height": 60},
+		{"id": "core-types", "type": "file", "file": "10_Architecture/Type System.md", "x": -180, "y": -260, "width": 240, "height": 80},
+		{"id": "core-handlers", "type": "file", "file": "10_Architecture/Handlers.md", "x": 80, "y": -260, "width": 240, "height": 80},
+		{"id": "core-executor", "type": "file", "file": "10_Architecture/Async Executor and Event Loops.md", "x": 340, "y": -260, "width": 240, "height": 80},
+		{"id": "core-onplatform", "type": "file", "file": "10_Architecture/Platform-Specific Views.md", "x": 600, "y": -260, "width": 240, "height": 80},
+
+		{"id": "lane-backends", "type": "text", "text": "## Platform Backends", "x": -400, "y": -100, "width": 200, "height": 60},
+		{"id": "be-win", "type": "text", "text": "**Windows**\nWinUI 3\nC++/WinRT\nIOCP", "x": -180, "y": -100, "width": 180, "height": 100, "color": "1"},
+		{"id": "be-android", "type": "text", "text": "**Android**\nViews + fbjni\nALooper + epoll", "x": 20, "y": -100, "width": 180, "height": 100, "color": "2"},
+		{"id": "be-linux", "type": "text", "text": "**Linux**\nGTK4\nio_uring + epoll", "x": 220, "y": -100, "width": 180, "height": 100, "color": "3"},
+		{"id": "be-macos", "type": "text", "text": "**macOS**\nAppKit (NOT Catalyst)\nkqueue", "x": 420, "y": -100, "width": 180, "height": 100, "color": "4"},
+		{"id": "be-ios", "type": "text", "text": "**iOS**\nUIKit (NOT Catalyst)\nkqueue", "x": 620, "y": -100, "width": 180, "height": 100, "color": "5"}
+	],
+	"edges": [
+		{"id": "e1", "fromNode": "api-widgets", "toNode": "core-handlers"},
+		{"id": "e2", "fromNode": "api-markup", "toNode": "core-types"},
+		{"id": "e3", "fromNode": "api-mvvm", "toNode": "core-types"},
+		{"id": "e4", "fromNode": "core-handlers", "toNode": "be-win"},
+		{"id": "e5", "fromNode": "core-handlers", "toNode": "be-android"},
+		{"id": "e6", "fromNode": "core-handlers", "toNode": "be-linux"},
+		{"id": "e7", "fromNode": "core-handlers", "toNode": "be-macos"},
+		{"id": "e8", "fromNode": "core-handlers", "toNode": "be-ios"},
+		{"id": "e9", "fromNode": "core-executor", "toNode": "be-win"},
+		{"id": "e10", "fromNode": "core-executor", "toNode": "be-android"},
+		{"id": "e11", "fromNode": "core-executor", "toNode": "be-linux"},
+		{"id": "e12", "fromNode": "core-executor", "toNode": "be-macos"},
+		{"id": "e13", "fromNode": "core-executor", "toNode": "be-ios"}
+	]
+}
