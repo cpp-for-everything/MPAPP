@@ -20,24 +20,34 @@ tags:
 
 ## Overview
 
-To be filled. What does MenuFlyoutItem do for the user?
+`MenuFlyoutItem` is a single, invokable leaf inside a [[MenuFlyout]], [[MenuBarItem]], or [[MenuFlyoutSubItem]]. It carries a label, optional icon, an `is_enabled` flag, a list of keyboard accelerators, and a `Command<>` fired when the user activates it. It is the most common menu element — every clickable entry in a menu tree is a `MenuFlyoutItem`.
 
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuFlyoutItem\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\MenuFlyoutItem\`
+- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Menu\MenuFlyoutItem.cs`
 - **Docs:** [Microsoft .NET MAUI — MenuFlyoutItem](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menuflyoutitem)
+
+`MenuFlyoutItem : MenuItem, IMenuFlyoutItem` inherits `Text`, `IconImageSource`, `IsEnabled`, `Command`, and `CommandParameter` from `MenuItem`, and adds an `IList<KeyboardAccelerator>` collection.
 
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
-class menuflyoutitem : public control<menuflyoutitem> {
+class menu_flyout_item : public control<menu_flyout_item> {
 public:
-    // Properties to be designed.
+    Observable<std::string>    text;
+    Observable<image_source>   icon;
+    Observable<bool>           is_enabled{ true };
 
-    // Events / commands to be designed.
+    Command<>                  command;
+    Observable<std::any>       command_parameter;
+
+    Observable<observable_list<keyboard_accelerator>> keyboard_accelerators;
+
+    // Fired after the platform invokes the item, before `command` runs.
+    Event<>                    clicked;
 };
 
 } // namespace mpapp
@@ -47,37 +57,57 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<MenuFlyoutItem/>
+<MenuFlyoutItem Text="Save" IconImageSource="save.png"
+                Command="{Binding save_command}">
+    <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Modifiers="Ctrl" Key="S"/>
+    </MenuFlyoutItem.KeyboardAccelerators>
+</MenuFlyoutItem>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `MenuFlyoutItem` (WinUI 3) | C++/WinRT | `KeyboardAccelerator` maps 1:1 to WinUI's type; icon set via `IconSource`. |
+| Android | `MenuItem` (in a `PopupMenu`) | fbjni / JNI | Accelerators surface only on hardware-keyboard configurations. |
+| Linux | `GMenuItem` | GTK4 | Action handler invokes `command`; accelerator registered on the parent window's `GtkApplication`. |
+| macOS | `NSMenuItem` | AppKit | `keyEquivalent` + `keyEquivalentModifierMask` set from the first accelerator; icon set via `image`. |
+| iOS | `UIAction` inside a `UIMenu` | UIKit | Accelerator on iPadOS only; icon set via `UIImage`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand}">
+    <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Modifiers="Ctrl" Key="C"/>
+    </MenuFlyoutItem.KeyboardAccelerators>
+</MenuFlyoutItem>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<MenuFlyoutItem Text="Copy" Command="{Binding copy_command}">
+    <MenuFlyoutItem.KeyboardAccelerators>
+        <KeyboardAccelerator Modifiers="Ctrl" Key="C"/>
+    </MenuFlyoutItem.KeyboardAccelerators>
+</MenuFlyoutItem>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto copy = mpapp::menu_flyout_item{
+    .text = "Copy",
+    .command = vm.copy_command,
+};
+copy.keyboard_accelerators.value().push_back({
+    .modifiers = mpapp::key_modifier::ctrl,
+    .key = mpapp::key::c,
+});
 ```
 
 ## Tests
@@ -97,6 +127,9 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| `Command` / `Clicked` order | `Clicked` fires before `Command` executes | Same: `clicked` event first, then `command` | Parity | n/a |
+| Multiple accelerators | All registered on Windows; only first on Android/macOS/Linux/iOS | Same — surplus accelerators documented as Windows-only | OS limit | RFC TBD |
+| `CommandParameter` type | `object` (boxed) | `std::any` | C++ idiom — typed wrappers possible per-binding | n/a |
 
 ## See also
 
@@ -104,3 +137,7 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[MenuFlyout]]
+- [[MenuFlyoutSubItem]]
+- [[MenuFlyoutSeparator]]
+- [[Observable Properties]]

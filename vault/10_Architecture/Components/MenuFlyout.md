@@ -20,24 +20,33 @@ tags:
 
 ## Overview
 
-To be filled. What does MenuFlyout do for the user?
+`MenuFlyout` is a context / pop-up menu attached to any [[Element]] via the `FlyoutBase.ContextFlyout` attached property. It is a collection of `IMenuElement` children that appears in response to a right-click, long-press, or programmatic `show()` call. Unlike [[MenuBar]], `MenuFlyout` is not bound to window chrome — it can decorate any control.
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuFlyout\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\MenuFlyout\`
+- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuFlyoutHandler\`
+- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Menu\MenuFlyout.cs`
 - **Docs:** [Microsoft .NET MAUI — MenuFlyout](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menuflyout)
+
+`MenuFlyout : FlyoutBase, IMenuFlyout` keeps children in a `List<IMenuElement>` and dispatches `ContextFlyoutItemHandlerUpdate(index, item)` to the handler on mutation. The flyout itself owns no display-state properties — show/hide is platform-driven.
 
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
-class menuflyout : public control<menuflyout> {
+class menu_flyout : public flyout_base<menu_flyout> {
 public:
-    // Properties to be designed.
+    Observable<observable_list<menu_element>> items;
 
-    // Events / commands to be designed.
+    void add(menu_element item);
+    void insert(std::size_t index, menu_element item);
+    void remove_at(std::size_t index);
+    void clear();
+
+    // Imperative API for cases where a gesture cannot trigger it natively.
+    Command<point /*anchor*/> show;
+    Command<>                 hide;
 };
 
 } // namespace mpapp
@@ -47,37 +56,66 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<MenuFlyout/>
+<Button Text="Right-click me">
+    <FlyoutBase.ContextFlyout>
+        <MenuFlyout>
+            <MenuFlyoutItem Text="Cut"/>
+            <MenuFlyoutItem Text="Copy"/>
+            <MenuFlyoutSeparator/>
+            <MenuFlyoutSubItem Text="Open with…">
+                <MenuFlyoutItem Text="Notepad"/>
+            </MenuFlyoutSubItem>
+        </MenuFlyout>
+    </FlyoutBase.ContextFlyout>
+</Button>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `MenuFlyout` (WinUI 3) | C++/WinRT | Triggered by `ContextRequested` event; anchor element drives placement. |
+| Android | `PopupMenu` | fbjni / JNI | Anchored to the view that owns the flyout; supports nested submenus via `MenuItem.subMenu`. |
+| Linux | `GtkPopoverMenu` | GTK4 | Built from a `GMenuModel`; popped via `gtk_popover_popup()` on right-click / long-press. |
+| macOS | `NSMenu.popUpContextMenu` | AppKit | Anchored to the owning `NSView`. |
+| iOS | `UIContextMenuInteraction` | UIKit | Requires `UIContextMenuInteractionDelegate` wired by the handler; long-press driven. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Label Text="Right-click me">
+    <FlyoutBase.ContextFlyout>
+        <MenuFlyout>
+            <MenuFlyoutItem Text="Inspect" Command="{Binding InspectCommand}"/>
+        </MenuFlyout>
+    </FlyoutBase.ContextFlyout>
+</Label>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Label Text="Right-click me">
+    <FlyoutBase.ContextFlyout>
+        <MenuFlyout>
+            <MenuFlyoutItem Text="Inspect" Command="{Binding inspect_command}"/>
+        </MenuFlyout>
+    </FlyoutBase.ContextFlyout>
+</Label>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto flyout = mpapp::menu_flyout{};
+flyout.add(mpapp::menu_flyout_item{
+    .text = "Inspect",
+    .command = vm.inspect_command,
+});
+
+label.context_flyout = std::move(flyout);
 ```
 
 ## Tests
@@ -97,6 +135,9 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Programmatic `Show` | No public API; relies on native gestures | `show(point)` / `hide()` commands | Headless testability + scriptable demos | n/a |
+| Trigger gesture | Right-click (desktop), long-press (mobile) | Same per platform | OS convention | n/a |
+| iOS context style | `UIContextMenuInteraction` modal | Same; submenus flatten when more than 2 levels deep | UIKit limitation | RFC TBD |
 
 ## See also
 
@@ -104,3 +145,6 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[MenuFlyoutItem]]
+- [[MenuFlyoutSubItem]]
+- [[MenuFlyoutSeparator]]

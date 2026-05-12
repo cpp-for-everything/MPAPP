@@ -20,13 +20,17 @@ tags:
 
 ## Overview
 
-To be filled. What does Toolbar do for the user?
+`Toolbar` is the top horizontal bar attached to a [[Page]] or [[NavigationPage]]. It owns a title, optional title icon, optional center `title_view`, a back-button affordance, and a collection of `ToolbarItem` actions. It is *the* surface for page-scoped navigation chrome — distinct from [[TitleBar]] (window chrome) and [[MenuBar]] (menus).
 
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Toolbar\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Toolbar\`
+- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Toolbar\Toolbar.cs`
 - **Docs:** [Microsoft .NET MAUI — Toolbar](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/toolbar)
+
+MAUI's `Toolbar : IToolbar, INotifyPropertyChanged` exposes plain CLR properties (no `BindableProperty`): `Title`, `TitleIcon`, `TitleView`, `BarBackground`, `BarTextColor`, `IconColor`, `BarHeight`, `BackButtonTitle`, `BackButtonVisible`, `BackButtonEnabled`, `DrawerToggleVisible`, `DynamicOverflowEnabled`, `IsVisible`, and the `ToolbarItems` enumerable.
+
+Each `ToolbarItem : MenuItem` adds `Order` (`Default | Primary | Secondary`) and a `Priority` integer.
 
 ## MPAPP C++ API
 
@@ -35,9 +39,38 @@ namespace mpapp {
 
 class toolbar : public control<toolbar> {
 public:
-    // Properties to be designed.
+    Observable<std::string>     title;
+    Observable<image_source>    title_icon;
+    Observable<view>            title_view;
 
-    // Events / commands to be designed.
+    Observable<brush>           bar_background;
+    Observable<color>           bar_text_color;
+    Observable<color>           icon_color;
+    Observable<std::optional<double>> bar_height;
+
+    Observable<std::string>     back_button_title;
+    Observable<bool>            back_button_visible{ false };
+    Observable<bool>            back_button_enabled{ true };
+    Observable<bool>            drawer_toggle_visible{ false };
+
+    Observable<bool>            dynamic_overflow_enabled{ true };
+    Observable<bool>            is_visible{ true };
+
+    Observable<observable_list<toolbar_item>> items;
+};
+
+class toolbar_item : public control<toolbar_item> {
+public:
+    Observable<std::string>    text;
+    Observable<image_source>   icon;
+    Observable<bool>           is_enabled{ true };
+
+    enum class order { default_, primary, secondary };
+    Observable<order>          order{ order::default_ };
+    Observable<int>            priority{ 0 };
+
+    Command<>                  command;
+    Event<>                    clicked;
 };
 
 } // namespace mpapp
@@ -47,37 +80,60 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Toolbar/>
+<ContentPage Title="Inbox">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Compose" IconImageSource="compose.png" Order="Primary"
+                     Command="{Binding compose_command}"/>
+        <ToolbarItem Text="Settings" Order="Secondary"
+                     Command="{Binding settings_command}"/>
+    </ContentPage.ToolbarItems>
+</ContentPage>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `CommandBar` (WinUI 3) | C++/WinRT | `Primary` items become `AppBarButton`s; `Secondary` items fill the overflow `…` menu. |
+| Android | `androidx.appcompat.widget.Toolbar` + `PopupMenu` | fbjni / JNI | Mirrors MAUI's `ToolbarExtensions`; `Secondary` items go to the action-bar overflow. |
+| Linux | `GtkHeaderBar` + `GtkPopoverMenu` | GTK4 | `title_view` slots into the headerbar's custom-title area. |
+| macOS | `NSToolbar` (on `NSWindow`) | AppKit | `ToolbarItem`s become `NSToolbarItem`s; secondary items collapse into the customisable overflow. |
+| iOS | `UINavigationBar` + `UIBarButtonItem`s | UIKit | The bar is the navigation controller's; `Primary` items align right, `Secondary` items align in the bottom toolbar. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<ContentPage Title="Notes">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add" IconImageSource="add.png" Order="Primary"
+                     Command="{Binding AddCommand}"/>
+    </ContentPage.ToolbarItems>
+</ContentPage>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<ContentPage Title="Notes">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Add" IconImageSource="add.png" Order="Primary"
+                     Command="{Binding add_command}"/>
+    </ContentPage.ToolbarItems>
+</ContentPage>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto page = mpapp::content_page{ .title = "Notes" };
+page.toolbar_items.value().push_back(mpapp::toolbar_item{
+    .text = "Add",
+    .icon = mpapp::image_source::from_file("add.png"),
+    .order = mpapp::toolbar_item::order::primary,
+    .command = vm.add_command,
+});
 ```
 
 ## Tests
@@ -97,6 +153,10 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Property model | Plain CLR + `INotifyPropertyChanged` (no `BindableProperty`) | `Observable<T>` per field | Uniform binding surface ([[ADR-0009-public-api-template-wrappers-only]]) | n/a |
+| `BarHeight` | Nullable `double?`; null = platform default | `Observable<std::optional<double>>` | Faithful port | n/a |
+| iOS `Secondary` placement | Bottom toolbar (not navigation bar) | Same | OS convention | n/a |
+| Drawer toggle | Surfaced via `DrawerToggleVisible` | Same; ignored on non-drawer hosts | Parity | n/a |
 
 ## See also
 
@@ -104,3 +164,7 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[TitleBar]]
+- [[MenuBar]]
+- [[NavigationPage]]
+- [[Page]]
