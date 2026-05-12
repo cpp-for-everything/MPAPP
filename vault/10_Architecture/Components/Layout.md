@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Layout"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/layout"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Layout
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — abstract container lives at `include/mpapp/layout.hpp` with explicit `add`/`insert`/`remove`/`clear`/`update_z_index` mutators; mock handler records both property and command mappers. See [[Controls Inventory]].
 
 ## Overview
 
@@ -131,6 +131,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Mock implementation
+
+The P2 mock surface (ADR-0008) lands in this repository:
+
+- **Cross-platform header:** `include/mpapp/layout.hpp` — `mpapp::layout` (derives from `view`) with `Observable<thickness> padding`, `is_clipped_to_bounds`, `cascade_input_transparent`, plus a flat `std::vector<view*>` children store and explicit mutators.
+- **Mock handler:** `include/mpapp/handlers/mock/layout_handler.hpp` — `layout_handler<platform::mock>` records property mappers AND the `add`/`insert`/`remove`/`clear`/`update_z_index` command mappers.
+- **Mock tests:** `tests/mock_handlers/layout_test.cpp`.
+
+The full `ObservableList<shared_ptr<view>>` from the vault spec lands with the M-03 collection-binding plumbing — until then the mutator-plus-command-mapper pair is the contract.
 
 ## See also
 

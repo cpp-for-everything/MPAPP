@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "BindableLayout"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/bindablelayout"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # BindableLayout
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — attached-property facility at `include/mpapp/bindable_layout.hpp`; mock handler snapshots items-source count, template name, and empty-view presence. See [[Controls Inventory]].
 
 ## Overview
 
@@ -149,6 +149,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Mock implementation
+
+The P2 mock surface (ADR-0008) lands in this repository:
+
+- **Cross-platform header:** `include/mpapp/bindable_layout.hpp` — `mpapp::bindable_layout` static facility with the attached-property accessor pair plus a `enable(...)` C++ helper. State is keyed on the host `layout*` in a static side table.
+- **Mock handler:** `include/mpapp/handlers/mock/bindable_layout_handler.hpp` — `bindable_layout_handler<platform::mock>` records mapper invocations (items count, template name, empty-view presence). Unlike Observable-backed mock handlers there is no `changed` signal; tests re-invoke the mapper to observe propagation.
+- **Mock tests:** `tests/mock_handlers/bindable_layout_test.cpp`.
+
+The rich `items_source` / `data_template` / `data_template_selector` types are reduced to lightweight stand-ins for the mock; the full versions arrive with `CollectionView` in M-03.
 
 ## See also
 

@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Frame"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/frame"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Frame
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** (deprecated) — cross-platform header at `include/mpapp/frame.hpp` carries the C++ `[[deprecated]]` attribute, mirroring MAUI .NET 9's deprecation. New code should use [[Border]]; the mock exists for one-to-one XAML migration parity. See [[Controls Inventory]].
 
 ## Overview
 
@@ -125,6 +125,14 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Mock implementation
+
+The P2 mock surface (ADR-0008) lands in this repository:
+
+- **Cross-platform header:** `include/mpapp/frame.hpp` — `mpapp::frame : view` with `[[deprecated("mpapp::frame is deprecated; use mpapp::border instead.")]]`. Properties match the vault spec (`border_color`, `has_shadow`, `corner_radius`, `padding`, `content`) with MAUI defaults (`has_shadow=true`, `corner_radius=-1`, `padding=thickness{20}`).
+- **Mock handler:** `include/mpapp/handlers/mock/frame_handler.hpp` — `frame_handler<platform::mock>` records every property mapper. Local pragmas suppress the deprecation diagnostic inside the handler since it IS the legacy path. The umbrella header `<mpapp/mpapp.hpp>` deliberately does NOT include `<frame.hpp>` — callers opt in explicitly.
+- **Mock tests:** `tests/mock_handlers/frame_test.cpp`.
 
 ## See also
 

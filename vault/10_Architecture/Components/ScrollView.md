@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "ScrollView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/scrollview"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # ScrollView
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — cross-platform header at `include/mpapp/scroll_view.hpp`; mock handler records orientation, scrollbar-visibility, content presence, and the `scroll_to` command request. See [[Controls Inventory]].
 
 ## Overview
 
@@ -138,6 +138,14 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Mock implementation
+
+The P2 mock surface (ADR-0008) lands in this repository:
+
+- **Cross-platform header:** `include/mpapp/scroll_view.hpp` — `mpapp::scroll_view : view` with `Observable<std::shared_ptr<view>> content`, the orientation / scrollbar-visibility enums, read-only `scroll_x`/`scroll_y` observables, and a `scroll_to(scroll_to_request, Command<scroll_to_request>)` method.
+- **Mock handler:** `include/mpapp/handlers/mock/scroll_view_handler.hpp` — `scroll_view_handler<platform::mock>` records property mappers and the scroll-to command (x, y, animated).
+- **Mock tests:** `tests/mock_handlers/scroll_view_test.cpp`.
 
 ## See also
 
