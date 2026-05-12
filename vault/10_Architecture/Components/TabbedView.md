@@ -20,64 +20,103 @@ tags:
 
 ## Overview
 
-To be filled. What does TabbedView do for the user?
+`TabbedView` is the abstract, `IView`-only contract behind [[TabbedPage]] — it describes a container with a horizontal bar of tabs and one child page visible at a time. The contract carries the tab bar's appearance properties (background color/brush, text color, selected/unselected tab colors) so that bar-only handlers can be written without inheriting the full `Page` surface. In MPAPP it surfaces as a lightweight view wrapper distinct from [[TabbedPage]], usable as a tabbed sub-region inside any layout.
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\TabbedView\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\TabbedView\`
-- **Docs:** [Microsoft .NET MAUI — TabbedView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/tabbedview)
+- **Handler:** MAUI has no `TabbedViewHandler`; the contract is consumed indirectly through [[TabbedPage]]'s `MultiPage<Page>` handler.
+- **Control:** Surface defined by `Microsoft.Maui.Controls.ITabbedView` (implemented by `TabbedPage`).
+- **Docs:** [Microsoft .NET MAUI — TabbedPage](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/pages/tabbedpage)
+
+MAUI's `TabbedPage : MultiPage<Page>, IBarElement, ITabbedView` exposes `BarBackgroundColor`, `BarBackground`, `BarTextColor`, `UnselectedTabColor`, `SelectedTabColor`, and inherits `Children`, `CurrentPage`, and `ItemsSource` from `MultiPage<Page>`.
 
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
-class tabbedview : public control<tabbedview> {
+class tabbed_view : public control<tabbed_view> {
 public:
-    // Properties to be designed.
+    Observable<observable_list<view>> children;
+    Observable<view>                  current;
 
-    // Events / commands to be designed.
+    Observable<color> bar_background_color;
+    Observable<brush> bar_background;
+    Observable<color> bar_text_color;
+    Observable<color> selected_tab_color;
+    Observable<color> unselected_tab_color;
+
+    // Optional data-template bridge — mirrors MultiPage<T>.ItemsSource.
+    Observable<observable_list<std::any>> items_source;
+
+    Event<view /*old*/, view /*new*/> selection_changed;
 };
 
 } // namespace mpapp
 ```
 
+[[TabbedPage]] is the `page<page>`-derived sibling for use as a top-level route; `tabbed_view` is the embeddable version.
+
 ## XAML Usage
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<TabbedView/>
+<TabbedView SelectedTabColor="DodgerBlue" UnselectedTabColor="Gray">
+    <ContentPage Title="Inbox"/>
+    <ContentPage Title="Drafts"/>
+    <ContentPage Title="Sent"/>
+</TabbedView>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `NavigationView` with `PaneDisplayMode="Top"` (WinUI 3) | C++/WinRT | Each child page becomes a `NavigationViewItem`; selected color drives the indicator brush. |
+| Android | `TabLayout` + `ViewPager2` (Material) | fbjni / JNI | Mirrors MAUI's `TabbedPageManager`; swipe-to-switch enabled by default. |
+| Linux | `GtkNotebook` (GTK4) | GTK4 | Tab labels bound to child `title`; reorder disabled by default. |
+| macOS | `NSTabView` | AppKit | One `NSTabViewItem` per child; tab style configurable via platform extension. |
+| iOS | `UITabBarController` (when used as page) / segmented control (when embedded) | UIKit | At top-level uses `UITabBar`; embedded uses `UISegmentedControl` over a content swap. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<TabbedPage SelectedTabColor="DodgerBlue"
+            UnselectedTabColor="Gray">
+    <ContentPage Title="Profile">
+        <Label Text="Profile"/>
+    </ContentPage>
+    <ContentPage Title="Settings">
+        <Label Text="Settings"/>
+    </ContentPage>
+</TabbedPage>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<TabbedView SelectedTabColor="DodgerBlue"
+            UnselectedTabColor="Gray">
+    <ContentPage Title="Profile">
+        <Label Text="Profile"/>
+    </ContentPage>
+    <ContentPage Title="Settings">
+        <Label Text="Settings"/>
+    </ContentPage>
+</TabbedView>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto tabs = mpapp::tabbed_view{
+    .selected_tab_color   = mpapp::colors::dodger_blue,
+    .unselected_tab_color = mpapp::colors::gray,
+};
+tabs.children.value().push_back(mpapp::content_page{ .title = "Profile",  .content = mpapp::label{ .text = "Profile"  } });
+tabs.children.value().push_back(mpapp::content_page{ .title = "Settings", .content = mpapp::label{ .text = "Settings" } });
 ```
 
 ## Tests
@@ -97,6 +136,10 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Standalone type | `ITabbedView` is an internal contract; only `TabbedPage` realises it | `tabbed_view` is a public, embeddable control | Allows tabs inside layouts, not only top-level pages | n/a |
+| iOS tab bar | Always `UITabBarController` | `UITabBar` when used as page; `UISegmentedControl` when embedded | Avoids nesting two `UITabBarController`s | n/a |
+| Tab reorder | Off by default on all platforms | Same | OS defaults | n/a |
+| `ItemsSource` template | `DataTemplate` | `data_template<T>` (compile-time typed) | [[ADR-0009-public-api-template-wrappers-only]] | n/a |
 
 ## See also
 
@@ -104,3 +147,6 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[TabbedPage]]
+- [[Page]]
+- [[NavigationPage]]

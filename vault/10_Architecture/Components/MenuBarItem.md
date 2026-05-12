@@ -20,64 +20,87 @@ tags:
 
 ## Overview
 
-To be filled. What does MenuBarItem do for the user?
+`MenuBarItem` is a single top-level entry inside a [[MenuBar]] — typically "File", "Edit", "View". It exposes a `text` label, an `is_enabled` flag, a `priority` ordering hint, and an inner collection of `IMenuElement` children ([[MenuFlyoutItem]], [[MenuFlyoutSeparator]], [[MenuFlyoutSubItem]]) that render as a drop-down when activated.
 
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuBarItem\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\MenuBarItem\`
+- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Menu\MenuBarItem.cs`
 - **Docs:** [Microsoft .NET MAUI — MenuBarItem](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menubaritem)
+
+MAUI's `MenuBarItem : BaseMenuItem, IMenuBarItem` exposes `BindableProperty` entries for `Text`, `IsEnabled`, and `Priority`. Children are kept in a `List<IMenuElement>` and mutations notify `MenuBarItemHandlerUpdate(index, item)`.
 
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
-class menubaritem : public control<menubaritem> {
+class menu_bar_item : public control<menu_bar_item> {
 public:
-    // Properties to be designed.
+    Observable<std::string> text;
+    Observable<bool>        is_enabled{ true };
+    Observable<int>         priority{ 0 };
 
-    // Events / commands to be designed.
+    Observable<observable_list<menu_element>> items;
+
+    void add(menu_element item);
+    void insert(std::size_t index, menu_element item);
+    void remove_at(std::size_t index);
+    void clear();
 };
 
 } // namespace mpapp
 ```
 
+`menu_element` is the variant base of [[MenuFlyoutItem]], [[MenuFlyoutSeparator]], and [[MenuFlyoutSubItem]].
+
 ## XAML Usage
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<MenuBarItem/>
+<MenuBarItem Text="File" Priority="0">
+    <MenuFlyoutItem Text="New"/>
+    <MenuFlyoutSeparator/>
+    <MenuFlyoutItem Text="Exit"/>
+</MenuBarItem>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `MenuBarItem` (WinUI 3) | C++/WinRT | Hosts a `MenuFlyout` populated from children. |
+| Android | `MenuItem` (action-bar overflow) | fbjni / JNI | No nested rendering — children promote into a single `PopupMenu` opened by tapping the entry. |
+| Linux | `GMenu` submenu | GTK4 | Each `menu_bar_item` is a `GMenuModel` section bound into the parent `GtkPopoverMenuBar`. |
+| macOS | `NSMenuItem` (with submenu) | AppKit | `text` maps to `title`; `is_enabled` to `enabled`. |
+| iOS | `UIMenu` | UIKit | Children become a `UIMenu` published through the `UIMenuBuilder` on iPadOS. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<MenuBarItem Text="Edit" IsEnabled="True">
+    <MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand}"/>
+    <MenuFlyoutItem Text="Paste" Command="{Binding PasteCommand}"/>
+</MenuBarItem>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<MenuBarItem Text="Edit" IsEnabled="True">
+    <MenuFlyoutItem Text="Copy" Command="{Binding copy_command}"/>
+    <MenuFlyoutItem Text="Paste" Command="{Binding paste_command}"/>
+</MenuBarItem>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto edit = mpapp::menu_bar_item{ .text = "Edit" };
+edit.add(mpapp::menu_flyout_item{ .text = "Copy",  .command = vm.copy_command });
+edit.add(mpapp::menu_flyout_item{ .text = "Paste", .command = vm.paste_command });
 ```
 
 ## Tests
@@ -97,6 +120,8 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Children type | `List<IMenuElement>` with runtime-cast `Element` | Typed `observable_list<menu_element>` variant | Compile-time exhaustiveness ([[ADR-0009-public-api-template-wrappers-only]]) | n/a |
+| `Priority` semantics | Honoured only on Android | Ignored on Windows/macOS/Linux/iOS; documented as Android-only hint | OS menu surfaces order strictly by insertion | RFC TBD |
 
 ## See also
 
@@ -104,3 +129,6 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[MenuBar]]
+- [[MenuFlyoutItem]]
+- [[MenuFlyoutSubItem]]
