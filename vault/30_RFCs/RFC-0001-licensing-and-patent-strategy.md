@@ -6,7 +6,7 @@ status: draft
 author: Alex Tsvetanov
 created: 2026-05-12
 area: legal
-relatedADRs: []
+relatedADRs: [ADR-0010]
 tags:
   - type/rfc
   - status/draft
@@ -17,6 +17,9 @@ tags:
 
 > [!info] Status
 > **draft** — under discussion.
+
+> [!note] Closed by
+> Recommendations promoted to [[ADR-0010-licensing-and-patent-strategy]] (proposed 2026-05-12). This RFC stays `draft` until ADR-0010 is accepted.
 
 ## Problem
 
