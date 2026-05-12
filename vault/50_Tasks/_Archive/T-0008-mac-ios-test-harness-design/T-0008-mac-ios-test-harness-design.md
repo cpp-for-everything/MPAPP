@@ -2,7 +2,7 @@
 type: task
 id: T-0008
 title: Design human-free macOS / iOS UI test harness
-status: todo
+status: done
 milestone: M-02
 owner: ""
 area: tooling
@@ -12,7 +12,7 @@ hasScreenshots: false
 hasRecordings: false
 tags:
   - type/task
-  - status/todo
+  - status/done
   - area/tooling
   - platform/macos
   - platform/ios
@@ -49,3 +49,10 @@ This task exists in M-02 — well before any macOS work — specifically so the 
 - Milestone: [[M-02-Infrastructure]]
 - Related: [[Test Harness]], [[M-07-macOS-Real]], [[M-08-iOS-Real]]
 - Design: [[design|notes/design.md]]
+
+## Closure notes
+
+- **Closed:** 2026-05-12
+- **Merged commits:** `f681645` (design doc on branch `batch/test-harness-design`), `cd38a07` (merge into main).
+- **Delivered:** 286-line `notes/design.md` covering the human-free macOS / iOS test-harness design — `xcrun simctl` + AppleScript/Accessibility API + XCUITest stack, full build → boot → install → launch → test → screenshot → teardown workflow, stuck-simulator recovery, self-hosted runner setup (security, sign-in, code-signing), screenshot capture strategy with PR-artifact attachment, failure-mode coverage, implementation-effort breakdown, and risks. Implementation deferred to M-07 per the task spec.
+- **Coverage:** design-only task — `100%` per the task gate.

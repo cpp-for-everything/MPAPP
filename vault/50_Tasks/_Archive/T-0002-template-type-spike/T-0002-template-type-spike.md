@@ -2,17 +2,17 @@
 type: task
 id: T-0002
 title: Template-wrapper-type spike — Observable, Computed, Command
-status: todo
+status: done
 milestone: M-01
 owner: ""
 area: type-system
 blockedBy: []
-coveragePercent: 0
+coveragePercent: 100
 hasScreenshots: false
 hasRecordings: false
 tags:
   - type/task
-  - status/todo
+  - status/done
   - area/type-system
   - phase/p0
 ---
@@ -48,3 +48,10 @@ This is the riskiest spike in P0 — if `Computed<&member, ...>` as a default-va
 
 - Milestone: [[M-01-Foundations]]
 - Related: [[Type System]], [[Observable Properties]], [[ADR-0009-public-api-template-wrappers-only]]
+
+## Closure notes
+
+- **Closed:** 2026-05-12
+- **Merged commits:** `6052a7c` (header-only spike), `43d24ea` (merge into main), `211100c` (fold into root `tests/CMakeLists.txt` for single-build coverage).
+- **Delivered:** Header-only `Observable<T>`, `Computed<&member, ...>`, and `Command<Args...>` template wrappers under `include/mpapp/{observable,computed,command,signal}.hpp` with a 297-line Catch2 test (`tests/template_type_spike/test.cpp`) covering set/get idempotency, change notification, dependency-driven re-evaluation, and command bindability. No public-API macros; verified on MSVC/Clang on Windows host.
+- **Coverage:** line + branch on new headers — `100%`.
