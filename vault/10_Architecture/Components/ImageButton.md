@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does ImageButton do for the user?
+`ImageButton` is a tappable button whose visual is an image rather than a text label — semantically `Button` + `Image`. It exposes the full button surface (`command`, `clicked`/`pressed`/`released` events, `is_pressed`, border, corner radius, padding) plus image-loading state. Use it for icon-only toolbars and toolbar-shelf actions.
 
 ## MAUI Reference
 
@@ -33,51 +33,80 @@ To be filled. What does ImageButton do for the user?
 ```cpp
 namespace mpapp {
 
-class imagebutton : public control<imagebutton> {
+class image_button : public control<image_button> {
 public:
-    // Properties to be designed.
+    // Image
+    Observable<image_source> source;
+    Observable<aspect_mode>  aspect{aspect_mode::aspect_fit};
+    Observable<bool>         is_opaque{false};
 
-    // Events / commands to be designed.
+    // Button surface
+    Observable<color>    border_color;
+    Observable<double>   border_width{0.0};
+    Observable<int>      corner_radius{-1};
+    Observable<thickness> padding;
+
+    // Read-only status
+    Observable<bool> is_loading{false};
+    Observable<bool> is_pressed{false};
+
+    // Commands / events
+    Command<>          clicked;
+    Command<>          pressed;
+    Command<>          released;
+    Command<std::any>  command;           // mirrors MAUI ICommand
 };
 
 } // namespace mpapp
 ```
 
+See [[Button]] for the shared button surface and [[Image]] for the source side.
+
 ## XAML Usage
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<ImageButton/>
+<ImageButton Source="favorite.png"
+             Command="{Binding ToggleFavoriteCmd}"
+             CornerRadius="16"
+             Padding="12"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.Button` wrapping `Image` | C++/WinRT | Inner `Image` is exposed for the image-handler mapper. |
+| Android | `Google.Android.Material.ImageView.ShapeableImageView` | fbjni / JNI | Tap surface is the image itself; ripple drawable for press feedback. |
+| Linux | `GtkButton` containing `GtkPicture` | GTK4 | Native press states. |
+| macOS | `NSButton` configured as image-only | AppKit | `bezelStyle = .regularSquare` with image. |
+| iOS | `UIKit.UIButton` (image-only) | UIKit | Inner `UIImageView` used by the image-handler mapper. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<ImageButton Source="star.png"
+             Clicked="OnStarClicked"
+             CornerRadius="8"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<ImageButton Source="star.png"
+             Clicked="OnStarClicked"
+             CornerRadius="8"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto ib = std::make_shared<mpapp::image_button>();
+ib->source = mpapp::image_source::from_file("star.png");
+ib->corner_radius = 8;
+ib->clicked.subscribe([]{ /* toggle favorite */ });
 ```
 
 ## Tests
@@ -104,3 +133,5 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[Button]]
+- [[Image]]

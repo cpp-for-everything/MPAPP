@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does Image do for the user?
+`Image` displays a bitmap or animated picture. Sources may be a file path, a URL, an embedded resource, or a stream — encapsulated by `image_source`. The `aspect` property selects scaling behaviour: fit, fill, or center. Loading is asynchronous; `is_loading` reports progress, and `is_animation_playing` controls GIF/APNG playback.
 
 ## MAUI Reference
 
@@ -33,51 +33,64 @@ To be filled. What does Image do for the user?
 ```cpp
 namespace mpapp {
 
+enum class aspect_mode { aspect_fit, aspect_fill, fill, center };
+
 class image : public control<image> {
 public:
-    // Properties to be designed.
+    // Source
+    Observable<image_source> source;             // file/uri/stream/resource
+    Observable<aspect_mode>  aspect{aspect_mode::aspect_fit};
+    Observable<bool>         is_opaque{false};
 
-    // Events / commands to be designed.
+    // Animation
+    Observable<bool> is_animation_playing{true};
+
+    // Read-only status
+    Observable<bool> is_loading{false};
 };
 
 } // namespace mpapp
 ```
 
+`image_source` is a discriminated union mirroring `Microsoft.Maui.Controls.ImageSource` (file / uri / stream / font / resource). See [[Observable Properties]].
+
 ## XAML Usage
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Image/>
+<Image Source="logo.png" Aspect="AspectFit"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.Image` | C++/WinRT | Decodes via WIC; supports SVG via `SvgImageSource`. |
+| Android | `android.widget.ImageView` | fbjni / JNI | Glide or stock `BitmapFactory` for decoding. |
+| Linux | `GtkPicture` | GTK4 | Backed by `GdkTexture`. |
+| macOS | `NSImageView` | AppKit | Accepts `NSImage` (including PDF + raster). |
+| iOS | `UIKit.UIImageView` | UIKit | Accepts `UIImage`; animation via `UIImage.animatedImage`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Image Source="https://example.com/logo.png" Aspect="AspectFit"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Image Source="https://example.com/logo.png" Aspect="AspectFit"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto img = std::make_shared<mpapp::image>();
+img->source = mpapp::image_source::from_uri("https://example.com/logo.png");
+img->aspect = mpapp::aspect_mode::aspect_fit;
 ```
 
 ## Tests
@@ -97,6 +110,7 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| `ImageSource` | Polymorphic class hierarchy | `image_source` variant (discriminated union) | Static dispatch per [[Type System]] | RFC TBD |
 
 ## See also
 
@@ -104,3 +118,4 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[ImageButton]]

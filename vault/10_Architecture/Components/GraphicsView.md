@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does GraphicsView do for the user?
+`GraphicsView` is an arbitrary 2D drawing surface backed by a `drawable` callback. The framework asks the drawable to render into a platform-neutral `canvas` (the [Microsoft.Maui.Graphics](https://github.com/dotnet/Microsoft.Maui.Graphics) abstraction on MAUI). It also forwards pointer/touch events as `start_interaction`, `drag_interaction`, `end_interaction`, plus hover variants. Use it when you want custom rendering without dropping to native graphics APIs per platform.
 
 ## MAUI Reference
 
@@ -33,51 +33,91 @@ To be filled. What does GraphicsView do for the user?
 ```cpp
 namespace mpapp {
 
-class graphicsview : public control<graphicsview> {
-public:
-    // Properties to be designed.
+// Abstract drawing target. Implemented by the framework over Skia / D2D / CoreGraphics.
+struct canvas;
 
-    // Events / commands to be designed.
+// User-supplied draw callback.
+struct drawable {
+    virtual ~drawable() = default;
+    virtual void draw(canvas& target, rect dirty) = 0;
+};
+
+class graphics_view : public control<graphics_view> {
+public:
+    // Drawing
+    Observable<std::shared_ptr<drawable>> drawable_;
+
+    // Trigger a redraw
+    Command<>            invalidate;
+
+    // Touch / pointer
+    Command<touch_event> start_interaction;
+    Command<touch_event> drag_interaction;
+    Command<touch_event> end_interaction;
+    Command<>            cancel_interaction;
+    Command<touch_event> start_hover_interaction;
+    Command<touch_event> move_hover_interaction;
+    Command<>            end_hover_interaction;
 };
 
 } // namespace mpapp
 ```
 
+The native handler hosts a `PlatformTouchGraphicsView` on every platform — see [[Handlers]] and [[Platform Interop]].
+
 ## XAML Usage
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<GraphicsView/>
+<GraphicsView Drawable="{StaticResource SparklineDrawable}"
+              HeightRequest="80" WidthRequest="240"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `PlatformTouchGraphicsView` over Win2D | C++/WinRT | Backed by `W2DGraphicsView`. |
+| Android | `PlatformTouchGraphicsView` (`View`) | fbjni / JNI | Software canvas; SkiaSharp optional. |
+| Linux | Custom `GtkDrawingArea` | GTK4 | Backed by Cairo or Skia. |
+| macOS | `PlatformTouchGraphicsView` (`NSView`) | AppKit | CoreGraphics-backed drawing context. |
+| iOS | `PlatformTouchGraphicsView` (`UIView`) | UIKit | CoreGraphics drawing context. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<GraphicsView x:Name="canvas"
+              Drawable="{StaticResource ChartDrawable}"
+              StartInteraction="OnStart"
+              DragInteraction="OnDrag"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<GraphicsView x:Name="canvas"
+              Drawable="{StaticResource ChartDrawable}"
+              StartInteraction="OnStart"
+              DragInteraction="OnDrag"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+struct sparkline : mpapp::drawable {
+    std::vector<float> values;
+    void draw(mpapp::canvas& g, mpapp::rect r) override {
+        g.stroke_color(mpapp::colors::azure);
+        // ... path drawing ...
+    }
+};
+
+auto gv = std::make_shared<mpapp::graphics_view>();
+gv->drawable_ = std::make_shared<sparkline>();
+gv->drag_interaction.subscribe([&](mpapp::touch_event e){ /* hit-test */ });
+gv->invalidate();
 ```
 
 ## Tests
@@ -97,6 +137,7 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Drawing API | `Microsoft.Maui.Graphics` (`ICanvas`) | `mpapp::canvas` thin C++ wrapper; intent to mirror surface 1:1 | Independent C++ implementation per [[Type System]] | RFC TBD |
 
 ## See also
 
@@ -104,3 +145,4 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[ShapeView]]
