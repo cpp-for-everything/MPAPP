@@ -11,10 +11,21 @@
 
 #pragma once
 
+#include "button.hpp"
+#include "check_box.hpp"
 #include "command.hpp"
 #include "computed.hpp"
+#include "control.hpp"
+#include "editor.hpp"
+#include "entry.hpp"
+#include "label.hpp"
 #include "observable.hpp"
+#include "platform.hpp"
+#include "radio_button.hpp"
 #include "signal.hpp"
+#include "slider.hpp"
+#include "stepper.hpp"
+#include "switch_.hpp"
 
 namespace mpapp {
 

@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "RadioButton"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/radiobutton"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # RadioButton
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/radio_button_handler.hpp` with tests in `tests/mock_handlers/radio_button_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview
 
@@ -103,11 +103,18 @@ medium->content = std::string{"Medium"};
 medium->group_name = "size";
 ```
 
+## Mock implementation
+
+- Handler: [`include/mpapp/handlers/mock/radio_button_handler.hpp`](../../../include/mpapp/handlers/mock/radio_button_handler.hpp)
+- Tests: [`tests/mock_handlers/radio_button_test.cpp`](../../../tests/mock_handlers/radio_button_test.cpp)
+
+`radio_button_handler<platform::mock>` records changes to `is_checked` and `group_name`. The mock surface drops the `content` (Observable<std::any>) slot for now — primitive Observables suffice to validate the mapper plumbing.
+
 ## Tests
 
 Links to per-platform handler test files. Tracked in [[Test Harness]].
 
-- Mock tests: `tests/components/radio_button/mock_test.cpp` (planned)
+- Mock tests: `tests/mock_handlers/radio_button_test.cpp`
 - Windows handler: `tests/components/radio_button/windows_test.cpp` (planned)
 - Android handler: `tests/components/radio_button/android_test.cpp` (planned)
 - Linux handler: `tests/components/radio_button/linux_test.cpp` (planned)

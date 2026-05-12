@@ -18,6 +18,30 @@ catch_discover_tests(smoke_test)
 
 add_subdirectory(template_type_spike)
 
+# Mock-handler unit tests. One binary per batch keeps build times
+# reasonable; the sibling worker adds more sources to this same target,
+# which the coordinator merges. Headers-only library — no link to a
+# platform handler static lib.
+add_executable(mock_handlers_test
+    mock_handlers/button_test.cpp
+    mock_handlers/check_box_test.cpp
+    mock_handlers/editor_test.cpp
+    mock_handlers/entry_test.cpp
+    mock_handlers/label_test.cpp
+    mock_handlers/radio_button_test.cpp
+    mock_handlers/slider_test.cpp
+    mock_handlers/stepper_test.cpp
+    mock_handlers/switch_test.cpp
+)
+target_link_libraries(mock_handlers_test
+    PRIVATE mpapp-core Catch2::Catch2WithMain
+)
+target_compile_options(mock_handlers_test PRIVATE
+    $<$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic -Werror>
+    $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/W4 /WX /permissive- /Zc:__cplusplus>
+)
+catch_discover_tests(mock_handlers_test)
+
 # T-0010 hot-reload spike — Windows-only.
 if(WIN32)
     add_executable(hot_reload_test

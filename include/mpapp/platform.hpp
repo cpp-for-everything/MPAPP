@@ -23,6 +23,11 @@ struct linux_  {}; // 'linux' is a predefined macro in some toolchains.
 struct macos   {};
 struct ios     {};
 
+// Test-only platform tag. Selects the mock-handler specialisations in
+// `include/mpapp/handlers/mock/` so unit tests can exercise the full
+// public API surface without a windowing toolkit. Never `platform::current`.
+struct mock    {};
+
 #if defined(_WIN32)
 using current = windows;
 #elif defined(__ANDROID__)
