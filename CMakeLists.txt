@@ -41,15 +41,18 @@ target_compile_options(mpapp-core PRIVATE
     $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/W4 /WX /permissive- /Zc:__cplusplus>
 )
 
-# Testing
+# Testing -- initialized before any subdirectory so nested CMakeLists can
+# observe BUILD_TESTING and register their own targets via catch_discover_tests.
 include(CTest)
+
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-# Host tools (mpapp CLI). The tests subdirectory above already pulls in Catch2,
-# so the mpapp CLI test binary can reuse the same Catch2::Catch2WithMain
-# target. Gate on MPAPP_BUILD_TOOLS so cross-compiles skip it cleanly.
+# Developer tools (mpapp CLI, mpapp-xc XAML compiler, ...). Gated on
+# MPAPP_BUILD_TOOLS so cross-compiles skip cleanly. Added after tests so the
+# tool test binaries can reuse the Catch2::Catch2WithMain target the tests
+# subdirectory fetched.
 if(MPAPP_BUILD_TOOLS)
     add_subdirectory(tools)
 endif()

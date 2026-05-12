@@ -22,7 +22,8 @@ Per [[CLAUDE]] rule 9 and [[RFC-0001-licensing-and-patent-strategy]], every thir
 | C++/WinRT | TBD | MIT | header-only | ✅ permissive | Windows WinUI 3 interop |
 | GTK4 | 4.x | LGPL-2.1+ | **dynamic only** | ⚠️ acceptable with rebuild path | Linux UI |
 | libclang | LLVM toolchain | Apache 2.0 with LLVM exceptions | static | ✅ permissive | (only if Option B were chosen — currently unused per ADR-0009) |
-| libxml2 | TBD | MIT | static | ✅ permissive | XAML parsing in `mpapp-xc` |
+| libxml2 | TBD | MIT | static | ✅ permissive | XAML parsing in `mpapp-xc` (planned; see pugixml row for the P0 skeleton) |
+| pugixml | v1.14 | MIT | header-only, static | ✅ permissive | XAML parsing in `mpapp-xc` skeleton (P0) |
 | Zig toolchain | TBD | MIT | external tool | ✅ permissive | cross-compilation (per RFC-0002) |
 | Android NDK | TBD | Apache 2.0 | external tool | ✅ permissive | Android targets |
 
