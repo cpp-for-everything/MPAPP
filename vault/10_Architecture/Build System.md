@@ -22,7 +22,13 @@ A developer must be able to produce binaries for all five targets from any suppo
 > [!warning] Apple signing requires macOS
 > *Apple binaries built on non-Mac hosts (via osxcross) produce *unsigned* artifacts useful for sanity-check compilation only. They cannot run on Simulator / device / users' machines without re-signing on macOS. **This is an Apple SDK / Gatekeeper constraint, not a tooling limit.**
 
-The toolchain choice (Zig vs LLVM/Clang + sysroots) is the subject of [[RFC-0002-cross-compilation-toolchain]].
+## A.6 Toolchain candidates
+
+Per [[ADR-0011-cross-compilation-toolchain]], **Zig (`zig cc`) is locked in** as the primary cross-compilation toolchain. One install of Zig wraps Clang + LLD with bundled libc headers and sysroots for Windows / Linux / Android targets from any host. Apple targets cross-compile to unsigned binaries via osxcross; signed Apple builds still require macOS.
+
+- **Vendoring:** Zig is *not* bundled in the repo. The `mpapp` CLI auto-installs Zig on first cross-compile to `~/.mpapp/toolchains/zig-<version>/`. The version is pinned in `cmake/toolchains/zig.cmake`.
+- **Host-native builds:** developers who never cross-compile may keep using MSVC (Windows), system Clang (Linux), or Xcode Clang (macOS). Zig is only consulted when a cross-target toolchain file is selected.
+- **Closed RFC:** [[RFC-0002-cross-compilation-toolchain]] evaluated Zig against LLVM/Clang + per-target sysroots; the decision record is [[ADR-0011-cross-compilation-toolchain]].
 
 ## CMake structure
 
@@ -128,6 +134,7 @@ See [[CI Strategy]] for the full design. Headlines:
 ## See also
 
 - [[ADR-0007-cross-platform-tooling]]
+- [[ADR-0011-cross-compilation-toolchain]]
 - [[RFC-0002-cross-compilation-toolchain]]
 - [[Async Executor and Event Loops]]
 - [[CI Strategy]]

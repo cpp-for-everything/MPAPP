@@ -8,6 +8,7 @@ created: 2026-05-12
 area: build
 relatedADRs:
   - ADR-0007
+  - ADR-0011
 tags:
   - type/rfc
   - status/draft
@@ -18,6 +19,9 @@ tags:
 
 > [!info] Status
 > **draft** — under discussion.
+
+> [!success] Closed by
+> [[ADR-0011-cross-compilation-toolchain]] — Zig (`zig cc`) is locked in as the primary cross-compilation toolchain. This RFC is retained for the evaluation record; the formal decision lives in the ADR.
 
 ## Problem
 

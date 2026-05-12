@@ -39,10 +39,14 @@ GitHub Actions minutes are finite. Per CLAUDE rule 8, every matrix axis must be 
   - Group E: platform-specific superset features.
 - Each group runs in parallel on the same runner; total wall-clock for a PR build is the slowest group.
 
+## Toolchain
+
+Per [[ADR-0011-cross-compilation-toolchain]], all cross-compilation in CI uses **Zig (`zig cc`)**. Cross jobs (`windows-cross`, `linux-cross`) invoke the toolchain files in `cmake/toolchains/` that wrap `zig cc --target=<triple>`. Native jobs continue to use the host's default compiler (MSVC on Windows runners, system Clang on Ubuntu runners, Xcode Clang on macOS runners). The Zig version is pinned in `cmake/toolchains/zig.cmake`; runners auto-install it via the `mpapp` CLI on first use and cache it between runs.
+
 ## Caching
 
 - **ccache** for C++ compilation, keyed on toolchain + flags + source hashes.
-- **GitHub Actions cache** for Zig toolchain downloads, Android NDK, GTK4 dev packages.
+- **GitHub Actions cache** for the pinned Zig toolchain (per [[ADR-0011-cross-compilation-toolchain]]), and any per-target Apple SDK pieces (osxcross) used by cross-build jobs. The Android NDK is no longer cached separately since Zig bundles the Android cross-target.
 - **Build outputs** between matrix jobs (Windows-native shares its CMake configure cache with Windows-cross).
 
 ## Self-hosted runners
@@ -93,6 +97,7 @@ Estimated minutes (target: free-tier 2000/mo with overflow):
 ## See also
 
 - [[ADR-0008-mock-first-implementation]]
+- [[ADR-0011-cross-compilation-toolchain]]
 - [[Test Harness]]
 - [[Build System]]
 - [[CLAUDE]] rule 8
