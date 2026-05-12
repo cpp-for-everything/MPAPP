@@ -6,6 +6,7 @@
 
 add_library(mpapp-cli-lib STATIC
     src/commands.cpp
+    src/process.cpp
 )
 
 target_include_directories(mpapp-cli-lib PUBLIC
