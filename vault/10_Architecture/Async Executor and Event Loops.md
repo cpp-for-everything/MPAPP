@@ -99,6 +99,45 @@ mpapp::io_task<size_t> read_log() {
 3. **Cancellation discipline.** `stop_token` is explicit; no surprise exception unwinds in long-running pipelines.
 4. **Test harness friendly.** Mock-first ([[ADR-0008-mock-first-implementation]]) tests use a `test_dispatcher` that drives time deterministically.
 
+## Skeleton implementation
+
+The public-API skeleton lives in
+[`include/mpapp/executor.hpp`](../../include/mpapp/executor.hpp) and
+[`include/mpapp/test_dispatcher.hpp`](../../include/mpapp/test_dispatcher.hpp).
+It implements the surface listed under "The public API" against a
+deterministic `test_dispatcher` so mock-first tests
+([[ADR-0008-mock-first-implementation]]) can target the async API today.
+
+Implemented in this skeleton:
+
+- `mpapp::dispatcher` — abstract base. `co_await dispatcher` resumes on the
+  dispatcher's thread via `post(...)`.
+- `mpapp::test_dispatcher` — deterministic dispatcher with a virtual clock.
+  - `post(fn)` — enqueue immediately.
+  - `post_after(d, fn)` — enqueue with a virtual-time deadline.
+  - `advance(d)` — advance the virtual clock by `d`, firing every timer whose
+    deadline has passed and draining ready work between ticks.
+  - `run_until_idle()` — drain the ready queue without advancing the clock.
+- `mpapp::main_dispatcher()` — returns a process-wide `test_dispatcher`
+  singleton. Real per-platform dispatchers replace this in P3+ (the platform
+  source files in the table above stay stubbed with `// TODO P4+` markers).
+- `mpapp::executor` — background-pool stub. `schedule(fn)` and
+  `co_await executor::current()` both route to `main_dispatcher()` for now;
+  the real work-stealing pool lands in P3+.
+- `mpapp::task<T>` — eager-start coroutine. Awaitable; provides
+  `request_stop()`, `is_cancelled()`, `get_stop_token()`, `is_ready()`,
+  `await_resume()`.
+- `mpapp::ui_task<T>` — same shape as `task<T>`, but its `final_suspend`
+  reschedules the continuation on `main_dispatcher()`.
+- `mpapp::async_sleep(duration, stop_token = {})` — awaitable that yields
+  control for `d` of virtual time and short-circuits if the supplied
+  `std::stop_token` is already requested.
+
+Cancellation matches the architecture's contract: `std::stop_token` is
+propagated as a coroutine parameter, never as an exception. The mock build
+links `src/executor/mock.cpp`; the platform-real sources stay stubbed and are
+filled in alongside their per-platform task.
+
 ## See also
 
 - [[Threading and Dispatcher]] (alias / cross-ref)

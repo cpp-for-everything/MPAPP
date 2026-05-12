@@ -44,6 +44,12 @@ endif()
 # with the SDK include paths set up. mpapp-core stays platform-neutral.
 set(MPAPP_CORE_SOURCES src/mpapp.cpp)
 
+# Async executor — mock (deterministic) backing for mpapp::main_dispatcher().
+# Cross-platform; real per-platform sources (windows_iocp.cpp, linux_iouring.cpp,
+# ...) are stubbed and land in P3+. See vault/10_Architecture/Async Executor and
+# Event Loops.md.
+list(APPEND MPAPP_CORE_SOURCES src/executor/mock.cpp)
+
 if(WIN32)
     list(APPEND MPAPP_CORE_SOURCES src/hot_reload/windows.cpp)
 endif()
