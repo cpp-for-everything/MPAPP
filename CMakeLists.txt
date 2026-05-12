@@ -27,8 +27,16 @@ target_compile_options(mpapp-core PRIVATE
     $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/W4 /WX /permissive- /Zc:__cplusplus>
 )
 
-# Testing
+# Testing -- initialized before any subdirectory so nested CMakeLists can
+# observe BUILD_TESTING and register their own targets via catch_discover_tests.
 include(CTest)
+
+# Developer tools (mpapp CLI, mpapp-xc XAML compiler, ...).
+option(MPAPP_BUILD_TOOLS "Build MPAPP developer tools (mpapp-xc, ...)" OFF)
+if(MPAPP_BUILD_TOOLS)
+    add_subdirectory(tools)
+endif()
+
 if(BUILD_TESTING)
     add_subdirectory(tests)
 endif()
