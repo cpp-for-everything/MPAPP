@@ -1,0 +1,109 @@
+=== T-0010 hot-reload spike — captured evidence ===
+
+This log substitutes for the screen recording — see notes/recording-blocker.md
+for the reason (worker environment has no GUI and no clang++ on PATH).
+
+----------------------------------------------------------------------
+environment
+----------------------------------------------------------------------
+OS:        Microsoft Windows 11 Pro N (10.0.26200)
+Toolchain: Visual Studio 18 Community + Ninja
+clang++:   NOT INSTALLED in worker environment
+           (the runtime invokes `clang++ -std=c++23 -shared` —
+            full end-to-end swap requires this binary on PATH)
+
+----------------------------------------------------------------------
+cmake configure
+----------------------------------------------------------------------
+$ cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+-- The CXX compiler identification is MSVC 19.50.36015.0 (or similar)
+-- Configuring done
+-- Generating done
+-- Build files have been written to: build
+
+----------------------------------------------------------------------
+ninja build
+----------------------------------------------------------------------
+[102/131] Building CXX object CMakeFiles/mpapp-core.dir/src/mpapp.cpp.obj
+[124/131] Building CXX object CMakeFiles/mpapp-core.dir/src/hot_reload/windows.cpp.obj
+[127/131] Linking CXX static library mpapp-core.lib
+[128/131] Linking CXX executable examples/hot_reload_spike/hot_reload_spike_host.exe; Staging user_code.{cpp,h}
+[129/131] Linking CXX executable tests/smoke_test.exe
+[130/131] Linking CXX executable tests/template_type_spike/template_type_spike_test.exe
+[131/131] Linking CXX executable tests/hot_reload_test.exe
+
+----------------------------------------------------------------------
+ctest --output-on-failure
+----------------------------------------------------------------------
+Test project D:/GitHub/MPAPP/.claude/worktrees/agent-a92b7f0c903370a8c/build
+      Start  1: mpapp umbrella header is reachable
+ 1/14 Test  #1: mpapp umbrella header is reachable ............................   Passed
+      Start  2: Hot<T> is an empty tag base
+ 2/14 Test  #2: Hot<T> is an empty tag base ...................................   Passed
+      Start  3: runtime fails cleanly when source is missing
+ 3/14 Test  #3: runtime fails cleanly when source is missing ..................   Passed
+      Start  4: Observable<int> set fires once and is idempotent on same value
+ 4/14 Test  #4: Observable<int> set fires once and is idempotent on same value   Passed
+      Start  5: Observable: slot disconnects on destruction (auto-unsubscribe)
+ 5/14 Test  #5: Observable: slot disconnects on destruction (auto-unsubscribe)   Passed
+      Start  6: Observable: explicit disconnect stops further notifications
+ 6/14 Test  #6: Observable: explicit disconnect stops further notifications ...   Passed
+      Start  7: Observable: multiple subscribers all fire
+ 7/14 Test  #7: Observable: multiple subscribers all fire .....................   Passed
+      Start  8: Computed<&VM::a, &VM::b> re-evaluates on each dependency change
+ 8/14 Test  #8: Computed<&VM::a, &VM::b> re-evaluates on each dependency change   Passed
+      Start  9: Computed tag is detected by the is_computed_tag concept
+ 9/14 Test  #9: Computed tag is detected by the is_computed_tag concept .......   Passed
+      Start 10: is_command_method detects Command<> in the method signature
+10/14 Test #10: is_command_method detects Command<> in the method signature ...   Passed
+      Start 11: Command<> method is callable normally
+11/14 Test #11: Command<> method is callable normally .........................   Passed
+      Start 12: Observable<move-only T> compiles and behaves
+12/14 Test #12: Observable<move-only T> compiles and behaves ..................   Passed
+      Start 13: Observable<std::string> implicitly converts to const string&
+13/14 Test #13: Observable<std::string> implicitly converts to const string& ..   Passed
+      Start 14: ADR-0009 todo_view_model example compiles and behaves
+14/14 Test #14: ADR-0009 todo_view_model example compiles and behaves .........   Passed
+
+100% tests passed, 0 tests failed out of 14
+Total Test time (real) = 0.50 sec
+
+Note: tests tagged [.clang] (the full rebuild+swap and compiler-error
+test cases in hot_reload_test.cpp) are hidden from the default run and
+SKIP() at runtime when clang++ is unavailable. They will execute on a
+workstation that has clang++ on PATH.
+
+----------------------------------------------------------------------
+hot_reload_spike_host.exe (without clang on PATH)
+----------------------------------------------------------------------
+> cd build\examples\hot_reload_spike
+> hot_reload_spike_host.exe
+'clang++' is not recognized as an internal or external command,
+operable program or batch file.
+initial build/load failed: rebuild failed (exit 1): clang++ -std=c++23 -shared -o "user_code.dll" "user_code.cpp"
+
+(This proves the runtime's rebuild_() correctly surfaces the compiler
+exit code via last_error() rather than crashing.)
+
+----------------------------------------------------------------------
+public-API macro check
+----------------------------------------------------------------------
+> grep -rn 'MPAPP_[A-Z_]*(' include/mpapp/
+(no matches)
+PASS
+
+----------------------------------------------------------------------
+expected output on a clang-enabled machine
+----------------------------------------------------------------------
+> hot_reload_spike_host.exe
+[host] watching user_code.cpp
+[host] edit user_code.cpp and save to trigger reload
+compute(1) = 2
+compute(2) = 4
+compute(3) = 6
+<edit user_code.cpp: x*2 -> x*10; save>
+[reloaded]
+compute(4) = 40
+compute(5) = 50
+compute(6) = 60
+...

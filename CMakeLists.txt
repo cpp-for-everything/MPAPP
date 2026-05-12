@@ -10,24 +10,30 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Host-platform tools (mpapp CLI, etc.) are off by default for cross-compiles
-# and on otherwise. CMAKE_CROSSCOMPILING is set by toolchain files; when it is
-# truthy we default the option off so a target build does not also pull in the
-# host CLI. The option remains overridable from the command line either way.
+# Host-platform tools (mpapp CLI, mpapp-xc, ...) are off by default for
+# cross-compiles and on otherwise. CMAKE_CROSSCOMPILING is set by toolchain
+# files; when truthy we default the option off so a cross-target build does
+# not also pull in the host CLI. Overridable from the command line.
 if(CMAKE_CROSSCOMPILING)
     set(MPAPP_BUILD_TOOLS_DEFAULT OFF)
 else()
     set(MPAPP_BUILD_TOOLS_DEFAULT ON)
 endif()
 option(MPAPP_BUILD_TOOLS
-    "Build host-platform tools (the mpapp CLI and friends)."
+    "Build host-platform tools (mpapp CLI, mpapp-xc XAML compiler, ...)."
     ${MPAPP_BUILD_TOOLS_DEFAULT}
 )
 
+option(MPAPP_BUILD_EXAMPLES "Build MPAPP example programs (spikes)." ON)
+
 # mpapp-core static library
-add_library(mpapp-core STATIC
-    src/mpapp.cpp
-)
+set(MPAPP_CORE_SOURCES src/mpapp.cpp)
+
+if(WIN32)
+    list(APPEND MPAPP_CORE_SOURCES src/hot_reload/windows.cpp)
+endif()
+
+add_library(mpapp-core STATIC ${MPAPP_CORE_SOURCES})
 
 target_include_directories(mpapp-core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -55,4 +61,9 @@ endif()
 # subdirectory fetched.
 if(MPAPP_BUILD_TOOLS)
     add_subdirectory(tools)
+endif()
+
+# Example programs / spikes (Windows-only today; see examples/CMakeLists.txt).
+if(MPAPP_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
