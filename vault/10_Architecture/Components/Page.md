@@ -20,12 +20,12 @@ tags:
 
 ## Overview
 
-To be filled. What does Page do for the user?
+`Page` is the abstract base for any visual element that occupies an entire screen. It is the root of MAUI's page hierarchy ([[ContentPage]], [[NavigationPage]], [[FlyoutPage]], [[TabbedPage]], [[Shell]] all derive from it) and carries the cross-cutting concerns every full-screen surface needs: `Title`, `IconImageSource`, `BackgroundImageSource`, `Padding`, `ToolbarItems`, `MenuBarItems`, lifecycle events (`Appearing`, `Disappearing`, `NavigatedTo`, `NavigatedFrom`), and the modal-dialog helpers (`DisplayAlertAsync`, `DisplayActionSheetAsync`, `DisplayPromptAsync`). MPAPP follows the same shape: `mpapp::page` is an abstract class that user code never instantiates directly; concrete pages are subclasses.
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Page\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Page\`
+- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Page\` (`PageHandler.cs`, `PageHandler.Windows.cs`, `PageHandler.Android.cs`, `PageHandler.iOS.cs`)
+- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Page\Page.cs`
 - **Docs:** [Microsoft .NET MAUI — Page](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/page)
 
 ## MPAPP C++ API
@@ -33,11 +33,37 @@ To be filled. What does Page do for the user?
 ```cpp
 namespace mpapp {
 
-class page : public control<page> {
+// Abstract base for full-screen surfaces. Not directly instantiable;
+// use content_page / navigation_page / flyout_page / tabbed_page / shell.
+class page : public visual_element<page> {
 public:
-    // Properties to be designed.
+    // Title shown in flyout / tab bar / nav bar.
+    Observable<std::u8string>            title;
+    // Icon shown next to the title (flyout entry, tab item).
+    Observable<image_source>             icon_image_source;
+    // Full-screen background image painted behind content.
+    Observable<image_source>             background_image_source;
+    // Inner padding between page edge and content.
+    Observable<thickness>                padding;
+    // Editable collections; mutate observably.
+    Observable<list<toolbar_item>>       toolbar_items;
+    Observable<list<menu_bar_item>>      menu_bar_items;
 
-    // Events / commands to be designed.
+    // Lifecycle events (raised by the navigation host).
+    Event<>                              appearing;
+    Event<>                              disappearing;
+    Event<navigated_to_args>             navigated_to;
+    Event<navigated_from_args>           navigated_from;
+    Event<navigating_from_args>          navigating_from;
+
+    // Modal helpers — return co_awaitable tasks.
+    Command<task<void>(alert_options)>   display_alert;
+    Command<task<bool>(confirm_options)> display_confirm;
+    Command<task<std::u8string>(action_sheet_options)> display_action_sheet;
+    Command<task<std::u8string>(prompt_options)>       display_prompt;
+
+protected:
+    page() = default; // abstract — subclass to use.
 };
 
 } // namespace mpapp
@@ -46,38 +72,68 @@ public:
 ## XAML Usage
 
 ```xml
-<!-- Must match MAUI XAML per ADR-0004. -->
-<Page/>
+<!-- Page itself is abstract — XAML always names a concrete subclass. -->
+<!-- Common attached properties (Title, IconImageSource, Padding) live on the subclass. -->
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.Frame` content host | C++/WinRT | Title and toolbar items projected onto the containing `NavigationView` / `CommandBar`. |
+| Android | `Fragment` + `ViewGroup` | fbjni / JNI | Lifecycle events bridge `Fragment.onResume` / `onPause`. Toolbar items map to `androidx.appcompat.widget.Toolbar` menu entries. |
+| Linux | `GtkBox` inside the `GtkStack` page slot | GTK4 | Title surfaced via the parent `AdwHeaderBar`. `DisplayAlertAsync` uses `GtkAlertDialog`. |
+| macOS | `NSViewController` | AppKit | `Title` binds to the window title bar when the page is the root. Action sheets use `NSAlert`. |
+| iOS | `UIViewController` | UIKit | `Appearing/Disappearing` map to `viewWillAppear` / `viewWillDisappear`. Modal helpers route to `UIAlertController`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
-```xml
-<!-- TBD -->
+```csharp
+public class MyPage : ContentPage // (Page is abstract)
+{
+    public MyPage()
+    {
+        Title = "Settings";
+        Padding = new Thickness(16);
+        ToolbarItems.Add(new ToolbarItem { Text = "Save" });
+    }
+
+    async void OnDelete(object sender, EventArgs e)
+    {
+        bool ok = await DisplayAlert("Delete?", "This cannot be undone.", "Yes", "No");
+    }
+}
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<ContentPage Title="Settings" Padding="16">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Save"/>
+    </ContentPage.ToolbarItems>
+</ContentPage>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+class my_page : public content_page {
+public:
+    my_page() {
+        title         = u8"Settings";
+        padding       = thickness{16};
+        toolbar_items.mutate([](auto& v){ v.emplace_back(toolbar_item{.text = u8"Save"}); });
+    }
+
+    task<void> on_delete() {
+        bool ok = co_await display_confirm({.title = u8"Delete?",
+                                            .message = u8"This cannot be undone.",
+                                            .accept = u8"Yes", .cancel = u8"No"});
+    }
+};
 ```
 
 ## Tests
@@ -97,6 +153,10 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Modal dialogs | `Task` returned by `DisplayAlert` etc. | `task<T>` (co_awaitable). | C++ coroutines, no managed `Task`. | RFC TBD |
+| `IsBusy` | Bindable property (deprecated in .NET 11). | Omitted from public API. | Deprecated upstream; replaced with `ActivityIndicator`. | RFC TBD |
+| `ContainerArea` | Obsolete `Rect` property. | Not exposed. | Internal/obsolete in MAUI. | n/a |
+| Safe-area | `ISafeAreaView2.SafeAreaInsets` + iOS-only API. | Cross-platform `safe_area_edges` on every page. | Interop parity (Rule 2). | RFC TBD |
 
 ## See also
 
@@ -104,3 +164,8 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[ContentPage]]
+- [[NavigationPage]]
+- [[FlyoutPage]]
+- [[TabbedPage]]
+- [[Shell]]
