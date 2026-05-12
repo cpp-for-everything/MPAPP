@@ -12,7 +12,11 @@ if(NOT TARGET Catch2::Catch2WithMain)
     FetchContent_MakeAvailable(Catch2)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+# Look up Catch2's source directory regardless of who fetched it. The
+# `catch2_SOURCE_DIR` variable is only set in the scope that called
+# FetchContent_MakeAvailable; FetchContent_GetProperties works across scopes.
+FetchContent_GetProperties(Catch2 SOURCE_DIR _mpapp_xc_catch2_src)
+list(APPEND CMAKE_MODULE_PATH "${_mpapp_xc_catch2_src}/extras")
 include(Catch)
 
 set(MPAPP_XC_FIXTURES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/fixtures")

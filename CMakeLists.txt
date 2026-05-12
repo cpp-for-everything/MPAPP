@@ -36,15 +36,16 @@ else()
     option(MPAPP_BUILD_EXAMPLES "Build the platform example apps." OFF)
 endif()
 
-# mpapp-core static library. Sources accumulate by platform.
+# mpapp-core static library. Sources accumulate by platform. The platform
+# UI handlers (WinUI 3 button/label, GTK4, AppKit, UIKit) are NOT compiled
+# into mpapp-core because they pull in heavy native SDKs (WindowsAppSDK,
+# C++/WinRT projections, ...). Each example/app builds its own
+# mpapp-handlers-<platform> static library that compiles those .cpp files
+# with the SDK include paths set up. mpapp-core stays platform-neutral.
 set(MPAPP_CORE_SOURCES src/mpapp.cpp)
 
 if(WIN32)
-    list(APPEND MPAPP_CORE_SOURCES
-        src/hot_reload/windows.cpp
-        src/handlers/windows/button_handler.cpp
-        src/handlers/windows/label_handler.cpp
-    )
+    list(APPEND MPAPP_CORE_SOURCES src/hot_reload/windows.cpp)
 endif()
 
 add_library(mpapp-core STATIC ${MPAPP_CORE_SOURCES})

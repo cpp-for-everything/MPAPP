@@ -13,6 +13,10 @@ CMakeUserPresets.json
 .claude/worktrees/
 .claude/update-paths.py
 
+# Local build-script helpers used by Claude Code workers (vcvars wrappers).
+# Each worker generates its own; not part of the canonical build interface.
+_build*.bat
+
 # OS
 Thumbs.db
 .DS_Store
