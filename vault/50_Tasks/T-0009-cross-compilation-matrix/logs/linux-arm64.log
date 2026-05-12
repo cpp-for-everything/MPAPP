@@ -1,0 +1,12 @@
+-- The CXX compiler identification is Clang 18.1.6
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - failed
+-- Check for working CXX compiler: C:/Users/alext/AppData/Local/Temp/mpapp-zig-aarch64-linux-gnu/zig-cxx.cmd
+-- Check for working CXX compiler: C:/Users/alext/AppData/Local/Temp/mpapp-zig-aarch64-linux-gnu/zig-cxx.cmd - works
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (1.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/GitHub/MPAPP/build-linux-arm64
+[1/2] Building CXX object CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o
+[2/2] Linking CXX static library libmpapp-core.a

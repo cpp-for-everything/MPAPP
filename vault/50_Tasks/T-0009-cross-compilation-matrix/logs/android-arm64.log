@@ -1,0 +1,23 @@
+-- The CXX compiler identification is Clang 18.1.6
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Users/alext/AppData/Local/Temp/mpapp-zig-aarch64-linux-android/zig-cxx.cmd - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (1.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/GitHub/MPAPP/build-android-arm64
+[1/2] Building CXX object CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o
+FAILED: CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o 
+C:\Users\alext\AppData\Local\Temp\mpapp-zig-aarch64-linux-android\zig-cxx.cmd  -ID:/GitHub/MPAPP/include -std=c++23 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o -MF CMakeFiles\mpapp-core.dir\src\mpapp.cpp.o.d -o CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o -c D:/GitHub/MPAPP/src/mpapp.cpp
+In file included from D:/GitHub/MPAPP/src/mpapp.cpp:1:
+In file included from D:/GitHub/MPAPP/include/mpapp/mpapp.hpp:14:
+In file included from D:/GitHub/MPAPP/include/mpapp/command.hpp:17:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/cstddef:36:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__assert:13:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__assertion_handler:13:
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__config:517:14: fatal error: 'features.h' file not found
+  517 | #    include <features.h>
+      |              ^~~~~~~~~~~~
+1 error generated.
+ninja: build stopped: subcommand failed.

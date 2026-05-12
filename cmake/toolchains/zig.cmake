@@ -141,4 +141,10 @@ function(mpapp_use_zig_target triple)
     # binutils (which may not understand the target object format).
     set(CMAKE_AR     "${_ar_path}"     CACHE FILEPATH "Zig archiver wrapper"  FORCE)
     set(CMAKE_RANLIB "${_ranlib_path}" CACHE FILEPATH "Zig ranlib wrapper"    FORCE)
+
+    # CMake 3.28+ enables clang-scan-deps for C++23 by default. Zig 0.13
+    # does not bundle clang-scan-deps, so module scanning fails on every
+    # cross target. Empirically validated under T-0009. MPAPP does not yet
+    # use C++ named modules in its public surface, so this is safe.
+    set(CMAKE_CXX_SCAN_FOR_MODULES OFF PARENT_SCOPE)
 endfunction()

@@ -1,0 +1,90 @@
+[71/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_random_number_generator.cpp.obj
+[72/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_decomposer.cpp.obj
+[73/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_message_info.cpp.obj
+[74/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_parse_numbers.cpp.obj
+[75/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_fatal_condition_handler.cpp.obj
+[76/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_jsonwriter.cpp.obj
+[77/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_singletons.cpp.obj
+[78/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_startup_exception_registry.cpp.obj
+[79/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_output_redirect.cpp.obj
+[80/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_lazy_expr.cpp.obj
+[81/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_list.cpp.obj
+[82/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_reusable_string_stream.cpp.obj
+[83/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_source_line_info.cpp.obj
+[84/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_reporter_registry.cpp.obj
+[85/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_run_context.cpp.obj
+[86/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_random_seed_generation.cpp.obj
+[87/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_string_manip.cpp.obj
+[88/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_stdstreams.cpp.obj
+[89/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_test_case_info_hasher.cpp.obj
+[90/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_section.cpp.obj
+[91/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_stringref.cpp.obj
+[92/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_uncaught_exceptions.cpp.obj
+[93/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_reporter_spec_parser.cpp.obj
+[94/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_test_spec_parser.cpp.obj
+[95/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_tag_alias_registry.cpp.obj
+[96/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_test_registry.cpp.obj
+[97/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_test_case_registry_impl.cpp.obj
+[98/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_test_failure_exception.cpp.obj
+[99/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_test_case_tracker.cpp.obj
+[100/127] Scanning D:\GitHub\MPAPP\tests\template_type_spike\test.cpp for CXX dependencies
+[101/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_textflow.cpp.obj
+[102/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_wildcard_pattern.cpp.obj
+[103/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\internal\catch_xmlwriter.cpp.obj
+[104/127] Building CXX object CMakeFiles\mpapp-core.dir\src\mpapp.cpp.obj
+[105/127] Generating CXX dyndep file tests\CMakeFiles\hot_reload_test.dir\CXX.dd
+[106/127] Generating CXX dyndep file tests\CMakeFiles\smoke_test.dir\CXX.dd
+[107/127] Generating CXX dyndep file tests\template_type_spike\CMakeFiles\template_type_spike_test.dir\CXX.dd
+[108/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\catch_matchers_exception.cpp.obj
+[109/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\catch_matchers_floating_point.cpp.obj
+[110/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\catch_matchers.cpp.obj
+[111/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\catch_matchers_container_properties.cpp.obj
+[112/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\catch_matchers_quantifiers.cpp.obj
+[113/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\catch_matchers_predicate.cpp.obj
+[114/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\catch_matchers_templated.cpp.obj
+[115/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\internal\catch_matchers_impl.cpp.obj
+[116/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2.dir\catch2\matchers\catch_matchers_string.cpp.obj
+[117/127] Building CXX object CMakeFiles\mpapp-core.dir\src\hot_reload\windows.cpp.obj
+[118/127] Linking CXX static library mpapp-core.lib
+[119/127] Building CXX object tests\CMakeFiles\smoke_test.dir\smoke_test.cpp.obj
+[120/127] Building CXX object _deps\catch2-build\src\CMakeFiles\Catch2WithMain.dir\catch2\internal\catch_main.cpp.obj
+[121/127] Linking CXX static library _deps\catch2-build\src\Catch2d.lib
+[122/127] Linking CXX static library _deps\catch2-build\src\Catch2Maind.lib
+[123/127] Building CXX object tests\template_type_spike\CMakeFiles\template_type_spike_test.dir\test.cpp.obj
+[124/127] Building CXX object tests\CMakeFiles\hot_reload_test.dir\__\vault\50_Tasks\T-0010-hot-reload-spike\tests\hot_reload_test.cpp.obj
+[125/127] Linking CXX executable tests\smoke_test.exe
+[126/127] Linking CXX executable tests\template_type_spike\template_type_spike_test.exe
+[127/127] Linking CXX executable tests\hot_reload_test.exe
+Test project D:/GitHub/MPAPP/build-windows-x64
+      Start  1: mpapp umbrella header is reachable
+ 1/14 Test  #1: mpapp umbrella header is reachable ................................   Passed    0.02 sec
+      Start  2: Hot<T> is an empty tag base
+ 2/14 Test  #2: Hot<T> is an empty tag base .......................................   Passed    0.02 sec
+      Start  3: runtime fails cleanly when source is missing
+ 3/14 Test  #3: runtime fails cleanly when source is missing ......................   Passed    0.04 sec
+      Start  4: Observable<int> set fires once and is idempotent on same value
+ 4/14 Test  #4: Observable<int> set fires once and is idempotent on same value ....   Passed    0.02 sec
+      Start  5: Observable: slot disconnects on destruction (auto-unsubscribe)
+ 5/14 Test  #5: Observable: slot disconnects on destruction (auto-unsubscribe) ....   Passed    0.03 sec
+      Start  6: Observable: explicit disconnect stops further notifications
+ 6/14 Test  #6: Observable: explicit disconnect stops further notifications .......   Passed    0.02 sec
+      Start  7: Observable: multiple subscribers all fire
+ 7/14 Test  #7: Observable: multiple subscribers all fire .........................   Passed    0.02 sec
+      Start  8: Computed<&VM::a, &VM::b> re-evaluates on each dependency change
+ 8/14 Test  #8: Computed<&VM::a, &VM::b> re-evaluates on each dependency change ...   Passed    0.03 sec
+      Start  9: Computed tag is detected by the is_computed_tag concept
+ 9/14 Test  #9: Computed tag is detected by the is_computed_tag concept ...........   Passed    0.02 sec
+      Start 10: is_command_method detects Command<> in the method signature
+10/14 Test #10: is_command_method detects Command<> in the method signature .......   Passed    0.05 sec
+      Start 11: Command<> method is callable normally
+11/14 Test #11: Command<> method is callable normally .............................   Passed    0.03 sec
+      Start 12: Observable<move-only T> compiles and behaves
+12/14 Test #12: Observable<move-only T> compiles and behaves ......................   Passed    0.03 sec
+      Start 13: Observable<std::string> implicitly converts to const string&
+13/14 Test #13: Observable<std::string> implicitly converts to const string& ......   Passed    0.04 sec
+      Start 14: ADR-0009 todo_view_model example compiles and behaves
+14/14 Test #14: ADR-0009 todo_view_model example compiles and behaves .............   Passed    0.03 sec
+
+100% tests passed, 0 tests failed out of 14
+
+Total Test time (real) =   0.50 sec
