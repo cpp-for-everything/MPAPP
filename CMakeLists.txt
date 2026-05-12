@@ -10,10 +10,12 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Host-platform tools (mpapp CLI, mpapp-xc, ...) are off by default for
-# cross-compiles and on otherwise. CMAKE_CROSSCOMPILING is set by toolchain
-# files; when truthy we default the option off so a cross-target build does
-# not also pull in the host CLI. Overridable from the command line.
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+# Host-platform tools (mpapp CLI, mpapp-xc, ...) are on by default for native
+# builds, off when cross-compiling. CMAKE_CROSSCOMPILING is set by toolchain
+# files; when truthy we default off so a cross-target build does not also pull
+# in the host CLI. Overridable from the command line.
 if(CMAKE_CROSSCOMPILING)
     set(MPAPP_BUILD_TOOLS_DEFAULT OFF)
 else()
@@ -24,13 +26,25 @@ option(MPAPP_BUILD_TOOLS
     ${MPAPP_BUILD_TOOLS_DEFAULT}
 )
 
-option(MPAPP_BUILD_EXAMPLES "Build MPAPP example programs (spikes)." ON)
+# Example programs (platform spikes). Default-on where their platform prereqs
+# ship — currently only Windows (WinUI 3, the hot-reload spike). Linux/macOS
+# spikes get the same default-on treatment as their build prereqs land
+# (see T-0007 WSLg, T-0008 macOS).
+if(WIN32)
+    option(MPAPP_BUILD_EXAMPLES "Build the platform example apps." ON)
+else()
+    option(MPAPP_BUILD_EXAMPLES "Build the platform example apps." OFF)
+endif()
 
-# mpapp-core static library
+# mpapp-core static library. Sources accumulate by platform.
 set(MPAPP_CORE_SOURCES src/mpapp.cpp)
 
 if(WIN32)
-    list(APPEND MPAPP_CORE_SOURCES src/hot_reload/windows.cpp)
+    list(APPEND MPAPP_CORE_SOURCES
+        src/hot_reload/windows.cpp
+        src/handlers/windows/button_handler.cpp
+        src/handlers/windows/label_handler.cpp
+    )
 endif()
 
 add_library(mpapp-core STATIC ${MPAPP_CORE_SOURCES})
@@ -63,7 +77,7 @@ if(MPAPP_BUILD_TOOLS)
     add_subdirectory(tools)
 endif()
 
-# Example programs / spikes (Windows-only today; see examples/CMakeLists.txt).
+# Platform-specific example apps (WinUI 3 button spike, hot-reload spike, ...).
 if(MPAPP_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()

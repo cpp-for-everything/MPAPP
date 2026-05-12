@@ -1,8 +1,10 @@
-# MPAPP examples — gated on MPAPP_BUILD_EXAMPLES from the root CMakeLists.
+# SPDX-License-Identifier: Apache-2.0
+# Part of MPAPP. Examples — one subdirectory per platform-specific spike.
 #
 # Each subdirectory is responsible for gating itself on the platforms it
-# supports. The hot-reload spike is Windows-only.
+# supports. The current spikes are Windows-only.
 
 if(WIN32)
     add_subdirectory(hot_reload_spike)
+    add_subdirectory(windows_button_spike)
 endif()
