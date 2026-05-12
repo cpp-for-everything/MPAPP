@@ -26,3 +26,7 @@ Two RFCs opened the same day:
 
 - [[RFC-0001-licensing-and-patent-strategy]] — dual license + CLA + patent prior-art audit (draft).
 - [[RFC-0002-cross-compilation-toolchain]] — Zig vs LLVM + per-platform sysroots (draft).
+
+Proposed ADRs from the same session (awaiting acceptance):
+
+- [[ADR-0011-cross-compilation-toolchain]] — Zig (`zig cc`) locked in as the cross-compilation toolchain, closing [[RFC-0002-cross-compilation-toolchain]].

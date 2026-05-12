@@ -31,6 +31,12 @@ Index of all ADRs by area. The authoritative live view is [[_Bases/ADRs.base]].
 - [[ADR-0007-cross-platform-tooling]] — All tools run on Windows + macOS + Linux
 - [[ADR-0008-mock-first-implementation]] — Full API surface as mocks first
 
+## Proposed
+
+### Build & tooling
+
+- [[ADR-0011-cross-compilation-toolchain]] — Zig (`zig cc`) as cross-compilation toolchain (closes [[RFC-0002-cross-compilation-toolchain]])
+
 ## Open RFCs (2)
 
 - [[RFC-0001-licensing-and-patent-strategy]] (draft) — Dual license + CLA + patent strategy
