@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does View do for the user?
+`View` is the abstract base class for every visual control in MAUI — it is the root of the visible UI hierarchy and the contract every [[Handlers|handler]] consumes. It surfaces the cross-cutting layout, transform, accessibility, and input properties that every concrete control (Label, Button, Layout, Border, etc.) inherits. In MAUI, the public `View` derives from `VisualElement` and `IView`, and the platform handler binds these abstract properties through a `PropertyMapper` to the underlying platform widget. In MPAPP it serves the same role: a single template-wrapped base type that gives every derived class a uniform observable surface.
 
 ## MAUI Reference
 
@@ -28,56 +28,118 @@ To be filled. What does View do for the user?
 - **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\View\`
 - **Docs:** [Microsoft .NET MAUI — View](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/view)
 
+The `ViewHandler` static `ViewMapper` lists the canonical property surface every subclass inherits: `AutomationId`, `Clip`, `Shadow`, `Visibility`, `Background`, `FlowDirection`, `Width`/`Height`, `MinimumWidth`/`MinimumHeight`, `MaximumWidth`/`MaximumHeight`, `IsEnabled`, `Opacity`, `Semantics`, `TranslationX`/`Y`, `Scale`/`ScaleX`/`ScaleY`, `Rotation`/`RotationX`/`RotationY`, `AnchorX`/`AnchorY`, `InputTransparent`, `ToolTip`, `ContextFlyout`, `SafeAreaEdges`. The `ViewCommandMapper` exposes `InvalidateMeasure`, `Frame`, `ZIndex`, `Focus`, and `Unfocus`.
+
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
+// Common cross-cutting surface for every visible control.
+// Mirrors MAUI's IView / ViewHandler ViewMapper.
 class view : public control<view> {
 public:
-    // Properties to be designed.
+    // Identity / accessibility
+    Observable<std::string>           automation_id;
+    Observable<semantics>             semantics_value;
+    Observable<std::optional<std::string>> tool_tip;
 
-    // Events / commands to be designed.
+    // Layout
+    Observable<double>                width;
+    Observable<double>                height;
+    Observable<double>                minimum_width;
+    Observable<double>                minimum_height;
+    Observable<double>                maximum_width;
+    Observable<double>                maximum_height;
+    Observable<flow_direction>        flow_direction;   // match-parent | ltr | rtl
+    Observable<safe_area_edges>       safe_area_edges;
+
+    // Visual state
+    Observable<visibility>            visibility;       // visible | hidden | collapsed
+    Observable<bool>                  is_enabled;
+    Observable<double>                opacity;          // 0.0 - 1.0
+    Observable<brush_ref>             background;
+    Observable<shadow>                shadow;
+    Observable<geometry_ref>          clip;
+
+    // Transforms
+    Observable<double>                translation_x;
+    Observable<double>                translation_y;
+    Observable<double>                scale;
+    Observable<double>                scale_x;
+    Observable<double>                scale_y;
+    Observable<double>                rotation;
+    Observable<double>                rotation_x;
+    Observable<double>                rotation_y;
+    Observable<double>                anchor_x;
+    Observable<double>                anchor_y;
+    Observable<int>                   z_index;
+
+    // Hit testing
+    Observable<bool>                  input_transparent;
+
+    // Commands
+    Command<>                         invalidate_measure;
+    Command<focus_request>            focus;
+    Command<>                         unfocus;
 };
 
 } // namespace mpapp
 ```
 
+No macros are used — every property is a template wrapper (see [[No Macros In Public API]] and [[Observable Properties]]).
+
 ## XAML Usage
 
+`View` is abstract in MAUI; it is never instantiated directly, but its properties are usable on every concrete descendant. The fragment below shows the inherited surface in use on a `Label`:
+
 ```xml
-<!-- Must match MAUI XAML per ADR-0004. -->
-<View/>
+<Label Text="Hello"
+       Opacity="0.8"
+       Rotation="15"
+       AutomationId="greeting"
+       IsEnabled="True"
+       HorizontalOptions="Center" />
 ```
 
 ## Platform Notes
 
-| Platform | Native control | Header / source | Notes |
-|---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Platform | Native control                           | Header / source            | Notes |
+|----------|------------------------------------------|----------------------------|-------|
+| Windows  | `Microsoft.UI.Xaml.FrameworkElement`     | C++/WinRT                  | Base of every WinUI control; handler stores `FrameworkElement?` as `PlatformView`. |
+| Android  | `android.views.View`                     | fbjni / JNI                | The root of every Android UI widget hierarchy. |
+| Linux    | `GtkWidget` (GTK4)                       | gtk4-rs / C bindings       | All GTK widgets derive from `GtkWidget`. |
+| macOS    | `NSView` (AppKit) / `UIView` (Catalyst)  | AppKit / UIKit interop     | Mac Catalyst path uses `UIView`. |
+| iOS      | `UIKit.UIView`                           | UIKit                      | Hosts every iOS-side control. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Button Text="Tap"
+        Opacity="0.9"
+        Rotation="0"
+        IsEnabled="True" />
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Button Text="Tap"
+        Opacity="0.9"
+        Rotation="0"
+        IsEnabled="True" />
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto btn = mpapp::make<mpapp::button>();
+btn->text       = "Tap";
+btn->opacity    = 0.9;
+btn->rotation   = 0.0;
+btn->is_enabled = true;
 ```
 
 ## Tests
@@ -104,3 +166,4 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[Observable Properties]]

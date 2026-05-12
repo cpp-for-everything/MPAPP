@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does ScrollView do for the user?
+`ScrollView` is a single-child container that lets the user pan its content when the content is larger than the available viewport. It supports vertical, horizontal, both, or neutral orientations and exposes per-axis scrollbar-visibility policies. The control raises `Scrolled` events as the offset changes and offers an awaitable `ScrollToAsync` API that scrolls to a coordinate, an element, or a named position (Start, Center, End, MakeVisible). MAUI's `ScrollViewHandler` maps directly to a `UIScrollView` on iOS, a `MauiScrollView` on Android, and a `Microsoft.UI.Xaml.Controls.ScrollViewer` on Windows.
 
 ## MAUI Reference
 
@@ -28,16 +28,32 @@ To be filled. What does ScrollView do for the user?
 - **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\ScrollView\`
 - **Docs:** [Microsoft .NET MAUI — ScrollView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/scrollview)
 
+`ScrollViewHandler.Mapper` adds `Content`, `HorizontalScrollBarVisibility`, `VerticalScrollBarVisibility`, and `Orientation` to the inherited `ViewMapper`. The `CommandMapper` adds `RequestScrollTo`. The control exposes read-only `ScrollX` / `ScrollY` and the `Scrolled` event.
+
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
-class scrollview : public control<scrollview> {
+class scroll_view : public view {
 public:
-    // Properties to be designed.
+    // Content
+    Observable<std::shared_ptr<view>>      content;
 
-    // Events / commands to be designed.
+    // Behavior
+    Observable<scroll_orientation>         orientation;                   // vertical (default) | horizontal | both | neither
+    Observable<scroll_bar_visibility>      horizontal_scroll_bar_visibility; // default | always | never
+    Observable<scroll_bar_visibility>      vertical_scroll_bar_visibility;
+
+    // Read-only current offsets (set by the handler).
+    Observable<double>                     scroll_x;
+    Observable<double>                     scroll_y;
+
+    // Commands
+    Command<scroll_to_request>             scroll_to;     // x/y or element + position + animated
+
+    // Events
+    Event<scrolled_args>                   scrolled;      // fires on offset change
 };
 
 } // namespace mpapp
@@ -46,38 +62,63 @@ public:
 ## XAML Usage
 
 ```xml
-<!-- Must match MAUI XAML per ADR-0004. -->
-<ScrollView/>
+<ScrollView Orientation="Vertical"
+            VerticalScrollBarVisibility="Always">
+    <VerticalStackLayout Padding="16" Spacing="8">
+        <Label Text="Item 1" />
+        <Label Text="Item 2" />
+        <!-- ... -->
+    </VerticalStackLayout>
+</ScrollView>
 ```
 
 ## Platform Notes
 
-| Platform | Native control | Header / source | Notes |
-|---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Platform | Native control                                | Header / source            | Notes |
+|----------|-----------------------------------------------|----------------------------|-------|
+| Windows  | `Microsoft.UI.Xaml.Controls.ScrollViewer`     | C++/WinRT                  | `Orientation` maps to `HorizontalScrollMode` / `VerticalScrollMode`. |
+| Android  | `android.widget.HorizontalScrollView` + `android.widget.ScrollView` (custom `MauiScrollView`) | fbjni / JNI | MAUI wraps both axes in a single composite to support `Both`. |
+| Linux    | `GtkScrolledWindow`                           | gtk4-rs                    | Hosts a single child via `gtk_scrolled_window_set_child`. |
+| macOS    | `NSScrollView` (AppKit) / `UIScrollView` (Catalyst) | AppKit / UIKit interop | Catalyst path uses `UIScrollView`. |
+| iOS      | `UIKit.UIScrollView`                          | UIKit                      | `ContentSize` is set from the cross-platform measure result. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<ScrollView>
+    <VerticalStackLayout>
+        <Label Text="Top" />
+        <Label Text="Bottom" />
+    </VerticalStackLayout>
+</ScrollView>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<ScrollView>
+    <VerticalStackLayout>
+        <Label Text="Top" />
+        <Label Text="Bottom" />
+    </VerticalStackLayout>
+</ScrollView>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto stack = mpapp::make<mpapp::vertical_stack_layout>();
+stack->children.add(mpapp::make<mpapp::label>("Top"));
+stack->children.add(mpapp::make<mpapp::label>("Bottom"));
+
+auto sv = mpapp::make<mpapp::scroll_view>();
+sv->content     = stack;
+sv->orientation = mpapp::scroll_orientation::vertical;
+sv->scrolled.subscribe([](const auto& args) {
+    // args.scroll_x, args.scroll_y
+});
 ```
 
 ## Tests
@@ -104,3 +145,5 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[View]]
+- [[Layout]]

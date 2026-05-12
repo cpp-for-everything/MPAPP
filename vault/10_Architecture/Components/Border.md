@@ -20,24 +20,40 @@ tags:
 
 ## Overview
 
-To be filled. What does Border do for the user?
+`Border` is a single-child decorator that draws a stroke, a background fill, and an optional non-rectangular outline around its `Content`. Its `StrokeShape` accepts any `IShape` — typically `Rectangle`, `RoundRectangle`, or `Ellipse` — letting authors create pills, cards, and circular avatars without bitmap masking. Stroke styling is the standard pen surface (`StrokeThickness`, `StrokeDashArray`, `StrokeDashOffset`, `StrokeLineCap`, `StrokeLineJoin`, `StrokeMiterLimit`). It supersedes the obsolete [[Frame]] control as of .NET 9 — new code should use `Border` everywhere.
 
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Border\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Border\`
+- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Border\Border.cs`
 - **Docs:** [Microsoft .NET MAUI — Border](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/border)
+
+`BorderHandler.Mapper` extends `ViewMapper` with: `Background`, `Content`, `Shape`, `Stroke`, `StrokeThickness`, `StrokeLineCap`, `StrokeLineJoin`, `StrokeDashPattern`, `StrokeDashOffset`, `StrokeMiterLimit` (and `Width`/`Height` on Android). The control also adds `Padding` and `SafeAreaEdges`.
 
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
-class border : public control<border> {
+class border : public view {
 public:
-    // Properties to be designed.
+    // Content
+    Observable<std::shared_ptr<view>>      content;
+    Observable<thickness>                  padding;
+    Observable<safe_area_edges>            safe_area_edges;
 
-    // Events / commands to be designed.
+    // Shape & fill
+    Observable<std::shared_ptr<shape>>     stroke_shape;   // default: rectangle
+    Observable<brush_ref>                  background;
+
+    // Stroke pen
+    Observable<brush_ref>                  stroke;
+    Observable<double>                     stroke_thickness;       // default 1.0
+    Observable<std::vector<double>>        stroke_dash_array;
+    Observable<double>                     stroke_dash_offset;     // default 0.0
+    Observable<pen_line_cap>               stroke_line_cap;        // flat | round | square
+    Observable<pen_line_join>              stroke_line_join;       // miter | round | bevel
+    Observable<double>                     stroke_miter_limit;     // default 10.0
 };
 
 } // namespace mpapp
@@ -46,38 +62,60 @@ public:
 ## XAML Usage
 
 ```xml
-<!-- Must match MAUI XAML per ADR-0004. -->
-<Border/>
+<Border Stroke="Black"
+        StrokeThickness="2"
+        Background="LightYellow"
+        Padding="12">
+    <Border.StrokeShape>
+        <RoundRectangle CornerRadius="12" />
+    </Border.StrokeShape>
+    <Label Text="Bordered content" />
+</Border>
 ```
 
 ## Platform Notes
 
-| Platform | Native control | Header / source | Notes |
-|---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Platform | Native control                                              | Header / source            | Notes |
+|----------|-------------------------------------------------------------|----------------------------|-------|
+| Windows  | `Microsoft.UI.Xaml.Controls.Panel` (custom `ContentPanel`)  | C++/WinRT                  | A `MauiPanel` subclass with a clipping `Path` element for non-rectangular `StrokeShape`. |
+| Android  | `android.view.ViewGroup` (custom `ContentViewGroup`)        | fbjni / JNI                | Stroke drawn via `Drawable` overlay on the view group. |
+| Linux    | `GtkBox` with a CSS-styled border / `GtkFrame`              | gtk4-rs                    | Non-rectangular shapes drawn via `GtkSnapshot` cairo overrides. |
+| macOS    | `NSView` / `UIView` (custom `ContentView`)                  | AppKit / Catalyst          | Stroke rendered into the layer. |
+| iOS      | `UIKit.UIView` (custom `ContentView` → `MauiView`)          | UIKit                      | Mask + stroke layer composited on `CALayer`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Border Stroke="Gray" StrokeThickness="1" Padding="8">
+    <Border.StrokeShape>
+        <RoundRectangle CornerRadius="8" />
+    </Border.StrokeShape>
+    <Label Text="Card" />
+</Border>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Border Stroke="Gray" StrokeThickness="1" Padding="8">
+    <Border.StrokeShape>
+        <RoundRectangle CornerRadius="8" />
+    </Border.StrokeShape>
+    <Label Text="Card" />
+</Border>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto card = mpapp::make<mpapp::border>();
+card->stroke           = mpapp::colors::gray;
+card->stroke_thickness = 1.0;
+card->padding          = mpapp::thickness{8};
+card->stroke_shape     = mpapp::shapes::round_rectangle(8);
+card->content          = mpapp::make<mpapp::label>("Card");
 ```
 
 ## Tests
@@ -104,3 +142,5 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[Frame]]
+- [[View]]
