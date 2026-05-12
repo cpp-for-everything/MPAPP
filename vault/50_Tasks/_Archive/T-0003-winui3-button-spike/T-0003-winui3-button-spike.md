@@ -2,7 +2,7 @@
 type: task
 id: T-0003
 title: WinUI 3 button handler spike
-status: in-progress
+status: done
 milestone: M-01
 owner: ""
 area: handlers
@@ -13,7 +13,7 @@ hasScreenshots: true
 hasRecordings: false
 tags:
   - type/task
-  - status/in-progress
+  - status/done
   - area/handlers
   - platform/windows
   - phase/p0
@@ -65,3 +65,10 @@ C++/WinRT pitfalls observed during the spike — full write-up in [[notes/depend
 - Screenshots:
   - `screenshots/window_initial.png` — fresh window, `Count: 0`
   - `screenshots/window.png` — after several clicks, `Count: 18`
+
+## Closure notes
+
+- **Closed:** 2026-05-12
+- **Merged commits:** `0a6fcd6` (initial implementation), `414fc35` (merge into main), `dde5f35` (post-merge build fix-ups keeping WinUI handlers out of `mpapp-core` and propagating the Catch2 path).
+- **Delivered:** Working CRTP `button_handler<platform::windows>` + companion `label_handler` against C++/WinRT and WinUI 3 (`include/mpapp/handlers/windows/*.hpp`, `src/handlers/windows/*.cpp`), cross-platform `mpapp::button` / `mpapp::label` surface, platform tag (`include/mpapp/platform.hpp`), CRTP base (`include/mpapp/control.hpp`), and a runnable `examples/windows_button_spike` that maps a `view_model` with `Observable<int> count` to a real WinUI 3 window — click increments the observable and the label re-renders. Screenshots `window_initial.png` (Count: 0) and `window.png` (Count: 18) capture the before/after.
+- **Coverage:** `coveragePercent: 100` on the spike-realised handler surface (`map_text`, `map_clicked`, native widget RAII). Screen recording was intentionally skipped — the static screenshot pair captures the visible behaviour and a real recording is deferred to the M-03 Button handler shipping task.

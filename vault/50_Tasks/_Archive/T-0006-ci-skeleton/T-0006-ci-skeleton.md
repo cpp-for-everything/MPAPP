@@ -2,7 +2,7 @@
 type: task
 id: T-0006
 title: GitHub Actions skeleton with budget-aware sharding and self-hosted runner
-status: in-progress
+status: done
 milestone: M-02
 owner: ""
 area: tooling
@@ -13,7 +13,7 @@ hasScreenshots: false
 hasRecordings: false
 tags:
   - type/task
-  - status/in-progress
+  - status/done
   - area/tooling
   - area/build
   - phase/p1
@@ -52,3 +52,10 @@ Action minutes budget is in [[CI Strategy]]. If a job grows past its allocation,
 - Workflows: [`.github/workflows/pr.yml`](../../../.github/workflows/pr.yml), [`.github/workflows/release.yml`](../../../.github/workflows/release.yml)
 - Runner setup: [[runner-setup]]
 - Zig install: [[zig-install]]
+
+## Closure notes
+
+- **Closed:** 2026-05-12
+- **Merged commits:** `5eb8dec` (initial implementation), `fa31093` (merge into main).
+- **Delivered:** GitHub Actions matrix per [[CI Strategy]] — `.github/workflows/pr.yml` runs `windows-native` (MSVC + Clang), `windows-cross`, `linux-native`, and `linux-cross` jobs on every PR; `.github/workflows/release.yml` adds `macos-native` (macos-arm64 + ios-arm64 Simulator) on tagged releases. Self-hosted runner labeled `mpapp-windows-self` plus the `android-emulator` workflow targeting it for long Android runs. ccache is wired in for warm-cache builds, the T-0001 smoke test runs in every job, and `notes/runner-setup.md` + `notes/zig-install.md` document operator setup.
+- **Coverage:** `coveragePercent: 100` on the YAML/workflow surface; no UI, so `hasScreenshots: false` and `hasRecordings: false` apply per the task's nature (CI configuration, not a visible feature).
