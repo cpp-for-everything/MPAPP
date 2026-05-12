@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does Stepper do for the user?
+`Stepper` is a pair of plus/minus buttons used to increment or decrement a numeric `Value` by a fixed `Interval` within `[Minimum, Maximum]`. It is the discrete counterpart of `Slider` and is preferred when the legal range is small and precise (quantity, page-size, font-step). Only iOS has a true native stepper (`UIStepper`); MAUI synthesizes `MauiStepper` on the other platforms by stacking two buttons.
 
 ## MAUI Reference
 
@@ -35,9 +35,12 @@ namespace mpapp {
 
 class stepper : public control<stepper> {
 public:
-    // Properties to be designed.
+    Observable<double>  value;
+    Observable<double>  minimum;
+    Observable<double>  maximum;
+    Observable<double>  interval;
 
-    // Events / commands to be designed.
+    Command<double>     value_changed;
 };
 
 } // namespace mpapp
@@ -47,37 +50,49 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Stepper/>
+<Stepper Minimum="0" Maximum="10" Increment="1" Value="1"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `MauiStepper` (two `Microsoft.UI.Xaml.Controls.Button`) | C++/WinRT | Composite — no native stepper in WinUI. |
+| Android | `MauiStepper` (two `Android.Widget.Button`) | fbjni / JNI | Auto-repeat on long press. |
+| Linux | `MauiStepper` (two `GtkButton`) | GTK4 | Composite for parity with platforms that lack a native stepper. |
+| macOS | `NSStepper` or composite | AppKit | Catalyst falls back to `UIStepper`. |
+| iOS | `UIStepper` | UIKit | Native two-segment control. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Stepper Minimum="1"
+         Maximum="99"
+         Increment="1"
+         Value="{Binding Quantity}"
+         ValueChanged="OnQuantityChanged"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Stepper Minimum="1"
+         Maximum="99"
+         Increment="1"
+         Value="{Binding Quantity}"
+         ValueChanged="{Binding OnQuantityChanged}"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto st = std::make_shared<mpapp::stepper>();
+st->minimum = 1.0;
+st->maximum = 99.0;
+st->interval = 1.0;
+st->value_changed.subscribe([](double v) { set_quantity(v); });
 ```
 
 ## Tests

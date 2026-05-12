@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does Slider do for the user?
+`Slider` is a horizontal continuous-range input: the user drags a thumb along a track between `Minimum` and `Maximum` to pick a `double` value. It exposes drag-start and drag-completed signals to distinguish committed selection from intermediate scrubbing — important when adjustments are expensive (audio scrubbing, brush size, network volume). Track segments before and after the thumb can be colored independently.
 
 ## MAUI Reference
 
@@ -35,9 +35,17 @@ namespace mpapp {
 
 class slider : public control<slider> {
 public:
-    // Properties to be designed.
+    Observable<double>        value;
+    Observable<double>        minimum;
+    Observable<double>        maximum;
+    Observable<color>         minimum_track_color;
+    Observable<color>         maximum_track_color;
+    Observable<color>         thumb_color;
+    Observable<image_source>  thumb_image_source;
 
-    // Events / commands to be designed.
+    Command<double>           value_changed;
+    Command<>                 drag_started;
+    Command<>                 drag_completed;
 };
 
 } // namespace mpapp
@@ -47,37 +55,47 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Slider/>
+<Slider Minimum="0" Maximum="100" Value="50"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.Slider` | C++/WinRT | `IsMoveToPointEnabled=true`. |
+| Android | `Android.Widget.SeekBar` | fbjni / JNI | Drag events derived from touch listener. |
+| Linux | `GtkScale` | GTK4 | `draw-value=false`. |
+| macOS | `NSSlider` (linear) | AppKit | `isContinuous=true`. |
+| iOS | `UISlider` | UIKit | `minimumTrackTintColor`, `maximumTrackTintColor`, `thumbTintColor`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Slider Minimum="0"
+        Maximum="100"
+        Value="{Binding Volume}"
+        ValueChanged="OnVolumeChanged"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Slider Minimum="0"
+        Maximum="100"
+        Value="{Binding Volume}"
+        ValueChanged="{Binding OnVolumeChanged}"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto sl = std::make_shared<mpapp::slider>();
+sl->minimum = 0.0;
+sl->maximum = 100.0;
+sl->value = 50.0;
+sl->drag_completed.subscribe([&] { commit_volume(sl->value.get()); });
 ```
 
 ## Tests

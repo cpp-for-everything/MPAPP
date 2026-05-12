@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does Button do for the user?
+`Button` is a tappable command surface that shows a text label and/or an image and raises a click event when activated. It is the canonical primary action control: every supported platform maps it to a native push-button widget so platform conventions for focus, ripple, hover, and accessibility carry over without re-implementation. Per MAUI's `IButton`, it composes text styling, padding, stroke, and image-source contracts.
 
 ## MAUI Reference
 
@@ -35,9 +35,20 @@ namespace mpapp {
 
 class button : public control<button> {
 public:
-    // Properties to be designed.
+    Observable<std::string>   text;
+    Observable<color>         text_color;
+    Observable<font>          font;
+    Observable<double>        character_spacing;
+    Observable<image_source>  image_source;
+    Observable<thickness>     padding;
+    Observable<color>         stroke_color;
+    Observable<double>        stroke_thickness;
+    Observable<double>        corner_radius;
+    Observable<brush>         background;
 
-    // Events / commands to be designed.
+    Command<>                 clicked;
+    Command<>                 pressed;
+    Command<>                 released;
 };
 
 } // namespace mpapp
@@ -47,37 +58,47 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Button/>
+<Button Text="Save" Clicked="OnSaveClicked"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.Button` | C++/WinRT | Stroke maps to a contained `Border`. |
+| Android | `Google.Android.Material.Button.MaterialButton` (AppCompat) | fbjni / JNI | Material 3 ripple, elevation honored. |
+| Linux | `GtkButton` | GTK4 | Image-plus-text via `GtkBox` child. |
+| macOS | `NSButton` (push-button style) | AppKit | Catalyst path falls back to `UIButton`. |
+| iOS | `UIButton` (system style) | UIKit | Padding mapped to `contentEdgeInsets`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Button Text="Save"
+        TextColor="White"
+        BackgroundColor="DodgerBlue"
+        Clicked="OnSaveClicked"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Button Text="Save"
+        TextColor="White"
+        Background="DodgerBlue"
+        Clicked="{Binding OnSaveClicked}"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto b = std::make_shared<mpapp::button>();
+b->text = "Save";
+b->text_color = colors::white;
+b->background = brush{colors::dodger_blue};
+b->clicked.subscribe([] { save(); });
 ```
 
 ## Tests

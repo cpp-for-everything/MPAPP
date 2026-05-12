@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does Entry do for the user?
+`Entry` is the single-line text-input control: user types a string, IME conventions apply, and a `Completed` event fires when the return key is pressed. It supports placeholder text, password masking, clear-button visibility, max-length, return-key style, and keyboard-type hints. Per MAUI's `IEntry`, it implements `ITextInput` and `ITextAlignment`, giving it the same surface as `Editor` minus multi-line rendering.
 
 ## MAUI Reference
 
@@ -35,9 +35,27 @@ namespace mpapp {
 
 class entry : public control<entry> {
 public:
-    // Properties to be designed.
+    Observable<std::string>             text;
+    Observable<std::string>             placeholder;
+    Observable<color>                   text_color;
+    Observable<color>                   placeholder_color;
+    Observable<font>                    font;
+    Observable<double>                  character_spacing;
+    Observable<bool>                    is_password;
+    Observable<bool>                    is_read_only;
+    Observable<bool>                    is_spell_check_enabled;
+    Observable<bool>                    is_text_prediction_enabled;
+    Observable<int>                     max_length;
+    Observable<int>                     cursor_position;
+    Observable<int>                     selection_length;
+    Observable<keyboard>                keyboard;
+    Observable<return_type>             return_type;
+    Observable<clear_button_visibility> clear_button_visibility;
+    Observable<text_alignment>          horizontal_text_alignment;
+    Observable<text_alignment>          vertical_text_alignment;
 
-    // Events / commands to be designed.
+    Command<>                           completed;
+    Command<std::string>                text_changed;
 };
 
 } // namespace mpapp
@@ -47,37 +65,49 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Entry/>
+<Entry Placeholder="Email" Keyboard="Email"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.TextBox` (or `PasswordBox` when `IsPassword`) | C++/WinRT | Handler swaps control type when password mode toggles. |
+| Android | `AndroidX.AppCompat.Widget.AppCompatEditText` | fbjni / JNI | `inputType` derives from keyboard + password. |
+| Linux | `GtkEntry` | GTK4 | `visibility=false` for password mode. |
+| macOS | `NSTextField` / `NSSecureTextField` | AppKit | Secure variant for `is_password`. |
+| iOS | `MauiTextField` (subclass of `UITextField`) | UIKit | Clear button mapped to `clearButtonMode`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Entry Placeholder="Username"
+       Text="{Binding Username}"
+       MaxLength="32"
+       ReturnType="Next"
+       Completed="OnUsernameCompleted"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Entry Placeholder="Username"
+       Text="{Binding Username}"
+       MaxLength="32"
+       ReturnType="Next"
+       Completed="{Binding OnUsernameCompleted}"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto e = std::make_shared<mpapp::entry>();
+e->placeholder = "Username";
+e->max_length = 32;
+e->return_type = return_type::next;
+e->completed.subscribe([&] { focus_next(); });
 ```
 
 ## Tests

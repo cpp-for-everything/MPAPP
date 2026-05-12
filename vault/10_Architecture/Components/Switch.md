@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does Switch do for the user?
+`Switch` is a sliding toggle showing one of two states (`IsOn` true or false). It is the on-off control of choice for settings screens where the change takes effect immediately, in contrast to `CheckBox` which is conventional for opt-in selection in forms. Per MAUI's `ISwitch`, it exposes `IsOn`, `ThumbColor`, and `TrackColor`.
 
 ## MAUI Reference
 
@@ -33,51 +33,62 @@ To be filled. What does Switch do for the user?
 ```cpp
 namespace mpapp {
 
-class switch : public control<switch> {
+class switch_ : public control<switch_> {
 public:
-    // Properties to be designed.
+    Observable<bool>   is_on;
+    Observable<color>  thumb_color;
+    Observable<color>  track_color;
 
-    // Events / commands to be designed.
+    Command<bool>      toggled;
 };
 
 } // namespace mpapp
 ```
 
+> Note: `switch` is a C++ keyword, so the class is named `switch_` per the project's reserved-word convention.
+
 ## XAML Usage
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Switch/>
+<Switch IsToggled="True"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.ToggleSwitch` | C++/WinRT | Has built-in on/off content labels (suppressed). |
+| Android | `AndroidX.AppCompat.Widget.SwitchCompat` | fbjni / JNI | Material thumb/track theming. |
+| Linux | `GtkSwitch` | GTK4 | CSS handles thumb/track colors. |
+| macOS | `NSSwitch` (10.15+) | AppKit | Catalyst falls back to `UISwitch`. |
+| iOS | `UISwitch` | UIKit | `onTintColor` maps to track color. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Switch IsToggled="{Binding NotificationsEnabled}"
+        OnColor="DodgerBlue"
+        ThumbColor="White"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Switch IsToggled="{Binding NotificationsEnabled}"
+        OnColor="DodgerBlue"
+        ThumbColor="White"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto s = std::make_shared<mpapp::switch_>();
+s->is_on = true;
+s->track_color = colors::dodger_blue;
+s->toggled.subscribe([](bool v) { save_pref("notifications", v); });
 ```
 
 ## Tests
@@ -97,6 +108,7 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Class name | `Switch` | `mpapp::switch_` | `switch` is a C++ reserved keyword. | N/A — XAML element name is unchanged. |
 
 ## See also
 
