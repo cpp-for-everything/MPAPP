@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does Label do for the user?
+`Label` is the read-only text display primitive. It renders single- or multi-line strings with a font, color, alignment, line height, and optional underline/strike decorations, but exposes no input or focus surface. Per MAUI's `ILabel`, it composes `IText`, `ITextAlignment`, and `IPadding` — making it the foundational widget for static copy, headings, and inline labels in forms.
 
 ## MAUI Reference
 
@@ -35,9 +35,15 @@ namespace mpapp {
 
 class label : public control<label> {
 public:
-    // Properties to be designed.
-
-    // Events / commands to be designed.
+    Observable<std::string>           text;
+    Observable<color>                 text_color;
+    Observable<font>                  font;
+    Observable<double>                character_spacing;
+    Observable<text_alignment>        horizontal_text_alignment;
+    Observable<text_alignment>        vertical_text_alignment;
+    Observable<text_decorations>      text_decorations;
+    Observable<double>                line_height;
+    Observable<thickness>             padding;
 };
 
 } // namespace mpapp
@@ -47,37 +53,47 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Label/>
+<Label Text="Welcome"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.TextBlock` | C++/WinRT | Inlines used for `FormattedString`. |
+| Android | `AndroidX.AppCompat.Widget.AppCompatTextView` | fbjni / JNI | Honors AppCompat theming. |
+| Linux | `GtkLabel` | GTK4 | Pango markup for decorations. |
+| macOS | `NSTextField` (non-editable) | AppKit | Bezel/border disabled. |
+| iOS | `UILabel` | UIKit | `numberOfLines = 0` for multi-line. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Label Text="Hello, world"
+       FontSize="24"
+       TextColor="Black"
+       HorizontalTextAlignment="Center"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Label Text="Hello, world"
+       FontSize="24"
+       TextColor="Black"
+       HorizontalTextAlignment="Center"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto l = std::make_shared<mpapp::label>();
+l->text = "Hello, world";
+l->font = font{ .size = 24 };
+l->text_color = colors::black;
+l->horizontal_text_alignment = text_alignment::center;
 ```
 
 ## Tests

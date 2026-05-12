@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does Editor do for the user?
+`Editor` is the multi-line text-input control. It accepts free-form text, wraps lines at the available width, supports vertical scrolling, and raises `Completed` when input is finalized (platform-specific — typically loss of focus or pressing return on hardware keyboards). It shares almost all of `Entry`'s `ITextInput` surface (placeholder, max-length, keyboard, read-only) but omits password masking and the single-line return-type / clear-button affordances.
 
 ## MAUI Reference
 
@@ -35,9 +35,24 @@ namespace mpapp {
 
 class editor : public control<editor> {
 public:
-    // Properties to be designed.
+    Observable<std::string>     text;
+    Observable<std::string>     placeholder;
+    Observable<color>           text_color;
+    Observable<color>           placeholder_color;
+    Observable<font>            font;
+    Observable<double>          character_spacing;
+    Observable<bool>            is_read_only;
+    Observable<bool>            is_spell_check_enabled;
+    Observable<bool>            is_text_prediction_enabled;
+    Observable<int>             max_length;
+    Observable<int>             cursor_position;
+    Observable<int>             selection_length;
+    Observable<keyboard>        keyboard;
+    Observable<text_alignment>  horizontal_text_alignment;
+    Observable<text_alignment>  vertical_text_alignment;
 
-    // Events / commands to be designed.
+    Command<>                   completed;
+    Command<std::string>        text_changed;
 };
 
 } // namespace mpapp
@@ -47,37 +62,46 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<Editor/>
+<Editor Placeholder="Notes" AutoSize="TextChanges"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.TextBox` (with `AcceptsReturn=true`) | C++/WinRT | Vertical scroll auto-enabled. |
+| Android | `AndroidX.AppCompat.Widget.AppCompatEditText` (with `inputType` multiline) | fbjni / JNI | `singleLine=false`. |
+| Linux | `GtkTextView` inside `GtkScrolledWindow` | GTK4 | `GtkTextBuffer` exposes text. |
+| macOS | `NSTextView` inside `NSScrollView` | AppKit | Catalyst uses `MauiTextView`. |
+| iOS | `MauiTextView` (subclass of `UITextView`) | UIKit | Adds placeholder support. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Editor Placeholder="Write your review..."
+        Text="{Binding Review}"
+        MaxLength="500"
+        AutoSize="TextChanges"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Editor Placeholder="Write your review..."
+        Text="{Binding Review}"
+        MaxLength="500"
+        AutoSize="TextChanges"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto ed = std::make_shared<mpapp::editor>();
+ed->placeholder = "Write your review...";
+ed->max_length = 500;
+ed->text_changed.subscribe([](auto const& s) { word_count(s); });
 ```
 
 ## Tests
