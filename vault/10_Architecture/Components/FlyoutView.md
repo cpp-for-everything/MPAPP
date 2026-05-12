@@ -20,64 +20,121 @@ tags:
 
 ## Overview
 
-To be filled. What does FlyoutView do for the user?
+`FlyoutView` is the abstract cross-platform [[View]] that hosts a two-pane master/detail layout: a **flyout** (the slide-out side panel) and a **detail** (the main content area). It is the surface every higher-level navigation primitive — [[FlyoutPage]] and [[Shell]] — composes on top of, and it is what the framework's adaptive layouts collapse into on small screens. It is defined in `Microsoft.Maui.Core` (no `Controls` subclass exists on its own; `FlyoutPage` and `Shell` are the user-facing consumers).
+
+`FlyoutBehavior` controls visibility mode (`Flyout`, `Popover`, `Disabled`), and `IsPresented` toggles the panel open/closed; both are intentionally surfaced for parent navigation containers to manipulate.
 
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\FlyoutView\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\FlyoutView\`
-- **Docs:** [Microsoft .NET MAUI — FlyoutView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/flyoutview)
+- **Control:** Defined as an abstract `IFlyoutView` interface in `D:\GitHub\MPAPP\maui\src\Core\src\Core\IFlyoutView.cs` — consumed by `FlyoutPage` and `Shell` under `D:\GitHub\MPAPP\maui\src\Controls\src\Core\`.
+- **Docs:** [Microsoft .NET MAUI — FlyoutPage](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/pages/flyoutpage)
 
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
-class flyoutview : public control<flyoutview> {
+class flyout_view : public view<flyout_view> {
 public:
-    // Properties to be designed.
+    // The two panes. Often supplied by FlyoutPage/Shell rather than user XAML.
+    Observable<std::shared_ptr<view_base>> flyout;
+    Observable<std::shared_ptr<view_base>> detail;
 
-    // Events / commands to be designed.
+    // True when the flyout pane is open. Two-way bindable.
+    Observable<bool> is_presented { false };
+
+    // Visibility mode: flyout | popover | disabled.
+    Observable<flyout_behavior> flyout_behavior { flyout_behavior::flyout };
+
+    // Width of the flyout pane in DIPs. <0 means "platform default".
+    Observable<double> flyout_width { -1.0 };
+
+    // Whether edge-swipe gestures can open the flyout (mobile).
+    Observable<bool> is_gesture_enabled { true };
 };
 
 } // namespace mpapp
 ```
 
+`flyout_view` has no verbs — opening/closing is driven by toggling `is_presented`.
+
 ## XAML Usage
+
+`FlyoutView` is typically not authored directly; consumers use [[FlyoutPage]] or [[Shell]], which compose a `FlyoutView` internally. The XAML form is still valid for low-level scenarios:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<FlyoutView/>
+<FlyoutView FlyoutBehavior="Flyout" IsPresented="{Binding ShowMenu}">
+    <FlyoutView.Flyout>
+        <ContentView>
+            <ListView ItemsSource="{Binding MenuItems}"/>
+        </ContentView>
+    </FlyoutView.Flyout>
+    <FlyoutView.Detail>
+        <ContentView>
+            <Label Text="Body"/>
+        </ContentView>
+    </FlyoutView.Detail>
+</FlyoutView>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.Maui.Platform.RootNavigationView` | C++/WinRT | Built on `Microsoft.UI.Xaml.Controls.NavigationView`. |
+| Android | `androidx.drawerlayout.widget.DrawerLayout` | fbjni / JNI | Edge swipe opens via `IsGestureEnabled`. |
+| Linux | Custom `GtkBox` + `GtkRevealer` composition | GTK4 | Targets [[GTK4]] adaptive container patterns. |
+| macOS | `NSSplitView` with collapsible sidebar | AppKit via [[Objective-Cpp]] | Behavior `Popover` shows a transient overlay instead. |
+| iOS | `UISplitViewController` | UIKit via [[Objective-Cpp]] | `Popover` collapses to a hamburger on compact widths. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<!-- Most users go through FlyoutPage rather than IFlyoutView directly. -->
+<FlyoutPage>
+    <FlyoutPage.Flyout>
+        <ContentPage Title="Menu"/>
+    </FlyoutPage.Flyout>
+    <FlyoutPage.Detail>
+        <NavigationPage>
+            <x:Arguments><ContentPage/></x:Arguments>
+        </NavigationPage>
+    </FlyoutPage.Detail>
+</FlyoutPage>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<FlyoutView FlyoutBehavior="Flyout">
+    <FlyoutView.Flyout>
+        <ContentView><Label Text="Menu"/></ContentView>
+    </FlyoutView.Flyout>
+    <FlyoutView.Detail>
+        <ContentView><Label Text="Body"/></ContentView>
+    </FlyoutView.Detail>
+</FlyoutView>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto fv = std::make_shared<mpapp::flyout_view>();
+fv->flyout_behavior = mpapp::flyout_behavior::flyout;
+
+auto menu = std::make_shared<mpapp::content_view>();
+menu->content = std::make_shared<mpapp::label>("Menu");
+fv->flyout = menu;
+
+auto body = std::make_shared<mpapp::content_view>();
+body->content = std::make_shared<mpapp::label>("Body");
+fv->detail = body;
+
+fv->is_presented = true;
 ```
 
 ## Tests
@@ -93,10 +150,11 @@ Links to per-platform handler test files. Tracked in [[Test Harness]].
 
 ## Known Differences
 
-Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
-
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| `Flyout`/`Detail` mapping on iOS/macOS | Mapped through the page-level handler (`FlyoutPage`), not the view-level one | Mapped at the view level for symmetry | Lets `flyout_view` be used directly without a `Page` wrapper | TBD |
+| `FlyoutWidth` < 0 sentinel | Same | Same | Matches MAUI defaults | N/A |
+| `IsGestureEnabled` on desktop | Effectively no-op | Same — explicitly documented as no-op | Aligns with [[Interop Parity]] | TBD |
 
 ## See also
 
@@ -104,3 +162,7 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[FlyoutPage]]
+- [[Shell]]
+- [[View]]
+- [[Page]]

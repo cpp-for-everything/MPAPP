@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does ProgressBar do for the user?
+`ProgressBar` is a determinate horizontal bar that fills proportionally to a `Progress` value clamped to `[0.0, 1.0]`. Unlike [[ActivityIndicator]], it expresses *how much* work has been done — useful for downloads, installers, and any task with a known total. MAUI also exposes `ProgressTo(value, length, easing)` to animate the fill; MPAPP mirrors this as an explicit coroutine-returning method on the C++ class.
 
 ## MAUI Reference
 
@@ -33,51 +33,69 @@ To be filled. What does ProgressBar do for the user?
 ```cpp
 namespace mpapp {
 
-class progressbar : public control<progressbar> {
+class progress_bar : public view<progress_bar> {
 public:
-    // Properties to be designed.
+    // Filled fraction, clamped to [0.0, 1.0] on assignment.
+    Observable<double> progress { 0.0 };
 
-    // Events / commands to be designed.
+    // Foreground/fill color of the bar.
+    Observable<color> progress_color { color::accent() };
+
+    // Animate Progress from its current value to `target` over `length_ms`.
+    // Returns a future that resolves to `true` if the animation ran to completion.
+    Command<std::future<bool>(double target, std::uint32_t length_ms, easing curve)>
+        progress_to;
 };
 
 } // namespace mpapp
 ```
 
+The `progress` observable applies clamping in its setter (matching MAUI's `coerceValue`). `progress_to` is the only command — there are no other verbs.
+
 ## XAML Usage
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<ProgressBar/>
+<ProgressBar Progress="{Binding DownloadFraction}"
+             ProgressColor="LimeGreen" />
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.ProgressBar` | C++/WinRT | `Progress` is mapped onto `Value` after scaling from `[0,1]` to `[0,100]`. |
+| Android | `android.widget.ProgressBar` (horizontal style) | fbjni / JNI | Two handler implementations exist in MAUI (`ProgressBarHandler` and `ProgressBarHandler2`) — MPAPP will adopt the newer one. |
+| Linux | `GtkProgressBar` | GTK4 | `gtk_progress_bar_set_fraction`. |
+| macOS | `NSProgressIndicator` (style `Bar`, determinate) | AppKit via [[Objective-Cpp]] | |
+| iOS | `UIProgressView` | UIKit via [[Objective-Cpp]] | `FlowDirection` is explicitly mapped on iOS to flip the bar. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<ProgressBar Progress="0.5" ProgressColor="DodgerBlue" />
+```
+
+```csharp
+await progressBar.ProgressTo(1.0, 1500, Easing.Linear);
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<ProgressBar Progress="0.5" ProgressColor="DodgerBlue" />
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto bar = std::make_shared<mpapp::progress_bar>();
+bar->progress = 0.5;
+bar->progress_color = mpapp::color::from_hex("#1E90FF");
+
+co_await bar->progress_to(1.0, 1500, mpapp::easing::linear);
 ```
 
 ## Tests
@@ -93,10 +111,10 @@ Links to per-platform handler test files. Tracked in [[Test Harness]].
 
 ## Known Differences
 
-Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
-
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Out-of-range values | Silently clamped via `coerceValue` | Clamped, plus a debug-build warning | Out-of-range almost always indicates a bug | TBD |
+| `ProgressTo` return type | `Task<bool>` (true = completed) | `std::future<bool>` plus coroutine awaitable | Idiomatic C++; no managed `Task` to model | [[ADR-0009-public-api-template-wrappers-only]] |
 
 ## See also
 
@@ -104,3 +122,5 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[ActivityIndicator]]
+- [[View]]
