@@ -16,6 +16,21 @@
 #include "observable.hpp"
 #include "signal.hpp"
 
+// Layout / primitive component surface (P2 mock — ADR-0008). Mock-only
+// users (and the XAML compiler's host-side validation harness) get the
+// full layout-group API by including only <mpapp/mpapp.hpp>. Real
+// handlers are pulled in explicitly per-platform.
+#include "view.hpp"
+#include "layout.hpp"
+#include "bindable_layout.hpp"
+#include "scroll_view.hpp"
+#include "border.hpp"
+#include "box_view.hpp"
+// `frame` is deprecated; do NOT include it from the umbrella so new
+// code is not silently exposed to it. Callers that genuinely need the
+// legacy element include <mpapp/frame.hpp> explicitly and accept the
+// deprecation diagnostic.
+
 namespace mpapp {
 
 // Subsystem headers populate this namespace.

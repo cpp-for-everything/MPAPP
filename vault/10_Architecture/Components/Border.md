@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Border"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/border"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Border
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — cross-platform header at `include/mpapp/border.hpp`; mock handler records the full stroke pen + shape + content surface. See [[Controls Inventory]].
 
 ## Overview
 
@@ -135,6 +135,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Mock implementation
+
+The P2 mock surface (ADR-0008) lands in this repository:
+
+- **Cross-platform header:** `include/mpapp/border.hpp` — `mpapp::border : view` with `content`, `padding`, `stroke_shape`, `stroke`, `stroke_thickness`, `stroke_dash_array`, `stroke_dash_offset`, `stroke_line_cap`, `stroke_line_join`, `stroke_miter_limit`.
+- **Mock handler:** `include/mpapp/handlers/mock/border_handler.hpp` — `border_handler<platform::mock>` records every property mapper; `content` is recorded as a presence boolean (no useful `std::format` repr for `shared_ptr<view>`) and `stroke_dash_array` as a size.
+- **Mock tests:** `tests/mock_handlers/border_test.cpp`.
+
+The rich `shape` / `brush_ref` types are lightweight stand-ins in the mock layer (`stroke_shape_desc` is a textual descriptor); the full graphics types arrive in P3.
 
 ## See also
 

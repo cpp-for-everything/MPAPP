@@ -23,6 +23,12 @@ struct linux_  {}; // 'linux' is a predefined macro in some toolchains.
 struct macos   {};
 struct ios     {};
 
+// Mock tag — used by the P2 mock surface (ADR-0008). Selecting it via a
+// handler template specialisation gives a host-independent recording
+// handler that runs in CI on every platform, regardless of which native
+// SDK is installed.
+struct mock    {};
+
 #if defined(_WIN32)
 using current = windows;
 #elif defined(__ANDROID__)

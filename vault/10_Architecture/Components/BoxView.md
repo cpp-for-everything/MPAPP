@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "BoxView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/boxview"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # BoxView
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — cross-platform header at `include/mpapp/box_view.hpp`; mock handler records `fill` and `corners` mappers. See [[Controls Inventory]].
 
 ## Overview
 
@@ -112,6 +112,14 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Mock implementation
+
+The P2 mock surface (ADR-0008) lands in this repository:
+
+- **Cross-platform header:** `include/mpapp/box_view.hpp` — `mpapp::box_view : view` with `Observable<color> fill` and `Observable<corner_radius> corners`. The lightweight `color` (rgba) and `corner_radius` (per-corner) types are defined in this header.
+- **Mock handler:** `include/mpapp/handlers/mock/box_view_handler.hpp` — `box_view_handler<platform::mock>` records both mappers.
+- **Mock tests:** `tests/mock_handlers/box_view_test.cpp`.
 
 ## See also
 

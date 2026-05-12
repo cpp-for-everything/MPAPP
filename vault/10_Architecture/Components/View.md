@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "View"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/view"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # View
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full cross-platform surface lives at `include/mpapp/view.hpp`; mock handler records every property mapper invocation. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 
@@ -159,6 +159,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Mock implementation
+
+The P2 mock surface (ADR-0008) lands in this repository:
+
+- **Cross-platform header:** `include/mpapp/view.hpp` — `mpapp::view` with the cross-cutting Observable surface and `Command<>`-tagged helpers (`invalidate_measure`, `focus`, `unfocus`).
+- **Mock handler:** `include/mpapp/handlers/mock/view_handler.hpp` — `view_handler<platform::mock>` records every property-mapper invocation into `calls()`.
+- **Mock tests:** `tests/mock_handlers/view_test.cpp` — Catch2 cases covering initial-bind recording, idempotent set short-circuiting, multi-property ordering, and symbolic enum repr.
+
+Rich types (`brush_ref`, `shadow_desc`) are lightweight stand-ins in the mock layer and are replaced by the real graphics types alongside the per-platform handlers in P3.
 
 ## See also
 
