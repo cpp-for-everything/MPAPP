@@ -20,64 +20,93 @@ tags:
 
 ## Overview
 
-To be filled. What does ShapeView do for the user?
+`ShapeView` is the host element for vector shapes (rectangle, ellipse, line, polyline, polygon, path). It owns a `shape` geometry plus paint controls: `fill`, `stroke`, `stroke_thickness`, dash pattern, line cap/join, and miter limit. The geometry stretches inside the view according to `aspect`. Under the hood every concrete `Rectangle`/`Ellipse`/`Path` derives from `Shape` and renders through `ShapeView`.
 
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\ShapeView\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\ShapeView\`
-- **Docs:** [Microsoft .NET MAUI — ShapeView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/shapeview)
+- **Control (base):** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Shapes\Shape.cs`
+- **Docs:** [Microsoft .NET MAUI — Shapes](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/shapes/)
 
 ## MPAPP C++ API
 
 ```cpp
 namespace mpapp {
 
-class shapeview : public control<shapeview> {
-public:
-    // Properties to be designed.
+enum class line_cap  { butt, round, square };
+enum class line_join { miter, bevel, round };
+enum class stretch   { none, fill, uniform, uniform_to_fill };
 
-    // Events / commands to be designed.
+struct geometry; // base for rectangle/ellipse/line/path geometries
+
+class shape_view : public control<shape_view> {
+public:
+    Observable<std::shared_ptr<geometry>> shape;
+    Observable<stretch>                   aspect{stretch::none};
+
+    // Paint
+    Observable<brush>     fill;
+    Observable<brush>     stroke;
+    Observable<double>    stroke_thickness{1.0};
+    Observable<std::vector<double>> stroke_dash_pattern;
+    Observable<double>    stroke_dash_offset{0.0};
+    Observable<line_cap>  stroke_line_cap{line_cap::butt};
+    Observable<line_join> stroke_line_join{line_join::miter};
+    Observable<double>    stroke_miter_limit{10.0};
 };
 
 } // namespace mpapp
 ```
 
+`brush` is the gradient/solid brush variant tracked in [[Observable Properties]].
+
 ## XAML Usage
 
 ```xml
-<!-- Must match MAUI XAML per ADR-0004. -->
-<ShapeView/>
+<!-- Must match MAUI XAML per ADR-0004. Most apps use derived shapes. -->
+<Rectangle Fill="Tomato"
+           Stroke="Black"
+           StrokeThickness="2"
+           WidthRequest="120" HeightRequest="80"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.Maui.Graphics.Win2D.W2DGraphicsView` | C++/WinRT | Win2D path rendering. |
+| Android | `MauiShapeView` (`View`) | fbjni / JNI | Skia / canvas-drawn paths. |
+| Linux | `GtkDrawingArea` driving a path renderer | GTK4 | Cairo backend. |
+| macOS | `MauiShapeView` (`NSView` w/ `CAShapeLayer`) | AppKit | Layer-backed stroke + fill. |
+| iOS | `MauiShapeView` (`UIView` w/ `CAShapeLayer`) | UIKit | Layer-backed stroke + fill. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<Ellipse Fill="DodgerBlue"
+         Stroke="Navy"
+         StrokeThickness="3"
+         WidthRequest="100" HeightRequest="100"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<Ellipse Fill="DodgerBlue"
+         Stroke="Navy"
+         StrokeThickness="3"
+         WidthRequest="100" HeightRequest="100"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto e = std::make_shared<mpapp::ellipse>();
+e->fill = mpapp::solid_brush(mpapp::colors::dodger_blue);
+e->stroke = mpapp::solid_brush(mpapp::colors::navy);
+e->stroke_thickness = 3.0;
 ```
 
 ## Tests
@@ -97,6 +126,8 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| `Brush` hierarchy | Polymorphic class tree | `brush` variant (`solid_brush`, `linear_gradient_brush`, ...) | Static dispatch per [[Type System]] | RFC TBD |
+| Geometry | Polymorphic `Geometry` | `geometry` interface with concrete types as `std::shared_ptr` | Closer to platform Skia/CoreGraphics surfaces | RFC TBD |
 
 ## See also
 
@@ -104,3 +135,4 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[GraphicsView]]

@@ -20,7 +20,7 @@ tags:
 
 ## Overview
 
-To be filled. What does SearchBar do for the user?
+`SearchBar` is a specialised single-line text input optimised for queries. It carries a search glyph, a placeholder, and (on most platforms) a clear/cancel button. Submitting (tapping the keyboard's search action) raises `search_command` with the current text. It is conceptually `Entry` + "search" `return_type` + cancel affordance, and uses `AutoSuggestBox`/`UISearchBar`/`SearchView` natively.
 
 ## MAUI Reference
 
@@ -33,11 +33,37 @@ To be filled. What does SearchBar do for the user?
 ```cpp
 namespace mpapp {
 
-class searchbar : public control<searchbar> {
+class search_bar : public control<search_bar> {
 public:
-    // Properties to be designed.
+    // Text
+    Observable<std::string> text;
+    Observable<std::string> placeholder;
+    Observable<color>       placeholder_color;
+    Observable<color>       text_color;
+    Observable<color>       cancel_button_color;
+    Observable<color>       search_icon_color;
 
-    // Events / commands to be designed.
+    // Typing behaviour
+    Observable<bool>   is_read_only{false};
+    Observable<bool>   is_text_prediction_enabled{true};
+    Observable<bool>   is_spell_check_enabled{true};
+    Observable<int>    max_length{-1};
+    Observable<int>    cursor_position{0};
+    Observable<int>    selection_length{0};
+    Observable<keyboard_kind> keyboard{keyboard_kind::text};
+    Observable<return_kind>   return_type{return_kind::search};
+
+    // Layout
+    Observable<font>           font;
+    Observable<double>         character_spacing{0.0};
+    Observable<text_alignment> horizontal_text_alignment{text_alignment::start};
+    Observable<text_alignment> vertical_text_alignment{text_alignment::center};
+
+    // Commands
+    Command<std::string /*query*/> search_command;
+    Command<std::string /*query*/> text_changed;
+    Command<>                      focus;
+    Command<>                      unfocus;
 };
 
 } // namespace mpapp
@@ -47,37 +73,47 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<SearchBar/>
+<SearchBar Placeholder="Find..."
+           Text="{Binding Query, Mode=TwoWay}"
+           SearchCommand="{Binding RunSearch}"/>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.AutoSuggestBox` | C++/WinRT | `QueryEditor` is the box itself. |
+| Android | `androidx.appcompat.widget.SearchView` | fbjni / JNI | `QueryEditor` is the inner `EditText`. |
+| Linux | `GtkSearchEntry` | GTK4 | Built-in clear button. |
+| macOS | `NSSearchField` | AppKit | Round-bezel field, sends `searchAction:`. |
+| iOS | `MauiSearchBar` over `UISearchBar` | UIKit | `QueryEditor` is the inner `UITextField`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<SearchBar Placeholder="Search products"
+           SearchCommand="{Binding RunSearch}"
+           SearchCommandParameter="{Binding Filters}"/>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<SearchBar Placeholder="Search products"
+           SearchCommand="{Binding RunSearch}"
+           SearchCommandParameter="{Binding Filters}"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto sb = std::make_shared<mpapp::search_bar>();
+sb->placeholder = "Search products";
+sb->search_command.subscribe([](std::string q){
+    std::cout << "searching for: " << q << "\n";
+});
 ```
 
 ## Tests
@@ -104,3 +140,4 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[Entry]]
