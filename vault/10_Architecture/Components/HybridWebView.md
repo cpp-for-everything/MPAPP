@@ -20,12 +20,12 @@ tags:
 
 ## Overview
 
-To be filled. What does HybridWebView do for the user?
+`HybridWebView` extends [[WebView]] with a two-way JavaScript↔native messaging bridge: HTML/JS bundled inside the app (under `Resources/Raw/wwwroot` by default) can call C++ methods, and C++ can invoke JavaScript with strongly-typed JSON marshalling. It is intended for "hybrid" apps where the UI is a web SPA but business logic lives in C++ — comparable to Electron's IPC, Tauri's `invoke()`, or Capacitor's plugin bridge. MAUI ships a small JS shim (`HybridWebView.js`) that MPAPP reuses byte-for-byte for parity.
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\HybridWebView\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\HybridWebView\`
+- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\HybridWebView\HybridWebViewHandler.cs`
+- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\HybridWebView\` (lives next to `WebView.cs`; type is `Microsoft.Maui.Controls.HybridWebView`)
 - **Docs:** [Microsoft .NET MAUI — HybridWebView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/hybridwebview)
 
 ## MPAPP C++ API
@@ -33,11 +33,32 @@ To be filled. What does HybridWebView do for the user?
 ```cpp
 namespace mpapp {
 
-class hybridwebview : public control<hybridwebview> {
+class hybrid_webview : public view<hybrid_webview> {
 public:
-    // Properties to be designed.
+    // Where the web assets live and which file to load by default.
+    Observable<std::string> hybrid_root;    // default: "wwwroot"
+    Observable<std::string> default_file;   // default: "index.html"
 
-    // Events / commands to be designed.
+    // Register the object whose public methods are callable from JS as
+    //   window.HybridWebView.InvokeDotNet("method_name", [args...])
+    template<typename T>
+    void set_invoke_javascript_target(std::shared_ptr<T> target);
+
+    // Raw string-message channel — both directions.
+    event<std::string>               raw_message_received;
+    void send_raw_message(std::string_view raw);
+
+    // Strongly-typed JS invocation. Marshalling uses mpapp::json
+    // (the marshaller will be selected by a future RFC).
+    template<typename TReturn, typename... TArgs>
+    std::future<TReturn> invoke_javascript_async(
+        std::string_view method_name, TArgs&&... args);
+
+    std::future<std::string> evaluate_javascript_async(std::string_view script);
+
+    // Standard navigation surface inherited from webview.
+    Command<> reload_command;
+    void reload();
 };
 
 } // namespace mpapp
@@ -47,37 +68,68 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<HybridWebView/>
+<HybridWebView HybridRoot="wwwroot"
+               DefaultFile="index.html"
+               x:Name="bridge"/>
+```
+
+Then from the bundled JS:
+
+```js
+// Send a typed call to C++.
+const sum = await window.HybridWebView.InvokeDotNet("add", [2, 3]);
+
+// Send a raw message.
+window.HybridWebView.SendRawMessage("hello from JS");
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.WebView2` | C++/WinRT | Asset serving via `CoreWebView2.SetVirtualHostNameToFolderMapping`; messages via `WebMessageReceived`. |
+| Android | `android.webkit.WebView` | fbjni / JNI | Asset serving via `WebViewAssetLoader`; messages via `addJavascriptInterface` with the shim. |
+| Linux | `WebKitGTK` (`WebKitWebView`) with a custom URI scheme handler | GTK4 | Messages via `webkit_web_view_send_message_to_page` + `script-message-received`. |
+| macOS | `WKWebView` with `WKURLSchemeHandler` for asset serving | AppKit | Messages via `WKScriptMessageHandler`; same shim as iOS. |
+| iOS | `WKWebView` with `WKURLSchemeHandler` for asset serving | UIKit | Messages via `WKScriptMessageHandler`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<HybridWebView HybridRoot="wwwroot" RawMessageReceived="OnRaw"/>
+```
+
+```csharp
+hybrid.SetInvokeJavaScriptTarget(new Bridge());
+var name = await hybrid.InvokeJavaScriptAsync<string>("getName", null);
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<HybridWebView HybridRoot="wwwroot" RawMessageReceived="OnRaw"/>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto bridge = std::make_shared<mpapp::hybrid_webview>();
+bridge->hybrid_root  = "wwwroot";
+bridge->default_file = "index.html";
+
+struct app_bridge {
+    int add(int a, int b) { return a + b; }
+    std::string greeting(std::string who) { return "Hello, " + who + "!"; }
+};
+bridge->set_invoke_javascript_target(std::make_shared<app_bridge>());
+
+bridge->raw_message_received.connect([](const std::string& msg) {
+    mpapp::log::info("JS says: {}", msg);
+});
+
+auto name = bridge->invoke_javascript_async<std::string>("getName").get();
 ```
 
 ## Tests
@@ -97,6 +149,11 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| JS-callable target | `SetInvokeJavaScriptTarget<T>` requires `DynamicallyAccessedMembers` for AOT | Methods are registered via a small reflection helper template — no runtime member discovery required | C++ has no managed reflection; explicit registration is preferred | — |
+| JSON marshalling | `JsonTypeInfo<T>` (System.Text.Json source-gen) | `mpapp::json` (TBD) — single, header-only marshaller chosen via RFC | No System.Text.Json equivalent | RFC pending |
+| Default `HybridRoot` | `wwwroot` | Same | — | — |
+| Linux engine | Not supported | `WebKitGTK` | Closest engine match on GTK | — |
+| Async API shape | `Task<TReturn?>` (nullable boxed) | `std::future<TReturn>` (throws on JS exception) | Idiomatic C++ surface | — |
 
 ## See also
 
@@ -104,3 +161,4 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[WebView]]

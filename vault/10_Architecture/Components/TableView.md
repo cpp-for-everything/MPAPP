@@ -20,12 +20,12 @@ tags:
 
 ## Overview
 
-To be filled. What does TableView do for the user?
+`TableView` displays a scrollable list of rows organized into named sections — typically used for settings screens, forms, and other heterogeneous layouts where each row is a `Cell` declared inline rather than driven by an `ItemTemplate`. Unlike [[ListView]], the content is built statically from a `TableRoot` containing `TableSection`s, which makes it ideal for fixed-shape UIs. MAUI flags it as obsolete in favor of `CollectionView`, and MPAPP ports it for parity with the legacy MAUI surface but does not recommend it for new code.
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\TableView\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\TableView\`
+- **Handler:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Compatibility\Handlers\TableView\` (compat renderers; no `Microsoft.Maui.Handlers` mapper)
+- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\TableView\TableView.cs`
 - **Docs:** [Microsoft .NET MAUI — TableView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/tableview)
 
 ## MPAPP C++ API
@@ -33,11 +33,29 @@ To be filled. What does TableView do for the user?
 ```cpp
 namespace mpapp {
 
-class tableview : public control<tableview> {
-public:
-    // Properties to be designed.
+enum class table_intent { menu, settings, form, data };
 
-    // Events / commands to be designed.
+class table_section : public element {
+public:
+    Observable<std::string>               title;
+    Observable<color>                     text_color;
+    Observable<observable_vector<cell>>   cells;
+};
+
+class table_root : public table_section {
+public:
+    Observable<observable_vector<table_section>> sections;
+};
+
+class tableview : public view<tableview> {
+public:
+    Observable<table_root>          root;
+    Observable<table_intent>        intent;        // default: data
+    Observable<int>                 row_height;    // -1 for native default
+    Observable<bool>                has_uneven_rows;
+
+    // No selection event — TableView dispatches taps to cells, which
+    // surface their own events (text_cell::tapped, switch_cell::on, ...).
 };
 
 } // namespace mpapp
@@ -47,37 +65,67 @@ public:
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<TableView/>
+<TableView Intent="Settings">
+    <TableRoot>
+        <TableSection Title="Profile">
+            <EntryCell Label="Name"  Text="{Binding Name}"/>
+            <EntryCell Label="Email" Text="{Binding Email}"/>
+        </TableSection>
+        <TableSection Title="Preferences">
+            <SwitchCell Text="Notifications" On="{Binding NotifyEnabled}"/>
+        </TableSection>
+    </TableRoot>
+</TableView>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.UI.Xaml.Controls.ListView` with grouped data | C++/WinRT | No native sectioned table; uses `CollectionViewSource` with grouping and `GroupStyle` headers. |
+| Android | `android.widget.ListView` with a sectioned `BaseAdapter` (`TableViewModelRenderer`) | fbjni / JNI | Section headers rendered as non-clickable rows. |
+| Linux | `GtkListBox` with header rows (`gtk_list_box_set_header_func`) | GTK4 | Each section title row is rendered as an unselectable header. |
+| macOS | `NSTableView` (grouped style) inside `NSScrollView` | AppKit | Uses `NSTableView`'s native grouped row appearance. |
+| iOS | `UITableView` with style `UITableViewStyle.Grouped` | UIKit | Matches MAUI: TableView always renders as grouped. `Intent` maps to visual styling only. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<TableView Intent="Settings">
+    <TableRoot>
+        <TableSection Title="Account">
+            <TextCell Text="Sign out"/>
+        </TableSection>
+    </TableRoot>
+</TableView>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<TableView Intent="Settings">
+    <TableRoot>
+        <TableSection Title="Account">
+            <TextCell Text="Sign out"/>
+        </TableSection>
+    </TableRoot>
+</TableView>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto tv = std::make_shared<mpapp::tableview>();
+tv->intent = mpapp::table_intent::settings;
+
+mpapp::table_root root;
+mpapp::table_section account;
+account.title = "Account";
+account.cells.get().push_back(mpapp::text_cell{"Sign out"});
+root.sections.get().push_back(std::move(account));
+tv->root = std::move(root);
 ```
 
 ## Tests
@@ -97,6 +145,10 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| Deprecation | `[Obsolete]` — kept for source-compat only | Same — documented as legacy | Mirror MAUI guidance | — |
+| Section model | `TableRoot` + `TableSection` + `Cell` | Same shape, but section/cell collections use `observable_vector` | Compile-time observable contract per [[ADR-0009-public-api-template-wrappers-only]] | — |
+| Cell mutation | Cells reparented imperatively; raises `ChildAdded` | Reparenting handled by `observable_vector` move semantics | C++ value semantics | — |
+| macOS native control | `UITableView` (Catalyst) | `NSTableView` (AppKit) | [[ADR-0005-ios-macos-separate-interop]] | — |
 
 ## See also
 
@@ -104,3 +156,5 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[ListView]]
+- [[CollectionView]]
