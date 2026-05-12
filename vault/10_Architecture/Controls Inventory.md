@@ -26,7 +26,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/BindableLayout\|BindableLayout]] | `Controls/BindableLayout/` | not-started |
 | [[Components/Border\|Border]] | `Handlers/Border/` | not-started |
 | [[Components/BoxView\|BoxView]] | `Controls/BoxView/` | not-started |
-| [[Components/Button\|Button]] | `Handlers/Button/` | not-started |
+| [[Components/Button\|Button]] | `Handlers/Button/` | mock |
 | [[Components/CheckBox\|CheckBox]] | `Handlers/CheckBox/` | not-started |
 | [[Components/ContentPage\|ContentPage]] | `Controls/ContentPage/` | not-started |
 | [[Components/ContentView\|ContentView]] | `Handlers/ContentView/` | not-started |

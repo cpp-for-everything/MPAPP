@@ -10,6 +10,17 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+# Examples are built by default on Windows hosts (where WinUI 3 ships),
+# off elsewhere. The Linux/macOS spikes get the same default-on treatment
+# once their build prereqs land — see T-0007, T-0008.
+if(WIN32)
+    option(MPAPP_BUILD_EXAMPLES "Build the platform example apps." ON)
+else()
+    option(MPAPP_BUILD_EXAMPLES "Build the platform example apps." OFF)
+endif()
+
 # mpapp-core static library
 add_library(mpapp-core STATIC
     src/mpapp.cpp
@@ -31,4 +42,9 @@ target_compile_options(mpapp-core PRIVATE
 include(CTest)
 if(BUILD_TESTING)
     add_subdirectory(tests)
+endif()
+
+# Platform-specific example apps (WinUI 3, GTK4, etc.).
+if(MPAPP_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()

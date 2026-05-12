@@ -1,0 +1,55 @@
+// SPDX-License-Identifier: Apache-2.0
+// Part of MPAPP. T-0003 — WinUI 3 button spike.
+//
+// `label_handler<platform::windows>` — wraps a
+// `winrt::Microsoft::UI::Xaml::Controls::TextBlock`. Single property
+// (`text`) for the spike.
+
+#ifndef MPAPP_HANDLERS_WINDOWS_LABEL_HANDLER_HPP
+#define MPAPP_HANDLERS_WINDOWS_LABEL_HANDLER_HPP
+
+#include "../../label.hpp"
+#include "../../platform.hpp"
+#include "../../signal.hpp"
+
+#if defined(_WIN32)
+
+#include <string>
+
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
+
+namespace mpapp {
+
+template <>
+class label_handler<platform::windows> {
+public:
+    label_handler();
+    ~label_handler();
+
+    label_handler(const label_handler&)            = delete;
+    label_handler& operator=(const label_handler&) = delete;
+    label_handler(label_handler&&)                 = delete;
+    label_handler& operator=(label_handler&&)      = delete;
+
+    void map_text(label& l);
+
+    winrt::Microsoft::UI::Xaml::Controls::TextBlock&       native() noexcept       { return native_; }
+    const winrt::Microsoft::UI::Xaml::Controls::TextBlock& native() const noexcept { return native_; }
+
+private:
+    void apply_text(std::string_view text);
+
+    struct text_callback {
+        label_handler<platform::windows>* self = nullptr;
+        void operator()(const std::string& v) const { self->apply_text(v); }
+    };
+
+    winrt::Microsoft::UI::Xaml::Controls::TextBlock native_{nullptr};
+    signal_slot<const std::string&>                 text_slot_{};
+    text_callback                                   text_callback_{this};
+};
+
+} // namespace mpapp
+
+#endif // _WIN32
+#endif // MPAPP_HANDLERS_WINDOWS_LABEL_HANDLER_HPP
