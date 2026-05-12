@@ -10,6 +10,14 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# MSVC 14.51+ emits C4530 from <chrono>/<format>/<filesystem> headers unless
+# unwind semantics are enabled. Visual Studio's MSBuild generator implicitly
+# adds /EHsc; the Ninja generator does not. Set it project-wide so /WX builds
+# stay green.
+if(MSVC)
+    add_compile_options(/EHsc)
+endif()
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # Host-platform tools (mpapp CLI, mpapp-xc, ...) are on by default for native

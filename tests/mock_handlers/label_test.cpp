@@ -36,7 +36,7 @@ TEST_CASE("label mock handler fires once per real text change",
     l.text = "Hello";
     l.text = "World";
 
-    REQUIRE(h.calls() ==
+    REQUIRE(h.calls_as_strings() ==
             std::vector<std::string>{"text=Hello", "text=World"});
 }
 

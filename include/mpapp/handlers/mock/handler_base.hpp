@@ -51,6 +51,11 @@ namespace mpapp {
 struct call_record {
     std::string property_name;
     std::string value_repr;
+    // True when this entry came from a property-mapper invocation (record /
+    // record_change) — even if the formatted value happens to be empty.
+    // False for bare-event entries from record(name) / record_event(name),
+    // letting calls_as_strings() distinguish "prop=" from "prop".
+    bool has_value = true;
 };
 
 namespace detail {
@@ -119,13 +124,14 @@ public:
     const std::vector<call_record>& calls() const noexcept { return calls_; }
 
     // Flat-string view of the call log. Each entry is `"<prop>=<value>"`
-    // when `value_repr` is non-empty, or just `"<prop>"` for bare events.
-    // Used by simple-input tests that prefer single-string assertions.
+    // for property-mapper records (even if the formatted value is empty) or
+    // just `"<prop>"` for bare events. Used by simple-input tests that
+    // prefer single-string assertions.
     std::vector<std::string> calls_as_strings() const {
         std::vector<std::string> out;
         out.reserve(calls_.size());
         for (const auto& c : calls_) {
-            if (c.value_repr.empty()) {
+            if (!c.has_value) {
                 out.push_back(c.property_name);
             } else {
                 std::string row;
@@ -153,6 +159,7 @@ public:
         calls_.push_back(call_record{
             std::string{property_name},
             detail::format_value(value),
+            /*has_value=*/true,
         });
     }
 
@@ -162,6 +169,7 @@ public:
         calls_.push_back(call_record{
             std::string{property_name},
             std::string{},
+            /*has_value=*/false,
         });
     }
 

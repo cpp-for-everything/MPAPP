@@ -34,7 +34,7 @@ TEST_CASE("editor mock handler fires once per real text change",
 
     e.text = "line one\nline two";
 
-    REQUIRE(h.calls() ==
+    REQUIRE(h.calls_as_strings() ==
             std::vector<std::string>{"text=line one\nline two"});
 }
 

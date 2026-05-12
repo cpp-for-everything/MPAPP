@@ -59,7 +59,7 @@ catch_discover_tests(mock_handlers_test)
 # T-0010 hot-reload spike — Windows-only.
 if(WIN32)
     add_executable(hot_reload_test
-        ${CMAKE_SOURCE_DIR}/vault/50_Tasks/T-0010-hot-reload-spike/tests/hot_reload_test.cpp
+        ${CMAKE_SOURCE_DIR}/vault/50_Tasks/_Archive/T-0010-hot-reload-spike/tests/hot_reload_test.cpp
     )
     target_link_libraries(hot_reload_test PRIVATE mpapp-core Catch2::Catch2WithMain)
     target_compile_options(hot_reload_test PRIVATE
