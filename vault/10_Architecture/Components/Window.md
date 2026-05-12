@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Window\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Window\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Window\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Window\`
 - **Docs:** [Microsoft .NET MAUI — Window](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/window)
 
 ## MPAPP C++ API

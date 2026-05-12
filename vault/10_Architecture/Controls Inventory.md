@@ -10,7 +10,7 @@ tags:
 
 Authoritative list of every MAUI control / handler MPAPP must implement, with porting status. Each row links to its per-component note at `Components/<Name>.md`.
 
-Generated from `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\` and `D:\GitHub\MPAPP\maui\src\Controls\src\Core\`.
+Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\`.
 
 **Porting status** state machine: `not-started → mock → windows-real → android-real → linux-real → macos-real → ios-real → parity-complete`.
 
@@ -95,5 +95,5 @@ When a control reaches a new status:
 - [[Components/README]]
 - [[Handlers]]
 - [[ADR-0004-maui-xaml-superset-compat]]
-- `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\`
-- `D:\GitHub\MPAPP\maui\src\Controls\src\Core\`
+- `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\`
+- `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\`

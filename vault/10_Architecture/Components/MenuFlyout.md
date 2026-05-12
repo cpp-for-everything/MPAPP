@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuFlyoutHandler\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Menu\MenuFlyout.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\MenuFlyoutHandler\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Menu\MenuFlyout.cs`
 - **Docs:** [Microsoft .NET MAUI — MenuFlyout](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menuflyout)
 
 `MenuFlyout : FlyoutBase, IMenuFlyout` keeps children in a `List<IMenuElement>` and dispatches `ContextFlyoutItemHandlerUpdate(index, item)` to the handler on mutation. The flyout itself owns no display-state properties — show/hide is platform-driven.

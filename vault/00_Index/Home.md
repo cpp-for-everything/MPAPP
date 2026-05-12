@@ -78,7 +78,7 @@ See [[CLAUDE]] for the full text.
 4. **No editing accepted ADRs** — supersede instead
 5. **Component work tracked in the inventory** ([[Controls Inventory]])
 6. **Mock before real** (ADR-0008)
-7. **MAUI is the spec** — check `D:\GitHub\MPAPP\maui\src\` first
+7. **MAUI is the spec** — check `D:\GitHub\MPAPP\references\maui\src\` first
 8. **CI budget awareness** — see [[CI Strategy]]
 9. **License vigilance** — see [[70_References/Third-Party Dependencies]]
 10. **Read [[Current Focus]] first**

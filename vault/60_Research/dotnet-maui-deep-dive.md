@@ -19,7 +19,7 @@ tags:
 # .NET MAUI Architecture & Platform Fundamentals: Comprehensive Research Guide
 
 > [!important] Why this document lives here
-> This is the **authoritative reference** for MAUI's architecture. MPAPP mirrors MAUI's structure 1:1 (per [[ADR-0004-maui-xaml-superset-compat]]), so understanding MAUI is foundational. Per [[CLAUDE]] rule 7, behavior questions resolve against `D:\GitHub\MPAPP\maui\src\` first, then this document.
+> This is the **authoritative reference** for MAUI's architecture. MPAPP mirrors MAUI's structure 1:1 (per [[ADR-0004-maui-xaml-superset-compat]]), so understanding MAUI is foundational. Per [[CLAUDE]] rule 7, behavior questions resolve against `D:\GitHub\MPAPP\references\maui\src\` first, then this document.
 
 **Document Date:** May 2026
 **Current MAUI Version:** .NET 10

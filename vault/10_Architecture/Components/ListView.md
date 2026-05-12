@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Compatibility\Handlers\ListView\` (compat renderers; no `Microsoft.Maui.Handlers` mapper — ListView still uses the Forms-era renderer model)
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\ListView\ListView.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Compatibility\Handlers\ListView\` (compat renderers; no `Microsoft.Maui.Handlers` mapper — ListView still uses the Forms-era renderer model)
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\ListView\ListView.cs`
 - **Docs:** [Microsoft .NET MAUI — ListView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/listview)
 
 ## MPAPP C++ API

@@ -34,8 +34,8 @@ Because of its breadth, `element` is the only class with a hand-written set of p
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Element\` (`ElementHandler`, `ElementHandlerOfT`)
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Element\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Element\` (`ElementHandler`, `ElementHandlerOfT`)
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Element\`
 - **Docs:** [Microsoft .NET MAUI — Element class](https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.controls.element)
 
 ## MPAPP C++ API

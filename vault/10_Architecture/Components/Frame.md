@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** *(no `FrameHandler` — `Frame` is rendered through the legacy compatibility pipeline; see `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Compatibility\Handlers\Android\FrameRenderer.cs`, `…\iOS\FrameRenderer.cs`, `…\Windows\FrameRenderer.cs`)*
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Frame\Frame.cs`
+- **Handler:** *(no `FrameHandler` — `Frame` is rendered through the legacy compatibility pipeline; see `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Compatibility\Handlers\Android\FrameRenderer.cs`, `…\iOS\FrameRenderer.cs`, `…\Windows\FrameRenderer.cs`)*
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Frame\Frame.cs`
 - **Docs:** [Microsoft .NET MAUI — Frame](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/frame)
 
 `Frame` exposes three bindable properties beyond what `ContentView` gives it: `BorderColor`, `HasShadow` (default `true`), and `CornerRadius` (default `-1.0` meaning "platform default"). On iOS, `Frame` injects a hard-coded `Shadow` (`Radius=5, Opacity=0.8, Brush=Black`) when `HasShadow` is set and no explicit `Shadow` is on the view.

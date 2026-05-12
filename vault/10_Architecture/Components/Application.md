@@ -26,8 +26,8 @@ In MAUI's hierarchy, `Application` derives from `Element` and is the root parent
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Application\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Application\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Application\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Application\`
 - **Docs:** [Microsoft .NET MAUI — Application](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/application)
 
 ## MPAPP C++ API

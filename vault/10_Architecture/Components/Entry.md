@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Entry\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Entry\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Entry\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Entry\`
 - **Docs:** [Microsoft .NET MAUI — Entry](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/entry)
 
 ## MPAPP C++ API

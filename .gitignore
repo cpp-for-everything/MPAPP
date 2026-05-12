@@ -9,6 +9,10 @@ build-*/
 *.user
 CMakeUserPresets.json
 
+# Claude Code worktrees / helper scripts
+.claude/worktrees/
+.claude/update-paths.py
+
 # OS
 Thumbs.db
 .DS_Store

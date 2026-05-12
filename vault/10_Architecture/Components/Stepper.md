@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Stepper\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Stepper\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Stepper\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Stepper\`
 - **Docs:** [Microsoft .NET MAUI — Stepper](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/stepper)
 
 ## MPAPP C++ API

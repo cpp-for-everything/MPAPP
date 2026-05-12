@@ -10,7 +10,7 @@ If anything in this file conflicts with another note in the vault, **this file w
 
 The Obsidian vault at `D:\GitHub\MPAPP\vault\` is the knowledge base for **MPAPP**, a multi-year project to build a C++ cross-platform UI framework analogous to .NET MAUI with stricter compile-time type safety.
 
-The MAUI source at `D:\GitHub\MPAPP\maui\` is the **authoritative specification** for the component surface MPAPP must mirror. The deep-dive analysis is at [[60_Research/dotnet-maui-deep-dive]].
+The MAUI source at `D:\GitHub\MPAPP\references\maui\` is the **authoritative specification** for the component surface MPAPP must mirror. The deep-dive analysis is at [[60_Research/dotnet-maui-deep-dive]].
 
 ---
 
@@ -60,7 +60,7 @@ Per [[ADR-0008-mock-first-implementation]]:
 
 ### Rule 7 — MAUI is the spec
 
-- Behavior questions resolve against `D:\GitHub\MPAPP\maui\src\` first.
+- Behavior questions resolve against `D:\GitHub\MPAPP\references\maui\src\` first.
 - Then [[60_Research/dotnet-maui-deep-dive]].
 - Then Microsoft's official MAUI docs.
 - Then this vault's component notes.

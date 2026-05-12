@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuBarItem\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Menu\MenuBarItem.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\MenuBarItem\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Menu\MenuBarItem.cs`
 - **Docs:** [Microsoft .NET MAUI — MenuBarItem](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menubaritem)
 
 MAUI's `MenuBarItem : BaseMenuItem, IMenuBarItem` exposes `BindableProperty` entries for `Text`, `IsEnabled`, and `Priority`. Children are kept in a `List<IMenuElement>` and mutations notify `MenuBarItemHandlerUpdate(index, item)`.

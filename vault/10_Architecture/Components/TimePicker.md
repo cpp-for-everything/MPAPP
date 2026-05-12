@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\TimePicker\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\TimePicker\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\TimePicker\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\TimePicker\`
 - **Docs:** [Microsoft .NET MAUI — TimePicker](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/timepicker)
 
 ## MPAPP C++ API

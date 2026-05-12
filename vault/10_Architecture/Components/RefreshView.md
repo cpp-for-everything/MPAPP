@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\RefreshView\RefreshViewHandler.cs`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\RefreshView\` (type lives at `Microsoft.Maui.Controls.RefreshView`)
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\RefreshView\RefreshViewHandler.cs`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\RefreshView\` (type lives at `Microsoft.Maui.Controls.RefreshView`)
 - **Docs:** [Microsoft .NET MAUI — RefreshView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/refreshview)
 
 ## MPAPP C++ API

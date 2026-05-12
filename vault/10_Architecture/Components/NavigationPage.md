@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\NavigationPage\` (`NavigationViewHandler.cs`, plus `.Windows.cs`, `.Android.cs`, `.iOS.cs`). Implements `IStackNavigationView`.
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\NavigationPage\NavigationPage.cs` (+ `NavigationPage.Legacy.cs`, `NavigationPage.iOS.cs`, `NavigationPageToolbar.cs`)
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\NavigationPage\` (`NavigationViewHandler.cs`, plus `.Windows.cs`, `.Android.cs`, `.iOS.cs`). Implements `IStackNavigationView`.
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\NavigationPage\NavigationPage.cs` (+ `NavigationPage.Legacy.cs`, `NavigationPage.iOS.cs`, `NavigationPageToolbar.cs`)
 - **Docs:** [Microsoft .NET MAUI — NavigationPage](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/navigationpage)
 
 ## MPAPP C++ API

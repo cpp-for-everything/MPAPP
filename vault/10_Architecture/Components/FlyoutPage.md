@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** No dedicated handler — `FlyoutPage` uses `PageHandler` plus the `IFlyoutView` cross-platform contract consumed by `FlyoutViewHandler`. See `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\FlyoutView\`.
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\FlyoutPage\FlyoutPage.cs` (+ `FlyoutLayoutBehavior.cs`, `FlyoutPage.Mapper.cs`)
+- **Handler:** No dedicated handler — `FlyoutPage` uses `PageHandler` plus the `IFlyoutView` cross-platform contract consumed by `FlyoutViewHandler`. See `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\FlyoutView\`.
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\FlyoutPage\FlyoutPage.cs` (+ `FlyoutLayoutBehavior.cs`, `FlyoutPage.Mapper.cs`)
 - **Docs:** [Microsoft .NET MAUI — FlyoutPage](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/flyoutpage)
 
 ## MPAPP C++ API

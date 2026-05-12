@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Slider\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Slider\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Slider\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Slider\`
 - **Docs:** [Microsoft .NET MAUI — Slider](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/slider)
 
 ## MPAPP C++ API

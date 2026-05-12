@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** Uses the base `PageHandler` (`D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Page\PageHandler.*.cs`). No dedicated `ContentPageHandler` — `ContentPage` is a control-layer concept.
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\ContentPage\ContentPage.cs` (mapper at `ContentPage.Mapper.cs`)
+- **Handler:** Uses the base `PageHandler` (`D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Page\PageHandler.*.cs`). No dedicated `ContentPageHandler` — `ContentPage` is a control-layer concept.
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\ContentPage\ContentPage.cs` (mapper at `ContentPage.Mapper.cs`)
 - **Docs:** [Microsoft .NET MAUI — ContentPage](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/contentpage)
 
 ## MPAPP C++ API

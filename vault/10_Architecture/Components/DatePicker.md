@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\DatePicker\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\DatePicker\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\DatePicker\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\DatePicker\`
 - **Docs:** [Microsoft .NET MAUI — DatePicker](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/datepicker)
 
 ## MPAPP C++ API

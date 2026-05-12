@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuFlyoutItem\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Menu\MenuFlyoutItem.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\MenuFlyoutItem\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Menu\MenuFlyoutItem.cs`
 - **Docs:** [Microsoft .NET MAUI — MenuFlyoutItem](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menuflyoutitem)
 
 `MenuFlyoutItem : MenuItem, IMenuFlyoutItem` inherits `Text`, `IconImageSource`, `IsEnabled`, `Command`, and `CommandParameter` from `MenuItem`, and adds an `IList<KeyboardAccelerator>` collection.

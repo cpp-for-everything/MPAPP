@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Button\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Button\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Button\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Button\`
 - **Docs:** [Microsoft .NET MAUI — Button](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/button)
 
 ## MPAPP C++ API

@@ -24,8 +24,8 @@ What is this control? What does it do for the user?
 
 ## MAUI Reference
 
-- Handler: `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\<HandlerName>\`
-- Control: `D:\GitHub\MPAPP\maui\src\Controls\src\Core\<ControlName>\`
+- Handler: `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\<HandlerName>\`
+- Control: `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\<ControlName>\`
 - Docs: `<mauiDocUrl>`
 
 ## MPAPP C++ API

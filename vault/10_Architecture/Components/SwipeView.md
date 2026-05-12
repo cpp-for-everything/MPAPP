@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\SwipeView\SwipeViewHandler.cs`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\SwipeView\` (lives next to `SwipeItem.cs`, `SwipeItems.cs`)
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\SwipeView\SwipeViewHandler.cs`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\SwipeView\` (lives next to `SwipeItem.cs`, `SwipeItems.cs`)
 - **Docs:** [Microsoft .NET MAUI — SwipeView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/swipeview)
 
 ## MPAPP C++ API

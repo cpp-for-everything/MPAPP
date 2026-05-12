@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\ScrollView\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\ScrollView\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ScrollView\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\ScrollView\`
 - **Docs:** [Microsoft .NET MAUI — ScrollView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/scrollview)
 
 `ScrollViewHandler.Mapper` adds `Content`, `HorizontalScrollBarVisibility`, `VerticalScrollBarVisibility`, and `Orientation` to the inherited `ViewMapper`. The `CommandMapper` adds `RequestScrollTo`. The control exposes read-only `ScrollX` / `ScrollY` and the `Scrolled` event.

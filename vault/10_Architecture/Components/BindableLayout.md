@@ -25,7 +25,7 @@ tags:
 ## MAUI Reference
 
 - **Handler:** *(none — `BindableLayout` has no dedicated handler; it composes with the host [[Layout]]'s handler)*
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\BindableLayout\BindableLayout.cs` (also contains the internal `BindableLayoutController`)
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\BindableLayout\BindableLayout.cs` (also contains the internal `BindableLayoutController`)
 - **Docs:** [Microsoft .NET MAUI — BindableLayout](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/bindablelayout)
 
 The bindable properties (all attached) are: `ItemsSourceProperty`, `ItemTemplateProperty`, `ItemTemplateSelectorProperty`, `EmptyViewProperty`, `EmptyViewTemplateProperty`. An internal `BindableLayoutController` watches the source collection and materializes / removes child views on the host layout.

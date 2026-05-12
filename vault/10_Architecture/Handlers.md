@@ -89,9 +89,9 @@ Lookup is a flat-array linear scan over ~10–30 entries — faster than `Dictio
 
 | MAUI artifact | MPAPP equivalent | Location in MAUI source |
 |---|---|---|
-| `ButtonHandler` | `mpapp::button_handler<P>` | `maui/src/Core/src/Handlers/Button/ButtonHandler.cs` |
-| `IButtonHandler` interface | implicit from CRTP `control<button>` | `maui/src/Core/src/Handlers/Button/IButton.cs` |
-| Property mapper (Dictionary) | `constexpr std::array<property_mapper_entry, N>` | `maui/src/Core/src/Handlers/Button/ButtonHandler.Standard.cs` |
+| `ButtonHandler` | `mpapp::button_handler<P>` | `references/maui/src/Core/src/Handlers/Button/ButtonHandler.cs` |
+| `IButtonHandler` interface | implicit from CRTP `control<button>` | `references/maui/src/Core/src/Handlers/Button/IButton.cs` |
+| Property mapper (Dictionary) | `constexpr std::array<property_mapper_entry, N>` | `references/maui/src/Core/src/Handlers/Button/ButtonHandler.Standard.cs` |
 | `VirtualView` / `PlatformView` | `button&` / `native_t*` (typed) | — |
 
 ## Handler lifecycle
@@ -109,4 +109,4 @@ Lookup is a flat-array linear scan over ~10–30 entries — faster than `Dictio
 - [[Interop Parity]] — handler contract
 - [[Controls Inventory]] — list of all controls to port
 - [[Components/Button]] — example component
-- `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\` — reference implementation
+- `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` — reference implementation

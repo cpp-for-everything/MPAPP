@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Page\` (`PageHandler.cs`, `PageHandler.Windows.cs`, `PageHandler.Android.cs`, `PageHandler.iOS.cs`)
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Page\Page.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Page\` (`PageHandler.cs`, `PageHandler.Windows.cs`, `PageHandler.Android.cs`, `PageHandler.iOS.cs`)
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Page\Page.cs`
 - **Docs:** [Microsoft .NET MAUI — Page](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/page)
 
 ## MPAPP C++ API

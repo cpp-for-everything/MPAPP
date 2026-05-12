@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\ProgressBar\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\ProgressBar\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ProgressBar\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\ProgressBar\`
 - **Docs:** [Microsoft .NET MAUI — ProgressBar](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/progressbar)
 
 ## MPAPP C++ API

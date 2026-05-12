@@ -76,6 +76,6 @@ On first open, Obsidian may prompt to install the community plugins. Accept.
 - **Accepted ADRs are immutable.** Supersede them.
 - **Tasks are folders.** Each contains screenshots, recordings, logs, tests, notes.
 - **100% coverage** required to close a task.
-- **MAUI source is the spec** — when in doubt, check `D:\GitHub\MPAPP\maui\src\`.
+- **MAUI source is the spec** — when in doubt, check `D:\GitHub\MPAPP\references\maui\src\`.
 
 Full rule book: [[CLAUDE]].

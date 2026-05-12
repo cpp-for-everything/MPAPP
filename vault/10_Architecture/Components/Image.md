@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Image\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Image\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Image\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Image\`
 - **Docs:** [Microsoft .NET MAUI — Image](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/image)
 
 ## MPAPP C++ API

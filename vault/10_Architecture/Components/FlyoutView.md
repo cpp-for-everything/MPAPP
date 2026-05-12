@@ -26,8 +26,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\FlyoutView\`
-- **Control:** Defined as an abstract `IFlyoutView` interface in `D:\GitHub\MPAPP\maui\src\Core\src\Core\IFlyoutView.cs` — consumed by `FlyoutPage` and `Shell` under `D:\GitHub\MPAPP\maui\src\Controls\src\Core\`.
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\FlyoutView\`
+- **Control:** Defined as an abstract `IFlyoutView` interface in `D:\GitHub\MPAPP\references\maui\src\Core\src\Core\IFlyoutView.cs` — consumed by `FlyoutPage` and `Shell` under `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\`.
 - **Docs:** [Microsoft .NET MAUI — FlyoutPage](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/pages/flyoutpage)
 
 ## MPAPP C++ API

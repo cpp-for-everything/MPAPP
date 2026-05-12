@@ -25,7 +25,7 @@ tags:
 ## MAUI Reference
 
 - **Handler:** No dedicated handler — `TabbedPage` uses the base `PageHandler` plus per-platform partial classes in the control project (`TabbedPage.Windows.cs`, `.Android.cs`, `.iOS.cs`).
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\TabbedPage\TabbedPage.cs` + `TabbedPage.Mapper.cs`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\TabbedPage\TabbedPage.cs` + `TabbedPage.Mapper.cs`
 - **Docs:** [Microsoft .NET MAUI — TabbedPage](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/tabbedpage)
 
 ## MPAPP C++ API

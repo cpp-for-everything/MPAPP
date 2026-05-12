@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Compatibility\Handlers\TableView\` (compat renderers; no `Microsoft.Maui.Handlers` mapper)
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\TableView\TableView.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Compatibility\Handlers\TableView\` (compat renderers; no `Microsoft.Maui.Handlers` mapper)
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\TableView\TableView.cs`
 - **Docs:** [Microsoft .NET MAUI — TableView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/tableview)
 
 ## MPAPP C++ API

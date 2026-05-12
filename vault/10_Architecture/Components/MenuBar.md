@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuBar\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Menu\MenuBar.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\MenuBar\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Menu\MenuBar.cs`
 - **Docs:** [Microsoft .NET MAUI — MenuBar](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menubar)
 
 MAUI exposes one `BindableProperty` (`IsEnabled`) and treats the bar as an `IList<IMenuBarItem>` via `Add` / `Insert` / `Remove` / `RemoveAt`. Mutations call `Handler.Invoke("Add" | "Insert" | "Remove", MenuBarHandlerUpdate)` so handlers patch the native menu without a full re-mount.

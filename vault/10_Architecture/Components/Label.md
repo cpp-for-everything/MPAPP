@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Label\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Label\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Label\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Label\`
 - **Docs:** [Microsoft .NET MAUI — Label](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/label)
 
 ## MPAPP C++ API

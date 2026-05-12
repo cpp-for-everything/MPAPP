@@ -21,7 +21,7 @@ tags:
 
 ## Goal
 
-Walk `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\` and `D:\GitHub\MPAPP\maui\src\Controls\src\Core\` and populate every per-component note in [[Components/]] with substantive content extracted from the MAUI source: overview, default property list, supported XAML usage, link to Microsoft docs.
+Walk `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\` and populate every per-component note in [[Components/]] with substantive content extracted from the MAUI source: overview, default property list, supported XAML usage, link to Microsoft docs.
 
 The stubs already exist (day 1 created 56). This task fills them in with real MAUI-derived content.
 
@@ -44,4 +44,4 @@ This is a large but mechanical task. Could be split into batches (10 components 
 
 - Milestone: [[M-01-Foundations]]
 - Related: [[Controls Inventory]], [[Components/README]], [[XAML Compatibility]]
-- Source: `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\`, `D:\GitHub\MPAPP\maui\src\Controls\src\Core\`
+- Source: `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\`, `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\`

@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\IndicatorView\IndicatorViewHandler.cs`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\IndicatorView\` (no dedicated folder — type lives next to CarouselView under `Microsoft.Maui.Controls.IndicatorView`)
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\IndicatorView\IndicatorViewHandler.cs`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\IndicatorView\` (no dedicated folder — type lives next to CarouselView under `Microsoft.Maui.Controls.IndicatorView`)
 - **Docs:** [Microsoft .NET MAUI — IndicatorView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/indicatorview)
 
 ## MPAPP C++ API

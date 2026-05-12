@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Layout\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Layout\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Layout\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Layout\`
 - **Docs:** [Microsoft .NET MAUI — Layout](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/layout)
 
 `LayoutHandler.Mapper` adds `Background` and `ClipsToBounds` to the inherited `ViewMapper`. The `CommandMapper` adds `Add`, `Remove`, `Clear`, `Insert`, `Update`, and `UpdateZIndex`. Measurement / arrangement is delegated to `ILayoutManager` returned from the control's `CreateLayoutManager()` override (per-subclass: `GridLayoutManager`, `StackLayoutManager`, `AbsoluteLayoutManager`, `FlexLayoutManager`).

@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Border\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Border\Border.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Border\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Border\Border.cs`
 - **Docs:** [Microsoft .NET MAUI — Border](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/border)
 
 `BorderHandler.Mapper` extends `ViewMapper` with: `Background`, `Content`, `Shape`, `Stroke`, `StrokeThickness`, `StrokeLineCap`, `StrokeLineJoin`, `StrokeDashPattern`, `StrokeDashOffset`, `StrokeMiterLimit` (and `Width`/`Height` on Android). The control also adds `Padding` and `SafeAreaEdges`.

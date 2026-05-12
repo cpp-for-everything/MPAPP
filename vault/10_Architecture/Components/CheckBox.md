@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\CheckBox\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\CheckBox\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\CheckBox\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\CheckBox\`
 - **Docs:** [Microsoft .NET MAUI — CheckBox](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/checkbox)
 
 ## MPAPP C++ API

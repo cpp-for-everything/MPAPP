@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\ShapeView\` (BoxView is rendered as a Shape; `BoxViewHandler : ShapeViewHandler` lives in `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Handlers\Shapes\BoxView\`)
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\BoxView\BoxView.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ShapeView\` (BoxView is rendered as a Shape; `BoxViewHandler : ShapeViewHandler` lives in `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Handlers\Shapes\BoxView\`)
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\BoxView\BoxView.cs`
 - **Docs:** [Microsoft .NET MAUI — BoxView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/boxview)
 
 The control exposes two bindable properties on top of `View`: `Color` (the fill — distinct from `BackgroundColor`) and `CornerRadius` (a `CornerRadius` with independent top-left / top-right / bottom-left / bottom-right values). The shape's `PathForBounds` builds a rounded rectangle from those four corner values.

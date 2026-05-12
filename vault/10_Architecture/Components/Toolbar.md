@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\Toolbar\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Toolbar\Toolbar.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Toolbar\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Toolbar\Toolbar.cs`
 - **Docs:** [Microsoft .NET MAUI — Toolbar](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/toolbar)
 
 MAUI's `Toolbar : IToolbar, INotifyPropertyChanged` exposes plain CLR properties (no `BindableProperty`): `Title`, `TitleIcon`, `TitleView`, `BarBackground`, `BarTextColor`, `IconColor`, `BarHeight`, `BackButtonTitle`, `BackButtonVisible`, `BackButtonEnabled`, `DrawerToggleVisible`, `DynamicOverflowEnabled`, `IsVisible`, and the `ToolbarItems` enumerable.

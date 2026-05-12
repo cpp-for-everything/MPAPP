@@ -26,7 +26,7 @@ tags:
 
 The user's directive: the **whole MAUI XAML set** must be supported, and **platform-specific MPAPP additions** are allowed where MAUI lacks a component.
 
-This decision makes the work easy to slice: every handler/control under `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\` and every control type under `D:\GitHub\MPAPP\maui\src\Controls\src\Core\` becomes one MPAPP component.
+This decision makes the work easy to slice: every handler/control under `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and every control type under `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\` becomes one MPAPP component.
 
 ## Decision
 
@@ -68,5 +68,5 @@ Documentation lives **one file per component** in `10_Architecture/Components/<N
 - [[ADR-0003-xaml-only-no-custom-dsl]]
 - [[10_Architecture/XAML Compatibility]]
 - [[10_Architecture/Controls Inventory]]
-- `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\`
-- `D:\GitHub\MPAPP\maui\src\Controls\src\Core\`
+- `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\`
+- `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\`

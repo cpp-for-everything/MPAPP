@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\MenuFlyoutSeparator\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Menu\MenuFlyoutSeparator.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\MenuFlyoutSeparator\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Menu\MenuFlyoutSeparator.cs`
 - **Docs:** [Microsoft .NET MAUI — MenuFlyoutSeparator](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menuflyoutseparator)
 
 The whole class body is a single line: `public class MenuFlyoutSeparator : MenuFlyoutItem, IMenuFlyoutSeparator { }`. Property inheritance is intentional but unused; the handler keys off the *type*, not the data.

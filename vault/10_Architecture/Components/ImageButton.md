@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\ImageButton\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\ImageButton\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ImageButton\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\ImageButton\`
 - **Docs:** [Microsoft .NET MAUI — ImageButton](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/imagebutton)
 
 ## MPAPP C++ API

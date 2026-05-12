@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\HybridWebView\HybridWebViewHandler.cs`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\HybridWebView\` (lives next to `WebView.cs`; type is `Microsoft.Maui.Controls.HybridWebView`)
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\HybridWebView\HybridWebViewHandler.cs`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\HybridWebView\` (lives next to `WebView.cs`; type is `Microsoft.Maui.Controls.HybridWebView`)
 - **Docs:** [Microsoft .NET MAUI — HybridWebView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/hybridwebview)
 
 ## MPAPP C++ API

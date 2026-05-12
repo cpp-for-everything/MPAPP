@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\View\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\View\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\View\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\View\`
 - **Docs:** [Microsoft .NET MAUI — View](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/view)
 
 The `ViewHandler` static `ViewMapper` lists the canonical property surface every subclass inherits: `AutomationId`, `Clip`, `Shadow`, `Visibility`, `Background`, `FlowDirection`, `Width`/`Height`, `MinimumWidth`/`MinimumHeight`, `MaximumWidth`/`MaximumHeight`, `IsEnabled`, `Opacity`, `Semantics`, `TranslationX`/`Y`, `Scale`/`ScaleX`/`ScaleY`, `Rotation`/`RotationX`/`RotationY`, `AnchorX`/`AnchorY`, `InputTransparent`, `ToolTip`, `ContextFlyout`, `SafeAreaEdges`. The `ViewCommandMapper` exposes `InvalidateMeasure`, `Frame`, `ZIndex`, `Focus`, and `Unfocus`.

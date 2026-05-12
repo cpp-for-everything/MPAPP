@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\ActivityIndicator\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\ActivityIndicator\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ActivityIndicator\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\ActivityIndicator\`
 - **Docs:** [Microsoft .NET MAUI — ActivityIndicator](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/activityindicator)
 
 ## MPAPP C++ API

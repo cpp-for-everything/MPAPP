@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\WebView\WebViewHandler.cs`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\WebView\` (type lives next to its source providers — `WebView.cs`, `UrlWebViewSource.cs`, `HtmlWebViewSource.cs`)
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\WebView\WebViewHandler.cs`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\WebView\` (type lives next to its source providers — `WebView.cs`, `UrlWebViewSource.cs`, `HtmlWebViewSource.cs`)
 - **Docs:** [Microsoft .NET MAUI — WebView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/webview)
 
 ## MPAPP C++ API

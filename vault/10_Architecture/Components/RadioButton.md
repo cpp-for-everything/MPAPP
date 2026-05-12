@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\RadioButton\`
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\RadioButton\`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\RadioButton\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\RadioButton\`
 - **Docs:** [Microsoft .NET MAUI — RadioButton](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/radiobutton)
 
 ## MPAPP C++ API

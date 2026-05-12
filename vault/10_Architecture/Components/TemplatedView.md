@@ -27,7 +27,7 @@ In MPAPP, `templated_view` is the building block users subclass when authoring a
 ## MAUI Reference
 
 - **Handler:** Inherited via `ViewHandler` — no dedicated `TemplatedViewHandler`.
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\TemplatedView\`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\TemplatedView\`
 - **Docs:** [Microsoft .NET MAUI — TemplatedView](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/templatedview)
 
 ## MPAPP C++ API

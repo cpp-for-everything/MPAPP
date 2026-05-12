@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** No top-level `ShellHandler` in `Core/src/Handlers`; rendering is done by per-platform compatibility renderers in `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Shell\` plus extension hooks (`IShellController`, `IShellAppearanceElement`).
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Shell\Shell.cs` (~3000 lines) and 30+ siblings:
+- **Handler:** No top-level `ShellHandler` in `Core/src/Handlers`; rendering is done by per-platform compatibility renderers in `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Shell\` plus extension hooks (`IShellController`, `IShellAppearanceElement`).
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Shell\Shell.cs` (~3000 lines) and 30+ siblings:
   - Structure: `ShellItem.cs`, `ShellSection.cs`, `ShellContent.cs`, `BaseShellItem.cs`, `MenuShellItem.cs`, `MenuItemCollection.cs`
   - Navigation: `ShellNavigationManager.cs`, `ShellUriHandler.cs`, `ShellNavigationState.cs`, `ShellNavigationParameters.cs`, `ShellNavigationQueryParameters.cs`, `ShellNavigatingEventArgs.cs`, `ShellNavigatedEventArgs.cs`, `RouteRequestBuilder.cs`, `RequestDefinition.cs`
   - Appearance: `ShellAppearance.cs`, `FlyoutHeaderBehavior.cs`, `FlyoutDisplayOptions.cs`

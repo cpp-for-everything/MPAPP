@@ -24,8 +24,8 @@ tags:
 
 ## MAUI Reference
 
-- **Handler:** `D:\GitHub\MPAPP\maui\src\Core\src\Handlers\ShapeView\`
-- **Control (base):** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\Shapes\Shape.cs`
+- **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ShapeView\`
+- **Control (base):** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Shapes\Shape.cs`
 - **Docs:** [Microsoft .NET MAUI — Shapes](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/shapes/)
 
 ## MPAPP C++ API

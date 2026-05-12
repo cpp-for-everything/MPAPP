@@ -25,7 +25,7 @@ tags:
 ## MAUI Reference
 
 - **Handler:** MAUI ships no dedicated `TitleBarHandler`; the control is hosted directly by `Window` and rendered via templated views.
-- **Control:** `D:\GitHub\MPAPP\maui\src\Controls\src\Core\TitleBar\TitleBar.cs`
+- **Control:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\TitleBar\TitleBar.cs`
 - **Docs:** [Microsoft .NET MAUI — TitleBar](https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/titlebar)
 
 `TitleBar : TemplatedView, ITitleBar, ISafeAreaView` has bindable properties for `Icon`, `LeadingContent`, `Content`, `TrailingContent`, `Title`, `Subtitle`, and `ForegroundColor`. Visual-state groups (`TitleBarTitleActive` / `Inactive`, `TitleBarLeftToRight` / `RightToLeft`, plus per-slot visible/collapsed groups) animate the bar.
