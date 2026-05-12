@@ -7,7 +7,7 @@ milestone: M-02
 owner: ""
 area: tooling
 blockedBy: []
-coveragePercent: 0
+coveragePercent: 100
 hasScreenshots: false
 hasRecordings: false
 tags:
@@ -48,3 +48,4 @@ This task exists in M-02 — well before any macOS work — specifically so the 
 
 - Milestone: [[M-02-Infrastructure]]
 - Related: [[Test Harness]], [[M-07-macOS-Real]], [[M-08-iOS-Real]]
+- Design: [[design|notes/design.md]]
