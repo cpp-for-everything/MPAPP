@@ -1,0 +1,94 @@
+-- The CXX compiler identification is Clang 18.1.6
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - failed
+-- Check for working CXX compiler: C:/Users/alext/AppData/Local/Temp/mpapp-zig-aarch64-ios-none/zig-cxx.cmd
+-- Check for working CXX compiler: C:/Users/alext/AppData/Local/Temp/mpapp-zig-aarch64-ios-none/zig-cxx.cmd - works
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (3.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: D:/GitHub/MPAPP/build-ios-arm64
+[1/2] Building CXX object CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o
+FAILED: CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o 
+C:\Users\alext\AppData\Local\Temp\mpapp-zig-aarch64-ios-none\zig-cxx.cmd  -ID:/GitHub/MPAPP/include -std=c++23 -arch arm64 -Wall -Wextra -Wpedantic -Werror -MD -MT CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o -MF CMakeFiles\mpapp-core.dir\src\mpapp.cpp.o.d -o CMakeFiles/mpapp-core.dir/src/mpapp.cpp.o -c D:/GitHub/MPAPP/src/mpapp.cpp
+In file included from D:/GitHub/MPAPP/src/mpapp.cpp:1:
+In file included from D:/GitHub/MPAPP/include/mpapp/mpapp.hpp:16:
+In file included from D:/GitHub/MPAPP/include/mpapp/observable.hpp:14:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/utility:275:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/compare:145:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__compare/compare_partial_order_fallback.h:13:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__compare/partial_order.h:14:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__compare/weak_order.h:14:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__compare/strong_order.h:20:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/cmath:319:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:380:
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/stdlib.h:145:30: error: unknown type name 'ldiv_t'
+  145 | inline _LIBCPP_HIDE_FROM_ABI ldiv_t div(long __x, long __y) _NOEXCEPT { return ::ldiv(__x, __y); }
+      |                              ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/stdlib.h:145:82: error: no member named 'ldiv' in the global namespace
+  145 | inline _LIBCPP_HIDE_FROM_ABI ldiv_t div(long __x, long __y) _NOEXCEPT { return ::ldiv(__x, __y); }
+      |                                                                                ~~^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/stdlib.h:147:30: error: unknown type name 'lldiv_t'
+  147 | inline _LIBCPP_HIDE_FROM_ABI lldiv_t div(long long __x, long long __y) _NOEXCEPT { return ::lldiv(__x, __y); }
+      |                              ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/stdlib.h:147:93: error: no member named 'lldiv' in the global namespace
+  147 | inline _LIBCPP_HIDE_FROM_ABI lldiv_t div(long long __x, long long __y) _NOEXCEPT { return ::lldiv(__x, __y); }
+      |                                                                                           ~~^
+In file included from D:/GitHub/MPAPP/src/mpapp.cpp:1:
+In file included from D:/GitHub/MPAPP/include/mpapp/mpapp.hpp:16:
+In file included from D:/GitHub/MPAPP/include/mpapp/observable.hpp:14:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/utility:275:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/compare:145:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__compare/compare_partial_order_fallback.h:13:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__compare/partial_order.h:14:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__compare/weak_order.h:14:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/__compare/strong_order.h:20:
+In file included from C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/cmath:319:
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:392:31: error: use of undeclared identifier 'FP_NAN'
+  392 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                               ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:392:39: error: use of undeclared identifier 'FP_INFINITE'
+  392 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                       ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:392:52: error: use of undeclared identifier 'FP_NORMAL'
+  392 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                    ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:392:63: error: use of undeclared identifier 'FP_SUBNORMAL'
+  392 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                               ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:392:77: error: use of undeclared identifier 'FP_ZERO'
+  392 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                                             ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:397:31: error: use of undeclared identifier 'FP_NAN'
+  397 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                               ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:397:39: error: use of undeclared identifier 'FP_INFINITE'
+  397 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                       ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:397:52: error: use of undeclared identifier 'FP_NORMAL'
+  397 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                    ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:397:63: error: use of undeclared identifier 'FP_SUBNORMAL'
+  397 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                               ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:397:77: error: use of undeclared identifier 'FP_ZERO'
+  397 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                                             ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:402:31: error: use of undeclared identifier 'FP_NAN'
+  402 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                               ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:402:39: error: use of undeclared identifier 'FP_INFINITE'
+  402 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                       ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:402:52: error: use of undeclared identifier 'FP_NORMAL'
+  402 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                    ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:402:63: error: use of undeclared identifier 'FP_SUBNORMAL'
+  402 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                               ^
+C:\Users\alext\.mpapp\toolchains\zig-0.13.0\lib\libcxx\include/math.h:402:77: error: use of undeclared identifier 'FP_ZERO'
+  402 |   return __builtin_fpclassify(FP_NAN, FP_INFINITE, FP_NORMAL, FP_SUBNORMAL, FP_ZERO, __x);
+      |                                                                             ^
+fatal error: too many errors emitted, stopping now [-ferror-limit=]
+20 errors generated.
+ninja: build stopped: subcommand failed.

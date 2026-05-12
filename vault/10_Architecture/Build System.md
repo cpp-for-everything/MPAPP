@@ -15,12 +15,22 @@ A developer must be able to produce binaries for all five targets from any suppo
 
 | Host \ Target | Windows | Linux | Android | macOS | iOS |
 |---|---|---|---|---|---|
-| **Windows** | ✅ native (MSVC / Clang) | ✅ Clang/Zig + sysroot | ✅ Android NDK / Zig | ⚠️ unsigned only* | ⚠️ unsigned only* |
-| **Linux** | ✅ MinGW / Zig | ✅ native | ✅ NDK / Zig | ⚠️ unsigned only* | ⚠️ unsigned only* |
-| **macOS** | ✅ MinGW / Zig | ✅ Clang/Zig + sysroot | ✅ NDK / Zig | ✅ native | ✅ native |
+| **Windows** | ✅ native (MSVC / Clang) | ✅ Zig (verified†) | ⚠️ NDK required‡ | ⚠️ unsigned only* (Zig static lib verified†) | ⚠️ unsigned only* + SDK required‡ |
+| **Linux** | ✅ MinGW / Zig | ✅ native | ⚠️ NDK required‡ | ⚠️ unsigned only* | ⚠️ unsigned only* + SDK required‡ |
+| **macOS** | ✅ MinGW / Zig | ✅ Clang/Zig + sysroot | ⚠️ NDK required‡ | ✅ native | ✅ native |
 
 > [!warning] Apple signing requires macOS
 > *Apple binaries built on non-Mac hosts (via osxcross) produce *unsigned* artifacts useful for sanity-check compilation only. They cannot run on Simulator / device / users' machines without re-signing on macOS. **This is an Apple SDK / Gatekeeper constraint, not a tooling limit.**
+
+> [!info] † Empirically verified from a Windows host
+> Per [[T-0009-cross-compilation-matrix]] (validated 2026-05-12 with Zig 0.13.0), the Windows-host row of this matrix has been exercised end-to-end for Windows-x64 (native), Linux-x64, Linux-arm64, and macOS-arm64. See [[T-0009-cross-compilation-matrix/notes/matrix-status]] for per-target artefacts and SHA-checked archive byte signatures.
+
+> [!warning] ‡ Zig 0.13 alone is insufficient for Android / iOS
+> Zig 0.13.0 bundles libc/sysroot only for the triples in `zig targets | jq .libc[]` — that list does **not** include `aarch64-linux-android` or any iOS triple. Cross-compiling to either target therefore still requires:
+> - **Android**: the Android NDK on the include/lib search path (`-DCMAKE_SYSROOT=$NDK/.../sysroot`).
+> - **iOS**: a macOS host with Xcode, or stand-alone Apple SDK extraction (osxcross). Apple SDKs are not redistributable.
+>
+> When a future Zig release bundles bionic this caveat can be removed; until then [[ADR-0011-cross-compilation-toolchain]]'s "Consequences" section should be updated to mirror this empirical finding.
 
 ## A.6 Toolchain candidates
 
@@ -28,6 +38,7 @@ Per [[ADR-0011-cross-compilation-toolchain]], **Zig (`zig cc`) is locked in** as
 
 - **Vendoring:** Zig is *not* bundled in the repo. The `mpapp` CLI auto-installs Zig on first cross-compile to `~/.mpapp/toolchains/zig-<version>/`. The version is pinned in `cmake/toolchains/zig.cmake`.
 - **Host-native builds:** developers who never cross-compile may keep using MSVC (Windows), system Clang (Linux), or Xcode Clang (macOS). Zig is only consulted when a cross-target toolchain file is selected.
+- **Empirical validation:** [[T-0009-cross-compilation-matrix]] (Zig 0.13.0, Windows host, 2026-05-12) — see [[T-0009-cross-compilation-matrix/notes/matrix-status]] for the per-target table. Windows, Linux x64/arm64, and macOS arm64 build cleanly from Zig alone; Android and iOS need external SDKs (NDK / Xcode) because Zig 0.13 does not bundle their libc/headers.
 - **Closed RFC:** [[RFC-0002-cross-compilation-toolchain]] evaluated Zig against LLVM/Clang + per-target sysroots; the decision record is [[ADR-0011-cross-compilation-toolchain]].
 
 ## CMake structure
