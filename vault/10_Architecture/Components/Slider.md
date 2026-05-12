@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Slider"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/slider"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Slider
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/slider_handler.hpp` with tests in `tests/mock_handlers/slider_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview
 
@@ -98,11 +98,18 @@ sl->value = 50.0;
 sl->drag_completed.subscribe([&] { commit_volume(sl->value.get()); });
 ```
 
+## Mock implementation
+
+- Handler: [`include/mpapp/handlers/mock/slider_handler.hpp`](../../../include/mpapp/handlers/mock/slider_handler.hpp)
+- Tests: [`tests/mock_handlers/slider_test.cpp`](../../../tests/mock_handlers/slider_test.cpp)
+
+`slider_handler<platform::mock>` records changes to `value`, `minimum`, and `maximum`. Tests cover the initial-range capture, per-channel propagation, and the no-emit-on-same-value contract.
+
 ## Tests
 
 Links to per-platform handler test files. Tracked in [[Test Harness]].
 
-- Mock tests: `tests/components/slider/mock_test.cpp` (planned)
+- Mock tests: `tests/mock_handlers/slider_test.cpp`
 - Windows handler: `tests/components/slider/windows_test.cpp` (planned)
 - Android handler: `tests/components/slider/android_test.cpp` (planned)
 - Linux handler: `tests/components/slider/linux_test.cpp` (planned)

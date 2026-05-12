@@ -170,11 +170,18 @@ b->background = brush{colors::dodger_blue};
 b->clicked.subscribe([] { save(); });
 ```
 
+## Mock implementation
+
+- Handler: [`include/mpapp/handlers/mock/button_handler.hpp`](../../../include/mpapp/handlers/mock/button_handler.hpp)
+- Tests: [`tests/mock_handlers/button_test.cpp`](../../../tests/mock_handlers/button_test.cpp)
+
+`button_handler<platform::mock>` records `text=<value>` and `clicked` events into `calls()`; tests verify mapper-on-attach behavior, the no-emit-on-same-value contract, and click forwarding.
+
 ## Tests
 
 Links to per-platform handler test files. Tracked in [[Test Harness]].
 
-- Mock tests: `tests/components/button/mock_test.cpp` (planned)
+- Mock tests: `tests/mock_handlers/button_test.cpp`
 - Windows handler: `tests/components/button/windows_test.cpp` (planned)
 - Android handler: `tests/components/button/android_test.cpp` (planned)
 - Linux handler: `tests/components/button/linux_test.cpp` (planned)

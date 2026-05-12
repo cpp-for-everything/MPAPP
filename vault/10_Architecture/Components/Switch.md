@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Switch"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/switch"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Switch
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/switch_handler.hpp` with tests in `tests/mock_handlers/switch_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview
 
@@ -91,11 +91,18 @@ s->track_color = colors::dodger_blue;
 s->toggled.subscribe([](bool v) { save_pref("notifications", v); });
 ```
 
+## Mock implementation
+
+- Handler: [`include/mpapp/handlers/mock/switch_handler.hpp`](../../../include/mpapp/handlers/mock/switch_handler.hpp)
+- Tests: [`tests/mock_handlers/switch_test.cpp`](../../../tests/mock_handlers/switch_test.cpp)
+
+`switch_handler<platform::mock>` records `is_on=<bool>` into `calls()`; tests cover the toggle sequence and the no-emit-on-same-value contract.
+
 ## Tests
 
 Links to per-platform handler test files. Tracked in [[Test Harness]].
 
-- Mock tests: `tests/components/switch/mock_test.cpp` (planned)
+- Mock tests: `tests/mock_handlers/switch_test.cpp`
 - Windows handler: `tests/components/switch/windows_test.cpp` (planned)
 - Android handler: `tests/components/switch/android_test.cpp` (planned)
 - Linux handler: `tests/components/switch/linux_test.cpp` (planned)

@@ -16,7 +16,7 @@ namespace mpapp {
 
 template <>
 class border_handler<platform::mock>
-    : public mock_handler_base<border_handler<platform::mock>, border> {
+    : public mock_handler_base {
 public:
     border_handler() = default;
 

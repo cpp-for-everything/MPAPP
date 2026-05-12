@@ -16,7 +16,7 @@ namespace mpapp {
 
 template <>
 class scroll_view_handler<platform::mock>
-    : public mock_handler_base<scroll_view_handler<platform::mock>, scroll_view> {
+    : public mock_handler_base {
 public:
     scroll_view_handler() = default;
 

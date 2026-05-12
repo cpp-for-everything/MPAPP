@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Entry"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/entry"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Entry
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/entry_handler.hpp` with tests in `tests/mock_handlers/entry_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview
 
@@ -110,11 +110,18 @@ e->return_type = return_type::next;
 e->completed.subscribe([&] { focus_next(); });
 ```
 
+## Mock implementation
+
+- Handler: [`include/mpapp/handlers/mock/entry_handler.hpp`](../../../include/mpapp/handlers/mock/entry_handler.hpp)
+- Tests: [`tests/mock_handlers/entry_test.cpp`](../../../tests/mock_handlers/entry_test.cpp)
+
+`entry_handler<platform::mock>` records changes to the primitive Observable slots (`text`, `placeholder`, `is_password`, `is_read_only`, `max_length`, `cursor_position`). Tests verify all mappers fire on attach, the same-value-no-emit contract, and exercise the password / cursor toggles.
+
 ## Tests
 
 Links to per-platform handler test files. Tracked in [[Test Harness]].
 
-- Mock tests: `tests/components/entry/mock_test.cpp` (planned)
+- Mock tests: `tests/mock_handlers/entry_test.cpp`
 - Windows handler: `tests/components/entry/windows_test.cpp` (planned)
 - Android handler: `tests/components/entry/android_test.cpp` (planned)
 - Linux handler: `tests/components/entry/linux_test.cpp` (planned)

@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "CheckBox"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/checkbox"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # CheckBox
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/check_box_handler.hpp` with tests in `tests/mock_handlers/check_box_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview
 
@@ -88,11 +88,18 @@ cb->foreground = solid_color_paint{colors::dodger_blue};
 cb->checked_changed.subscribe([](bool v) { set_accept_terms(v); });
 ```
 
+## Mock implementation
+
+- Handler: [`include/mpapp/handlers/mock/check_box_handler.hpp`](../../../include/mpapp/handlers/mock/check_box_handler.hpp)
+- Tests: [`tests/mock_handlers/check_box_test.cpp`](../../../tests/mock_handlers/check_box_test.cpp)
+
+`check_box_handler<platform::mock>` records `is_checked=<bool>` into `calls()`; tests cover initial-value capture, toggling, and the no-emit-on-same-value contract.
+
 ## Tests
 
 Links to per-platform handler test files. Tracked in [[Test Harness]].
 
-- Mock tests: `tests/components/check_box/mock_test.cpp` (planned)
+- Mock tests: `tests/mock_handlers/check_box_test.cpp`
 - Windows handler: `tests/components/check_box/windows_test.cpp` (planned)
 - Android handler: `tests/components/check_box/android_test.cpp` (planned)
 - Linux handler: `tests/components/check_box/linux_test.cpp` (planned)

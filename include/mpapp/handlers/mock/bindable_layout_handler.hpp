@@ -19,7 +19,7 @@ namespace mpapp {
 
 template <>
 class bindable_layout_handler<platform::mock>
-    : public mock_handler_base<bindable_layout_handler<platform::mock>, layout> {
+    : public mock_handler_base {
 public:
     bindable_layout_handler() = default;
 

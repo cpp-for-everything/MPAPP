@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Label"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/label"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Label
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/label_handler.hpp` with tests in `tests/mock_handlers/label_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview
 
@@ -96,11 +96,18 @@ l->text_color = colors::black;
 l->horizontal_text_alignment = text_alignment::center;
 ```
 
+## Mock implementation
+
+- Handler: [`include/mpapp/handlers/mock/label_handler.hpp`](../../../include/mpapp/handlers/mock/label_handler.hpp)
+- Tests: [`tests/mock_handlers/label_test.cpp`](../../../tests/mock_handlers/label_test.cpp)
+
+`label_handler<platform::mock>` records `text=<value>` into `calls()`; tests cover initial-value capture on map, sequential updates, and the no-op-on-same-value contract.
+
 ## Tests
 
 Links to per-platform handler test files. Tracked in [[Test Harness]].
 
-- Mock tests: `tests/components/label/mock_test.cpp` (planned)
+- Mock tests: `tests/mock_handlers/label_test.cpp`
 - Windows handler: `tests/components/label/windows_test.cpp` (planned)
 - Android handler: `tests/components/label/android_test.cpp` (planned)
 - Linux handler: `tests/components/label/linux_test.cpp` (planned)

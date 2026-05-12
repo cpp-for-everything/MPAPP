@@ -21,7 +21,7 @@ namespace mpapp {
 
 template <>
 class view_handler<platform::mock>
-    : public mock_handler_base<view_handler<platform::mock>, view> {
+    : public mock_handler_base {
 public:
     view_handler() = default;
 

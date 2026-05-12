@@ -30,7 +30,7 @@ namespace mpapp {
 
 template <>
 class frame_handler<platform::mock>
-    : public mock_handler_base<frame_handler<platform::mock>, frame> {
+    : public mock_handler_base {
 public:
     frame_handler() = default;
 

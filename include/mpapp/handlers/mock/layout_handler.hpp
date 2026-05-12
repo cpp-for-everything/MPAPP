@@ -17,7 +17,7 @@ namespace mpapp {
 
 template <>
 class layout_handler<platform::mock>
-    : public mock_handler_base<layout_handler<platform::mock>, layout> {
+    : public mock_handler_base {
 public:
     layout_handler() = default;
 

@@ -15,7 +15,7 @@ namespace mpapp {
 
 template <>
 class box_view_handler<platform::mock>
-    : public mock_handler_base<box_view_handler<platform::mock>, box_view> {
+    : public mock_handler_base {
 public:
     box_view_handler() = default;
 

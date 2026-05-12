@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Editor"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/editor"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Editor
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/editor_handler.hpp` with tests in `tests/mock_handlers/editor_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview
 
@@ -104,11 +104,18 @@ ed->max_length = 500;
 ed->text_changed.subscribe([](auto const& s) { word_count(s); });
 ```
 
+## Mock implementation
+
+- Handler: [`include/mpapp/handlers/mock/editor_handler.hpp`](../../../include/mpapp/handlers/mock/editor_handler.hpp)
+- Tests: [`tests/mock_handlers/editor_test.cpp`](../../../tests/mock_handlers/editor_test.cpp)
+
+`editor_handler<platform::mock>` records changes to the primitive Observable slots (`text`, `placeholder`, `is_read_only`, `max_length`). The mock surface omits password masking (per the Editor MAUI spec) and exercises multi-line text propagation.
+
 ## Tests
 
 Links to per-platform handler test files. Tracked in [[Test Harness]].
 
-- Mock tests: `tests/components/editor/mock_test.cpp` (planned)
+- Mock tests: `tests/mock_handlers/editor_test.cpp`
 - Windows handler: `tests/components/editor/windows_test.cpp` (planned)
 - Android handler: `tests/components/editor/android_test.cpp` (planned)
 - Linux handler: `tests/components/editor/linux_test.cpp` (planned)

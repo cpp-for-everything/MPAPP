@@ -27,10 +27,10 @@ catch_discover_tests(executor_test)
 
 add_subdirectory(template_type_spike)
 
-# Mock-handler tests for the P2 layout/primitive group (ADR-0008).
-# All seven components share a single Catch2 executable — they pull in
-# the same handler-base infrastructure and exercise the same recording
-# contract, so a combined binary keeps build cost low.
+# Mock-handler unit tests for the P2 component surface (ADR-0008).
+# Layout-group and simple-input handlers share a single Catch2 executable —
+# they pull in the same handler-base infrastructure and exercise the same
+# recording contract, so a combined binary keeps build cost low.
 add_executable(mock_handlers_test
     mock_handlers/view_test.cpp
     mock_handlers/layout_test.cpp
@@ -39,6 +39,15 @@ add_executable(mock_handlers_test
     mock_handlers/border_test.cpp
     mock_handlers/frame_test.cpp
     mock_handlers/box_view_test.cpp
+    mock_handlers/button_test.cpp
+    mock_handlers/check_box_test.cpp
+    mock_handlers/editor_test.cpp
+    mock_handlers/entry_test.cpp
+    mock_handlers/label_test.cpp
+    mock_handlers/radio_button_test.cpp
+    mock_handlers/slider_test.cpp
+    mock_handlers/stepper_test.cpp
+    mock_handlers/switch_test.cpp
 )
 target_link_libraries(mock_handlers_test PRIVATE mpapp-core Catch2::Catch2WithMain)
 target_compile_options(mock_handlers_test PRIVATE
