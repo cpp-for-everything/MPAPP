@@ -20,7 +20,9 @@ tags:
 
 ## Overview
 
-To be filled. What does ContentView do for the user?
+`ContentView` is the simplest possible container: a [[TemplatedView]] that hosts a single child [[View]] through its `Content` property. It is the standard base class for compound, reusable custom controls — a card, a labeled field, an icon-with-text — where the consumer just wants "one thing, with my chrome around it". `ContentView` also adds a `SafeAreaEdges` property so the control can opt into iOS/Android safe-area insets independently of its parent [[Page]].
+
+`Content` is the XAML `ContentProperty`, so the child can be written as a direct nested element.
 
 ## MAUI Reference
 
@@ -33,51 +35,69 @@ To be filled. What does ContentView do for the user?
 ```cpp
 namespace mpapp {
 
-class contentview : public control<contentview> {
+class content_view : public templated_view<content_view> {
 public:
-    // Properties to be designed.
+    // The single hosted child. Designated XAML content property.
+    Observable<std::shared_ptr<view_base>> content;
 
-    // Events / commands to be designed.
+    // Which edges should obey safe-area insets. Default: none (edge-to-edge).
+    Observable<safe_area_edges> safe_area_edges { safe_area_edges::none() };
 };
 
 } // namespace mpapp
 ```
 
+Because `content_view` inherits from `templated_view`, it also picks up `control_template`, `padding`, `is_clipped_to_bounds`, and `cascade_input_transparent`. The handler maps `Content` onto the native container's single child slot.
+
 ## XAML Usage
 
 ```xml
 <!-- Must match MAUI XAML per ADR-0004. -->
-<ContentView/>
+<ContentView Padding="12" SafeAreaEdges="Top,Bottom">
+    <VerticalStackLayout>
+        <Label Text="Header" FontAttributes="Bold"/>
+        <Label Text="Body"/>
+    </VerticalStackLayout>
+</ContentView>
 ```
 
 ## Platform Notes
 
 | Platform | Native control | Header / source | Notes |
 |---|---|---|---|
-| Windows | TBD | C++/WinRT | |
-| Android | TBD | fbjni / JNI | |
-| Linux | TBD | GTK4 | |
-| macOS | TBD | AppKit | |
-| iOS | TBD | UIKit | |
+| Windows | `Microsoft.Maui.Platform.ContentPanel` | C++/WinRT | A `Panel` that lays out its single child via the cross-platform layout core. |
+| Android | `Microsoft.Maui.Platform.ContentViewGroup` | fbjni / JNI | Custom `ViewGroup` that hands measure/layout to the cross-platform core. |
+| Linux | Custom `GtkWidget` subclass (`MpappContentBox`) | GTK4 | Single-child container with `padding`. |
+| macOS | `Microsoft.Maui.Platform.ContentView` (flipped `NSView`) | AppKit via [[Objective-Cpp]] | `safe_area_edges` is a no-op (no notch). |
+| iOS | `Microsoft.Maui.Platform.ContentView` (`UIView`) | UIKit via [[Objective-Cpp]] | `safe_area_edges` drives `UIView.safeAreaInsets`. |
 
 ## Side-by-side Examples
 
 ### MAUI
 
 ```xml
-<!-- TBD -->
+<ContentView Padding="12">
+    <Label Text="Hello"/>
+</ContentView>
 ```
 
 ### MPAPP (XAML)
 
 ```xml
-<!-- TBD -->
+<ContentView Padding="12">
+    <Label Text="Hello"/>
+</ContentView>
 ```
 
 ### MPAPP (C++)
 
 ```cpp
-// TBD
+auto card = std::make_shared<mpapp::content_view>();
+card->padding = mpapp::thickness{12};
+
+auto label = std::make_shared<mpapp::label>();
+label->text = "Hello";
+card->content = label;
 ```
 
 ## Tests
@@ -93,10 +113,11 @@ Links to per-platform handler test files. Tracked in [[Test Harness]].
 
 ## Known Differences
 
-Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
-
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+| `ISafeAreaView2.SafeAreaInsets` | Public no-op setter on the interface | Internal — only the handler can drive it | Users should not be writing safe-area insets manually | TBD |
+| `SafeAreaEdges` default | `None` (edge-to-edge) | Same | Matches MAUI; mobile apps must opt in explicitly | N/A |
+| `Content`-as-`Element` parenthood | `Content` is wired as a logical child of the `ContentView` | Same | Required for binding-context inheritance | N/A |
 
 ## See also
 
@@ -104,3 +125,7 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 - [[Handlers]]
 - [[Markup]]
 - [[Interop Parity]]
+- [[TemplatedView]]
+- [[View]]
+- [[ContentPage]]
+- [[Layout]]
