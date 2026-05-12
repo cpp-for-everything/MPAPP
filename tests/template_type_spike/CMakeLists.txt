@@ -1,38 +1,19 @@
-cmake_minimum_required(VERSION 3.24)
-project(mpapp_template_type_spike LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-include(FetchContent)
-FetchContent_Declare(
-    Catch2
-    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v3.6.0
-    GIT_SHALLOW    TRUE
-)
-FetchContent_MakeAvailable(Catch2)
+# Template-wrapper-type spike (T-0002).
+#
+# This CMakeLists is intended to be consumed as a subdirectory by the root
+# project. Catch2 is provided by the parent's tests/CMakeLists.txt; mpapp-core
+# (the umbrella include path) is provided by the root CMakeLists.txt.
 
 add_executable(template_type_spike_test test.cpp)
 
-# Repo-root-relative include path: the spike lives at
-# tests/template_type_spike/ and headers live at include/mpapp/.
-target_include_directories(template_type_spike_test PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
+target_link_libraries(template_type_spike_test PRIVATE
+    mpapp-core
+    Catch2::Catch2WithMain
 )
 
-target_link_libraries(template_type_spike_test PRIVATE Catch2::Catch2WithMain)
+target_compile_options(template_type_spike_test PRIVATE
+    $<$<COMPILE_LANG_AND_ID:CXX,GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic -Werror>
+    $<$<COMPILE_LANG_AND_ID:CXX,MSVC>:/W4 /WX /permissive- /Zc:__cplusplus>
+)
 
-if(MSVC)
-    target_compile_options(template_type_spike_test PRIVATE /W4 /permissive-)
-else()
-    target_compile_options(template_type_spike_test PRIVATE
-        -Wall -Wextra -Wpedantic
-    )
-endif()
-
-enable_testing()
-list(APPEND CMAKE_MODULE_PATH ${Catch2_SOURCE_DIR}/extras)
-include(Catch)
 catch_discover_tests(template_type_spike_test)
