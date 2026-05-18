@@ -12,11 +12,13 @@ namespace mpapp {
 namespace {
 
 jobject make_text_view(JNIEnv* env, jobject context) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
     jclass cls = env->FindClass("android/widget/TextView");
-    if (cls == nullptr) return nullptr;
+    if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
     jmethodID ctor = env->GetMethodID(cls, "<init>", "(Landroid/content/Context;)V");
-    if (ctor == nullptr) { env->DeleteLocalRef(cls); return nullptr; }
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
     jobject local = env->NewObject(cls, ctor, context);
+    if (env->ExceptionCheck()) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
     env->DeleteLocalRef(cls);
     if (local == nullptr) return nullptr;
     jobject global = env->NewGlobalRef(local);
@@ -25,11 +27,14 @@ jobject make_text_view(JNIEnv* env, jobject context) {
 }
 
 void text_view_set_text(JNIEnv* env, jobject tv, const std::string& text) {
-    jclass cls = env->GetObjectClass(tv);
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/TextView");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
     jmethodID m = env->GetMethodID(cls, "setText", "(Ljava/lang/CharSequence;)V");
     if (m != nullptr) {
         jstring jstr = env->NewStringUTF(text.c_str());
         env->CallVoidMethod(tv, m, jstr);
+        if (env->ExceptionCheck()) env->ExceptionClear();
         env->DeleteLocalRef(jstr);
     }
     env->DeleteLocalRef(cls);

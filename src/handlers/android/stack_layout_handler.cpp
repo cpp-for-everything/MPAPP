@@ -22,11 +22,13 @@ constexpr int LINEAR_LAYOUT_VERTICAL   = 1;
 // Construct an android.widget.LinearLayout(Context). Returns a global
 // ref or nullptr on failure.
 jobject make_linear_layout(JNIEnv* env, jobject context) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
     jclass cls = env->FindClass("android/widget/LinearLayout");
-    if (cls == nullptr) return nullptr;
+    if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
     jmethodID ctor = env->GetMethodID(cls, "<init>", "(Landroid/content/Context;)V");
-    if (ctor == nullptr) { env->DeleteLocalRef(cls); return nullptr; }
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
     jobject local = env->NewObject(cls, ctor, context);
+    if (env->ExceptionCheck()) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
     env->DeleteLocalRef(cls);
     if (local == nullptr) return nullptr;
     jobject global = env->NewGlobalRef(local);
@@ -35,23 +37,38 @@ jobject make_linear_layout(JNIEnv* env, jobject context) {
 }
 
 void linear_layout_set_orientation(JNIEnv* env, jobject ll, int orient_native) {
-    jclass cls = env->GetObjectClass(ll);
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/LinearLayout");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
     jmethodID m = env->GetMethodID(cls, "setOrientation", "(I)V");
-    if (m != nullptr) env->CallVoidMethod(ll, m, orient_native);
+    if (m != nullptr) {
+        env->CallVoidMethod(ll, m, orient_native);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
     env->DeleteLocalRef(cls);
 }
 
 void linear_layout_set_padding(JNIEnv* env, jobject ll, int l, int t, int r, int b) {
-    jclass cls = env->GetObjectClass(ll);
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/view/View");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
     jmethodID m = env->GetMethodID(cls, "setPadding", "(IIII)V");
-    if (m != nullptr) env->CallVoidMethod(ll, m, l, t, r, b);
+    if (m != nullptr) {
+        env->CallVoidMethod(ll, m, l, t, r, b);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
     env->DeleteLocalRef(cls);
 }
 
 void view_set_gravity(JNIEnv* env, jobject layout, int gravity) {
-    jclass cls = env->GetObjectClass(layout);
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/LinearLayout");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
     jmethodID m = env->GetMethodID(cls, "setGravity", "(I)V");
-    if (m != nullptr) env->CallVoidMethod(layout, m, gravity);
+    if (m != nullptr) {
+        env->CallVoidMethod(layout, m, gravity);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
     env->DeleteLocalRef(cls);
 }
 
@@ -176,6 +193,7 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
     if (native_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
 
     jobject child_obj = nullptr;
     if (auto* b = dynamic_cast<button*>(&child); b && b->has_handler()) {
@@ -187,10 +205,15 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
     }
     if (child_obj == nullptr) return;
 
-    jclass cls = env->GetObjectClass(native_);
+    jclass cls = env->FindClass("android/view/ViewGroup");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
     jmethodID add_view = env->GetMethodID(cls, "addView", "(Landroid/view/View;)V");
     if (add_view != nullptr) {
         env->CallVoidMethod(native_, add_view, child_obj);
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
     }
     env->DeleteLocalRef(cls);
 }

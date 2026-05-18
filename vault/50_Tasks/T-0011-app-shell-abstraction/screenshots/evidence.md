@@ -96,10 +96,12 @@ of the same end-to-end pipeline.)
 
 The same `main.cpp` body — a `class spike_app : public mpapp::application`
 that builds button + label + stack_layout + window in `on_launch` —
-compiles unchanged onto two completely different platforms and
-produces visually + behaviourally equivalent native windows. The only
-diffs between `examples/windows_button_spike/main.cpp` and
-`examples/gtk4_hello/main.cpp` are:
+compiles unchanged onto **three** completely different platforms
+(WinUI 3 on Windows, GTK4 on Linux, Java widgets via JNI on
+Android) and produces visually + behaviourally equivalent native
+windows on all three. The only diffs between
+`examples/windows_button_spike/main.cpp`, `examples/gtk4_hello/main.cpp`,
+and `examples/android_hello/app/src/main/cpp/native_main.cpp` are:
 
 1. The `#include <mpapp/handlers/{platform}/...>` lines name a
    different platform directory.
@@ -119,77 +121,108 @@ on this Windows host — no Apple toolchain available. Compilation
 will be exercised once a self-hosted macOS runner comes online (per
 [[T-0008-mac-ios-test-harness-design]]).
 
-## Android — code-complete, APK builds + installs; UI render hits JNI lifetime bug
+## Android — fully verified live on emulator
 
 Verified on the existing `D:\android-sdk` install (Android SDK 34,
 NDK r26.1.10909125, AVD `coroute_test` on a Pixel-class device
-profile, system-image `android-34/google_apis`):
+profile, system-image `android-34/google_apis`).
 
-1. **Gradle 8.10** downloaded and pinned at `D:\gradle-8.10` (user-
-   authorised). AGP 8.5.2 + OpenJDK 21.0.8 (already on this host
-   from prior Android Studio install).
-2. **Native build via NDK** — `examples/android_hello/app/src/main/cpp/CMakeLists.txt`
-   compiles the full app-shell handler set + `mpapp-core` sources
-   into a single `libandroid_hello.so` for `x86_64`. Required two
-   project-wide CMake fixes uncovered by this build:
-     - `CMAKE_CXX_SCAN_FOR_MODULES OFF` globally (NDK clang has no
-       `clang-scan-deps`).
-     - Gate every `std::formatter` specialisation behind
-       `__has_include(<format>) && !defined(__ANDROID__)`. The NDK's
-       libc++ in r26 doesn't ship `<format>` yet; the formatters are
-       only used by mock tests, so excluding them from the Android
-       build is safe.
-3. **APK packaged** — `app-debug.apk` produced under
-   `examples/android_hello/app/build/outputs/apk/debug/`.
-4. **Installed** via `adb install -r` on the running emulator
-   (`pm list packages` confirms `package:io.mpapp.example`).
-5. **Launched** via `adb shell am start -n io.mpapp.example/.MainActivity`.
-   `MainActivity.onCreate` runs, calls `nativeRegisterActivity(this)`
-   then `nativeLaunch()` → `mpapp::run<spike_app>(...)`.
-   `spike_app::on_launch()` enters, builds the UI tree via the
-   cross-platform surface.
-6. **Crash** at `window_handler<android>::apply_content` →
-   `env->GetObjectClass(native_)` → SIGABRT in the bionic JNI
-   checker (stack frame `#10 GetObjectClass+35`, called from
-   `apply_content+127`). The `content.changed` signal pipeline
-   fires correctly through `Observable<view*>::set` →
-   `signal::emit` → `content_cb_t::operator()` → `apply_content` —
-   all four MPAPP layers traverse exactly as on Windows and Linux.
-   The abort is purely in the last step's JNI call.
+**Source**: `examples/android_hello/app/src/main/cpp/native_main.cpp`
++ Java `MainActivity` + `MppClickRouter` + manifest + Gradle.
+The C++ body is the same view-model + UI composition as the Windows
+and Linux spikes; only the handler template arguments differ
+(`platform::android`).
 
-**Hypothesis (most likely)**: the activity `jobject` registered in
-`nativeRegisterActivity` is `NewGlobalRef`'d in `set_activity` and
-then `NewGlobalRef`'d *again* in `window_handler<android>::window_handler()`
-to populate `native_`. The double-global-ref may not be the issue per
-se — both should remain valid — but the second `GetObjectClass` call
-on the latter ref aborts. The bionic abort signature (`SIGABRT` /
-`SI_QUEUE` / `signal 6`) is consistent with ART's `CheckJNI` finding
-a stale or null ref.
+**Handler set**: `mpapp/handlers/android/{application,window,stack_layout,
+button,label}_handler` backed by real Java widget jobjects:
 
-**Fix attempted, did not resolve**: dropped the `native_` member from
-`window_handler<android>` and have `apply_*` look up the activity via
-`detail::get_activity()` directly each call (committed in the same
-batch — the source after this change is the as-shipped one). The
-clean-rebuilt APK reproduces the exact same crash signature
-(`GetObjectClass+35` → SIGABRT), confirming the issue is not in the
-double-NewGlobalRef layer. The crash needs deeper debugging with
-either CheckJNI extended diagnostics or a debug native build with
-breakpoints; tracked as M-05 follow-up.
+- `android.app.Activity` (registered from `MainActivity.onCreate`
+  via `nativeRegisterActivity(this)`).
+- `android.widget.LinearLayout` (for `mpapp::stack_layout`).
+- `android.widget.Button` (for `mpapp::button`).
+- `android.widget.TextView` (for `mpapp::label`).
+- `View.setOnClickListener(new io.mpapp.MppClickRouter(buttonPtr))`
+  bridges Java clicks back into `mpapp::button::clicked.emit()` via
+  the registered `Java_io_mpapp_MppClickRouter_nativeDispatchClick`
+  JNI thunk.
 
-**What this still proves**:
+**Build**: Gradle 8.10 + AGP 8.5.2 + OpenJDK 21.0.8 + NDK r26.1.
+Required two project-wide CMake fixes uncovered by this build:
 
-- The same `examples/android_hello/app/src/main/cpp/native_main.cpp`
-  body — identical to the Windows + Linux `main.cpp` except for the
-  handler template arguments — **compiles and links cleanly against
-  the Android NDK**.
-- The Java ↔ JNI ↔ C++ ↔ mpapp::run<App> ↔ on_launch chain works
-  end-to-end on the emulator (the crash is *inside* on_launch, deep
-  in the cross-platform pipeline that did fire correctly).
-- The full APK build pipeline — Gradle → CMake (NDK clang) →
-  `.so` packaging → install → launch — is wired and verified.
+- `CMAKE_CXX_SCAN_FOR_MODULES OFF` globally — NDK clang has no
+  `clang-scan-deps`.
+- Every `std::formatter` specialisation gated behind
+  `__has_include(<format>) && !defined(__ANDROID__)` — NDK r26
+  libc++ doesn't ship `<format>` yet. The formatters are only used
+  by mock-handler tests, so excluding them from Android is safe.
 
-Screenshot of the emulator immediately after the APK install
-(showing the launcher) is at `android-emulator-app-installed.png`
-next to this file. The `io.mpapp.example` package is installed
-(verified via `adb shell pm list packages`); it crashes on launch
-before its UI renders.
+**Verified live via adb**:
+
+1. APK packages cleanly (`app-debug.apk` ~3 MB).
+2. `adb install -r` succeeds (`pm list packages` shows
+   `package:io.mpapp.example`).
+3. `adb shell am start -n io.mpapp.example/.MainActivity` launches
+   the Activity. `MainActivity.onCreate` calls
+   `nativeRegisterActivity(this)` → `nativeLaunch()` →
+   `mpapp::run<spike_app>(...)`.
+4. The Activity renders with title bar **"MPAPP T-0011 - Android hello"**.
+5. The native `setContentView` mounts the `LinearLayout` (from
+   `mpapp::stack_layout`) holding the `TextView` (`mpapp::label`)
+   showing **"Count: 0"** above the `Button` (`mpapp::button`)
+   labelled **"Click me"**. `uiautomator dump` confirms the button
+   bounds as `[24,1268][1056,1394]`.
+6. **`adb shell input tap 540 1331`** × 7 → label updates to
+   **"Count: 7"**. Cross-platform signal pipeline confirmed
+   end-to-end on Android:
+
+   ```
+   Java Button click
+     -> View.OnClickListener (MppClickRouter)
+     -> JNI nativeDispatchClick(buttonPtr)
+     -> mpapp::android_button_dispatch_click(button*)
+     -> button.clicked.emit()
+     -> user's click_cb → vm.count.set(count + 1)
+     -> count.changed.emit
+     -> user's count_cb → label.text.set("Count: ...")
+     -> label.text.changed.emit
+     -> label_handler<android>::apply_text via callback
+     -> JNI CallVoidMethod TextView.setText
+     -> visible counter update
+   ```
+
+**Bug fixes discovered during this verification** (all in the
+final-shipped source):
+
+1. **`map_clicked` was a stub** — the OnClickListener was never
+   installed on the Java Button. Fix: `button_handler<android>::map_clicked`
+   now instantiates `io.mpapp.MppClickRouter(buttonPtr)` via JNI and
+   calls `View.setOnClickListener(router)` so taps route back into
+   the cross-platform `mpapp::button::clicked` signal.
+2. **ART `CheckJNI` aborts on pending exceptions**. Bionic's checked
+   JNI mode calls `abort()` if any JNI call is made while an
+   exception is pending. `setContentView(null)` (the initial-state
+   sync at bind time when `window.content` is `nullptr`)
+   legitimately throws `IllegalArgumentException` — leaving an
+   exception pending that nukes the next call. Fix: every
+   `apply_*` / helper now opens with `if (env->ExceptionCheck())
+   env->ExceptionClear();` and clears after each `CallVoidMethod`.
+   Applied across `window_handler`, `button_handler`,
+   `label_handler`, and `stack_layout_handler`.
+3. **`GetObjectClass(activity)` was the abort site under CheckJNI**.
+   Swapped to `FindClass("android/app/Activity")` /
+   `FindClass("android/view/ViewGroup")` /
+   `FindClass("android/widget/LinearLayout")` — looking up the
+   class by name avoids whatever ART CheckJNI quirk was tripping
+   on the global ref. Side benefit: `ViewGroup.addView` is the
+   right level for the type, since `LinearLayout` inherits it.
+
+Screenshots committed alongside this file:
+
+- `android-emulator-app-installed.png` — the launcher with the
+  package installed (early state, before fixing the click chain).
+- `android-mpapp-running.png` — the MPAPP window rendered, but
+  the click handler hadn't been implemented yet (Count stays 0).
+- `android-mpapp-count7.png` — after wiring `map_clicked` + the
+  `ExceptionClear` pattern, 7 button taps drive Count: 0 → 7.
+- `android-mpapp-final-count3.png` — after stripping the
+  diagnostic logging and re-running, 3 taps → Count: 3.

@@ -12,11 +12,13 @@ namespace mpapp {
 namespace {
 
 jobject make_button(JNIEnv* env, jobject context) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
     jclass cls = env->FindClass("android/widget/Button");
-    if (cls == nullptr) return nullptr;
+    if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
     jmethodID ctor = env->GetMethodID(cls, "<init>", "(Landroid/content/Context;)V");
-    if (ctor == nullptr) { env->DeleteLocalRef(cls); return nullptr; }
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
     jobject local = env->NewObject(cls, ctor, context);
+    if (env->ExceptionCheck()) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
     env->DeleteLocalRef(cls);
     if (local == nullptr) return nullptr;
     jobject global = env->NewGlobalRef(local);
@@ -25,11 +27,14 @@ jobject make_button(JNIEnv* env, jobject context) {
 }
 
 void button_set_text(JNIEnv* env, jobject btn, const std::string& text) {
-    jclass cls = env->GetObjectClass(btn);
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/Button");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
     jmethodID m = env->GetMethodID(cls, "setText", "(Ljava/lang/CharSequence;)V");
     if (m != nullptr) {
         jstring jstr = env->NewStringUTF(text.c_str());
         env->CallVoidMethod(btn, m, jstr);
+        if (env->ExceptionCheck()) env->ExceptionClear();
         env->DeleteLocalRef(jstr);
     }
     env->DeleteLocalRef(cls);
@@ -66,13 +71,53 @@ void button_handler<platform::android>::map_text(button& b) {
 }
 
 void button_handler<platform::android>::map_clicked(button& b) {
-    // The Java MainActivity is responsible for installing an
-    // OnClickListener on the Button jobject (it has the View ref via
-    // setContentView's tree). That listener invokes a native method
-    // bridged here. The user's Android app boilerplate ships a stock
-    // `MppClickRouter` Java class that does this — see the Android
-    // example template (T-0011 follow-up: M-05 milestone).
-    (void)b;
+    if (native_ == nullptr) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
+    // 1. Instantiate `io.mpapp.MppClickRouter(long buttonPtr)` — the
+    //    Java-side OnClickListener that bridges back into native via
+    //    `Java_io_mpapp_MppClickRouter_nativeDispatchClick`.
+    jclass router_cls = env->FindClass("io/mpapp/MppClickRouter");
+    if (router_cls == nullptr) {
+        env->ExceptionClear();
+        return;
+    }
+    jmethodID router_ctor = env->GetMethodID(router_cls, "<init>", "(J)V");
+    if (router_ctor == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    const jlong button_ptr = reinterpret_cast<jlong>(&b);
+    jobject router = env->NewObject(router_cls, router_ctor, button_ptr);
+    if (router == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+
+    // 2. Call View.setOnClickListener(router). The Button class
+    //    inherits setOnClickListener from android.view.View, so we
+    //    look up the method on the View class for portability.
+    jclass view_cls = env->FindClass("android/view/View");
+    if (view_cls != nullptr) {
+        jmethodID set_listener = env->GetMethodID(
+            view_cls, "setOnClickListener",
+            "(Landroid/view/View$OnClickListener;)V");
+        if (set_listener != nullptr) {
+            env->CallVoidMethod(native_, set_listener, router);
+            if (env->ExceptionCheck()) {
+                env->ExceptionDescribe();
+                env->ExceptionClear();
+            }
+        }
+        env->DeleteLocalRef(view_cls);
+    }
+
+    env->DeleteLocalRef(router);
+    env->DeleteLocalRef(router_cls);
 }
 
 void android_button_dispatch_click(button* b) {

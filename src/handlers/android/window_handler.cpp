@@ -57,12 +57,25 @@ void window_handler<platform::android>::apply_title(const std::string& v) {
     if (activity == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    jclass activity_cls = env->GetObjectClass(activity);
+
+    if (env->ExceptionCheck()) {
+        env->ExceptionClear();
+    }
+
+    jclass activity_cls = env->FindClass("android/app/Activity");
+    if (activity_cls == nullptr) {
+        env->ExceptionClear();
+        return;
+    }
     jmethodID set_title = env->GetMethodID(activity_cls, "setTitle",
                                             "(Ljava/lang/CharSequence;)V");
     if (set_title != nullptr) {
         jstring jstr = env->NewStringUTF(v.c_str());
         env->CallVoidMethod(activity, set_title, jstr);
+        if (env->ExceptionCheck()) {
+            env->ExceptionDescribe();
+            env->ExceptionClear();
+        }
         env->DeleteLocalRef(jstr);
     }
     env->DeleteLocalRef(activity_cls);
@@ -73,12 +86,28 @@ void window_handler<platform::android>::apply_content(view* v) {
     if (activity == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
+
+    // Clear any pending JNI exception from earlier calls so ART's
+    // CheckJNI doesn't abort on the next JNI call. See
+    // vault/50_Tasks/T-0011-app-shell-abstraction/screenshots/evidence.md
+    // for the diagnosis that surfaced this requirement.
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
     jobject child = (v != nullptr) ? child_jobject(v) : nullptr;
-    jclass activity_cls = env->GetObjectClass(activity);
+
+    // FindClass on android/app/Activity is more robust than
+    // GetObjectClass(activity) — the latter has been observed to
+    // abort ART's CheckJNI on Android-34 emulator images.
+    jclass activity_cls = env->FindClass("android/app/Activity");
+    if (activity_cls == nullptr) {
+        env->ExceptionClear();
+        return;
+    }
     jmethodID set_content_view = env->GetMethodID(
         activity_cls, "setContentView", "(Landroid/view/View;)V");
     if (set_content_view != nullptr) {
         env->CallVoidMethod(activity, set_content_view, child);
+        if (env->ExceptionCheck()) env->ExceptionClear();
     }
     env->DeleteLocalRef(activity_cls);
 }
