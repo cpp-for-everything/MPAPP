@@ -14,8 +14,11 @@
 #define MPAPP_LAYOUT_HPP
 
 #include <cstddef>
-#include <format>
 #include <vector>
+#if __has_include(<format>) && !defined(__ANDROID__)
+#  include <format>
+#  define MPAPP_LAYOUT_HAS_STD_FORMAT 1
+#endif
 
 #include "observable.hpp"
 #include "platform.hpp"
@@ -110,6 +113,7 @@ inline void layout::update_z_index(view& child, int new_z) {
 
 } // namespace mpapp
 
+#ifdef MPAPP_LAYOUT_HAS_STD_FORMAT
 template <>
 struct std::formatter<mpapp::thickness> {
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
@@ -118,5 +122,6 @@ struct std::formatter<mpapp::thickness> {
                               t.left, t.top, t.right, t.bottom);
     }
 };
+#endif
 
 #endif // MPAPP_LAYOUT_HPP

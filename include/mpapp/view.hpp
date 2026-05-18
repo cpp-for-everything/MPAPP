@@ -20,10 +20,13 @@
 #define MPAPP_VIEW_HPP
 
 #include <cstdint>
-#include <format>
 #include <optional>
 #include <string>
 #include <string_view>
+#if __has_include(<format>) && !defined(__ANDROID__)
+#  include <format>
+#  define MPAPP_VIEW_HAS_STD_FORMAT 1
+#endif
 
 #include "command.hpp"
 #include "observable.hpp"
@@ -175,6 +178,8 @@ constexpr std::string_view to_string(flow_direction f) noexcept {
 // `std::format("{}", value)` call site (mock handler or user code) gets
 // the same string.
 
+#ifdef MPAPP_VIEW_HAS_STD_FORMAT
+
 template <>
 struct std::formatter<mpapp::visibility> : std::formatter<std::string_view> {
     auto format(mpapp::visibility v, std::format_context& ctx) const {
@@ -205,5 +210,7 @@ struct std::formatter<mpapp::shadow_desc> {
                               s.offset_x, s.offset_y, s.radius, s.opacity);
     }
 };
+
+#endif // MPAPP_VIEW_HAS_STD_FORMAT
 
 #endif // MPAPP_VIEW_HPP

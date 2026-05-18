@@ -15,8 +15,11 @@
 #define MPAPP_LAYOUT_TYPES_HPP
 
 #include <cstdint>
-#include <format>
 #include <string_view>
+#if __has_include(<format>) && !defined(__ANDROID__)
+#  include <format>
+#  define MPAPP_HAS_STD_FORMAT 1
+#endif
 
 namespace mpapp {
 
@@ -79,6 +82,8 @@ constexpr std::string_view v_align_name(v_align a) noexcept {
 
 } // namespace mpapp
 
+#ifdef MPAPP_HAS_STD_FORMAT
+
 template <>
 struct std::formatter<mpapp::orientation> {
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
@@ -102,5 +107,7 @@ struct std::formatter<mpapp::v_align> {
         return std::format_to(ctx.out(), "{}", mpapp::detail::v_align_name(a));
     }
 };
+
+#endif // MPAPP_HAS_STD_FORMAT
 
 #endif // MPAPP_LAYOUT_TYPES_HPP

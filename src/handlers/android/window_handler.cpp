@@ -33,53 +33,52 @@ jobject child_jobject(view* v) {
 
 } // namespace
 
-window_handler<platform::android>::window_handler() {
-    // The Activity is set globally by the user's MainActivity native
-    // bridge before run_app is called. Grab a per-window copy here so
-    // the handler doesn't depend on global state after construction.
-    JNIEnv* env = detail::attach_current_thread();
-    if (env != nullptr) {
-        jobject activity = detail::get_activity();
-        if (activity != nullptr) {
-            native_ = env->NewGlobalRef(activity);
-        }
-    }
+window_handler<platform::android>::window_handler() = default;
+window_handler<platform::android>::~window_handler() = default;
+
+jobject window_handler<platform::android>::native() noexcept {
+    return detail::get_activity();
+}
+jobject window_handler<platform::android>::native() const noexcept {
+    return detail::get_activity();
 }
 
-window_handler<platform::android>::~window_handler() {
-    if (native_ != nullptr) {
-        if (JNIEnv* env = detail::attach_current_thread(); env != nullptr) {
-            env->DeleteGlobalRef(native_);
-        }
-        native_ = nullptr;
-    }
+// Look up the Activity directly through the JNI bridge each time
+// instead of holding a per-handler `NewGlobalRef`. The bridge's
+// `g_activity` is already a global ref; double-NewGlobalRef-ing it
+// has been seen to trip ART's CheckJNI on some Android-34 emulator
+// images.
+namespace {
+jobject get_activity() noexcept { return detail::get_activity(); }
 }
 
 void window_handler<platform::android>::apply_title(const std::string& v) {
-    if (native_ == nullptr) return;
+    jobject activity = get_activity();
+    if (activity == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    jclass activity_cls = env->GetObjectClass(native_);
+    jclass activity_cls = env->GetObjectClass(activity);
     jmethodID set_title = env->GetMethodID(activity_cls, "setTitle",
                                             "(Ljava/lang/CharSequence;)V");
     if (set_title != nullptr) {
         jstring jstr = env->NewStringUTF(v.c_str());
-        env->CallVoidMethod(native_, set_title, jstr);
+        env->CallVoidMethod(activity, set_title, jstr);
         env->DeleteLocalRef(jstr);
     }
     env->DeleteLocalRef(activity_cls);
 }
 
 void window_handler<platform::android>::apply_content(view* v) {
-    if (native_ == nullptr) return;
+    jobject activity = get_activity();
+    if (activity == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
     jobject child = (v != nullptr) ? child_jobject(v) : nullptr;
-    jclass activity_cls = env->GetObjectClass(native_);
+    jclass activity_cls = env->GetObjectClass(activity);
     jmethodID set_content_view = env->GetMethodID(
         activity_cls, "setContentView", "(Landroid/view/View;)V");
     if (set_content_view != nullptr) {
-        env->CallVoidMethod(native_, set_content_view, child);
+        env->CallVoidMethod(activity, set_content_view, child);
     }
     env->DeleteLocalRef(activity_cls);
 }

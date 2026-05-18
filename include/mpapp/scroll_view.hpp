@@ -10,7 +10,10 @@
 #define MPAPP_SCROLL_VIEW_HPP
 
 #include <cstdint>
-#include <format>
+#if __has_include(<format>) && !defined(__ANDROID__)
+#  include <format>
+#  define MPAPP_SCROLL_VIEW_HAS_STD_FORMAT 1
+#endif
 #include <memory>
 #include <string_view>
 
@@ -117,6 +120,8 @@ constexpr std::string_view to_string(scroll_bar_visibility v) noexcept {
 
 } // namespace mpapp
 
+#ifdef MPAPP_SCROLL_VIEW_HAS_STD_FORMAT
+
 template <>
 struct std::formatter<mpapp::scroll_orientation> : std::formatter<std::string_view> {
     auto format(mpapp::scroll_orientation o, std::format_context& ctx) const {
@@ -130,5 +135,7 @@ struct std::formatter<mpapp::scroll_bar_visibility> : std::formatter<std::string
         return std::formatter<std::string_view>::format(mpapp::to_string(v), ctx);
     }
 };
+
+#endif // MPAPP_SCROLL_VIEW_HAS_STD_FORMAT
 
 #endif // MPAPP_SCROLL_VIEW_HPP

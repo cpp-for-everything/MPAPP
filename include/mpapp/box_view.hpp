@@ -7,7 +7,10 @@
 #ifndef MPAPP_BOX_VIEW_HPP
 #define MPAPP_BOX_VIEW_HPP
 
-#include <format>
+#if __has_include(<format>) && !defined(__ANDROID__)
+#  include <format>
+#  define MPAPP_BOX_VIEW_HAS_STD_FORMAT 1
+#endif
 
 #include "observable.hpp"
 #include "platform.hpp"
@@ -59,6 +62,8 @@ private:
 
 } // namespace mpapp
 
+#ifdef MPAPP_BOX_VIEW_HAS_STD_FORMAT
+
 template <>
 struct std::formatter<mpapp::color> {
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
@@ -75,5 +80,7 @@ struct std::formatter<mpapp::corner_radius> {
                               cr.top_left, cr.top_right, cr.bottom_left, cr.bottom_right);
     }
 };
+
+#endif // MPAPP_BOX_VIEW_HAS_STD_FORMAT
 
 #endif // MPAPP_BOX_VIEW_HPP

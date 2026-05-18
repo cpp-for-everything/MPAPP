@@ -119,10 +119,77 @@ on this Windows host — no Apple toolchain available. Compilation
 will be exercised once a self-hosted macOS runner comes online (per
 [[T-0008-mac-ios-test-harness-design]]).
 
-## Android
+## Android — code-complete, APK builds + installs; UI render hits JNI lifetime bug
 
-Code-complete (`include/mpapp/handlers/android/`,
-`src/handlers/android/*.cpp`, `examples/android_hello/` with
-MainActivity + JNI bridge + MppClickRouter). Pending: Gradle harness
-+ emulator install on this host (in flight after the Windows + Linux
-verification).
+Verified on the existing `D:\android-sdk` install (Android SDK 34,
+NDK r26.1.10909125, AVD `coroute_test` on a Pixel-class device
+profile, system-image `android-34/google_apis`):
+
+1. **Gradle 8.10** downloaded and pinned at `D:\gradle-8.10` (user-
+   authorised). AGP 8.5.2 + OpenJDK 21.0.8 (already on this host
+   from prior Android Studio install).
+2. **Native build via NDK** — `examples/android_hello/app/src/main/cpp/CMakeLists.txt`
+   compiles the full app-shell handler set + `mpapp-core` sources
+   into a single `libandroid_hello.so` for `x86_64`. Required two
+   project-wide CMake fixes uncovered by this build:
+     - `CMAKE_CXX_SCAN_FOR_MODULES OFF` globally (NDK clang has no
+       `clang-scan-deps`).
+     - Gate every `std::formatter` specialisation behind
+       `__has_include(<format>) && !defined(__ANDROID__)`. The NDK's
+       libc++ in r26 doesn't ship `<format>` yet; the formatters are
+       only used by mock tests, so excluding them from the Android
+       build is safe.
+3. **APK packaged** — `app-debug.apk` produced under
+   `examples/android_hello/app/build/outputs/apk/debug/`.
+4. **Installed** via `adb install -r` on the running emulator
+   (`pm list packages` confirms `package:io.mpapp.example`).
+5. **Launched** via `adb shell am start -n io.mpapp.example/.MainActivity`.
+   `MainActivity.onCreate` runs, calls `nativeRegisterActivity(this)`
+   then `nativeLaunch()` → `mpapp::run<spike_app>(...)`.
+   `spike_app::on_launch()` enters, builds the UI tree via the
+   cross-platform surface.
+6. **Crash** at `window_handler<android>::apply_content` →
+   `env->GetObjectClass(native_)` → SIGABRT in the bionic JNI
+   checker (stack frame `#10 GetObjectClass+35`, called from
+   `apply_content+127`). The `content.changed` signal pipeline
+   fires correctly through `Observable<view*>::set` →
+   `signal::emit` → `content_cb_t::operator()` → `apply_content` —
+   all four MPAPP layers traverse exactly as on Windows and Linux.
+   The abort is purely in the last step's JNI call.
+
+**Hypothesis (most likely)**: the activity `jobject` registered in
+`nativeRegisterActivity` is `NewGlobalRef`'d in `set_activity` and
+then `NewGlobalRef`'d *again* in `window_handler<android>::window_handler()`
+to populate `native_`. The double-global-ref may not be the issue per
+se — both should remain valid — but the second `GetObjectClass` call
+on the latter ref aborts. The bionic abort signature (`SIGABRT` /
+`SI_QUEUE` / `signal 6`) is consistent with ART's `CheckJNI` finding
+a stale or null ref.
+
+**Fix attempted, did not resolve**: dropped the `native_` member from
+`window_handler<android>` and have `apply_*` look up the activity via
+`detail::get_activity()` directly each call (committed in the same
+batch — the source after this change is the as-shipped one). The
+clean-rebuilt APK reproduces the exact same crash signature
+(`GetObjectClass+35` → SIGABRT), confirming the issue is not in the
+double-NewGlobalRef layer. The crash needs deeper debugging with
+either CheckJNI extended diagnostics or a debug native build with
+breakpoints; tracked as M-05 follow-up.
+
+**What this still proves**:
+
+- The same `examples/android_hello/app/src/main/cpp/native_main.cpp`
+  body — identical to the Windows + Linux `main.cpp` except for the
+  handler template arguments — **compiles and links cleanly against
+  the Android NDK**.
+- The Java ↔ JNI ↔ C++ ↔ mpapp::run<App> ↔ on_launch chain works
+  end-to-end on the emulator (the crash is *inside* on_launch, deep
+  in the cross-platform pipeline that did fire correctly).
+- The full APK build pipeline — Gradle → CMake (NDK clang) →
+  `.so` packaging → install → launch — is wired and verified.
+
+Screenshot of the emulator immediately after the APK install
+(showing the launcher) is at `android-emulator-app-installed.png`
+next to this file. The `io.mpapp.example` package is installed
+(verified via `adb shell pm list packages`); it crashes on launch
+before its UI renders.

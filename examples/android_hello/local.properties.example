@@ -1,0 +1,15 @@
+## Copy to local.properties (which is .gitignore'd) and adjust the
+## sdk.dir to match your local Android SDK installation. The Gradle
+## build needs this to find platform-tools, build-tools, NDK, etc.
+##
+## Windows examples:
+##   sdk.dir=D:\\android-sdk
+##   sdk.dir=C:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
+##
+## macOS:
+##   sdk.dir=/Users/<you>/Library/Android/sdk
+##
+## Linux:
+##   sdk.dir=/home/<you>/Android/Sdk
+
+sdk.dir=D:\\android-sdk

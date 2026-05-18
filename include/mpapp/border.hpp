@@ -11,11 +11,14 @@
 #define MPAPP_BORDER_HPP
 
 #include <cstdint>
-#include <format>
 #include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
+#if __has_include(<format>) && !defined(__ANDROID__)
+#  include <format>
+#  define MPAPP_BORDER_HAS_STD_FORMAT 1
+#endif
 
 #include "layout.hpp"   // for `thickness`
 #include "observable.hpp"
@@ -92,6 +95,8 @@ constexpr std::string_view to_string(pen_line_join j) noexcept {
 
 } // namespace mpapp
 
+#ifdef MPAPP_BORDER_HAS_STD_FORMAT
+
 template <>
 struct std::formatter<mpapp::pen_line_cap> : std::formatter<std::string_view> {
     auto format(mpapp::pen_line_cap c, std::format_context& ctx) const {
@@ -112,5 +117,7 @@ struct std::formatter<mpapp::stroke_shape_desc> : std::formatter<std::string_vie
         return std::formatter<std::string_view>::format(s.descriptor, ctx);
     }
 };
+
+#endif // MPAPP_BORDER_HAS_STD_FORMAT
 
 #endif // MPAPP_BORDER_HPP

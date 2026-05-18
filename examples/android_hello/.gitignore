@@ -1,0 +1,10 @@
+# Gradle / Android build artefacts. Don't commit these.
+.gradle/
+.cxx/
+app/build/
+build/
+local.properties
+
+# IDE
+*.iml
+.idea/

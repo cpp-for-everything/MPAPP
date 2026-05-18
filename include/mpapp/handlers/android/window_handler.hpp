@@ -33,9 +33,10 @@ public:
 
     void bind(window& w);
 
-    // Activity jobject (global ref).
-    jobject     native() noexcept       { return native_; }
-    jobject     native() const noexcept { return native_; }
+    // Returns the current Activity jobject (looked up from the JNI
+    // bridge each call). No per-handler cache.
+    jobject     native() noexcept;
+    jobject     native() const noexcept;
 
 private:
     void apply_title(const std::string& v);
@@ -46,7 +47,6 @@ private:
     struct content_cb_t { window_handler<platform::android>* self; void operator()(view* v) const { self->apply_content(v); } };
     struct visible_cb_t { window_handler<platform::android>* self; void operator()(bool v) const { self->apply_is_visible(v); } };
 
-    jobject native_ = nullptr;  // global ref to Activity
     window* bound_  = nullptr;
 
     title_cb_t                       title_cb_{this};

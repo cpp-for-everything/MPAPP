@@ -16,6 +16,9 @@ CMakeUserPresets.json
 # Local build-script helpers used by Claude Code workers (vcvars wrappers).
 # Each worker generates its own; not part of the canonical build interface.
 _build*.bat
+_gtk_smoke.c
+_run_gtk_bg.sh
+_mpapp_spike.log
 
 # OS
 Thumbs.db
