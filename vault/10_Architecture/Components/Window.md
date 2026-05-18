@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "Window"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/window"
-mpappStatus: not-started
-platformWindows: false
+mpappStatus: windows-real
+platformWindows: true
 platformAndroid: false
 platformLinux: false
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/windows-real
 ---
 
 # Window
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **windows-real** — mock + WinUI 3 handler landed in [[T-0011-app-shell-abstraction]]. The simplified initial surface (title / content / width / height / is_visible + activated/closed signals) replaces the original spec; the richer geometry / titlebar / mode flags below remain on the M-04 docket. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 
@@ -30,38 +30,30 @@ tags:
 
 ## MPAPP C++ API
 
+Initial surface as shipped in T-0011. The richer geometry / chrome /
+title-bar set follows in M-04.
+
 ```cpp
 namespace mpapp {
 
-class window : public element<window> {
+class window : public control<window> {
 public:
-    // The root page hosted by this window. Setting it triggers re-layout.
-    Observable<std::shared_ptr<page>> page;
+    // The root view hosted by this window. Non-owning pointer; the
+    // user owns the lifetime (typically as a sibling field of the
+    // mpapp::application subclass). The handler rebinds the native
+    // window's content slot on change.
+    Observable<view*>       content{nullptr};
 
-    Observable<std::string>           title;
-    Observable<flow_direction>        flow_direction { flow_direction::match_parent };
+    Observable<std::string> title{""};
+    Observable<int>         width{0};       // 0 = let the OS choose
+    Observable<int>         height{0};
+    Observable<bool>        is_visible{false};
 
-    // Geometry. `unset` means "let the OS choose".
-    Observable<double> x      { dimension::unset };
-    Observable<double> y      { dimension::unset };
-    Observable<double> width  { dimension::unset };
-    Observable<double> height { dimension::unset };
+    mpapp::signal<>         activated;      // emitted after platform Activate
+    mpapp::signal<>         closed;         // emitted on user / programmatic close
 
-    Observable<double> minimum_width  { dimension::minimum };
-    Observable<double> minimum_height { dimension::minimum };
-    Observable<double> maximum_width  { dimension::maximum };
-    Observable<double> maximum_height { dimension::maximum };
-
-    // Desktop-only chrome.
-    Observable<std::shared_ptr<title_bar>> title_bar;
-    Observable<bool>                       is_minimizable { true };
-    Observable<bool>                       is_maximizable { true };
-
-    // True once the OS has shown and focused the window.
-    Computed<bool> is_activated;
-
-    // Verbs.
-    Command<double()> request_display_density; // returns scale factor (DIPs per px)
+    void show();                            // sets is_visible = true
+    void close();                           // sets is_visible = false + emits closed
 };
 
 } // namespace mpapp

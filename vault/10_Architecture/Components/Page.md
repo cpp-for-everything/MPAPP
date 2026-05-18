@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Page"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/page"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,8 +10,11 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
+
+> [!info] Status
+> **mock** — public surface (`title` / `content` / `is_busy`) + mock handler landed in [[T-0011-app-shell-abstraction]]. WinUI 3 real handler deferred to M-04 (the spike rewrite uses `mpapp::stack_layout` as the window content directly without an intermediate page; pages matter more for navigation, which lands later).
 
 # Page
 

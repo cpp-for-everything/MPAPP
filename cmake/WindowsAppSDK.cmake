@@ -94,9 +94,19 @@ function(mpapp_install_windows_app_sdk)
     set(MPAPP_WINAPPSDK_AI_DIR
         "${MPAPP_PACKAGES_DIR}/Microsoft.WindowsAppSDK.AI"
         PARENT_SCOPE)
-    set(MPAPP_WINDOWS_AI_ML_DIR
-        "${MPAPP_PACKAGES_DIR}/Microsoft.Windows.AI.MachineLearning"
-        PARENT_SCOPE)
+    # Renamed in WindowsAppSDK 1.8.260416003+ from
+    # Microsoft.Windows.AI.MachineLearning to Microsoft.WindowsAppSDK.ML.
+    # The old folder name lingers in some derived caches; prefer the new
+    # one if present.
+    if(EXISTS "${MPAPP_PACKAGES_DIR}/Microsoft.WindowsAppSDK.ML/metadata")
+        set(MPAPP_WINDOWS_AI_ML_DIR
+            "${MPAPP_PACKAGES_DIR}/Microsoft.WindowsAppSDK.ML"
+            PARENT_SCOPE)
+    else()
+        set(MPAPP_WINDOWS_AI_ML_DIR
+            "${MPAPP_PACKAGES_DIR}/Microsoft.Windows.AI.MachineLearning"
+            PARENT_SCOPE)
+    endif()
     set(MPAPP_WEBVIEW2_DIR
         "${MPAPP_PACKAGES_DIR}/Microsoft.Web.WebView2"
         PARENT_SCOPE)

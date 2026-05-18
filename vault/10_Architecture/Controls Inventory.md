@@ -22,7 +22,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | Component | MAUI handler folder | Status |
 |---|---|---|
 | [[Components/ActivityIndicator\|ActivityIndicator]] | `Handlers/ActivityIndicator/` | not-started |
-| [[Components/Application\|Application]] | `Handlers/Application/` | not-started |
+| [[Components/Application\|Application]] | `Handlers/Application/` | windows-real |
 | [[Components/BindableLayout\|BindableLayout]] | `Controls/BindableLayout/` | mock |
 | [[Components/Border\|Border]] | `Handlers/Border/` | mock |
 | [[Components/BoxView\|BoxView]] | `Controls/BoxView/` | mock |
@@ -36,6 +36,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Entry\|Entry]] | `Handlers/Entry/` | mock |
 | [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | not-started |
 | [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | not-started |
+| [[Components/Grid\|Grid]] | `Layouts/GridLayoutManager/` | mock |
 | [[Components/Frame\|Frame]] | `Controls/Frame/` | mock |
 | [[Components/GraphicsView\|GraphicsView]] | `Handlers/GraphicsView/` | not-started |
 | [[Components/HybridWebView\|HybridWebView]] | `Handlers/HybridWebView/` | not-started |
@@ -52,7 +53,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/MenuFlyoutSeparator\|MenuFlyoutSeparator]] | `Handlers/MenuFlyoutSeparator/` | not-started |
 | [[Components/MenuFlyoutSubItem\|MenuFlyoutSubItem]] | `Handlers/MenuFlyoutSubItem/` | not-started |
 | [[Components/NavigationPage\|NavigationPage]] | `Handlers/NavigationPage/` | not-started |
-| [[Components/Page\|Page]] | `Handlers/Page/` | not-started |
+| [[Components/Page\|Page]] | `Handlers/Page/` | mock |
 | [[Components/Picker\|Picker]] | `Handlers/Picker/` | not-started |
 | [[Components/ProgressBar\|ProgressBar]] | `Handlers/ProgressBar/` | not-started |
 | [[Components/RadioButton\|RadioButton]] | `Handlers/RadioButton/` | mock |
@@ -62,6 +63,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ShapeView\|ShapeView]] | `Handlers/ShapeView/` | not-started |
 | [[Components/Shell\|Shell]] | `Controls/Shell/` | not-started |
 | [[Components/Slider\|Slider]] | `Handlers/Slider/` | mock |
+| [[Components/StackLayout\|StackLayout]] | `Layouts/StackLayoutManager/` | windows-real |
 | [[Components/Stepper\|Stepper]] | `Handlers/Stepper/` | mock |
 | [[Components/SwipeItemMenuItem\|SwipeItemMenuItem]] | `Handlers/SwipeItemMenuItem/` | not-started |
 | [[Components/SwipeItemView\|SwipeItemView]] | `Handlers/SwipeItemView/` | not-started |
@@ -76,7 +78,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Toolbar\|Toolbar]] | `Handlers/Toolbar/` | not-started |
 | [[Components/View\|View]] | `Handlers/View/` | mock |
 | [[Components/WebView\|WebView]] | `Handlers/WebView/` | not-started |
-| [[Components/Window\|Window]] | `Handlers/Window/` | not-started |
+| [[Components/Window\|Window]] | `Handlers/Window/` | windows-real |
 
 **Total: 55 components.**
 

@@ -15,10 +15,21 @@ mpapp_install_windows_app_sdk()
 add_library(mpapp-handlers-windows STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/button_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/label_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/windows/application_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/windows/window_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/windows/stack_layout_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-windows PUBLIC
     ${CMAKE_SOURCE_DIR}/include
+)
+
+# application_handler.cpp pulls in <MddBootstrap.h> + the WindowsAppRuntime
+# extern declaration. The headers live in the Foundation NuGet's include
+# dir; add it SYSTEM so /W4 /WX in upstream targets does not flag SDK
+# headers.
+target_include_directories(mpapp-handlers-windows SYSTEM PRIVATE
+    "${MPAPP_WINAPPSDK_FOUNDATION_DIR}/include"
 )
 
 target_compile_features(mpapp-handlers-windows PUBLIC cxx_std_23)
@@ -48,7 +59,7 @@ target_link_libraries(mpapp-handlers-windows PUBLIC
 # Now the executable.
 set(_winappsdk_inc "${MPAPP_PACKAGES_DIR}/Microsoft.WindowsAppSDK.Foundation/include")
 
-add_executable(windows_button_spike WIN32
+add_executable(windows_button_spike
     main.cpp
     app.manifest
 )
@@ -78,9 +89,9 @@ target_compile_options(windows_button_spike PRIVATE
 
 mpapp_add_winappsdk_runtime(windows_button_spike)
 
-# wWinMain entry point — the linker default for /SUBSYSTEM:WINDOWS with a
-# wWinMain entry point.
-set_target_properties(windows_button_spike PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    LINK_FLAGS "/ENTRY:wWinMainCRTStartup"
-)
+# T-0011: this is now a console-subsystem app so the cross-platform
+# `int main(int, char**)` entry works without a wWinMain shim. A
+# console window appears alongside the WinUI window for the spike —
+# acceptable for development. A `/SUBSYSTEM:WINDOWS` flavour with the
+# console hidden via `FreeConsole()` lands when the spike is promoted
+# to a real sample app.

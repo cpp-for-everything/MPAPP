@@ -1,0 +1,143 @@
+// SPDX-License-Identifier: Apache-2.0
+// Part of MPAPP. T-0011 — WinUI 3 stack_layout handler implementation.
+
+#include "mpapp/handlers/windows/stack_layout_handler.hpp"
+
+#if defined(_WIN32)
+
+#include <winrt/base.h>
+#include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>
+#include <winrt/Microsoft.UI.Xaml.h>
+#include <winrt/Microsoft.UI.Xaml.Controls.h>
+
+#include "mpapp/button.hpp"
+#include "mpapp/handlers/windows/button_handler.hpp"
+#include "mpapp/handlers/windows/label_handler.hpp"
+#include "mpapp/label.hpp"
+
+namespace mpapp {
+
+namespace mux  = ::winrt::Microsoft::UI::Xaml;
+namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
+
+stack_layout_handler<platform::windows>::stack_layout_handler() {
+    native_ = muxc::StackPanel{};
+}
+
+stack_layout_handler<platform::windows>::~stack_layout_handler() = default;
+
+void stack_layout_handler<platform::windows>::apply_orientation(orientation o) {
+    if (native_ == nullptr) {
+        return;
+    }
+    native_.Orientation(o == orientation::horizontal
+                            ? muxc::Orientation::Horizontal
+                            : muxc::Orientation::Vertical);
+}
+
+void stack_layout_handler<platform::windows>::apply_spacing(double s) {
+    if (native_ != nullptr) {
+        native_.Spacing(s);
+    }
+}
+
+void stack_layout_handler<platform::windows>::apply_padding(thickness t) {
+    if (native_ != nullptr) {
+        native_.Padding(mux::Thickness{t.left, t.top, t.right, t.bottom});
+    }
+}
+
+namespace {
+
+mux::HorizontalAlignment to_native(h_align a) noexcept {
+    switch (a) {
+        case h_align::start:   return mux::HorizontalAlignment::Left;
+        case h_align::center:  return mux::HorizontalAlignment::Center;
+        case h_align::end:     return mux::HorizontalAlignment::Right;
+        case h_align::stretch: return mux::HorizontalAlignment::Stretch;
+    }
+    return mux::HorizontalAlignment::Stretch;
+}
+
+mux::VerticalAlignment to_native(v_align a) noexcept {
+    switch (a) {
+        case v_align::start:   return mux::VerticalAlignment::Top;
+        case v_align::center:  return mux::VerticalAlignment::Center;
+        case v_align::end:     return mux::VerticalAlignment::Bottom;
+        case v_align::stretch: return mux::VerticalAlignment::Stretch;
+    }
+    return mux::VerticalAlignment::Stretch;
+}
+
+} // namespace
+
+void stack_layout_handler<platform::windows>::apply_horizontal_alignment(h_align a) {
+    if (native_ != nullptr) {
+        native_.HorizontalAlignment(to_native(a));
+    }
+}
+
+void stack_layout_handler<platform::windows>::apply_vertical_alignment(v_align a) {
+    if (native_ != nullptr) {
+        native_.VerticalAlignment(to_native(a));
+    }
+}
+
+void stack_layout_handler<platform::windows>::bind(stack_layout& s) {
+    bound_ = &s;
+
+    apply_orientation(s.stack_orientation.get());
+    s.stack_orientation.changed.subscribe(orient_slot_, orient_cb_);
+
+    apply_spacing(s.spacing.get());
+    s.spacing.changed.subscribe(spacing_slot_, spacing_cb_);
+
+    apply_padding(s.padding.get());
+    s.padding.changed.subscribe(padding_slot_, padding_cb_);
+
+    apply_horizontal_alignment(s.horizontal_alignment.get());
+    s.horizontal_alignment.changed.subscribe(h_align_slot_, h_align_cb_);
+
+    apply_vertical_alignment(s.vertical_alignment.get());
+    s.vertical_alignment.changed.subscribe(v_align_slot_, v_align_cb_);
+
+    // Initial children — the user has typically already populated the
+    // layout via `add(...)` before binding. Replay them into the
+    // native panel.
+    for (std::size_t i = 0; i < s.child_count(); ++i) {
+        if (view* child = s.child_at(i); child != nullptr) {
+            add_child(*child);
+        }
+    }
+}
+
+void stack_layout_handler<platform::windows>::add_child(view& child) {
+    if (native_ == nullptr) {
+        return;
+    }
+    if (auto* b = dynamic_cast<button*>(&child); b != nullptr) {
+        if (b->has_handler()) {
+            native_.Children().Append(b->handler().native());
+        }
+        return;
+    }
+    if (auto* l = dynamic_cast<label*>(&child); l != nullptr) {
+        if (l->has_handler()) {
+            native_.Children().Append(l->handler().native());
+        }
+        return;
+    }
+    if (auto* sl = dynamic_cast<stack_layout*>(&child); sl != nullptr) {
+        if (sl->has_handler()) {
+            native_.Children().Append(sl->handler().native());
+        }
+        return;
+    }
+    // Unknown subtype — silently drop. As more handlers ship, append
+    // new branches here.
+}
+
+} // namespace mpapp
+
+#endif // _WIN32

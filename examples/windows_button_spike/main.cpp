@@ -1,54 +1,37 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0003 — WinUI 3 button spike.
+// Part of MPAPP. T-0011 — rewrite of the T-0003 WinUI 3 button spike
+// against the app-shell abstraction.
 //
-// Minimal WinUI 3 desktop app that demonstrates the MPAPP handler
-// pattern end-to-end:
+// Goal: zero `winrt::`, `mux::`, `muxc::`, `Mdd*` tokens in this
+// translation unit. The platform bootstrap (Application::Start, the
+// `mux::ApplicationT<App>` subclass, MddBootstrap, apartment init,
+// runtime DLL forwarder) lives inside the WinUI 3 handler set and is
+// invoked by `mpapp::run<App>`. User code reads as a portable MPAPP
+// program — the same source compiles unmodified once the GTK4 /
+// AppKit / UIKit / Android handlers land.
 //
-//   1. Initialise the unpackaged Windows App SDK via MddBootstrap.
-//   2. Force-load Microsoft.WindowsAppRuntime.dll so the undocked
-//      reg-free WinRT manifest is registered before Application::Start.
-//   3. Subclass `winrt::Microsoft::UI::Xaml::Application` in-place.
-//   4. In the App's OnLaunched (which runs on the UI thread), construct
-//      the MPAPP widgets + handlers, set their initial state, and add
-//      the native widgets to a Window.
-//   5. Click handler increments a `Observable<int> count`; a slot on
-//      `count.changed` writes the new value into `label.text` — which
-//      propagates to the native TextBlock through the label handler.
-//
-// No public-API macros are used. Native WinUI types appear only in the
-// App scaffolding; the property/event flow goes entirely through MPAPP
-// cross-platform surface.
-
-#include <windows.h>
+// Cross-platform parts (Observable, signal, button.text, label.text,
+// view-model wiring) are unchanged from the T-0003 spike. The diff
+// between this and the old `main.cpp` is entirely about hiding
+// platform-specific bootstrap behind `mpapp::application`,
+// `mpapp::window`, `mpapp::stack_layout`, `mpapp::run<App>`.
 
 #include <string>
 
-#include <MddBootstrap.h>
-
-// Exported by Microsoft.WindowsAppRuntime.dll. Calling it registers the
-// undocked reg-free WinRT manifest with the loader, which is what makes
-// `Application::Start` able to activate WinUI 3 types in an unpackaged
-// app. Without this, Start throws RPC_E_WRONG_THREAD. See
-// `vault/50_Tasks/T-0003-winui3-button-spike/notes/rpc-e-wrong-thread.md`.
-extern "C" HRESULT __stdcall WindowsAppRuntime_EnsureIsLoaded();
-
-#include <winrt/base.h>
-#include <winrt/Windows.Foundation.h>
-#include <winrt/Windows.Foundation.Collections.h>
-#include <winrt/Microsoft.UI.Xaml.h>
-#include <winrt/Microsoft.UI.Xaml.Controls.h>
-// Click lives on IButtonBase, defined in the Primitives header.
-#include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
-
+#include <mpapp/application.hpp>
 #include <mpapp/button.hpp>
 #include <mpapp/label.hpp>
+#include <mpapp/layout_types.hpp>
 #include <mpapp/observable.hpp>
+#include <mpapp/run.hpp>
 #include <mpapp/signal.hpp>
+#include <mpapp/stack_layout.hpp>
+#include <mpapp/window.hpp>
+
 #include <mpapp/handlers/windows/button_handler.hpp>
 #include <mpapp/handlers/windows/label_handler.hpp>
-
-namespace mux  = ::winrt::Microsoft::UI::Xaml;
-namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
+#include <mpapp/handlers/windows/stack_layout_handler.hpp>
+#include <mpapp/handlers/windows/window_handler.hpp>
 
 namespace {
 
@@ -57,126 +40,89 @@ struct view_model {
     mpapp::Observable<int> count{0};
 };
 
-// State owned by the App. Lives for the lifetime of the WinUI App so
-// the MPAPP widgets, handlers, and signal slots are stable references.
-struct spike_state {
-    view_model                                       vm;
-    mpapp::button                                    btn;
-    mpapp::label                                     lbl;
-    mpapp::button_handler<mpapp::platform::windows>  btn_handler;
-    mpapp::label_handler<mpapp::platform::windows>   lbl_handler;
-    mpapp::signal_slot<>                             click_slot;
-    mpapp::signal_slot<const int&>                   count_slot;
+class spike_app : public mpapp::application {
+public:
+    void on_launch() override {
+        // 1. Wire handlers to widgets.
+        btn_.set_handler(btn_handler_);
+        lbl_.set_handler(lbl_handler_);
+        layout_.set_handler(layout_handler_);
 
-    // signal::subscribe holds the callable by reference, so we keep the
-    // trampolines as members rather than passing temporaries.
-    struct click_callback {
-        spike_state* self;
-        void operator()() const {
-            self->vm.count.set(self->vm.count.get() + 1);
-        }
-    } click_cb{this};
+        // 2. Initial property values via the MPAPP surface.
+        btn_.text = "Click me";
+        lbl_.text = "Count: 0";
 
-    struct count_callback {
-        spike_state* self;
-        void operator()(int n) const {
-            self->lbl.text.set("Count: " + std::to_string(n));
-        }
-    } count_cb{this};
-};
+        // 3. Map text properties + click event onto native widgets.
+        btn_handler_.map_text(btn_);
+        btn_handler_.map_clicked(btn_);
+        lbl_handler_.map_text(lbl_);
 
-// A "real" WinUI 3 app would implement IXamlMetadataProvider here so the
-// runtime can resolve theme/control types at startup. The T-0003 spike
-// builds the UI tree fully programmatically without XAML resource
-// lookups, so we elide that interface for now.
-struct App : mux::ApplicationT<App> {
-    // spike_state owns native WinUI widgets. Constructing it here makes
-    // those widgets come into being on the UI thread that the App is
-    // instantiated on. Creating them earlier (in wWinMain) throws
-    // RPC_E_WRONG_THREAD because the WinUI dispatcher isn't set up yet.
-    spike_state  state{};
-    mux::Window  window{nullptr};
+        // 4. VM ↔ view wiring through cross-platform signals only.
+        btn_.clicked.subscribe(click_slot_, click_cb_);
+        vm_.count.changed.subscribe(count_slot_, count_cb_);
 
-    void OnLaunched(mux::LaunchActivatedEventArgs const&) {
-        // Wire MPAPP handlers to their cross-platform widgets.
-        state.btn.set_handler(state.btn_handler);
-        state.lbl.set_handler(state.lbl_handler);
+        // 5. Compose the layout — orientation / spacing / padding /
+        //    alignment all in cross-platform terms.
+        layout_.stack_orientation    = mpapp::orientation::vertical;
+        layout_.spacing              = 12.0;
+        layout_.padding              = mpapp::thickness{24.0};
+        layout_.horizontal_alignment = mpapp::h_align::center;
+        layout_.vertical_alignment   = mpapp::v_align::center;
+        layout_.add(lbl_);
+        layout_.add(btn_);
 
-        // Initial property values via the MPAPP surface.
-        state.btn.text = "Click me";
-        state.lbl.text = "Count: 0";
+        // Bind the layout handler — pushes the property values into
+        // the native StackPanel and replays the child list.
+        layout_handler_.bind(layout_);
 
-        // Push initial values into native widgets and wire change-signals.
-        state.btn_handler.map_text(state.btn);
-        state.lbl_handler.map_text(state.lbl);
-        state.btn_handler.map_clicked(state.btn);
+        // 6. Window setup. `window.content` is a non-owning view*.
+        window_.title    = "MPAPP T-0011 - app-shell rewrite";
+        window_.set_handler(window_handler_);
+        window_handler_.bind(window_);
 
-        // Click increments `count` via the cross-platform signal.
-        state.btn.clicked.subscribe(state.click_slot, state.click_cb);
+        // Assign content AFTER binding so the handler's content
+        // mapper picks up the change-signal and routes the new value
+        // into the native window's Content slot.
+        window_.content = &layout_;
 
-        // count changes drive label text changes via MPAPP only — the
-        // native TextBlock is updated by the label handler's text mapper.
-        state.vm.count.changed.subscribe(state.count_slot, state.count_cb);
-
-        muxc::StackPanel panel{};
-        panel.Orientation(muxc::Orientation::Vertical);
-        panel.Spacing(12);
-        panel.Padding(mux::Thickness{24, 24, 24, 24});
-        panel.HorizontalAlignment(mux::HorizontalAlignment::Center);
-        panel.VerticalAlignment(mux::VerticalAlignment::Center);
-        panel.Children().Append(state.lbl_handler.native());
-        panel.Children().Append(state.btn_handler.native());
-
-        window = mux::Window{};
-        window.Title(L"MPAPP T-0003 - WinUI 3 button spike");
-        window.Content(panel);
-        window.Activate();
+        // 7. Show the window.
+        window_.show();
     }
-};
 
-// Show a message-box and return non-zero from main so the failure is
-// visible without a debugger. Used only on the fatal-error path; the
-// happy path is silent.
-int fail(wchar_t const* what, HRESULT hr) {
-    wchar_t buf[256];
-    ::swprintf_s(buf, L"%s failed: 0x%08X", what, static_cast<unsigned>(hr));
-    ::MessageBoxW(nullptr, buf, L"MPAPP spike", MB_OK | MB_ICONERROR);
-    return 1;
-}
+private:
+    struct click_cb_t {
+        spike_app* self;
+        void operator()() const {
+            self->vm_.count.set(self->vm_.count.get() + 1);
+        }
+    };
+
+    struct count_cb_t {
+        spike_app* self;
+        void operator()(int n) const {
+            self->lbl_.text.set("Count: " + std::to_string(n));
+        }
+    };
+
+    view_model              vm_{};
+    mpapp::button           btn_{};
+    mpapp::label            lbl_{};
+    mpapp::stack_layout     layout_{};
+    mpapp::window           window_{};
+
+    mpapp::button_handler<mpapp::platform::windows>       btn_handler_{};
+    mpapp::label_handler<mpapp::platform::windows>        lbl_handler_{};
+    mpapp::stack_layout_handler<mpapp::platform::windows> layout_handler_{};
+    mpapp::window_handler<mpapp::platform::windows>       window_handler_{};
+
+    click_cb_t                       click_cb_{this};
+    count_cb_t                       count_cb_{this};
+    mpapp::signal_slot<>             click_slot_{};
+    mpapp::signal_slot<const int&>   count_slot_{};
+};
 
 } // namespace
 
-int __stdcall wWinMain(HINSTANCE, HINSTANCE, LPWSTR, int) {
-    // Bootstrap the unpackaged Windows App SDK 1.8 dynamic dependency.
-    // 0x0001'0008 = major.minor 1.8; the matching framework package
-    // ships preinstalled on Windows 11 24H2 development images.
-    PACKAGE_VERSION min_version{};
-    if (const HRESULT hr = ::MddBootstrapInitialize2(
-            0x00010008, nullptr, min_version,
-            MddBootstrapInitializeOptions_OnNoMatch_ShowUI);
-        FAILED(hr)) {
-        return fail(L"MddBootstrapInitialize2", hr);
-    }
-
-    if (const HRESULT hr = ::WindowsAppRuntime_EnsureIsLoaded(); FAILED(hr)) {
-        ::MddBootstrapShutdown();
-        return fail(L"WindowsAppRuntime_EnsureIsLoaded", hr);
-    }
-
-    try {
-        // WinUI 3 requires an STA. Application::Start sets up the UI
-        // dispatcher on top of it.
-        ::winrt::init_apartment(::winrt::apartment_type::single_threaded);
-
-        mux::Application::Start(
-            []([[maybe_unused]] mux::ApplicationInitializationCallbackParams const& p) {
-                ::winrt::make<App>();
-            });
-    } catch (::winrt::hresult_error const& e) {
-        ::MddBootstrapShutdown();
-        return fail(L"Application::Start", e.code().value);
-    }
-
-    ::MddBootstrapShutdown();
-    return 0;
+int main(int argc, char** argv) {
+    return mpapp::run<spike_app>(argc, argv);
 }

@@ -33,6 +33,7 @@
 // handlers are pulled in explicitly per-platform.
 #include "view.hpp"
 #include "layout.hpp"
+#include "layout_types.hpp"
 #include "bindable_layout.hpp"
 #include "scroll_view.hpp"
 #include "border.hpp"
@@ -41,6 +42,20 @@
 // code is not silently exposed to it. Callers that genuinely need the
 // legacy element include <mpapp/frame.hpp> explicitly and accept the
 // deprecation diagnostic.
+
+// App-shell surface (T-0011, ADR-0012). Application is the program
+// root; window / page are top-level chrome; stack_layout / grid_layout
+// are the user-facing layout primitives that replace native
+// StackPanel / Grid types in user code. The `mpapp::run<App>`
+// entry-point template is here too, but pulls in the native handler
+// set for `platform::current` — including <mpapp/run.hpp> brings in
+// the real WinUI / GTK4 / AppKit / UIKit / Android handlers and is
+// therefore opt-in. Mock-only consumers stick to <mpapp/mpapp.hpp>.
+#include "application.hpp"
+#include "window.hpp"
+#include "page.hpp"
+#include "stack_layout.hpp"
+#include "grid_layout.hpp"
 
 namespace mpapp {
 

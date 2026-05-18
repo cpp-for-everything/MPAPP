@@ -2,7 +2,7 @@
 type: adr
 id: ADR-0012
 title: Application / Window / Page / Layout handlers extend the widget-handler pattern
-status: proposed
+status: accepted
 decisionDate: 2026-05-18
 deciders:
   - alex
@@ -15,7 +15,7 @@ area: handlers
 
 ## Status
 
-**proposed** — awaiting a green spike rewrite under [[T-0011-app-shell-abstraction]].
+**accepted** — [[T-0011-app-shell-abstraction]] landed the mock surface for all five new types (Application, Window, Page, StackLayout, Grid), the WinUI 3 real handlers for Application / Window / StackLayout, and the rewritten `examples/windows_button_spike/main.cpp` with zero `winrt::`/`mux::`/`muxc::`/`Mdd*` tokens in user-facing code. 126/126 tests green (109 previous + 17 new for the app-shell surface).
 
 ## Context
 

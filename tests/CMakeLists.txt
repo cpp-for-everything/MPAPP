@@ -48,6 +48,11 @@ add_executable(mock_handlers_test
     mock_handlers/slider_test.cpp
     mock_handlers/stepper_test.cpp
     mock_handlers/switch_test.cpp
+    mock_handlers/application_test.cpp
+    mock_handlers/window_test.cpp
+    mock_handlers/page_test.cpp
+    mock_handlers/stack_layout_test.cpp
+    mock_handlers/grid_layout_test.cpp
 )
 target_link_libraries(mock_handlers_test PRIVATE mpapp-core Catch2::Catch2WithMain)
 target_compile_options(mock_handlers_test PRIVATE

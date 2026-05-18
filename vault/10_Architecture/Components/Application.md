@@ -2,16 +2,19 @@
 type: component
 mauiHandler: "Application"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/application"
-mpappStatus: not-started
-platformWindows: false
+mpappStatus: windows-real
+platformWindows: true
 platformAndroid: false
 platformLinux: false
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/windows-real
 ---
+
+> [!info] Status
+> **windows-real** — mock + WinUI 3 handler landed in [[T-0011-app-shell-abstraction]]. `mpapp::application` is the program root; the WinUI handler hides `MddBootstrap*`, `winrt::init_apartment`, and `Application::Start` behind `mpapp::run<App>(argc, argv)`. The C++ API and lifecycle hooks below are the as-shipped surface.
 
 # Application
 
