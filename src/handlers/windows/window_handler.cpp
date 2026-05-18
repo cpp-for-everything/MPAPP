@@ -85,7 +85,11 @@ void window_handler<platform::windows>::apply_is_visible(bool v) {
     }
     if (v) {
         native_.Activate();
-    } else {
+        was_activated_ = true;
+    } else if (was_activated_) {
+        // Only call Close() if the window has been shown at least once.
+        // Calling Close() on a never-activated mux::Window throws
+        // 0x800710DD.
         native_.Close();
     }
 }

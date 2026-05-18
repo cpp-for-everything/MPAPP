@@ -1,32 +1,48 @@
 # SPDX-License-Identifier: Apache-2.0
-# T-0007 — WSLg GTK4 hello-window example.
-#
-# Linux-only GTK4 smoke target. Used to validate the Linux dev loop from
-# a Windows host: build under WSL2 Ubuntu (or cross-build from the host
-# via the linux-x64 toolchain) and run the binary so the window surfaces
-# on the Windows desktop through WSLg.
-#
-# The example is gated on UNIX AND NOT APPLE — Linux/BSD only. macOS is
-# excluded because GTK4 there is not the native toolkit.
+# T-0011 — GTK4 hello-window example, rewritten against the MPAPP
+# app-shell abstraction. Compiles + runs only on UNIX (non-Apple).
 
 if(NOT (UNIX AND NOT APPLE))
     return()
 endif()
 
-# Enable C so we can compile main.c. The project file lists CXX only, so
-# we have to add C locally for this target.
-enable_language(C)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
-add_executable(gtk4_hello main.c)
-
-target_link_libraries(gtk4_hello PRIVATE PkgConfig::GTK4)
-
-target_compile_options(gtk4_hello PRIVATE
-    $<$<COMPILE_LANG_AND_ID:C,GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic>
+# MPAPP Linux handler set — single small static library, mirrors the
+# Windows handler set layout (examples/windows_button_spike/CMakeLists).
+add_library(mpapp-handlers-linux STATIC
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/application_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/window_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/stack_layout_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/button_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/label_handler.cpp
 )
 
-# GTK4 headers require C11 (stdatomic.h, _Generic).
-target_compile_features(gtk4_hello PRIVATE c_std_11)
+target_include_directories(mpapp-handlers-linux PUBLIC
+    ${CMAKE_SOURCE_DIR}/include
+)
+
+target_compile_features(mpapp-handlers-linux PUBLIC cxx_std_23)
+
+target_link_libraries(mpapp-handlers-linux
+    PUBLIC mpapp-core
+    PUBLIC PkgConfig::GTK4
+)
+
+# GTK4 headers don't survive -Wpedantic -Werror cleanly; loosen on this
+# library only.
+target_compile_options(mpapp-handlers-linux PRIVATE
+    -Wall -Wextra
+)
+
+# The example exe.
+add_executable(gtk4_hello main.cpp)
+target_link_libraries(gtk4_hello PRIVATE
+    mpapp-core
+    mpapp-handlers-linux
+)
+target_compile_features(gtk4_hello PRIVATE cxx_std_23)
+target_compile_options(gtk4_hello PRIVATE
+    -Wall -Wextra -Wpedantic
+)

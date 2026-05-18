@@ -10,6 +10,13 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# CMake 3.28 enables clang-scan-deps for C++23 by default. MPAPP doesn't
+# use named modules in its public surface yet, and several toolchains
+# (Ubuntu clang 18, Zig 0.13) ship clang/clang++ without a matching
+# clang-scan-deps. Disable globally so the build does not depend on
+# scan-deps being on PATH.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 # MSVC 14.51+ emits C4530 from <chrono>/<format>/<filesystem> headers unless
 # unwind semantics are enabled. Visual Studio's MSBuild generator implicitly
 # adds /EHsc; the Ninja generator does not. Set it project-wide so /WX builds
@@ -35,10 +42,10 @@ option(MPAPP_BUILD_TOOLS
 )
 
 # Example programs (platform spikes). Default-on where their platform prereqs
-# ship — currently only Windows (WinUI 3, the hot-reload spike). Linux/macOS
-# spikes get the same default-on treatment as their build prereqs land
-# (see T-0007 WSLg, T-0008 macOS).
-if(WIN32)
+# are routinely available — Windows (WinUI 3) and Linux/Unix (GTK4 via apt /
+# pkg-config). macOS/iOS/Android spikes get the same treatment as their build
+# prereqs land.
+if(WIN32 OR (UNIX AND NOT APPLE))
     option(MPAPP_BUILD_EXAMPLES "Build the platform example apps." ON)
 else()
     option(MPAPP_BUILD_EXAMPLES "Build the platform example apps." OFF)

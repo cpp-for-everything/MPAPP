@@ -67,7 +67,8 @@ private:
 
     winrt::Microsoft::UI::Xaml::Window native_{nullptr};
     winrt::event_token                 closed_token_{};
-    window*                            bound_ = nullptr;
+    window*                            bound_         = nullptr;
+    bool                               was_activated_ = false;
 
     title_cb_t                         title_cb_{this};
     content_cb_t                       content_cb_{this};

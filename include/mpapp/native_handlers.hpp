@@ -27,19 +27,24 @@
 // are pulled in by user code that needs them. The Application / Window /
 // StackLayout trio is what `mpapp::run<App>` needs to instantiate.
 #elif defined(__ANDROID__)
-// Android handlers — TODO(T-0011 follow-up): land alongside the JNI
-// codegen work in T-0004. For now this is a hard error so misconfigured
-// builds fail loudly instead of silently dropping the entry point.
-#  error "MPAPP: Android handlers not yet implemented (tracked in T-0011 follow-up)"
+#  include "handlers/android/application_handler.hpp"
+#  include "handlers/android/window_handler.hpp"
+#  include "handlers/android/stack_layout_handler.hpp"
 #elif defined(__APPLE__)
 #  include <TargetConditionals.h>
 #  if TARGET_OS_IPHONE
-#    error "MPAPP: iOS handlers not yet implemented (tracked in T-0011 follow-up)"
+#    include "handlers/ios/application_handler.hpp"
+#    include "handlers/ios/window_handler.hpp"
+#    include "handlers/ios/stack_layout_handler.hpp"
 #  else
-#    error "MPAPP: macOS handlers not yet implemented (tracked in T-0011 follow-up)"
+#    include "handlers/macos/application_handler.hpp"
+#    include "handlers/macos/window_handler.hpp"
+#    include "handlers/macos/stack_layout_handler.hpp"
 #  endif
 #elif defined(__linux__)
-#  error "MPAPP: Linux/GTK4 handlers not yet implemented (tracked in T-0011 follow-up + T-0007 unblocking)"
+#  include "handlers/linux/application_handler.hpp"
+#  include "handlers/linux/window_handler.hpp"
+#  include "handlers/linux/stack_layout_handler.hpp"
 #else
 #  error "MPAPP: unsupported host platform — no native handler set available."
 #endif

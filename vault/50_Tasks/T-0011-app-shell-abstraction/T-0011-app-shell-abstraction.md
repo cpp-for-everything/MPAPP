@@ -8,7 +8,7 @@ owner: ""
 area: handlers
 blockedBy: []
 coveragePercent: 100
-hasScreenshots: false
+hasScreenshots: true
 hasRecordings: false
 tags:
   - type/task
