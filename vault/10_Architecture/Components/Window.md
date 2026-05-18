@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "Window"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/window"
-mpappStatus: windows-real
+mpappStatus: android-real
 platformWindows: true
-platformAndroid: false
-platformLinux: false
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/windows-real
+  - status/android-real
 ---
 
 # Window
 
 > [!info] Status
-> **windows-real** — mock + WinUI 3 handler landed in [[T-0011-app-shell-abstraction]]. The simplified initial surface (title / content / width / height / is_visible + activated/closed signals) replaces the original spec; the richer geometry / titlebar / mode flags below remain on the M-04 docket. See [[Controls Inventory]] for the full porting matrix.
+> **3-of-5 platforms real** — mock + WinUI 3 + GTK4 + Android (Activity content view via JNI) handlers all landed and **live-verified end-to-end** in [[T-0011-app-shell-abstraction]]. The simplified initial surface (title / content / width / height / is_visible + activated/closed signals) replaces the original spec; the richer geometry / titlebar / mode flags below remain on the M-04 docket. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 

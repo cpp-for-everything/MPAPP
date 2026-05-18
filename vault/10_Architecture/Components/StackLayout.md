@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "StackLayout"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/layouts/stacklayout"
-mpappStatus: windows-real
+mpappStatus: android-real
 platformWindows: true
-platformAndroid: false
-platformLinux: false
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/windows-real
+  - status/android-real
 ---
 
 # StackLayout
 
 > [!info] Status
-> **windows-real** — mock + WinUI 3 handler landed in [[T-0011-app-shell-abstraction]]. Replaces the raw `muxc::StackPanel` user code used to name; first-class layout primitive in the app-shell layer.
+> **3-of-5 platforms real** — mock + WinUI 3 + GTK4 + Android (`LinearLayout` via JNI) handlers all landed and **live-verified end-to-end** in [[T-0011-app-shell-abstraction]]. Replaces the raw `muxc::StackPanel` / `GtkBox` / `LinearLayout` user code used to name; first-class cross-platform layout primitive.
 
 ## Overview
 

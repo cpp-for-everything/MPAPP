@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "Button"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/button"
-mpappStatus: mock
+mpappStatus: android-real
 platformWindows: true
-platformAndroid: false
-platformLinux: false
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Button
 
 > [!info] Status
-> **mock** — Windows handler validated by [[../50_Tasks/T-0003-winui3-button-spike/T-0003-winui3-button-spike]]; the rest of the API surface is mocked, with the full property/event set landing in M-03.
+> **3-of-5 platforms real** — `text` + `clicked` surface verified live on WinUI 3 (`mux::Button` + `Click` event), GTK4 (`GtkButton` + `clicked` signal), and Android (`android.widget.Button` + `OnClickListener` via the `MppClickRouter` JNI bridge) under [[../50_Tasks/T-0011-app-shell-abstraction/T-0011-app-shell-abstraction]]. macOS (`NSButton`) and iOS (`UIButton`) handlers are code-complete pending an Apple host.
 
 ## Overview
 

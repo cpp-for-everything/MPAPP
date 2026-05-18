@@ -2,19 +2,19 @@
 type: component
 mauiHandler: "Application"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/application"
-mpappStatus: windows-real
+mpappStatus: android-real
 platformWindows: true
-platformAndroid: false
-platformLinux: false
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/windows-real
+  - status/android-real
 ---
 
 > [!info] Status
-> **windows-real** — mock + WinUI 3 handler landed in [[T-0011-app-shell-abstraction]]. `mpapp::application` is the program root; the WinUI handler hides `MddBootstrap*`, `winrt::init_apartment`, and `Application::Start` behind `mpapp::run<App>(argc, argv)`. The C++ API and lifecycle hooks below are the as-shipped surface.
+> **3-of-5 platforms real** — mock + WinUI 3 + GTK4 + Android (JNI) handlers all landed and **live-verified end-to-end** in [[T-0011-app-shell-abstraction]]. `mpapp::run<App>(argc, argv)` is the cross-platform entry point; each platform's `application_handler` hides the native bootstrap (`MddBootstrap*` on Windows, `gtk_application_new + g_application_run` on Linux, `MainActivity.onCreate + JNI` on Android). macOS + iOS handlers are code-complete pending an Apple host.
 
 # Application
 

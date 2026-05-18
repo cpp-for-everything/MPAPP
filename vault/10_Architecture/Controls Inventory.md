@@ -22,11 +22,11 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | Component | MAUI handler folder | Status |
 |---|---|---|
 | [[Components/ActivityIndicator\|ActivityIndicator]] | `Handlers/ActivityIndicator/` | not-started |
-| [[Components/Application\|Application]] | `Handlers/Application/` | windows-real |
+| [[Components/Application\|Application]] | `Handlers/Application/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/BindableLayout\|BindableLayout]] | `Controls/BindableLayout/` | mock |
 | [[Components/Border\|Border]] | `Handlers/Border/` | mock |
 | [[Components/BoxView\|BoxView]] | `Controls/BoxView/` | mock |
-| [[Components/Button\|Button]] | `Handlers/Button/` | mock |
+| [[Components/Button\|Button]] | `Handlers/Button/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/CheckBox\|CheckBox]] | `Handlers/CheckBox/` | mock |
 | [[Components/ContentPage\|ContentPage]] | `Controls/ContentPage/` | not-started |
 | [[Components/ContentView\|ContentView]] | `Handlers/ContentView/` | not-started |
@@ -43,7 +43,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Image\|Image]] | `Handlers/Image/` | not-started |
 | [[Components/ImageButton\|ImageButton]] | `Handlers/ImageButton/` | not-started |
 | [[Components/IndicatorView\|IndicatorView]] | `Handlers/IndicatorView/` | not-started |
-| [[Components/Label\|Label]] | `Handlers/Label/` | mock |
+| [[Components/Label\|Label]] | `Handlers/Label/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/Layout\|Layout]] | `Handlers/Layout/` | mock |
 | [[Components/ListView\|ListView]] | `Controls/ListView/` | not-started |
 | [[Components/MenuBar\|MenuBar]] | `Handlers/MenuBar/` | not-started |
@@ -63,7 +63,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ShapeView\|ShapeView]] | `Handlers/ShapeView/` | not-started |
 | [[Components/Shell\|Shell]] | `Controls/Shell/` | not-started |
 | [[Components/Slider\|Slider]] | `Handlers/Slider/` | mock |
-| [[Components/StackLayout\|StackLayout]] | `Layouts/StackLayoutManager/` | windows-real |
+| [[Components/StackLayout\|StackLayout]] | `Layouts/StackLayoutManager/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/Stepper\|Stepper]] | `Handlers/Stepper/` | mock |
 | [[Components/SwipeItemMenuItem\|SwipeItemMenuItem]] | `Handlers/SwipeItemMenuItem/` | not-started |
 | [[Components/SwipeItemView\|SwipeItemView]] | `Handlers/SwipeItemView/` | not-started |
@@ -78,7 +78,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Toolbar\|Toolbar]] | `Handlers/Toolbar/` | not-started |
 | [[Components/View\|View]] | `Handlers/View/` | mock |
 | [[Components/WebView\|WebView]] | `Handlers/WebView/` | not-started |
-| [[Components/Window\|Window]] | `Handlers/Window/` | windows-real |
+| [[Components/Window\|Window]] | `Handlers/Window/` | android-real (Windows + Linux + Android verified live) |
 
 **Total: 55 components.**
 

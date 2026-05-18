@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "Label"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/label"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Label
 
 > [!info] Status
-> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/label_handler.hpp` with tests in `tests/mock_handlers/label_test.cpp`. Real platform handlers follow in P3.
+> **3-of-5 platforms real** — `text` surface verified live on WinUI 3 (`mux::TextBlock`), GTK4 (`GtkLabel`), and Android (`android.widget.TextView`) under [[../50_Tasks/T-0011-app-shell-abstraction/T-0011-app-shell-abstraction]]. macOS (`NSTextField` in label mode) and iOS (`UILabel`) handlers are code-complete pending an Apple host.
 
 ## Overview
 
