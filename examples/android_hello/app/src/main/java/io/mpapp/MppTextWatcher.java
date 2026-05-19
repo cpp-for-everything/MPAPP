@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 follow-up — Android text watcher.
-//
-// Bridges android.text.TextWatcher → native mpapp::entry::text.set.
-// The native entry handler instantiates one of these via JNI and
-// installs it on its EditText.
+// Part of MPAPP. Bridges android.text.TextWatcher → native mpapp text
+// handlers (entry / editor). `kind` discriminates which handler type
+// the long pointer refers to: 1 = entry, 2 = editor.
 
 package io.mpapp;
 
@@ -12,9 +10,11 @@ import android.text.TextWatcher;
 
 public final class MppTextWatcher implements TextWatcher {
     private final long handlerPtr;
+    private final int  kind;
 
-    public MppTextWatcher(long handlerPtr) {
+    public MppTextWatcher(long handlerPtr, int kind) {
         this.handlerPtr = handlerPtr;
+        this.kind       = kind;
     }
 
     @Override
@@ -25,8 +25,8 @@ public final class MppTextWatcher implements TextWatcher {
 
     @Override
     public void afterTextChanged(Editable s) {
-        nativeDispatchTextChanged(handlerPtr, s == null ? null : s.toString());
+        nativeDispatchTextChanged(handlerPtr, kind, s == null ? null : s.toString());
     }
 
-    private static native void nativeDispatchTextChanged(long handlerPtr, String text);
+    private static native void nativeDispatchTextChanged(long handlerPtr, int kind, String text);
 }

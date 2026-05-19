@@ -13,9 +13,11 @@
 
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
+#include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
 #include "mpapp/handlers/windows/check_box_handler.hpp"
+#include "mpapp/handlers/windows/editor_handler.hpp"
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/radio_button_handler.hpp"
@@ -179,6 +181,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* st = dynamic_cast<stepper*>(&child); st != nullptr) {
         if (st->has_handler()) {
             native_.Children().Append(st->handler().native());
+        }
+        return;
+    }
+    if (auto* ed = dynamic_cast<editor*>(&child); ed != nullptr) {
+        if (ed->has_handler()) {
+            native_.Children().Append(ed->handler().native());
         }
         return;
     }

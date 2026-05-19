@@ -9,9 +9,11 @@
 
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
+#include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
 #include "mpapp/handlers/linux/check_box_handler.hpp"
+#include "mpapp/handlers/linux/editor_handler.hpp"
 #include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
 #include "mpapp/handlers/linux/radio_button_handler.hpp"
@@ -97,6 +99,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* st = dynamic_cast<stepper*>(v); st != nullptr && st->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(st->handler().native()));
+        return;
+    }
+    if (auto* ed = dynamic_cast<editor*>(v); ed != nullptr && ed->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(ed->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.

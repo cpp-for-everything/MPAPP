@@ -11,9 +11,11 @@
 
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
+#include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
 #include "mpapp/handlers/windows/check_box_handler.hpp"
+#include "mpapp/handlers/windows/editor_handler.hpp"
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/radio_button_handler.hpp"
@@ -120,6 +122,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* st = dynamic_cast<stepper*>(v); st != nullptr) {
         if (st->has_handler()) {
             native_.Content(st->handler().native());
+        }
+        return;
+    }
+    if (auto* ed = dynamic_cast<editor*>(v); ed != nullptr) {
+        if (ed->has_handler()) {
+            native_.Content(ed->handler().native());
         }
         return;
     }

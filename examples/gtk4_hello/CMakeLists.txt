@@ -23,6 +23,7 @@ add_library(mpapp-handlers-linux STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/radio_button_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/slider_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/stepper_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/editor_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-linux PUBLIC

@@ -31,7 +31,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ContentPage\|ContentPage]] | `Controls/ContentPage/` | not-started |
 | [[Components/ContentView\|ContentView]] | `Handlers/ContentView/` | not-started |
 | [[Components/DatePicker\|DatePicker]] | `Handlers/DatePicker/` | not-started |
-| [[Components/Editor\|Editor]] | `Handlers/Editor/` | mock |
+| [[Components/Editor\|Editor]] | `Handlers/Editor/` | android-real (Windows multi-line TextBox + Linux GtkTextView + Android multi-line EditText; shares text-binding bridge with Entry via shared MppTextWatcher kind discriminator) |
 | [[Components/Element\|Element]] | `Handlers/Element/` | not-started |
 | [[Components/Entry\|Entry]] | `Handlers/Entry/` | android-real (Windows + Linux + Android; bidirectional text-binding live-verified on Android) |
 | [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | not-started |

@@ -2,20 +2,23 @@
 type: component
 mauiHandler: "Editor"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/editor"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Editor
 
 > [!info] Status
+> **3-of-5 platforms real** — `text` + `placeholder` (WinUI 3 + Android only — GTK4 `GtkTextView` has no placeholder concept) + `is_read_only` surface real on WinUI 3 (`mux::Controls::TextBox` with `AcceptsReturn=true, TextWrapping=Wrap`), GTK4 (`GtkTextView` + `GtkTextBuffer`), and Android (`android.widget.EditText` with `InputType = TYPE_CLASS_TEXT | TYPE_TEXT_FLAG_MULTI_LINE`, min 3 lines). Shares the bidirectional text-binding pipeline with Entry — the same `MppTextWatcher` Java listener routes Entry (kind=1) and Editor (kind=2) through a new shared `text_watcher_dispatch.cpp` JNI trampoline. Entry's reverse-binding chain is live-verified on Android; Editor uses the identical code path, just attached to a multi-line-configured EditText. macOS / iOS handlers code-complete pending an Apple host.
+
+> [!info] Original status
 > **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/editor_handler.hpp` with tests in `tests/mock_handlers/editor_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview

@@ -9,9 +9,11 @@
 
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
+#include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
 #include "mpapp/handlers/android/check_box_handler.hpp"
+#include "mpapp/handlers/android/editor_handler.hpp"
 #include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
 #include "mpapp/handlers/android/radio_button_handler.hpp"
@@ -57,6 +59,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* st = dynamic_cast<stepper*>(v); st && st->has_handler()) {
         return st->handler().native();
+    }
+    if (auto* ed = dynamic_cast<editor*>(v); ed && ed->has_handler()) {
+        return ed->handler().native();
     }
     return nullptr;
 }
