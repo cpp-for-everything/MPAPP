@@ -17,12 +17,14 @@
 #include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
 #include "mpapp/handlers/android/radio_button_handler.hpp"
+#include "mpapp/handlers/android/scroll_view_handler.hpp"
 #include "mpapp/handlers/android/slider_handler.hpp"
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
 #include "mpapp/handlers/android/stepper_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
+#include "mpapp/scroll_view.hpp"
 #include "mpapp/slider.hpp"
 #include "mpapp/stack_layout.hpp"
 #include "mpapp/stepper.hpp"
@@ -62,6 +64,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* ed = dynamic_cast<editor*>(v); ed && ed->has_handler()) {
         return ed->handler().native();
+    }
+    if (auto* sv = dynamic_cast<scroll_view*>(v); sv && sv->has_handler()) {
+        return sv->handler().native();
     }
     return nullptr;
 }

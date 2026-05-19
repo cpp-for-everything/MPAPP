@@ -58,7 +58,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ProgressBar\|ProgressBar]] | `Handlers/ProgressBar/` | not-started |
 | [[Components/RadioButton\|RadioButton]] | `Handlers/RadioButton/` | android-real (Windows + Linux + Android; auto-grouping via group_name; shared compound-button JNI bridge kind=3) |
 | [[Components/RefreshView\|RefreshView]] | `Handlers/RefreshView/` | not-started |
-| [[Components/ScrollView\|ScrollView]] | `Handlers/ScrollView/` | mock |
+| [[Components/ScrollView\|ScrollView]] | `Handlers/ScrollView/` | android-real (Windows ScrollViewer + Linux GtkScrolledWindow + Android ScrollView; `bind_content(scroll_view&, view&)` helper wraps a non-owning child as null-deleter `shared_ptr<view>`; Android spike wraps the full widget stack and renders through it) |
 | [[Components/SearchBar\|SearchBar]] | `Handlers/SearchBar/` | not-started |
 | [[Components/ShapeView\|ShapeView]] | `Handlers/ShapeView/` | not-started |
 | [[Components/Shell\|Shell]] | `Controls/Shell/` | not-started |

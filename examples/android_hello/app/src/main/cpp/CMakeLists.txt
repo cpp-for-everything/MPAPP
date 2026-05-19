@@ -26,6 +26,7 @@ add_library(android_hello SHARED
     ${MPAPP_ROOT}/src/handlers/android/slider_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/stepper_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/editor_handler.cpp
+    ${MPAPP_ROOT}/src/handlers/android/scroll_view_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/compound_button_dispatch.cpp
     ${MPAPP_ROOT}/src/handlers/android/text_watcher_dispatch.cpp
     ${MPAPP_ROOT}/src/mpapp.cpp

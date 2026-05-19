@@ -2,20 +2,23 @@
 type: component
 mauiHandler: "ScrollView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/scrollview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # ScrollView
 
 > [!info] Status
+> **3-of-5 platforms real** — `content` + `orientation` surface real on WinUI 3 (`mux::Controls::ScrollViewer` with `HorizontalScrollMode`/`VerticalScrollMode` + `*ScrollBarVisibility` per axis), GTK4 (`GtkScrolledWindow` with per-axis `GTK_POLICY_*`), and Android (`android.widget.ScrollView` via JNI — vertical-only for the spike; horizontal scrolling needs `HorizontalScrollView` and lands as M-05 polish per the [[Controls Inventory]] follow-up). Each platform exposes a `bind_content(scroll_view&, view&)` helper that wraps the non-owning child in a null-deleter `shared_ptr<view>` so callers don't have to manage real shared ownership for the cross-platform `Observable<std::shared_ptr<view>>` contract. macOS / iOS handlers code-complete pending an Apple host.
+
+> [!info] Original status
 > **mock** — cross-platform header at `include/mpapp/scroll_view.hpp`; mock handler records orientation, scrollbar-visibility, content presence, and the `scroll_to` command request. See [[Controls Inventory]].
 
 ## Overview

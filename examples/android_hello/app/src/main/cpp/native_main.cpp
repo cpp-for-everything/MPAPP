@@ -17,6 +17,7 @@
 #include <mpapp/layout_types.hpp>
 #include <mpapp/observable.hpp>
 #include <mpapp/run.hpp>
+#include <mpapp/scroll_view.hpp>
 #include <mpapp/signal.hpp>
 #include <mpapp/slider.hpp>
 #include <mpapp/stack_layout.hpp>
@@ -28,6 +29,7 @@
 #include <mpapp/handlers/android/entry_handler.hpp>
 #include <mpapp/handlers/android/jni_bridge.hpp>
 #include <mpapp/handlers/android/label_handler.hpp>
+#include <mpapp/handlers/android/scroll_view_handler.hpp>
 #include <mpapp/handlers/android/slider_handler.hpp>
 #include <mpapp/handlers/android/stack_layout_handler.hpp>
 #include <mpapp/handlers/android/switch_handler.hpp>
@@ -49,6 +51,7 @@ public:
         exclaim_.set_handler(exclaim_handler_);
         repeat_.set_handler(repeat_handler_);
         layout_.set_handler(layout_handler_);
+        scroll_.set_handler(scroll_handler_);
 
         btn_.text         = "Click me";
         lbl_.text         = "Count: 0 — hello, world";
@@ -69,6 +72,8 @@ public:
         repeat_handler_.map_minimum(repeat_);
         repeat_handler_.map_maximum(repeat_);
         repeat_handler_.map_value(repeat_);
+        scroll_handler_.map_content(scroll_);
+        scroll_handler_.map_orientation(scroll_);
 
         btn_.clicked.subscribe(click_slot_, click_cb_);
         vm_.count.changed.subscribe(count_slot_, count_cb_);
@@ -89,11 +94,12 @@ public:
         layout_.add(repeat_);
         layout_.add(btn_);
         layout_handler_.bind(layout_);
+        scroll_handler_.bind_content(scroll_, layout_);
 
         window_.title  = "MPAPP T-0011 - Android hello";
         window_.set_handler(window_handler_);
         window_handler_.bind(window_);
-        window_.content = &layout_;
+        window_.content = &scroll_;
         window_.show();
     }
 
@@ -140,6 +146,7 @@ private:
     mpapp::check_box        exclaim_{};
     mpapp::slider           repeat_{};
     mpapp::stack_layout     layout_{};
+    mpapp::scroll_view      scroll_{};
     mpapp::window           window_{};
 
     mpapp::button_handler<mpapp::platform::android>       btn_handler_{};
@@ -149,6 +156,7 @@ private:
     mpapp::check_box_handler<mpapp::platform::android>    exclaim_handler_{};
     mpapp::slider_handler<mpapp::platform::android>       repeat_handler_{};
     mpapp::stack_layout_handler<mpapp::platform::android> layout_handler_{};
+    mpapp::scroll_view_handler<mpapp::platform::android>  scroll_handler_{};
     mpapp::window_handler<mpapp::platform::android>       window_handler_{};
 
     click_cb_t                             click_cb_{this};

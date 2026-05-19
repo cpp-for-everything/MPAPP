@@ -19,12 +19,14 @@
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/radio_button_handler.hpp"
+#include "mpapp/handlers/windows/scroll_view_handler.hpp"
 #include "mpapp/handlers/windows/slider_handler.hpp"
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
 #include "mpapp/handlers/windows/stepper_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
+#include "mpapp/scroll_view.hpp"
 #include "mpapp/slider.hpp"
 #include "mpapp/stack_layout.hpp"
 #include "mpapp/stepper.hpp"
@@ -128,6 +130,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* ed = dynamic_cast<editor*>(v); ed != nullptr) {
         if (ed->has_handler()) {
             native_.Content(ed->handler().native());
+        }
+        return;
+    }
+    if (auto* sv = dynamic_cast<scroll_view*>(v); sv != nullptr) {
+        if (sv->has_handler()) {
+            native_.Content(sv->handler().native());
         }
         return;
     }

@@ -17,12 +17,14 @@
 #include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
 #include "mpapp/handlers/linux/radio_button_handler.hpp"
+#include "mpapp/handlers/linux/scroll_view_handler.hpp"
 #include "mpapp/handlers/linux/slider_handler.hpp"
 #include "mpapp/handlers/linux/stack_layout_handler.hpp"
 #include "mpapp/handlers/linux/stepper_handler.hpp"
 #include "mpapp/handlers/linux/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
+#include "mpapp/scroll_view.hpp"
 #include "mpapp/slider.hpp"
 #include "mpapp/stack_layout.hpp"
 #include "mpapp/stepper.hpp"
@@ -103,6 +105,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* ed = dynamic_cast<editor*>(v); ed != nullptr && ed->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(ed->handler().native()));
+        return;
+    }
+    if (auto* sv = dynamic_cast<scroll_view*>(v); sv != nullptr && sv->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(sv->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.

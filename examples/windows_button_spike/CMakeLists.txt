@@ -25,6 +25,7 @@ add_library(mpapp-handlers-windows STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/slider_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/stepper_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/editor_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/windows/scroll_view_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-windows PUBLIC
