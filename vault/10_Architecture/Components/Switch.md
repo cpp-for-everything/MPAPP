@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "Switch"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/switch"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Switch
 
 > [!info] Status
-> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/switch_handler.hpp` with tests in `tests/mock_handlers/switch_test.cpp`. Real platform handlers follow in P3.
+> **3-of-5 platforms real** — `is_on: Observable<bool>` surface real on WinUI 3 (`mux::Controls::ToggleSwitch` + `Toggled` event), GTK4 (`GtkSwitch` + `state-set` signal), and Android (`android.widget.Switch` + `OnCheckedChangeListener` via the `MppCheckedChangeListener` JNI bridge). **Bidirectional binding** end-to-end live-verified on Android: toggling the switch flips a cross-platform `Observable<bool>` whose user-side observer transforms the label text to ALL CAPS + "!!!". Verified screenshot: `_Archive/T-0011-app-shell-abstraction/screenshots/android-switch-on.png` (label flips Count: 0 — hello, world → Count: 0 — HELLO, WORLD!!! on toggle); `android-switch-clicked2.png` (Count: 2 with switch ON shows clicks ALSO compose with the shout state). macOS / iOS handlers code-complete pending an Apple host.
 
 ## Overview
 

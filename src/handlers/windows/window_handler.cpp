@@ -15,8 +15,10 @@
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
+#include "mpapp/handlers/windows/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/stack_layout.hpp"
+#include "mpapp/switch_.hpp"
 
 #include "winrt_strings.hpp"
 
@@ -80,6 +82,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* e = dynamic_cast<entry*>(v); e != nullptr) {
         if (e->has_handler()) {
             native_.Content(e->handler().native());
+        }
+        return;
+    }
+    if (auto* sw = dynamic_cast<switch_*>(v); sw != nullptr) {
+        if (sw->has_handler()) {
+            native_.Content(sw->handler().native());
         }
         return;
     }

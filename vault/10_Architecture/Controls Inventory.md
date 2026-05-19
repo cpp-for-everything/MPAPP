@@ -68,7 +68,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/SwipeItemMenuItem\|SwipeItemMenuItem]] | `Handlers/SwipeItemMenuItem/` | not-started |
 | [[Components/SwipeItemView\|SwipeItemView]] | `Handlers/SwipeItemView/` | not-started |
 | [[Components/SwipeView\|SwipeView]] | `Handlers/SwipeView/` | not-started |
-| [[Components/Switch\|Switch]] | `Handlers/Switch/` | mock |
+| [[Components/Switch\|Switch]] | `Handlers/Switch/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android) |
 | [[Components/TabbedPage\|TabbedPage]] | `Controls/TabbedPage/` | not-started |
 | [[Components/TabbedView\|TabbedView]] | `Handlers/TabbedView/` | not-started |
 | [[Components/TableView\|TableView]] | `Controls/TableView/` | not-started |

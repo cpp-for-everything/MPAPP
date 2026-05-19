@@ -16,7 +16,9 @@
 #include "mpapp/handlers/windows/button_handler.hpp"
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
+#include "mpapp/handlers/windows/switch_handler.hpp"
 #include "mpapp/label.hpp"
+#include "mpapp/switch_.hpp"
 
 namespace mpapp {
 
@@ -139,6 +141,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* e = dynamic_cast<entry*>(&child); e != nullptr) {
         if (e->has_handler()) {
             native_.Children().Append(e->handler().native());
+        }
+        return;
+    }
+    if (auto* sw = dynamic_cast<switch_*>(&child); sw != nullptr) {
+        if (sw->has_handler()) {
+            native_.Children().Append(sw->handler().native());
         }
         return;
     }

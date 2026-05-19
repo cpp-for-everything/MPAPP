@@ -20,6 +20,7 @@ add_library(android_hello SHARED
     ${MPAPP_ROOT}/src/handlers/android/button_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/label_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/entry_handler.cpp
+    ${MPAPP_ROOT}/src/handlers/android/switch_handler.cpp
     ${MPAPP_ROOT}/src/mpapp.cpp
 )
 

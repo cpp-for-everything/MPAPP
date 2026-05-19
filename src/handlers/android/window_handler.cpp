@@ -13,8 +13,10 @@
 #include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
+#include "mpapp/handlers/android/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/stack_layout.hpp"
+#include "mpapp/switch_.hpp"
 
 namespace mpapp {
 
@@ -32,6 +34,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* e = dynamic_cast<entry*>(v); e && e->has_handler()) {
         return e->handler().native();
+    }
+    if (auto* sw = dynamic_cast<switch_*>(v); sw && sw->has_handler()) {
+        return sw->handler().native();
     }
     return nullptr;
 }

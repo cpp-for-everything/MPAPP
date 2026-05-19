@@ -19,6 +19,7 @@ add_library(mpapp-handlers-windows STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/window_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/stack_layout_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/entry_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/windows/switch_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-windows PUBLIC

@@ -13,8 +13,10 @@
 #include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
 #include "mpapp/handlers/linux/stack_layout_handler.hpp"
+#include "mpapp/handlers/linux/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/stack_layout.hpp"
+#include "mpapp/switch_.hpp"
 
 namespace mpapp {
 
@@ -67,6 +69,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* e = dynamic_cast<entry*>(v); e != nullptr && e->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(e->handler().native()));
+        return;
+    }
+    if (auto* sw = dynamic_cast<switch_*>(v); sw != nullptr && sw->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(sw->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.

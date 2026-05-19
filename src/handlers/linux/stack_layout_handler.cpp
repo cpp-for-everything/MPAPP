@@ -12,7 +12,9 @@
 #include "mpapp/handlers/linux/button_handler.hpp"
 #include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
+#include "mpapp/handlers/linux/switch_handler.hpp"
 #include "mpapp/label.hpp"
+#include "mpapp/switch_.hpp"
 
 namespace mpapp {
 
@@ -122,6 +124,10 @@ void stack_layout_handler<platform::linux_>::add_child(view& child) {
     }
     if (auto* e = dynamic_cast<entry*>(&child); e != nullptr && e->has_handler()) {
         gtk_box_append(box, GTK_WIDGET(e->handler().native()));
+        return;
+    }
+    if (auto* sw = dynamic_cast<switch_*>(&child); sw != nullptr && sw->has_handler()) {
+        gtk_box_append(box, GTK_WIDGET(sw->handler().native()));
         return;
     }
 }
