@@ -14,9 +14,11 @@
 #include "mpapp/handlers/linux/check_box_handler.hpp"
 #include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
+#include "mpapp/handlers/linux/radio_button_handler.hpp"
 #include "mpapp/handlers/linux/stack_layout_handler.hpp"
 #include "mpapp/handlers/linux/switch_handler.hpp"
 #include "mpapp/label.hpp"
+#include "mpapp/radio_button.hpp"
 #include "mpapp/stack_layout.hpp"
 #include "mpapp/switch_.hpp"
 
@@ -79,6 +81,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* cb = dynamic_cast<check_box*>(v); cb != nullptr && cb->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(cb->handler().native()));
+        return;
+    }
+    if (auto* rb = dynamic_cast<radio_button*>(v); rb != nullptr && rb->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(rb->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.

@@ -20,6 +20,7 @@ add_library(mpapp-handlers-linux STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/entry_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/switch_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/check_box_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/radio_button_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-linux PUBLIC

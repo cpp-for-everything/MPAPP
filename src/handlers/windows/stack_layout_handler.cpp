@@ -18,8 +18,10 @@
 #include "mpapp/handlers/windows/check_box_handler.hpp"
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
+#include "mpapp/handlers/windows/radio_button_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
 #include "mpapp/label.hpp"
+#include "mpapp/radio_button.hpp"
 #include "mpapp/switch_.hpp"
 
 namespace mpapp {
@@ -155,6 +157,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* cb = dynamic_cast<check_box*>(&child); cb != nullptr) {
         if (cb->has_handler()) {
             native_.Children().Append(cb->handler().native());
+        }
+        return;
+    }
+    if (auto* rb = dynamic_cast<radio_button*>(&child); rb != nullptr) {
+        if (rb->has_handler()) {
+            native_.Children().Append(rb->handler().native());
         }
         return;
     }

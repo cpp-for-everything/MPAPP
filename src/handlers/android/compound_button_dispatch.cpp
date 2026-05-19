@@ -9,6 +9,7 @@
 #include <jni.h>
 
 #include "mpapp/handlers/android/check_box_handler.hpp"
+#include "mpapp/handlers/android/radio_button_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
 
 extern "C" JNIEXPORT void JNICALL
@@ -25,6 +26,11 @@ Java_io_mpapp_MppCheckedChangeListener_nativeDispatchCheckedChanged(
         case 2:  // check_box_handler
             mpapp::android_check_box_dispatch_checked_changed(
                 reinterpret_cast<mpapp::check_box_handler<mpapp::platform::android>*>(handler_ptr),
+                v);
+            return;
+        case 3:  // radio_button_handler
+            mpapp::android_radio_button_dispatch_checked_changed(
+                reinterpret_cast<mpapp::radio_button_handler<mpapp::platform::android>*>(handler_ptr),
                 v);
             return;
         default:

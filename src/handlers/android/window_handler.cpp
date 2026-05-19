@@ -14,9 +14,11 @@
 #include "mpapp/handlers/android/check_box_handler.hpp"
 #include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
+#include "mpapp/handlers/android/radio_button_handler.hpp"
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
 #include "mpapp/label.hpp"
+#include "mpapp/radio_button.hpp"
 #include "mpapp/stack_layout.hpp"
 #include "mpapp/switch_.hpp"
 
@@ -42,6 +44,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* cb = dynamic_cast<check_box*>(v); cb && cb->has_handler()) {
         return cb->handler().native();
+    }
+    if (auto* rb = dynamic_cast<radio_button*>(v); rb && rb->has_handler()) {
+        return rb->handler().native();
     }
     return nullptr;
 }

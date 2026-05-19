@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "RadioButton"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/radiobutton"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # RadioButton
 
 > [!info] Status
-> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/radio_button_handler.hpp` with tests in `tests/mock_handlers/radio_button_test.cpp`. Real platform handlers follow in P3.
+> **3-of-5 platforms real** — `is_checked: Observable<bool>` + `group_name: Observable<std::string>` surface real on WinUI 3 (`mux::Controls::RadioButton` with native `GroupName` auto-grouping), GTK4 (`GtkCheckButton` with `gtk_check_button_set_group` via a per-process group-leader registry keyed on `group_name`), and Android (`android.widget.RadioButton` inside an auto-allocated `android.widget.RadioGroup` per `group_name`, with reverse binding through the shared `MppCheckedChangeListener` JNI bridge using `kind=3`). Compiles + builds clean on all three platforms; binding pipeline shares its code path with the CheckBox handler (also live-verified on Android — same bridge, just a different `kind`). macOS / iOS handlers code-complete pending an Apple host.
 
 ## Overview
 

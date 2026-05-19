@@ -16,9 +16,11 @@
 #include "mpapp/handlers/windows/check_box_handler.hpp"
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
+#include "mpapp/handlers/windows/radio_button_handler.hpp"
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
 #include "mpapp/label.hpp"
+#include "mpapp/radio_button.hpp"
 #include "mpapp/stack_layout.hpp"
 #include "mpapp/switch_.hpp"
 
@@ -96,6 +98,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* cb = dynamic_cast<check_box*>(v); cb != nullptr) {
         if (cb->has_handler()) {
             native_.Content(cb->handler().native());
+        }
+        return;
+    }
+    if (auto* rb = dynamic_cast<radio_button*>(v); rb != nullptr) {
+        if (rb->has_handler()) {
+            native_.Content(rb->handler().native());
         }
         return;
     }

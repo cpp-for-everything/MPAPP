@@ -14,8 +14,10 @@
 #include "mpapp/handlers/android/check_box_handler.hpp"
 #include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
+#include "mpapp/handlers/android/radio_button_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
 #include "mpapp/label.hpp"
+#include "mpapp/radio_button.hpp"
 #include "mpapp/switch_.hpp"
 
 namespace mpapp {
@@ -214,6 +216,8 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
         child_obj = sw->handler().native();
     } else if (auto* cb = dynamic_cast<check_box*>(&child); cb && cb->has_handler()) {
         child_obj = cb->handler().native();
+    } else if (auto* rb = dynamic_cast<radio_button*>(&child); rb && rb->has_handler()) {
+        child_obj = rb->handler().native();
     }
     if (child_obj == nullptr) return;
 
