@@ -21,7 +21,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 
 | Component | MAUI handler folder | Status |
 |---|---|---|
-| [[Components/ActivityIndicator\|ActivityIndicator]] | `Handlers/ActivityIndicator/` | not-started |
+| [[Components/ActivityIndicator\|ActivityIndicator]] | `Handlers/ActivityIndicator/` | android-real (Windows mux::ProgressRing + Linux GtkSpinner + Android indeterminate ProgressBar; is_running toggle + color tint via brush_ref) |
 | [[Components/Application\|Application]] | `Handlers/Application/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/BindableLayout\|BindableLayout]] | `Controls/BindableLayout/` | mock |
 | [[Components/Border\|Border]] | `Handlers/Border/` | android-real (Windows mux::Border + Linux GtkBox CSS provider + Android FrameLayout with GradientDrawable; stroke + per-corner radius from `RoundRectangle(N)` descriptor; dash/cap/join deferred) |

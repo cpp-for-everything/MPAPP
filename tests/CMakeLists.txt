@@ -39,6 +39,7 @@ add_executable(mock_handlers_test
     mock_handlers/border_test.cpp
     mock_handlers/frame_test.cpp
     mock_handlers/box_view_test.cpp
+    mock_handlers/activity_indicator_test.cpp
     mock_handlers/button_test.cpp
     mock_handlers/check_box_test.cpp
     mock_handlers/editor_test.cpp

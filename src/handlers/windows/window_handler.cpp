@@ -9,12 +9,14 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Microsoft.UI.Xaml.h>
 
+#include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/windows/activity_indicator_handler.hpp"
 #include "mpapp/handlers/windows/border_handler.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
@@ -152,6 +154,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* br = dynamic_cast<border*>(v); br != nullptr) {
         if (br->has_handler()) {
             native_.Content(br->handler().native());
+        }
+        return;
+    }
+    if (auto* ai = dynamic_cast<activity_indicator*>(v); ai != nullptr) {
+        if (ai->has_handler()) {
+            native_.Content(ai->handler().native());
         }
         return;
     }

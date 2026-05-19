@@ -7,12 +7,14 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
+#include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/android/activity_indicator_handler.hpp"
 #include "mpapp/handlers/android/border_handler.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
@@ -77,6 +79,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* br = dynamic_cast<border*>(v); br && br->has_handler()) {
         return br->handler().native();
+    }
+    if (auto* ai = dynamic_cast<activity_indicator*>(v); ai && ai->has_handler()) {
+        return ai->handler().native();
     }
     return nullptr;
 }

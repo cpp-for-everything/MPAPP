@@ -28,6 +28,7 @@ add_library(mpapp-handlers-windows STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/scroll_view_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/box_view_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/border_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/windows/activity_indicator_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-windows PUBLIC

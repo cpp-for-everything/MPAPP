@@ -9,12 +9,14 @@
 
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
+#include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
 #include "mpapp/handlers/android/check_box_handler.hpp"
+#include "mpapp/handlers/android/activity_indicator_handler.hpp"
 #include "mpapp/handlers/android/border_handler.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
 #include "mpapp/handlers/android/editor_handler.hpp"
@@ -238,6 +240,8 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
         child_obj = bx->handler().native();
     } else if (auto* br = dynamic_cast<border*>(&child); br && br->has_handler()) {
         child_obj = br->handler().native();
+    } else if (auto* ai = dynamic_cast<activity_indicator*>(&child); ai && ai->has_handler()) {
+        child_obj = ai->handler().native();
     }
     if (child_obj == nullptr) return;
 

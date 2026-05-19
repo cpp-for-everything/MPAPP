@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "ActivityIndicator"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/activityindicator"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # ActivityIndicator
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **3-of-5 platforms real (compile-verified)** — `mpapp::activity_indicator` with `is_running: Observable<bool>` + `color: Observable<brush_ref>`. WinUI 3 wraps `mux::Controls::ProgressRing` (IsActive + Foreground + Visibility); GTK4 wraps `GtkSpinner` (gtk_spinner_start/stop + gtk_widget_set_visible + per-instance CSS provider for `color`); Android wraps `android.widget.ProgressBar` in its default indeterminate style (setVisibility VISIBLE/GONE for is_running + setIndeterminateTintList(ColorStateList) for color). Mock handler + tests cover the bind/change protocol. macOS / iOS handlers planned in M-06.
 
 ## Overview
 
