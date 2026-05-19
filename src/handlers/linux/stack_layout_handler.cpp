@@ -7,11 +7,13 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/linux/border_handler.hpp"
 #include "mpapp/handlers/linux/box_view_handler.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
 #include "mpapp/handlers/linux/check_box_handler.hpp"
@@ -164,6 +166,10 @@ void stack_layout_handler<platform::linux_>::add_child(view& child) {
     }
     if (auto* bx = dynamic_cast<box_view*>(&child); bx != nullptr && bx->has_handler()) {
         gtk_box_append(box, GTK_WIDGET(bx->handler().native()));
+        return;
+    }
+    if (auto* br = dynamic_cast<border*>(&child); br != nullptr && br->has_handler()) {
+        gtk_box_append(box, GTK_WIDGET(br->handler().native()));
         return;
     }
 }

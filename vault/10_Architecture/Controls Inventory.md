@@ -24,7 +24,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ActivityIndicator\|ActivityIndicator]] | `Handlers/ActivityIndicator/` | not-started |
 | [[Components/Application\|Application]] | `Handlers/Application/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/BindableLayout\|BindableLayout]] | `Controls/BindableLayout/` | mock |
-| [[Components/Border\|Border]] | `Handlers/Border/` | mock |
+| [[Components/Border\|Border]] | `Handlers/Border/` | android-real (Windows mux::Border + Linux GtkBox CSS provider + Android FrameLayout with GradientDrawable; stroke + per-corner radius from `RoundRectangle(N)` descriptor; dash/cap/join deferred) |
 | [[Components/BoxView\|BoxView]] | `Controls/BoxView/` | android-real (Windows Border+SolidColorBrush+CornerRadius + Linux GtkBox with per-instance CSS provider + Android View with GradientDrawable; spike's box corner-radius tracks slider value live) |
 | [[Components/Button\|Button]] | `Handlers/Button/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/CheckBox\|CheckBox]] | `Handlers/CheckBox/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android, shared compound-button JNI bridge with Switch) |

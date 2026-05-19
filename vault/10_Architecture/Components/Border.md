@@ -2,20 +2,23 @@
 type: component
 mauiHandler: "Border"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/border"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Border
 
 > [!info] Status
+> **3-of-5 platforms real (compile-verified)** — `content` + `padding` + `stroke` + `stroke_thickness` + `stroke_shape` (parsed as `RoundRectangle(N)` for uniform or `RoundRectangle(tl,tr,br,bl)` for per-corner) surface real on WinUI 3 (`mux::Controls::Border` natively exposes `Background`, `BorderBrush`, `BorderThickness`, `CornerRadius`, `Padding`, `Child`), GTK4 (`GtkBox` + per-instance `GtkCssProvider` carrying `border: Npx solid rgba(...)` + `border-radius: tl tr br bl` + `padding: t r b l` — single-child via `gtk_box_append`), and Android (`android.widget.FrameLayout` with a `GradientDrawable` background rebuilt on every property change — `setStroke(width, color)` + `setCornerRadii(float[8])`; padding routed through `View.setPadding`). Dash array / line cap / line join / miter limit on the cross-platform surface remain Observable but are not yet plumbed through any real handler — they're deferred to the M-05 polish track behind the shape language work. macOS / iOS handlers planned in M-06.
+
+> [!info] Original status
 > **mock** — cross-platform header at `include/mpapp/border.hpp`; mock handler records the full stroke pen + shape + content surface. See [[Controls Inventory]].
 
 ## Overview

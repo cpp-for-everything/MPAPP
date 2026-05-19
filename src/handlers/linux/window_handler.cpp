@@ -7,11 +7,13 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/linux/border_handler.hpp"
 #include "mpapp/handlers/linux/box_view_handler.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
 #include "mpapp/handlers/linux/check_box_handler.hpp"
@@ -115,6 +117,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* bx = dynamic_cast<box_view*>(v); bx != nullptr && bx->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(bx->handler().native()));
+        return;
+    }
+    if (auto* br = dynamic_cast<border*>(v); br != nullptr && br->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(br->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.

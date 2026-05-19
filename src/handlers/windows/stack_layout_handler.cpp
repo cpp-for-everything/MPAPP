@@ -11,11 +11,13 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
+#include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/windows/border_handler.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
 #include "mpapp/handlers/windows/check_box_handler.hpp"
@@ -195,6 +197,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* bx = dynamic_cast<box_view*>(&child); bx != nullptr) {
         if (bx->has_handler()) {
             native_.Children().Append(bx->handler().native());
+        }
+        return;
+    }
+    if (auto* br = dynamic_cast<border*>(&child); br != nullptr) {
+        if (br->has_handler()) {
+            native_.Children().Append(br->handler().native());
         }
         return;
     }

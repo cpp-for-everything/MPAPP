@@ -7,11 +7,13 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/linux/border_handler.hpp"
 #include "mpapp/handlers/linux/box_view_handler.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
 #include "mpapp/handlers/linux/check_box_handler.hpp"
@@ -46,6 +48,7 @@ GtkWidget* native_widget_of(view* v) {
     if (auto* st = dynamic_cast<stepper*>(v);      st && st->has_handler()) return GTK_WIDGET(st->handler().native());
     if (auto* ed = dynamic_cast<editor*>(v);       ed && ed->has_handler()) return GTK_WIDGET(ed->handler().native());
     if (auto* bx = dynamic_cast<box_view*>(v);     bx && bx->has_handler()) return GTK_WIDGET(bx->handler().native());
+    if (auto* br = dynamic_cast<border*>(v);       br && br->has_handler()) return GTK_WIDGET(br->handler().native());
     return nullptr;
 }
 

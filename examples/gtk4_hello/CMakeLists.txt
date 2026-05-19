@@ -26,6 +26,7 @@ add_library(mpapp-handlers-linux STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/editor_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/scroll_view_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/box_view_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/border_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-linux PUBLIC
