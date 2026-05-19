@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "ProgressBar"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/progressbar"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # ProgressBar
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **3-of-5 platforms real (compile-verified)** — `mpapp::progress_bar` with `progress: Observable<double>` (0..1) + `color` + `background_color`. WinUI 3 `mux::Controls::ProgressBar` (Min/Max 0..1, Value = progress; Foreground/Background SolidColorBrush). GTK4 `GtkProgressBar` (`gtk_progress_bar_set_fraction` + per-instance CSS provider targeting `trough > progress` and `trough` for color/background). Android `android.widget.ProgressBar` determinate (Max=10000, setProgress(progress*10000), setProgressTintList + setProgressBackgroundTintList). macOS / iOS planned in M-06.
 
 ## Overview
 

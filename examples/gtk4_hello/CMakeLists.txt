@@ -28,6 +28,7 @@ add_library(mpapp-handlers-linux STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/box_view_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/border_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/activity_indicator_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/progress_bar_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-linux PUBLIC

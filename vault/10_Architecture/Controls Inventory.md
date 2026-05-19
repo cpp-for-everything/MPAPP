@@ -55,7 +55,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/NavigationPage\|NavigationPage]] | `Handlers/NavigationPage/` | not-started |
 | [[Components/Page\|Page]] | `Handlers/Page/` | mock |
 | [[Components/Picker\|Picker]] | `Handlers/Picker/` | not-started |
-| [[Components/ProgressBar\|ProgressBar]] | `Handlers/ProgressBar/` | not-started |
+| [[Components/ProgressBar\|ProgressBar]] | `Handlers/ProgressBar/` | android-real (Windows ProgressBar + Linux GtkProgressBar + Android determinate ProgressBar; normalized 0..1 progress + color + background_color) |
 | [[Components/RadioButton\|RadioButton]] | `Handlers/RadioButton/` | android-real (Windows + Linux + Android; auto-grouping via group_name; shared compound-button JNI bridge kind=3) |
 | [[Components/RefreshView\|RefreshView]] | `Handlers/RefreshView/` | not-started |
 | [[Components/ScrollView\|ScrollView]] | `Handlers/ScrollView/` | android-real (Windows ScrollViewer + Linux GtkScrolledWindow + Android ScrollView; `bind_content(scroll_view&, view&)` helper wraps a non-owning child as null-deleter `shared_ptr<view>`; Android spike wraps the full widget stack and renders through it) |
