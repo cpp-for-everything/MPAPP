@@ -31,6 +31,7 @@ add_library(android_hello SHARED
     ${MPAPP_ROOT}/src/handlers/android/border_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/activity_indicator_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/progress_bar_handler.cpp
+    ${MPAPP_ROOT}/src/handlers/android/search_bar_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/compound_button_dispatch.cpp
     ${MPAPP_ROOT}/src/handlers/android/text_watcher_dispatch.cpp
     ${MPAPP_ROOT}/src/mpapp.cpp

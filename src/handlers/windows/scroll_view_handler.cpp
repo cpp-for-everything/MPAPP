@@ -14,6 +14,7 @@
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/progress_bar.hpp"
+#include "mpapp/search_bar.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
@@ -22,6 +23,7 @@
 #include "mpapp/handlers/windows/border_handler.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/progress_bar_handler.hpp"
+#include "mpapp/handlers/windows/search_bar_handler.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
 #include "mpapp/handlers/windows/check_box_handler.hpp"
 #include "mpapp/handlers/windows/editor_handler.hpp"
@@ -98,6 +100,9 @@ void scroll_view_handler<platform::windows>::apply_content(const std::shared_ptr
     }
     if (auto* pb = dynamic_cast<progress_bar*>(raw); pb && pb->has_handler()) {
         native_.Content(pb->handler().native()); return;
+    }
+    if (auto* sb = dynamic_cast<search_bar*>(raw); sb && sb->has_handler()) {
+        native_.Content(sb->handler().native()); return;
     }
 }
 

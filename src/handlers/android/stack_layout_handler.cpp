@@ -14,12 +14,14 @@
 #include "mpapp/box_view.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/progress_bar.hpp"
+#include "mpapp/search_bar.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
 #include "mpapp/handlers/android/check_box_handler.hpp"
 #include "mpapp/handlers/android/activity_indicator_handler.hpp"
 #include "mpapp/handlers/android/border_handler.hpp"
 #include "mpapp/handlers/android/progress_bar_handler.hpp"
+#include "mpapp/handlers/android/search_bar_handler.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
 #include "mpapp/handlers/android/editor_handler.hpp"
 #include "mpapp/handlers/android/entry_handler.hpp"
@@ -246,6 +248,8 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
         child_obj = ai->handler().native();
     } else if (auto* pb = dynamic_cast<progress_bar*>(&child); pb && pb->has_handler()) {
         child_obj = pb->handler().native();
+    } else if (auto* sb = dynamic_cast<search_bar*>(&child); sb && sb->has_handler()) {
+        child_obj = sb->handler().native();
     }
     if (child_obj == nullptr) return;
 

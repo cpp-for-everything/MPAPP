@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "SearchBar"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/searchbar"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # SearchBar
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **3-of-5 platforms real (compile-verified)** — `mpapp::search_bar` with `text` + `placeholder`. Windows wraps `mux::Controls::AutoSuggestBox` (with `QueryIcon = SymbolIcon{Find}` for search affordance). Linux wraps `GtkSearchEntry`. Android wraps `android.widget.SearchView` (`setIconified(false)` so the field opens immediately, `setQuery` for text, `setQueryHint` for placeholder). macOS / iOS planned in M-06.
 
 ## Overview
 

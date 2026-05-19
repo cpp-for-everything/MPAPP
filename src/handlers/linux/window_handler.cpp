@@ -11,6 +11,7 @@
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/progress_bar.hpp"
+#include "mpapp/search_bar.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
@@ -19,6 +20,7 @@
 #include "mpapp/handlers/linux/border_handler.hpp"
 #include "mpapp/handlers/linux/box_view_handler.hpp"
 #include "mpapp/handlers/linux/progress_bar_handler.hpp"
+#include "mpapp/handlers/linux/search_bar_handler.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
 #include "mpapp/handlers/linux/check_box_handler.hpp"
 #include "mpapp/handlers/linux/editor_handler.hpp"
@@ -133,6 +135,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* pb = dynamic_cast<progress_bar*>(v); pb != nullptr && pb->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(pb->handler().native()));
+        return;
+    }
+    if (auto* sb = dynamic_cast<search_bar*>(v); sb != nullptr && sb->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(sb->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.
