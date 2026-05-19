@@ -8,7 +8,9 @@
 #include <gtk/gtk.h>
 
 #include "mpapp/button.hpp"
+#include "mpapp/entry.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
+#include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
 #include "mpapp/label.hpp"
 
@@ -116,6 +118,10 @@ void stack_layout_handler<platform::linux_>::add_child(view& child) {
     }
     if (auto* sl = dynamic_cast<stack_layout*>(&child); sl != nullptr && sl->has_handler()) {
         gtk_box_append(box, GTK_WIDGET(sl->handler().native()));
+        return;
+    }
+    if (auto* e = dynamic_cast<entry*>(&child); e != nullptr && e->has_handler()) {
+        gtk_box_append(box, GTK_WIDGET(e->handler().native()));
         return;
     }
 }

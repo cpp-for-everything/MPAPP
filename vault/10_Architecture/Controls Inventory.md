@@ -33,7 +33,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/DatePicker\|DatePicker]] | `Handlers/DatePicker/` | not-started |
 | [[Components/Editor\|Editor]] | `Handlers/Editor/` | mock |
 | [[Components/Element\|Element]] | `Handlers/Element/` | not-started |
-| [[Components/Entry\|Entry]] | `Handlers/Entry/` | mock |
+| [[Components/Entry\|Entry]] | `Handlers/Entry/` | android-real (Windows + Linux + Android; bidirectional text-binding live-verified on Android) |
 | [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | not-started |
 | [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | not-started |
 | [[Components/Grid\|Grid]] | `Layouts/GridLayoutManager/` | mock |

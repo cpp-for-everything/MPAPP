@@ -10,7 +10,9 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 
 #include "mpapp/button.hpp"
+#include "mpapp/entry.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
+#include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
 #include "mpapp/label.hpp"
@@ -72,6 +74,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* l = dynamic_cast<label*>(v); l != nullptr) {
         if (l->has_handler()) {
             native_.Content(l->handler().native());
+        }
+        return;
+    }
+    if (auto* e = dynamic_cast<entry*>(v); e != nullptr) {
+        if (e->has_handler()) {
+            native_.Content(e->handler().native());
         }
         return;
     }

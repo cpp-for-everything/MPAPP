@@ -34,6 +34,23 @@ inline winrt::hstring to_hstring_utf8(std::string_view utf8) {
     return winrt::hstring{wide};
 }
 
+inline std::string wstring_to_utf8(std::wstring_view wide) {
+    if (wide.empty()) {
+        return {};
+    }
+    const int required = ::WideCharToMultiByte(
+        CP_UTF8, 0, wide.data(), static_cast<int>(wide.size()),
+        nullptr, 0, nullptr, nullptr);
+    if (required <= 0) {
+        return {};
+    }
+    std::string utf8(static_cast<std::size_t>(required), '\0');
+    ::WideCharToMultiByte(
+        CP_UTF8, 0, wide.data(), static_cast<int>(wide.size()),
+        utf8.data(), required, nullptr, nullptr);
+    return utf8;
+}
+
 } // namespace mpapp::detail
 
 #endif // MPAPP_SRC_HANDLERS_WINDOWS_WINRT_STRINGS_HPP

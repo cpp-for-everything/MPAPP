@@ -12,7 +12,9 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
 #include "mpapp/button.hpp"
+#include "mpapp/entry.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
+#include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/label.hpp"
 
@@ -131,6 +133,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* sl = dynamic_cast<stack_layout*>(&child); sl != nullptr) {
         if (sl->has_handler()) {
             native_.Children().Append(sl->handler().native());
+        }
+        return;
+    }
+    if (auto* e = dynamic_cast<entry*>(&child); e != nullptr) {
+        if (e->has_handler()) {
+            native_.Children().Append(e->handler().native());
         }
         return;
     }

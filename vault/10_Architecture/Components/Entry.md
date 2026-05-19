@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "Entry"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/entry"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Entry
 
 > [!info] Status
-> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/entry_handler.hpp` with tests in `tests/mock_handlers/entry_test.cpp`. Real platform handlers follow in P3.
+> **3-of-5 platforms real** — `text` + `placeholder` + `is_read_only` surface real on WinUI 3 (`mux::Controls::TextBox` + `TextChanged` event), GTK4 (`GtkEntry` + `changed` signal), and Android (`android.widget.EditText` + `TextWatcher` via the `MppTextWatcher` JNI bridge). **Bidirectional binding** end-to-end live-verified on Android: typing into the EditText flows back through Java `afterTextChanged` → JNI `nativeDispatchTextChanged` → `mpapp::entry::text.set` → user observer → label update. Verified screenshot: `_Archive/T-0011-app-shell-abstraction/screenshots/android-entry-typed.png` + `android-entry-typed-clicked3.png` (Count: 0 → 4, name "xelA" persists across button taps; "xelA" rather than "Alex" is an `adb shell input text` ordering quirk unrelated to the binding). macOS / iOS handlers code-complete pending an Apple host.
 
 ## Overview
 

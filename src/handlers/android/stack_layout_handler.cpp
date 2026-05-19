@@ -8,7 +8,9 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
 #include "mpapp/button.hpp"
+#include "mpapp/entry.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
+#include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
 #include "mpapp/label.hpp"
 
@@ -202,6 +204,8 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
         child_obj = l->handler().native();
     } else if (auto* sl = dynamic_cast<stack_layout*>(&child); sl && sl->has_handler()) {
         child_obj = sl->handler().native();
+    } else if (auto* e = dynamic_cast<entry*>(&child); e && e->has_handler()) {
+        child_obj = e->handler().native();
     }
     if (child_obj == nullptr) return;
 

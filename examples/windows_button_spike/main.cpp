@@ -20,6 +20,7 @@
 
 #include <mpapp/application.hpp>
 #include <mpapp/button.hpp>
+#include <mpapp/entry.hpp>
 #include <mpapp/label.hpp>
 #include <mpapp/layout_types.hpp>
 #include <mpapp/observable.hpp>
@@ -29,6 +30,7 @@
 #include <mpapp/window.hpp>
 
 #include <mpapp/handlers/windows/button_handler.hpp>
+#include <mpapp/handlers/windows/entry_handler.hpp>
 #include <mpapp/handlers/windows/label_handler.hpp>
 #include <mpapp/handlers/windows/stack_layout_handler.hpp>
 #include <mpapp/handlers/windows/window_handler.hpp>
@@ -46,20 +48,25 @@ public:
         // 1. Wire handlers to widgets.
         btn_.set_handler(btn_handler_);
         lbl_.set_handler(lbl_handler_);
+        name_.set_handler(name_handler_);
         layout_.set_handler(layout_handler_);
 
         // 2. Initial property values via the MPAPP surface.
-        btn_.text = "Click me";
-        lbl_.text = "Count: 0";
+        btn_.text         = "Click me";
+        lbl_.text         = "Count: 0 — hello, world";
+        name_.placeholder = "Type your name";
 
         // 3. Map text properties + click event onto native widgets.
         btn_handler_.map_text(btn_);
         btn_handler_.map_clicked(btn_);
         lbl_handler_.map_text(lbl_);
+        name_handler_.map_text(name_);
+        name_handler_.map_placeholder(name_);
 
         // 4. VM ↔ view wiring through cross-platform signals only.
         btn_.clicked.subscribe(click_slot_, click_cb_);
         vm_.count.changed.subscribe(count_slot_, count_cb_);
+        name_.text.changed.subscribe(name_slot_, name_cb_);
 
         // 5. Compose the layout — orientation / spacing / padding /
         //    alignment all in cross-platform terms.
@@ -69,6 +76,7 @@ public:
         layout_.horizontal_alignment = mpapp::h_align::center;
         layout_.vertical_alignment   = mpapp::v_align::center;
         layout_.add(lbl_);
+        layout_.add(name_);
         layout_.add(btn_);
 
         // Bind the layout handler — pushes the property values into
@@ -100,25 +108,44 @@ private:
     struct count_cb_t {
         spike_app* self;
         void operator()(int n) const {
-            self->lbl_.text.set("Count: " + std::to_string(n));
+            const std::string who = self->name_.text.get().empty()
+                                      ? std::string{"world"}
+                                      : self->name_.text.get();
+            self->lbl_.text.set("Count: " + std::to_string(n) + " — hello, " + who);
+        }
+    };
+
+    struct name_cb_t {
+        spike_app* self;
+        void operator()(const std::string&) const {
+            // Re-render the label by re-emitting through count_cb_.
+            const int n = self->vm_.count.get();
+            const std::string who = self->name_.text.get().empty()
+                                      ? std::string{"world"}
+                                      : self->name_.text.get();
+            self->lbl_.text.set("Count: " + std::to_string(n) + " — hello, " + who);
         }
     };
 
     view_model              vm_{};
     mpapp::button           btn_{};
     mpapp::label            lbl_{};
+    mpapp::entry            name_{};
     mpapp::stack_layout     layout_{};
     mpapp::window           window_{};
 
     mpapp::button_handler<mpapp::platform::windows>       btn_handler_{};
     mpapp::label_handler<mpapp::platform::windows>        lbl_handler_{};
+    mpapp::entry_handler<mpapp::platform::windows>        name_handler_{};
     mpapp::stack_layout_handler<mpapp::platform::windows> layout_handler_{};
     mpapp::window_handler<mpapp::platform::windows>       window_handler_{};
 
-    click_cb_t                       click_cb_{this};
-    count_cb_t                       count_cb_{this};
-    mpapp::signal_slot<>             click_slot_{};
-    mpapp::signal_slot<const int&>   count_slot_{};
+    click_cb_t                            click_cb_{this};
+    count_cb_t                            count_cb_{this};
+    name_cb_t                             name_cb_{this};
+    mpapp::signal_slot<>                  click_slot_{};
+    mpapp::signal_slot<const int&>        count_slot_{};
+    mpapp::signal_slot<const std::string&> name_slot_{};
 };
 
 } // namespace

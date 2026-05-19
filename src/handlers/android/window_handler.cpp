@@ -8,7 +8,9 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
 #include "mpapp/button.hpp"
+#include "mpapp/entry.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
+#include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
 #include "mpapp/label.hpp"
@@ -27,6 +29,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* l = dynamic_cast<label*>(v); l && l->has_handler()) {
         return l->handler().native();
+    }
+    if (auto* e = dynamic_cast<entry*>(v); e && e->has_handler()) {
+        return e->handler().native();
     }
     return nullptr;
 }

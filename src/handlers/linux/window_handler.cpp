@@ -8,7 +8,9 @@
 #include <gtk/gtk.h>
 
 #include "mpapp/button.hpp"
+#include "mpapp/entry.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
+#include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
 #include "mpapp/handlers/linux/stack_layout_handler.hpp"
 #include "mpapp/label.hpp"
@@ -61,6 +63,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* l = dynamic_cast<label*>(v); l != nullptr && l->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(l->handler().native()));
+        return;
+    }
+    if (auto* e = dynamic_cast<entry*>(v); e != nullptr && e->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(e->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.
