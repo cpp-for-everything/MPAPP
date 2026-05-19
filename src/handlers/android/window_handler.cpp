@@ -17,11 +17,13 @@
 #include "mpapp/handlers/android/radio_button_handler.hpp"
 #include "mpapp/handlers/android/slider_handler.hpp"
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
+#include "mpapp/handlers/android/stepper_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
 #include "mpapp/slider.hpp"
 #include "mpapp/stack_layout.hpp"
+#include "mpapp/stepper.hpp"
 #include "mpapp/switch_.hpp"
 
 namespace mpapp {
@@ -52,6 +54,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* sl = dynamic_cast<slider*>(v); sl && sl->has_handler()) {
         return sl->handler().native();
+    }
+    if (auto* st = dynamic_cast<stepper*>(v); st && st->has_handler()) {
+        return st->handler().native();
     }
     return nullptr;
 }

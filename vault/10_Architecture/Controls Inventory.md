@@ -64,7 +64,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Shell\|Shell]] | `Controls/Shell/` | not-started |
 | [[Components/Slider\|Slider]] | `Handlers/Slider/` | android-real (Windows + Linux + Android; bidirectional double-range binding live-verified on Android via SeekBar→int progress→double remap) |
 | [[Components/StackLayout\|StackLayout]] | `Layouts/StackLayoutManager/` | android-real (Windows + Linux + Android verified live) |
-| [[Components/Stepper\|Stepper]] | `Handlers/Stepper/` | mock |
+| [[Components/Stepper\|Stepper]] | `Handlers/Stepper/` | android-real (Windows NumberBox + Linux GtkSpinButton + Android NumberPicker; double↔int step-index remap honoring `interval`) |
 | [[Components/SwipeItemMenuItem\|SwipeItemMenuItem]] | `Handlers/SwipeItemMenuItem/` | not-started |
 | [[Components/SwipeItemView\|SwipeItemView]] | `Handlers/SwipeItemView/` | not-started |
 | [[Components/SwipeView\|SwipeView]] | `Handlers/SwipeView/` | not-started |

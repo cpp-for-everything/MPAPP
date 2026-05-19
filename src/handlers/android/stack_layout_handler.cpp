@@ -16,10 +16,12 @@
 #include "mpapp/handlers/android/label_handler.hpp"
 #include "mpapp/handlers/android/radio_button_handler.hpp"
 #include "mpapp/handlers/android/slider_handler.hpp"
+#include "mpapp/handlers/android/stepper_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
 #include "mpapp/slider.hpp"
+#include "mpapp/stepper.hpp"
 #include "mpapp/switch_.hpp"
 
 namespace mpapp {
@@ -222,6 +224,8 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
         child_obj = rb->handler().native();
     } else if (auto* sl = dynamic_cast<slider*>(&child); sl && sl->has_handler()) {
         child_obj = sl->handler().native();
+    } else if (auto* st = dynamic_cast<stepper*>(&child); st && st->has_handler()) {
+        child_obj = st->handler().native();
     }
     if (child_obj == nullptr) return;
 

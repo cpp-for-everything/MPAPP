@@ -19,11 +19,13 @@
 #include "mpapp/handlers/windows/radio_button_handler.hpp"
 #include "mpapp/handlers/windows/slider_handler.hpp"
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
+#include "mpapp/handlers/windows/stepper_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
 #include "mpapp/slider.hpp"
 #include "mpapp/stack_layout.hpp"
+#include "mpapp/stepper.hpp"
 #include "mpapp/switch_.hpp"
 
 #include "winrt_strings.hpp"
@@ -112,6 +114,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* sl = dynamic_cast<slider*>(v); sl != nullptr) {
         if (sl->has_handler()) {
             native_.Content(sl->handler().native());
+        }
+        return;
+    }
+    if (auto* st = dynamic_cast<stepper*>(v); st != nullptr) {
+        if (st->has_handler()) {
+            native_.Content(st->handler().native());
         }
         return;
     }

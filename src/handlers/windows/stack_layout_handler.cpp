@@ -20,10 +20,12 @@
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/radio_button_handler.hpp"
 #include "mpapp/handlers/windows/slider_handler.hpp"
+#include "mpapp/handlers/windows/stepper_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
 #include "mpapp/slider.hpp"
+#include "mpapp/stepper.hpp"
 #include "mpapp/switch_.hpp"
 
 namespace mpapp {
@@ -171,6 +173,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* sl = dynamic_cast<slider*>(&child); sl != nullptr) {
         if (sl->has_handler()) {
             native_.Children().Append(sl->handler().native());
+        }
+        return;
+    }
+    if (auto* st = dynamic_cast<stepper*>(&child); st != nullptr) {
+        if (st->has_handler()) {
+            native_.Children().Append(st->handler().native());
         }
         return;
     }

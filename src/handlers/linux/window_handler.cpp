@@ -17,11 +17,13 @@
 #include "mpapp/handlers/linux/radio_button_handler.hpp"
 #include "mpapp/handlers/linux/slider_handler.hpp"
 #include "mpapp/handlers/linux/stack_layout_handler.hpp"
+#include "mpapp/handlers/linux/stepper_handler.hpp"
 #include "mpapp/handlers/linux/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
 #include "mpapp/slider.hpp"
 #include "mpapp/stack_layout.hpp"
+#include "mpapp/stepper.hpp"
 #include "mpapp/switch_.hpp"
 
 namespace mpapp {
@@ -91,6 +93,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* sl = dynamic_cast<slider*>(v); sl != nullptr && sl->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(sl->handler().native()));
+        return;
+    }
+    if (auto* st = dynamic_cast<stepper*>(v); st != nullptr && st->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(st->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.

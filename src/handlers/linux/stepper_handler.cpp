@@ -1,0 +1,104 @@
+// SPDX-License-Identifier: Apache-2.0
+// Part of MPAPP. GTK4 stepper handler implementation.
+
+#include "mpapp/handlers/linux/stepper_handler.hpp"
+
+#if defined(__linux__) && !defined(__ANDROID__)
+
+#include <gtk/gtk.h>
+
+namespace mpapp {
+
+namespace {
+
+struct value_changed_ctx {
+    stepper*                            target;
+    stepper_handler<platform::linux_>*  handler;
+};
+
+void on_value_changed(GtkSpinButton* btn, gpointer user_data) {
+    auto* ctx = static_cast<value_changed_ctx*>(user_data);
+    if (ctx == nullptr || ctx->target == nullptr) return;
+    const double v = gtk_spin_button_get_value(btn);
+    if (ctx->target->value.get() != v) {
+        ctx->target->value.set(v);
+    }
+}
+
+} // namespace
+
+stepper_handler<platform::linux_>::stepper_handler() {
+    native_ = gtk_spin_button_new_with_range(0.0, 100.0, 1.0);
+}
+
+stepper_handler<platform::linux_>::~stepper_handler() {
+    if (native_ != nullptr && value_changed_handler_id_ != 0) {
+        g_signal_handler_disconnect(static_cast<GtkWidget*>(native_),
+                                    value_changed_handler_id_);
+        value_changed_handler_id_ = 0;
+    }
+}
+
+void stepper_handler<platform::linux_>::apply_value(double v) {
+    if (native_ == nullptr) return;
+    suppress_echo_ = true;
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), v);
+    suppress_echo_ = false;
+}
+
+void stepper_handler<platform::linux_>::apply_minimum(double v) {
+    if (native_ == nullptr) return;
+    double lo = 0.0, hi = 0.0;
+    gtk_spin_button_get_range(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), &lo, &hi);
+    gtk_spin_button_set_range(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), v, hi);
+}
+
+void stepper_handler<platform::linux_>::apply_maximum(double v) {
+    if (native_ == nullptr) return;
+    double lo = 0.0, hi = 0.0;
+    gtk_spin_button_get_range(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), &lo, &hi);
+    gtk_spin_button_set_range(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), lo, v);
+}
+
+void stepper_handler<platform::linux_>::apply_interval(double v) {
+    if (native_ == nullptr) return;
+    double step = 0.0, page = 0.0;
+    gtk_spin_button_get_increments(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), &step, &page);
+    gtk_spin_button_set_increments(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), v, page > 0 ? page : v * 10.0);
+}
+
+void stepper_handler<platform::linux_>::map_value(stepper& s) {
+    apply_value(s.value.get());
+    s.value.changed.subscribe(value_slot_, value_cb_);
+
+    if (native_ == nullptr) return;
+    auto* ctx = new value_changed_ctx{&s, this};
+    if (value_changed_handler_id_ != 0) {
+        g_signal_handler_disconnect(static_cast<GtkWidget*>(native_),
+                                    value_changed_handler_id_);
+    }
+    value_changed_handler_id_ = g_signal_connect_data(
+        static_cast<GtkWidget*>(native_),
+        "value-changed",
+        G_CALLBACK(on_value_changed),
+        ctx,
+        +[](gpointer p, GClosure*) { delete static_cast<value_changed_ctx*>(p); },
+        static_cast<GConnectFlags>(0));
+}
+
+void stepper_handler<platform::linux_>::map_minimum(stepper& s) {
+    apply_minimum(s.minimum.get());
+    s.minimum.changed.subscribe(minimum_slot_, minimum_cb_);
+}
+void stepper_handler<platform::linux_>::map_maximum(stepper& s) {
+    apply_maximum(s.maximum.get());
+    s.maximum.changed.subscribe(maximum_slot_, maximum_cb_);
+}
+void stepper_handler<platform::linux_>::map_interval(stepper& s) {
+    apply_interval(s.interval.get());
+    s.interval.changed.subscribe(interval_slot_, interval_cb_);
+}
+
+} // namespace mpapp
+
+#endif // __linux__ && !__ANDROID__

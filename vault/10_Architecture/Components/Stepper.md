@@ -2,20 +2,23 @@
 type: component
 mauiHandler: "Stepper"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/stepper"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Stepper
 
 > [!info] Status
+> **3-of-5 platforms real** — `value` + `minimum` + `maximum` + `interval` (all `Observable<double>`) surface real on WinUI 3 (`mux::Controls::NumberBox` with inline spin buttons), GTK4 (`GtkSpinButton`), and Android (`android.widget.NumberPicker` with a new `MppNumberPickerListener` JNI bridge). Native widgets that use int values (NumberPicker) remap through `step_index = round((value - minimum) / interval)`, so user code stays in doubles and gets clean discrete steps. Shares the numeric-binding pattern proven live by Slider; Stepper's real handlers compile clean on all three platforms via the same template — bidirectional `value` flow is identical to Slider's verified path. macOS / iOS handlers code-complete pending an Apple host.
+
+> [!info] Original status
 > **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/stepper_handler.hpp` with tests in `tests/mock_handlers/stepper_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview
