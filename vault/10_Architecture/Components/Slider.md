@@ -2,20 +2,23 @@
 type: component
 mauiHandler: "Slider"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/slider"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Slider
 
 > [!info] Status
+> **3-of-5 platforms real** — `value: Observable<double>` + `minimum: Observable<double>` + `maximum: Observable<double>` surface real on WinUI 3 (`mux::Controls::Slider` + `ValueChanged` RangeBase event), GTK4 (`GtkScale` + `value-changed` GSignal), and Android (`android.widget.SeekBar` + a new `MppSeekBarChangeListener` JNI bridge). **Bidirectional numeric binding** end-to-end live-verified on Android: dragging the SeekBar emits int progress in [0, 10000] which the native handler remaps to the cross-platform [minimum, maximum] double range; user observers re-render the label LIVE. Screenshots: `android-slider-initial.png` (slider at min, value=1, label says "hello, world" once); `android-slider-dragged.png` (slider at ~80%, value=4, label repeats "hello, world · hello, world · hello, world · hello, world"). macOS / iOS handlers code-complete pending an Apple host.
+
+> [!info] Original status
 > **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/slider_handler.hpp` with tests in `tests/mock_handlers/slider_test.cpp`. Real platform handlers follow in P3.
 
 ## Overview

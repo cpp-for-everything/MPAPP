@@ -15,9 +15,11 @@
 #include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
 #include "mpapp/handlers/linux/radio_button_handler.hpp"
+#include "mpapp/handlers/linux/slider_handler.hpp"
 #include "mpapp/handlers/linux/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
+#include "mpapp/slider.hpp"
 #include "mpapp/switch_.hpp"
 
 namespace mpapp {
@@ -140,6 +142,10 @@ void stack_layout_handler<platform::linux_>::add_child(view& child) {
     }
     if (auto* rb = dynamic_cast<radio_button*>(&child); rb != nullptr && rb->has_handler()) {
         gtk_box_append(box, GTK_WIDGET(rb->handler().native()));
+        return;
+    }
+    if (auto* sl = dynamic_cast<slider*>(&child); sl != nullptr && sl->has_handler()) {
+        gtk_box_append(box, GTK_WIDGET(sl->handler().native()));
         return;
     }
 }

@@ -3,11 +3,11 @@
 //
 // Bridge between the Java MainActivity and `mpapp::run<spike_app>`.
 
+#include <algorithm>
+#include <cctype>
 #include <string>
 
 #include <jni.h>
-
-#include <cctype>
 
 #include <mpapp/application.hpp>
 #include <mpapp/button.hpp>
@@ -18,6 +18,7 @@
 #include <mpapp/observable.hpp>
 #include <mpapp/run.hpp>
 #include <mpapp/signal.hpp>
+#include <mpapp/slider.hpp>
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/switch_.hpp>
 #include <mpapp/window.hpp>
@@ -27,6 +28,7 @@
 #include <mpapp/handlers/android/entry_handler.hpp>
 #include <mpapp/handlers/android/jni_bridge.hpp>
 #include <mpapp/handlers/android/label_handler.hpp>
+#include <mpapp/handlers/android/slider_handler.hpp>
 #include <mpapp/handlers/android/stack_layout_handler.hpp>
 #include <mpapp/handlers/android/switch_handler.hpp>
 #include <mpapp/handlers/android/window_handler.hpp>
@@ -45,6 +47,7 @@ public:
         name_.set_handler(name_handler_);
         shout_.set_handler(shout_handler_);
         exclaim_.set_handler(exclaim_handler_);
+        repeat_.set_handler(repeat_handler_);
         layout_.set_handler(layout_handler_);
 
         btn_.text         = "Click me";
@@ -52,6 +55,9 @@ public:
         name_.placeholder = "Type your name";
         shout_.is_on      = false;
         exclaim_.is_checked = false;
+        repeat_.minimum   = 1.0;
+        repeat_.maximum   = 5.0;
+        repeat_.value     = 1.0;
 
         btn_handler_.map_text(btn_);
         btn_handler_.map_clicked(btn_);
@@ -60,12 +66,16 @@ public:
         name_handler_.map_placeholder(name_);
         shout_handler_.map_is_on(shout_);
         exclaim_handler_.map_is_checked(exclaim_);
+        repeat_handler_.map_minimum(repeat_);
+        repeat_handler_.map_maximum(repeat_);
+        repeat_handler_.map_value(repeat_);
 
         btn_.clicked.subscribe(click_slot_, click_cb_);
         vm_.count.changed.subscribe(count_slot_, count_cb_);
         name_.text.changed.subscribe(name_slot_, name_cb_);
         shout_.is_on.changed.subscribe(shout_slot_, shout_cb_);
         exclaim_.is_checked.changed.subscribe(exclaim_slot_, exclaim_cb_);
+        repeat_.value.changed.subscribe(repeat_slot_, repeat_cb_);
 
         layout_.stack_orientation    = mpapp::orientation::vertical;
         layout_.spacing              = 12.0;
@@ -76,6 +86,7 @@ public:
         layout_.add(name_);
         layout_.add(shout_);
         layout_.add(exclaim_);
+        layout_.add(repeat_);
         layout_.add(btn_);
         layout_handler_.bind(layout_);
 
@@ -98,11 +109,17 @@ private:
     }
 
     void render_label() {
-        const int n = vm_.count.get();
-        lbl_.text.set("Count: " + std::to_string(n) + " — "
-                      + greeting(name_.text.get(),
-                                  shout_.is_on.get(),
-                                  exclaim_.is_checked.get()));
+        const int n     = vm_.count.get();
+        const int times = std::max(1, static_cast<int>(repeat_.value.get() + 0.5));
+        std::string greet = greeting(name_.text.get(),
+                                      shout_.is_on.get(),
+                                      exclaim_.is_checked.get());
+        std::string repeated;
+        for (int i = 0; i < times; ++i) {
+            if (i > 0) repeated += " · ";
+            repeated += greet;
+        }
+        lbl_.text.set("Count: " + std::to_string(n) + " — " + repeated);
     }
 
     struct click_cb_t {
@@ -113,6 +130,7 @@ private:
     struct name_cb_t   { spike_app* self; void operator()(const std::string&) const { self->render_label(); } };
     struct shout_cb_t  { spike_app* self; void operator()(bool) const { self->render_label(); } };
     struct exclaim_cb_t{ spike_app* self; void operator()(bool) const { self->render_label(); } };
+    struct repeat_cb_t { spike_app* self; void operator()(double) const { self->render_label(); } };
 
     view_model              vm_{};
     mpapp::button           btn_{};
@@ -120,6 +138,7 @@ private:
     mpapp::entry            name_{};
     mpapp::switch_          shout_{};
     mpapp::check_box        exclaim_{};
+    mpapp::slider           repeat_{};
     mpapp::stack_layout     layout_{};
     mpapp::window           window_{};
 
@@ -128,6 +147,7 @@ private:
     mpapp::entry_handler<mpapp::platform::android>        name_handler_{};
     mpapp::switch_handler<mpapp::platform::android>       shout_handler_{};
     mpapp::check_box_handler<mpapp::platform::android>    exclaim_handler_{};
+    mpapp::slider_handler<mpapp::platform::android>       repeat_handler_{};
     mpapp::stack_layout_handler<mpapp::platform::android> layout_handler_{};
     mpapp::window_handler<mpapp::platform::android>       window_handler_{};
 
@@ -136,11 +156,13 @@ private:
     name_cb_t                              name_cb_{this};
     shout_cb_t                             shout_cb_{this};
     exclaim_cb_t                           exclaim_cb_{this};
+    repeat_cb_t                            repeat_cb_{this};
     mpapp::signal_slot<>                   click_slot_{};
     mpapp::signal_slot<const int&>         count_slot_{};
     mpapp::signal_slot<const std::string&> name_slot_{};
     mpapp::signal_slot<const bool&>        shout_slot_{};
     mpapp::signal_slot<const bool&>        exclaim_slot_{};
+    mpapp::signal_slot<const double&>      repeat_slot_{};
 };
 
 } // namespace

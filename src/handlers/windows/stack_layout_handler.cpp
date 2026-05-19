@@ -19,9 +19,11 @@
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/radio_button_handler.hpp"
+#include "mpapp/handlers/windows/slider_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
 #include "mpapp/label.hpp"
 #include "mpapp/radio_button.hpp"
+#include "mpapp/slider.hpp"
 #include "mpapp/switch_.hpp"
 
 namespace mpapp {
@@ -163,6 +165,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* rb = dynamic_cast<radio_button*>(&child); rb != nullptr) {
         if (rb->has_handler()) {
             native_.Children().Append(rb->handler().native());
+        }
+        return;
+    }
+    if (auto* sl = dynamic_cast<slider*>(&child); sl != nullptr) {
+        if (sl->has_handler()) {
+            native_.Children().Append(sl->handler().native());
         }
         return;
     }
