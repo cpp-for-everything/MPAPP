@@ -9,10 +9,12 @@
 
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
+#include "mpapp/box_view.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
 #include "mpapp/handlers/android/check_box_handler.hpp"
+#include "mpapp/handlers/android/box_view_handler.hpp"
 #include "mpapp/handlers/android/editor_handler.hpp"
 #include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
@@ -230,6 +232,8 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
         child_obj = st->handler().native();
     } else if (auto* ed = dynamic_cast<editor*>(&child); ed && ed->has_handler()) {
         child_obj = ed->handler().native();
+    } else if (auto* bx = dynamic_cast<box_view*>(&child); bx && bx->has_handler()) {
+        child_obj = bx->handler().native();
     }
     if (child_obj == nullptr) return;
 

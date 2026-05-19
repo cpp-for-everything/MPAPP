@@ -7,10 +7,12 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
+#include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/android/box_view_handler.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
 #include "mpapp/handlers/android/check_box_handler.hpp"
 #include "mpapp/handlers/android/editor_handler.hpp"
@@ -58,6 +60,7 @@ jobject child_jobject(view* v) {
     if (auto* s2 = dynamic_cast<slider*>(v);       s2 && s2->has_handler()) return s2->handler().native();
     if (auto* st = dynamic_cast<stepper*>(v);      st && st->has_handler()) return st->handler().native();
     if (auto* ed = dynamic_cast<editor*>(v);       ed && ed->has_handler()) return ed->handler().native();
+    if (auto* bx = dynamic_cast<box_view*>(v);     bx && bx->has_handler()) return bx->handler().native();
     return nullptr;
 }
 

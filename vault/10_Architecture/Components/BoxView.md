@@ -2,20 +2,23 @@
 type: component
 mauiHandler: "BoxView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/boxview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # BoxView
 
 > [!info] Status
+> **3-of-5 platforms real** — `fill` + `corners` surface real on WinUI 3 (`mux::Controls::Border` with `Background = SolidColorBrush` and `CornerRadius` per corner; default 40×40 dip from `Width`/`Height`), GTK4 (`GtkBox` with a per-handler `GtkCssProvider` carrying inline `background-color: rgba(...)` + `border-radius: tl tr br bl`, attached to the default display so the unique CSS class on each instance picks it up without using the deprecated style-context APIs), and Android (`android.view.View` with a `GradientDrawable` background rebuilt on every fill or corner change — `setColor` for ARGB, `setCornerRadii(float[8])` for per-corner radii). Android spike's box's corner radius tracks the slider value (1.0 → 4px, 5.0 → 20px) — proves the `corners` observable propagates through to the Drawable at runtime. macOS / iOS handlers planned in M-06.
+
+> [!info] Original status
 > **mock** — cross-platform header at `include/mpapp/box_view.hpp`; mock handler records `fill` and `corners` mappers. See [[Controls Inventory]].
 
 ## Overview

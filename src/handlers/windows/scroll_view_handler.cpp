@@ -10,10 +10,12 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
+#include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
 #include "mpapp/handlers/windows/check_box_handler.hpp"
 #include "mpapp/handlers/windows/editor_handler.hpp"
@@ -78,6 +80,9 @@ void scroll_view_handler<platform::windows>::apply_content(const std::shared_ptr
     }
     if (auto* ed = dynamic_cast<editor*>(raw); ed && ed->has_handler()) {
         native_.Content(ed->handler().native()); return;
+    }
+    if (auto* bx = dynamic_cast<box_view*>(raw); bx && bx->has_handler()) {
+        native_.Content(bx->handler().native()); return;
     }
 }
 

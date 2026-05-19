@@ -7,10 +7,12 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/entry.hpp"
+#include "mpapp/handlers/linux/box_view_handler.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
 #include "mpapp/handlers/linux/check_box_handler.hpp"
 #include "mpapp/handlers/linux/editor_handler.hpp"
@@ -43,6 +45,7 @@ GtkWidget* native_widget_of(view* v) {
     if (auto* s2 = dynamic_cast<slider*>(v);       s2 && s2->has_handler()) return GTK_WIDGET(s2->handler().native());
     if (auto* st = dynamic_cast<stepper*>(v);      st && st->has_handler()) return GTK_WIDGET(st->handler().native());
     if (auto* ed = dynamic_cast<editor*>(v);       ed && ed->has_handler()) return GTK_WIDGET(ed->handler().native());
+    if (auto* bx = dynamic_cast<box_view*>(v);     bx && bx->has_handler()) return GTK_WIDGET(bx->handler().native());
     return nullptr;
 }
 

@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: Apache-2.0
+// Part of MPAPP. GTK4 box_view handler — colored rectangle with rounded
+// corners. Implemented as a `GtkBox` + per-handler `GtkCssProvider`
+// targeting a unique CSS class so fill + per-corner radius can be
+// rebuilt at runtime without touching deprecated style-context APIs.
+
+#ifndef MPAPP_HANDLERS_LINUX_BOX_VIEW_HANDLER_HPP
+#define MPAPP_HANDLERS_LINUX_BOX_VIEW_HANDLER_HPP
+
+#include <string>
+
+#include "../../box_view.hpp"
+#include "../../platform.hpp"
+#include "../../signal.hpp"
+
+#if defined(__linux__) && !defined(__ANDROID__)
+
+namespace mpapp {
+
+template <>
+class box_view_handler<platform::linux_> {
+public:
+    box_view_handler();
+    ~box_view_handler();
+
+    box_view_handler(const box_view_handler&)            = delete;
+    box_view_handler& operator=(const box_view_handler&) = delete;
+    box_view_handler(box_view_handler&&)                 = delete;
+    box_view_handler& operator=(box_view_handler&&)      = delete;
+
+    void map_fill(box_view& b);
+    void map_corners(box_view& b);
+
+    void*       native() noexcept       { return native_; }
+    const void* native() const noexcept { return native_; }
+
+private:
+    void apply_fill(const color& c);
+    void apply_corners(const corner_radius& r);
+    void reload_css();
+
+    struct fill_cb_t {
+        box_view_handler<platform::linux_>* self = nullptr;
+        void operator()(const color& c) const { self->apply_fill(c); }
+    };
+    struct corners_cb_t {
+        box_view_handler<platform::linux_>* self = nullptr;
+        void operator()(const corner_radius& r) const { self->apply_corners(r); }
+    };
+
+    void* native_   = nullptr;   // GtkWidget* (GtkBox)
+    void* provider_ = nullptr;   // GtkCssProvider*
+    std::string class_name_{};   // "mpapp-box-N"
+
+    color           cached_fill_{};
+    corner_radius   cached_corners_{};
+
+    fill_cb_t                            fill_cb_{this};
+    corners_cb_t                         corners_cb_{this};
+    signal_slot<const color&>            fill_slot_{};
+    signal_slot<const corner_radius&>    corners_slot_{};
+};
+
+} // namespace mpapp
+
+#endif // __linux__ && !__ANDROID__
+#endif // MPAPP_HANDLERS_LINUX_BOX_VIEW_HANDLER_HPP

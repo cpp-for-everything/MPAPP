@@ -10,6 +10,7 @@
 #include <jni.h>
 
 #include <mpapp/application.hpp>
+#include <mpapp/box_view.hpp>
 #include <mpapp/button.hpp>
 #include <mpapp/check_box.hpp>
 #include <mpapp/entry.hpp>
@@ -24,6 +25,7 @@
 #include <mpapp/switch_.hpp>
 #include <mpapp/window.hpp>
 
+#include <mpapp/handlers/android/box_view_handler.hpp>
 #include <mpapp/handlers/android/button_handler.hpp>
 #include <mpapp/handlers/android/check_box_handler.hpp>
 #include <mpapp/handlers/android/entry_handler.hpp>
@@ -52,6 +54,7 @@ public:
         repeat_.set_handler(repeat_handler_);
         layout_.set_handler(layout_handler_);
         scroll_.set_handler(scroll_handler_);
+        box_.set_handler(box_handler_);
 
         btn_.text         = "Click me";
         lbl_.text         = "Count: 0 — hello, world";
@@ -61,6 +64,8 @@ public:
         repeat_.minimum   = 1.0;
         repeat_.maximum   = 5.0;
         repeat_.value     = 1.0;
+        box_.fill         = mpapp::color{0.0, 0.6, 0.65, 1.0};   // teal
+        box_.corners      = mpapp::corner_radius{4.0, 4.0, 4.0, 4.0};
 
         btn_handler_.map_text(btn_);
         btn_handler_.map_clicked(btn_);
@@ -74,6 +79,8 @@ public:
         repeat_handler_.map_value(repeat_);
         scroll_handler_.map_content(scroll_);
         scroll_handler_.map_orientation(scroll_);
+        box_handler_.map_fill(box_);
+        box_handler_.map_corners(box_);
 
         btn_.clicked.subscribe(click_slot_, click_cb_);
         vm_.count.changed.subscribe(count_slot_, count_cb_);
@@ -81,12 +88,14 @@ public:
         shout_.is_on.changed.subscribe(shout_slot_, shout_cb_);
         exclaim_.is_checked.changed.subscribe(exclaim_slot_, exclaim_cb_);
         repeat_.value.changed.subscribe(repeat_slot_, repeat_cb_);
+        repeat_.value.changed.subscribe(box_corners_slot_, box_corners_cb_);
 
         layout_.stack_orientation    = mpapp::orientation::vertical;
         layout_.spacing              = 12.0;
         layout_.padding              = mpapp::thickness{24.0};
         layout_.horizontal_alignment = mpapp::h_align::center;
         layout_.vertical_alignment   = mpapp::v_align::center;
+        layout_.add(box_);
         layout_.add(lbl_);
         layout_.add(name_);
         layout_.add(shout_);
@@ -137,6 +146,13 @@ private:
     struct shout_cb_t  { spike_app* self; void operator()(bool) const { self->render_label(); } };
     struct exclaim_cb_t{ spike_app* self; void operator()(bool) const { self->render_label(); } };
     struct repeat_cb_t { spike_app* self; void operator()(double) const { self->render_label(); } };
+    struct box_corners_cb_t {
+        spike_app* self;
+        void operator()(double v) const {
+            const double r = v * 4.0;  // slider 1.0 → 4px corners; 5.0 → 20px
+            self->box_.corners.set(mpapp::corner_radius{r, r, r, r});
+        }
+    };
 
     view_model              vm_{};
     mpapp::button           btn_{};
@@ -147,6 +163,7 @@ private:
     mpapp::slider           repeat_{};
     mpapp::stack_layout     layout_{};
     mpapp::scroll_view      scroll_{};
+    mpapp::box_view         box_{};
     mpapp::window           window_{};
 
     mpapp::button_handler<mpapp::platform::android>       btn_handler_{};
@@ -157,6 +174,7 @@ private:
     mpapp::slider_handler<mpapp::platform::android>       repeat_handler_{};
     mpapp::stack_layout_handler<mpapp::platform::android> layout_handler_{};
     mpapp::scroll_view_handler<mpapp::platform::android>  scroll_handler_{};
+    mpapp::box_view_handler<mpapp::platform::android>     box_handler_{};
     mpapp::window_handler<mpapp::platform::android>       window_handler_{};
 
     click_cb_t                             click_cb_{this};
@@ -165,12 +183,14 @@ private:
     shout_cb_t                             shout_cb_{this};
     exclaim_cb_t                           exclaim_cb_{this};
     repeat_cb_t                            repeat_cb_{this};
+    box_corners_cb_t                       box_corners_cb_{this};
     mpapp::signal_slot<>                   click_slot_{};
     mpapp::signal_slot<const int&>         count_slot_{};
     mpapp::signal_slot<const std::string&> name_slot_{};
     mpapp::signal_slot<const bool&>        shout_slot_{};
     mpapp::signal_slot<const bool&>        exclaim_slot_{};
     mpapp::signal_slot<const double&>      repeat_slot_{};
+    mpapp::signal_slot<const double&>      box_corners_slot_{};
 };
 
 } // namespace
