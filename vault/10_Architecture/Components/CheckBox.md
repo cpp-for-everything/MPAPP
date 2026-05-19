@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "CheckBox"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/checkbox"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # CheckBox
 
 > [!info] Status
-> **mock** — full mock surface and handler land in `include/mpapp/handlers/mock/check_box_handler.hpp` with tests in `tests/mock_handlers/check_box_test.cpp`. Real platform handlers follow in P3.
+> **3-of-5 platforms real** — `is_checked: Observable<bool>` surface real on WinUI 3 (`mux::Controls::CheckBox` + `Checked`/`Unchecked` events), GTK4 (`GtkCheckButton` + `toggled` signal), and Android (`android.widget.CheckBox` + shared `MppCheckedChangeListener` JNI bridge with `kind=2` discriminator). **Bidirectional binding** end-to-end live-verified on Android: tapping the checkbox flips a cross-platform `Observable<bool>` whose user-side observer appends "!!!" to the label. Verified screenshots: `_Archive/T-0011-app-shell-abstraction/screenshots/android-checkbox-on.png` (Count: 0 — hello, world!!!); `android-checkbox-switch-clicks3.png` (Count: 3 — HELLO, WORLD!!! after CheckBox + Switch both on and three button clicks — confirms multiple Observables compose). macOS / iOS handlers code-complete pending an Apple host.
 
 ## Overview
 

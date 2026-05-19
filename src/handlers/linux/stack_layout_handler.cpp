@@ -8,8 +8,10 @@
 #include <gtk/gtk.h>
 
 #include "mpapp/button.hpp"
+#include "mpapp/check_box.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
+#include "mpapp/handlers/linux/check_box_handler.hpp"
 #include "mpapp/handlers/linux/entry_handler.hpp"
 #include "mpapp/handlers/linux/label_handler.hpp"
 #include "mpapp/handlers/linux/switch_handler.hpp"
@@ -128,6 +130,10 @@ void stack_layout_handler<platform::linux_>::add_child(view& child) {
     }
     if (auto* sw = dynamic_cast<switch_*>(&child); sw != nullptr && sw->has_handler()) {
         gtk_box_append(box, GTK_WIDGET(sw->handler().native()));
+        return;
+    }
+    if (auto* cb = dynamic_cast<check_box*>(&child); cb != nullptr && cb->has_handler()) {
+        gtk_box_append(box, GTK_WIDGET(cb->handler().native()));
         return;
     }
 }

@@ -10,8 +10,10 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 
 #include "mpapp/button.hpp"
+#include "mpapp/check_box.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
+#include "mpapp/handlers/windows/check_box_handler.hpp"
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
@@ -88,6 +90,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* sw = dynamic_cast<switch_*>(v); sw != nullptr) {
         if (sw->has_handler()) {
             native_.Content(sw->handler().native());
+        }
+        return;
+    }
+    if (auto* cb = dynamic_cast<check_box*>(v); cb != nullptr) {
+        if (cb->has_handler()) {
+            native_.Content(cb->handler().native());
         }
         return;
     }

@@ -8,8 +8,10 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
 #include "mpapp/button.hpp"
+#include "mpapp/check_box.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
+#include "mpapp/handlers/android/check_box_handler.hpp"
 #include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
@@ -37,6 +39,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* sw = dynamic_cast<switch_*>(v); sw && sw->has_handler()) {
         return sw->handler().native();
+    }
+    if (auto* cb = dynamic_cast<check_box*>(v); cb && cb->has_handler()) {
+        return cb->handler().native();
     }
     return nullptr;
 }

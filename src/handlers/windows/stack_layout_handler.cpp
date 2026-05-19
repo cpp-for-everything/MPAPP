@@ -12,8 +12,10 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
 #include "mpapp/button.hpp"
+#include "mpapp/check_box.hpp"
 #include "mpapp/entry.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
+#include "mpapp/handlers/windows/check_box_handler.hpp"
 #include "mpapp/handlers/windows/entry_handler.hpp"
 #include "mpapp/handlers/windows/label_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
@@ -147,6 +149,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* sw = dynamic_cast<switch_*>(&child); sw != nullptr) {
         if (sw->has_handler()) {
             native_.Children().Append(sw->handler().native());
+        }
+        return;
+    }
+    if (auto* cb = dynamic_cast<check_box*>(&child); cb != nullptr) {
+        if (cb->has_handler()) {
+            native_.Children().Append(cb->handler().native());
         }
         return;
     }

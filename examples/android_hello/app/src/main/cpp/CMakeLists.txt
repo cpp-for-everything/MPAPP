@@ -21,6 +21,8 @@ add_library(android_hello SHARED
     ${MPAPP_ROOT}/src/handlers/android/label_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/entry_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/switch_handler.cpp
+    ${MPAPP_ROOT}/src/handlers/android/check_box_handler.cpp
+    ${MPAPP_ROOT}/src/handlers/android/compound_button_dispatch.cpp
     ${MPAPP_ROOT}/src/mpapp.cpp
 )
 

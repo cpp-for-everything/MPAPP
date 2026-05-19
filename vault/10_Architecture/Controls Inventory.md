@@ -27,7 +27,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Border\|Border]] | `Handlers/Border/` | mock |
 | [[Components/BoxView\|BoxView]] | `Controls/BoxView/` | mock |
 | [[Components/Button\|Button]] | `Handlers/Button/` | android-real (Windows + Linux + Android verified live) |
-| [[Components/CheckBox\|CheckBox]] | `Handlers/CheckBox/` | mock |
+| [[Components/CheckBox\|CheckBox]] | `Handlers/CheckBox/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android, shared compound-button JNI bridge with Switch) |
 | [[Components/ContentPage\|ContentPage]] | `Controls/ContentPage/` | not-started |
 | [[Components/ContentView\|ContentView]] | `Handlers/ContentView/` | not-started |
 | [[Components/DatePicker\|DatePicker]] | `Handlers/DatePicker/` | not-started |
