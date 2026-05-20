@@ -14,6 +14,7 @@
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
+#include "mpapp/picker.hpp"
 #include "mpapp/progress_bar.hpp"
 #include "mpapp/search_bar.hpp"
 #include "mpapp/button.hpp"
@@ -23,6 +24,7 @@
 #include "mpapp/handlers/windows/activity_indicator_handler.hpp"
 #include "mpapp/handlers/windows/border_handler.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
+#include "mpapp/handlers/windows/picker_handler.hpp"
 #include "mpapp/handlers/windows/progress_bar_handler.hpp"
 #include "mpapp/handlers/windows/search_bar_handler.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
@@ -227,6 +229,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* sb = dynamic_cast<search_bar*>(&child); sb != nullptr) {
         if (sb->has_handler()) {
             native_.Children().Append(sb->handler().native());
+        }
+        return;
+    }
+    if (auto* pk = dynamic_cast<picker*>(&child); pk != nullptr) {
+        if (pk->has_handler()) {
+            native_.Children().Append(pk->handler().native());
         }
         return;
     }

@@ -10,6 +10,7 @@
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
+#include "mpapp/picker.hpp"
 #include "mpapp/progress_bar.hpp"
 #include "mpapp/search_bar.hpp"
 #include "mpapp/button.hpp"
@@ -19,6 +20,7 @@
 #include "mpapp/handlers/linux/activity_indicator_handler.hpp"
 #include "mpapp/handlers/linux/border_handler.hpp"
 #include "mpapp/handlers/linux/box_view_handler.hpp"
+#include "mpapp/handlers/linux/picker_handler.hpp"
 #include "mpapp/handlers/linux/progress_bar_handler.hpp"
 #include "mpapp/handlers/linux/search_bar_handler.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
@@ -188,6 +190,10 @@ void stack_layout_handler<platform::linux_>::add_child(view& child) {
     }
     if (auto* sb = dynamic_cast<search_bar*>(&child); sb != nullptr && sb->has_handler()) {
         gtk_box_append(box, GTK_WIDGET(sb->handler().native()));
+        return;
+    }
+    if (auto* pk = dynamic_cast<picker*>(&child); pk != nullptr && pk->has_handler()) {
+        gtk_box_append(box, GTK_WIDGET(pk->handler().native()));
         return;
     }
 }

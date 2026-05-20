@@ -2,18 +2,21 @@
 type: component
 mauiHandler: "Picker"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/picker"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # Picker
+
+> [!info] Status — promoted 2026-05-20
+> **3-of-5 platforms real (compile-verified)** — `mpapp::picker` with `items: Observable<vector<string>>` + `selected_index: Observable<int>` (-1 = nothing selected) + `title: Observable<string>`. Windows wraps `mux::Controls::ComboBox` (Items.Clear + Append for items; SelectedIndex; PlaceholderText for title). Linux wraps `GtkDropDown` + a `GtkStringList` model (gtk_string_list_splice for items; gtk_drop_down_set_selected for index; title deferred — `GtkDropDown` has no first-class title slot). Android wraps `android.widget.Spinner` + a freshly-constructed `ArrayAdapter<String>` per items() update (`android.R.layout.simple_spinner_item = 0x01090008`); `AbsSpinner.setSelection` for the index; title deferred. macOS / iOS planned in M-06.
 
 > [!info] Status
 > **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.

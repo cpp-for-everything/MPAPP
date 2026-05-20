@@ -42,6 +42,7 @@ add_executable(mock_handlers_test
     mock_handlers/activity_indicator_test.cpp
     mock_handlers/progress_bar_test.cpp
     mock_handlers/search_bar_test.cpp
+    mock_handlers/picker_test.cpp
     mock_handlers/button_test.cpp
     mock_handlers/check_box_test.cpp
     mock_handlers/editor_test.cpp

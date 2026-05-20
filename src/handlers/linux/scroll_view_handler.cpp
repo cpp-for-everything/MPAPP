@@ -10,6 +10,7 @@
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
+#include "mpapp/picker.hpp"
 #include "mpapp/progress_bar.hpp"
 #include "mpapp/search_bar.hpp"
 #include "mpapp/button.hpp"
@@ -19,6 +20,7 @@
 #include "mpapp/handlers/linux/activity_indicator_handler.hpp"
 #include "mpapp/handlers/linux/border_handler.hpp"
 #include "mpapp/handlers/linux/box_view_handler.hpp"
+#include "mpapp/handlers/linux/picker_handler.hpp"
 #include "mpapp/handlers/linux/progress_bar_handler.hpp"
 #include "mpapp/handlers/linux/search_bar_handler.hpp"
 #include "mpapp/handlers/linux/button_handler.hpp"
@@ -58,6 +60,7 @@ GtkWidget* native_widget_of(view* v) {
     if (auto* ai = dynamic_cast<activity_indicator*>(v); ai && ai->has_handler()) return GTK_WIDGET(ai->handler().native());
     if (auto* pb = dynamic_cast<progress_bar*>(v);       pb && pb->has_handler()) return GTK_WIDGET(pb->handler().native());
     if (auto* sb = dynamic_cast<search_bar*>(v);         sb && sb->has_handler()) return GTK_WIDGET(sb->handler().native());
+    if (auto* pk = dynamic_cast<picker*>(v);             pk && pk->has_handler()) return GTK_WIDGET(pk->handler().native());
     return nullptr;
 }
 
