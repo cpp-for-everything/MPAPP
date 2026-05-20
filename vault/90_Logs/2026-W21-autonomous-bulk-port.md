@@ -37,6 +37,18 @@ Each row is committed as a separate batch.
 | 6 | SearchBar (not-started → real) | shipped | `1487e16` | Win AutoSuggestBox with Find QueryIcon; Linux GtkSearchEntry; Android SearchView (setIconified(false) + setQuery + setQueryHint). |
 | 7 | Picker (not-started → real) | shipped | `efc1448` | Win ComboBox + Items.Append; Linux GtkDropDown + GtkStringList with splice; Android Spinner + freshly-built ArrayAdapter<String> per items update (android.R.layout.simple_spinner_item = 0x01090008). Items recorded as count in mock (`items.count`) — std::format doesn't ship a formatter for `vector<string>` and the concept fallback didn't route cleanly on GCC 14. Title slot deferred on Linux/Android. |
 
+## Second autonomous push (same session, user "do what you gotta do")
+
+Same handoff, more widgets. The harness's file-state tracking started rejecting Edit operations on dispatch surface files after the first few hits, which throttled throughput significantly — each batch's dispatch wiring across 9 files (stack_layout / window / scroll_view × 3 platforms) needed multiple re-reads and re-edits when the tracker got out of sync. The pattern still landed, but the slope flattened.
+
+| # | Widget | Status | Commit | Notes |
+|---|--------|--------|--------|-------|
+| 8 | DatePicker (not-started → real) | shipped | (see `git log`) | Win CalendarDatePicker (winrt::clock::from_time_t via _mkgmtime), Linux GtkCalendar (gtk_calendar_select_day with GDateTime), Android DatePicker (updateDate; month-1 for 0-indexed API). `<format>` guard for the NDK. POD `date_value{year, month, day}`. |
+| 9 | TimePicker (not-started → real) | shipped | (see `git log`) | Win mux::TimePicker, Linux GtkSpinButton pair (hour 0..23 + minute 0..59 in a horizontal GtkBox with a `:` separator), Android TimePicker (24h via setIs24HourView(Boolean.valueOf(true))). POD `time_value{hour, minute}`. |
+| 10 | Image (not-started → real) | shipped | (see `git log`) | File-path source; Win mux::Image + BitmapImage from file:// URI, Linux GtkPicture set_filename, Android ImageView + BitmapFactory.decodeFile. `aspect_mode` enum → Stretch / ContentFit / ScaleType. URL + resource-id + stream sources deferred. |
+| 11 | ImageButton (not-started → real) | shipped | (see `git log`) | Win Button-with-Image-content, Linux GtkButton + GtkPicture child, Android ImageButton + setImageBitmap. **Click event deferred** — wire button + image manually if clicks are needed today. |
+| 12 | ContentView (not-started → scaffolded) | shipped, dispatch pending | (see `git log`) | Win mux::ContentControl + Linux GtkBox single-child + Android FrameLayout + mock handler all compile in isolation, but the handler files aren't yet wired into the 9 dispatch surfaces or the example CMakeLists. A follow-up batch needs to add `dynamic_cast<content_view*>` cases to stack_layout / window / scroll_view dispatch on each platform and append the .cpp to the 3 example CMake source lists + 1 test list. |
+
 ## Caveats
 
 - **Heavy widgets** (Shell, NavigationPage, ListView, WebView, HybridWebView, CollectionView if added) require lifecycle / navigation design that can't be rushed in a bulk port. If I run out of budget before them, they're flagged in the handoff section.
@@ -47,9 +59,9 @@ Each row is committed as a separate batch.
 
 Stopped at 7 batches when the harness exited "auto mode" and reminded me to ask clarifying questions rather than continue blindly. That signal is correct — the remaining ~29 components include enough heavy ones (Shell, NavigationPage, ListView, WebView, Grid as a real layout engine, the full menu/swipe families) that bulk-porting them in one autonomous run without your review would have produced lower-quality code than the rest of this session.
 
-## Inventory state at stop
+## Inventory state at stop (after second push)
 
-**20 components `android-real`** (3-of-5: Win + Linux + Android real, macOS / iOS code-only or pending; "compile-verified" except where noted live-verified):
+**24 components `android-real` + 1 scaffolded (ContentView)** — net +5 over the first stop. Same caveat as before: macOS / iOS code-only or pending, compile-verified except where noted live-verified.
 
 - App-shell: Application, Window, StackLayout
 - Inputs: Button, Label, Entry, Switch, CheckBox, RadioButton, Slider, Stepper, Editor, SearchBar, Picker, ActivityIndicator, ProgressBar
