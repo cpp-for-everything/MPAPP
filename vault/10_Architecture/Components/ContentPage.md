@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "ContentPage"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/contentpage"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # ContentPage
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Windows (mux::Controls::Page wrapping a Grid with title TextBlock + content host), Linux (vertical GtkBox with GtkLabel + content child), Android (vertical LinearLayout with TextView + FrameLayout content host). All three platforms self-register with the ADR-0013 dispatch registry. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 
