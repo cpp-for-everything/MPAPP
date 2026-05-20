@@ -31,6 +31,7 @@ add_library(mpapp-handlers-linux STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/progress_bar_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/search_bar_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/picker_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/date_picker_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-linux PUBLIC

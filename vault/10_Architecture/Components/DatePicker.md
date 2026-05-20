@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "DatePicker"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/datepicker"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # DatePicker
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **3-of-5 platforms real (compile-verified)** — `mpapp::date_picker` with `date: Observable<date_value>` (POD year/month/day; cross-platform header doesn't pull in `<chrono>`) + `format: Observable<string>`. Windows wraps `mux::Controls::CalendarDatePicker` (Date IReference&lt;DateTimeOffset&gt; via winrt::clock::from_time_t, DateFormat string). Linux wraps `GtkCalendar` (gtk_calendar_select_day with GDateTime; format slot deferred — GtkCalendar has no DateFormat property). Android wraps `android.widget.DatePicker` (updateDate(year, month-1, day); format slot deferred — Android DatePicker is the spinner/calendar widget, not the dialog).
 
 ## Overview
 

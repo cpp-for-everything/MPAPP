@@ -32,6 +32,7 @@ add_library(mpapp-handlers-windows STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/progress_bar_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/search_bar_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/windows/picker_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/windows/date_picker_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-windows PUBLIC

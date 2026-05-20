@@ -10,6 +10,7 @@
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
+#include "mpapp/date_picker.hpp"
 #include "mpapp/picker.hpp"
 #include "mpapp/progress_bar.hpp"
 #include "mpapp/search_bar.hpp"
@@ -20,6 +21,7 @@
 #include "mpapp/handlers/android/activity_indicator_handler.hpp"
 #include "mpapp/handlers/android/border_handler.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
+#include "mpapp/handlers/android/date_picker_handler.hpp"
 #include "mpapp/handlers/android/picker_handler.hpp"
 #include "mpapp/handlers/android/progress_bar_handler.hpp"
 #include "mpapp/handlers/android/search_bar_handler.hpp"
@@ -76,6 +78,7 @@ jobject child_jobject(view* v) {
     if (auto* pb = dynamic_cast<progress_bar*>(v);       pb && pb->has_handler()) return pb->handler().native();
     if (auto* sb = dynamic_cast<search_bar*>(v);         sb && sb->has_handler()) return sb->handler().native();
     if (auto* pk = dynamic_cast<picker*>(v);             pk && pk->has_handler()) return pk->handler().native();
+    if (auto* dp = dynamic_cast<date_picker*>(v);        dp && dp->has_handler()) return dp->handler().native();
     return nullptr;
 }
 

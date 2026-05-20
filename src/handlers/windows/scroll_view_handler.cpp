@@ -13,6 +13,7 @@
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
+#include "mpapp/date_picker.hpp"
 #include "mpapp/picker.hpp"
 #include "mpapp/progress_bar.hpp"
 #include "mpapp/search_bar.hpp"
@@ -23,6 +24,7 @@
 #include "mpapp/handlers/windows/activity_indicator_handler.hpp"
 #include "mpapp/handlers/windows/border_handler.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
+#include "mpapp/handlers/windows/date_picker_handler.hpp"
 #include "mpapp/handlers/windows/picker_handler.hpp"
 #include "mpapp/handlers/windows/progress_bar_handler.hpp"
 #include "mpapp/handlers/windows/search_bar_handler.hpp"
@@ -108,6 +110,9 @@ void scroll_view_handler<platform::windows>::apply_content(const std::shared_ptr
     }
     if (auto* pk = dynamic_cast<picker*>(raw); pk && pk->has_handler()) {
         native_.Content(pk->handler().native()); return;
+    }
+    if (auto* dp = dynamic_cast<date_picker*>(raw); dp && dp->has_handler()) {
+        native_.Content(dp->handler().native()); return;
     }
 }
 

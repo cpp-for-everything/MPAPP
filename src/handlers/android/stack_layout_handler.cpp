@@ -12,6 +12,7 @@
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
+#include "mpapp/date_picker.hpp"
 #include "mpapp/editor.hpp"
 #include "mpapp/picker.hpp"
 #include "mpapp/progress_bar.hpp"
@@ -25,6 +26,7 @@
 #include "mpapp/handlers/android/progress_bar_handler.hpp"
 #include "mpapp/handlers/android/search_bar_handler.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
+#include "mpapp/handlers/android/date_picker_handler.hpp"
 #include "mpapp/handlers/android/editor_handler.hpp"
 #include "mpapp/handlers/android/entry_handler.hpp"
 #include "mpapp/handlers/android/label_handler.hpp"
@@ -254,6 +256,8 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
         child_obj = sb->handler().native();
     } else if (auto* pk = dynamic_cast<picker*>(&child); pk && pk->has_handler()) {
         child_obj = pk->handler().native();
+    } else if (auto* dp = dynamic_cast<date_picker*>(&child); dp && dp->has_handler()) {
+        child_obj = dp->handler().native();
     }
     if (child_obj == nullptr) return;
 
