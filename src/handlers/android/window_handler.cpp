@@ -11,6 +11,7 @@
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/date_picker.hpp"
+#include "mpapp/image.hpp"
 #include "mpapp/picker.hpp"
 #include "mpapp/time_picker.hpp"
 #include "mpapp/progress_bar.hpp"
@@ -23,6 +24,7 @@
 #include "mpapp/handlers/android/border_handler.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
 #include "mpapp/handlers/android/date_picker_handler.hpp"
+#include "mpapp/handlers/android/image_handler.hpp"
 #include "mpapp/handlers/android/picker_handler.hpp"
 #include "mpapp/handlers/android/time_picker_handler.hpp"
 #include "mpapp/handlers/android/progress_bar_handler.hpp"
@@ -107,6 +109,9 @@ jobject child_jobject(view* v) {
     }
     if (auto* tp = dynamic_cast<time_picker*>(v); tp && tp->has_handler()) {
         return tp->handler().native();
+    }
+    if (auto* im = dynamic_cast<image*>(v); im && im->has_handler()) {
+        return im->handler().native();
     }
     return nullptr;
 }

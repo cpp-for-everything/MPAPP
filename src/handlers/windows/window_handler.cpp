@@ -13,6 +13,7 @@
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
 #include "mpapp/date_picker.hpp"
+#include "mpapp/image.hpp"
 #include "mpapp/picker.hpp"
 #include "mpapp/time_picker.hpp"
 #include "mpapp/progress_bar.hpp"
@@ -25,6 +26,7 @@
 #include "mpapp/handlers/windows/border_handler.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/date_picker_handler.hpp"
+#include "mpapp/handlers/windows/image_handler.hpp"
 #include "mpapp/handlers/windows/picker_handler.hpp"
 #include "mpapp/handlers/windows/time_picker_handler.hpp"
 #include "mpapp/handlers/windows/progress_bar_handler.hpp"
@@ -200,6 +202,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* tp = dynamic_cast<time_picker*>(v); tp != nullptr) {
         if (tp->has_handler()) {
             native_.Content(tp->handler().native());
+        }
+        return;
+    }
+    if (auto* im = dynamic_cast<image*>(v); im != nullptr) {
+        if (im->has_handler()) {
+            native_.Content(im->handler().native());
         }
         return;
     }

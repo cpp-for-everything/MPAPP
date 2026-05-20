@@ -2,15 +2,15 @@
 type: component
 mauiHandler: "Image"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/image"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # Image
