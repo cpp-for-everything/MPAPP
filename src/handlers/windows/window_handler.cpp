@@ -14,6 +14,7 @@
 #include "mpapp/box_view.hpp"
 #include "mpapp/date_picker.hpp"
 #include "mpapp/image.hpp"
+#include "mpapp/image_button.hpp"
 #include "mpapp/picker.hpp"
 #include "mpapp/time_picker.hpp"
 #include "mpapp/progress_bar.hpp"
@@ -27,6 +28,7 @@
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/date_picker_handler.hpp"
 #include "mpapp/handlers/windows/image_handler.hpp"
+#include "mpapp/handlers/windows/image_button_handler.hpp"
 #include "mpapp/handlers/windows/picker_handler.hpp"
 #include "mpapp/handlers/windows/time_picker_handler.hpp"
 #include "mpapp/handlers/windows/progress_bar_handler.hpp"
@@ -208,6 +210,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* im = dynamic_cast<image*>(v); im != nullptr) {
         if (im->has_handler()) {
             native_.Content(im->handler().native());
+        }
+        return;
+    }
+    if (auto* ib = dynamic_cast<image_button*>(v); ib != nullptr) {
+        if (ib->has_handler()) {
+            native_.Content(ib->handler().native());
         }
         return;
     }

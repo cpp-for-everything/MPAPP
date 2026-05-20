@@ -41,7 +41,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/GraphicsView\|GraphicsView]] | `Handlers/GraphicsView/` | not-started |
 | [[Components/HybridWebView\|HybridWebView]] | `Handlers/HybridWebView/` | not-started |
 | [[Components/Image\|Image]] | `Handlers/Image/` | android-real (Win mux::Image + BitmapImage from file:// URI + Linux GtkPicture set_filename + Android ImageView + BitmapFactory.decodeFile; aspect_mode → Stretch/ContentFit/ScaleType) |
-| [[Components/ImageButton\|ImageButton]] | `Handlers/ImageButton/` | not-started |
+| [[Components/ImageButton\|ImageButton]] | `Handlers/ImageButton/` | android-real (Win Button + Image content; Linux GtkButton + GtkPicture child; Android ImageButton + BitmapFactory.decodeFile; click event deferred to M-05 polish) |
 | [[Components/IndicatorView\|IndicatorView]] | `Handlers/IndicatorView/` | not-started |
 | [[Components/Label\|Label]] | `Handlers/Label/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/Layout\|Layout]] | `Handlers/Layout/` | mock |

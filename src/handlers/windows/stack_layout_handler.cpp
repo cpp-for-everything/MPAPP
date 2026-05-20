@@ -16,6 +16,7 @@
 #include "mpapp/box_view.hpp"
 #include "mpapp/date_picker.hpp"
 #include "mpapp/image.hpp"
+#include "mpapp/image_button.hpp"
 #include "mpapp/time_picker.hpp"
 #include "mpapp/picker.hpp"
 #include "mpapp/progress_bar.hpp"
@@ -29,6 +30,7 @@
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/date_picker_handler.hpp"
 #include "mpapp/handlers/windows/image_handler.hpp"
+#include "mpapp/handlers/windows/image_button_handler.hpp"
 #include "mpapp/handlers/windows/time_picker_handler.hpp"
 #include "mpapp/handlers/windows/picker_handler.hpp"
 #include "mpapp/handlers/windows/progress_bar_handler.hpp"
@@ -259,6 +261,12 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (auto* im = dynamic_cast<image*>(&child); im != nullptr) {
         if (im->has_handler()) {
             native_.Children().Append(im->handler().native());
+        }
+        return;
+    }
+    if (auto* ib = dynamic_cast<image_button*>(&child); ib != nullptr) {
+        if (ib->has_handler()) {
+            native_.Children().Append(ib->handler().native());
         }
         return;
     }

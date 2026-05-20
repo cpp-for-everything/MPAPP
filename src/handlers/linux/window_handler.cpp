@@ -12,6 +12,7 @@
 #include "mpapp/box_view.hpp"
 #include "mpapp/date_picker.hpp"
 #include "mpapp/image.hpp"
+#include "mpapp/image_button.hpp"
 #include "mpapp/picker.hpp"
 #include "mpapp/time_picker.hpp"
 #include "mpapp/progress_bar.hpp"
@@ -25,6 +26,7 @@
 #include "mpapp/handlers/linux/box_view_handler.hpp"
 #include "mpapp/handlers/linux/date_picker_handler.hpp"
 #include "mpapp/handlers/linux/image_handler.hpp"
+#include "mpapp/handlers/linux/image_button_handler.hpp"
 #include "mpapp/handlers/linux/picker_handler.hpp"
 #include "mpapp/handlers/linux/time_picker_handler.hpp"
 #include "mpapp/handlers/linux/progress_bar_handler.hpp"
@@ -163,6 +165,10 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     }
     if (auto* im = dynamic_cast<image*>(v); im != nullptr && im->has_handler()) {
         gtk_window_set_child(win, GTK_WIDGET(im->handler().native()));
+        return;
+    }
+    if (auto* ib = dynamic_cast<image_button*>(v); ib != nullptr && ib->has_handler()) {
+        gtk_window_set_child(win, GTK_WIDGET(ib->handler().native()));
         return;
     }
     // Unknown subtype — leave content empty.

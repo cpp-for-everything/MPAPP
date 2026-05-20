@@ -46,6 +46,7 @@ add_executable(mock_handlers_test
     mock_handlers/date_picker_test.cpp
     mock_handlers/time_picker_test.cpp
     mock_handlers/image_test.cpp
+    mock_handlers/image_button_test.cpp
     mock_handlers/button_test.cpp
     mock_handlers/check_box_test.cpp
     mock_handlers/editor_test.cpp

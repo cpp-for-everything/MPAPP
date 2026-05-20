@@ -36,6 +36,7 @@ add_library(android_hello SHARED
     ${MPAPP_ROOT}/src/handlers/android/date_picker_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/time_picker_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/image_handler.cpp
+    ${MPAPP_ROOT}/src/handlers/android/image_button_handler.cpp
     ${MPAPP_ROOT}/src/handlers/android/compound_button_dispatch.cpp
     ${MPAPP_ROOT}/src/handlers/android/text_watcher_dispatch.cpp
     ${MPAPP_ROOT}/src/mpapp.cpp

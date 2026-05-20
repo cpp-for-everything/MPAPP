@@ -34,6 +34,7 @@ add_library(mpapp-handlers-linux STATIC
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/date_picker_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/time_picker_handler.cpp
     ${CMAKE_SOURCE_DIR}/src/handlers/linux/image_handler.cpp
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/image_button_handler.cpp
 )
 
 target_include_directories(mpapp-handlers-linux PUBLIC
