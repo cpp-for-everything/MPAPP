@@ -73,7 +73,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/TabbedView\|TabbedView]] | `Handlers/TabbedView/` | not-started |
 | [[Components/TableView\|TableView]] | `Controls/TableView/` | not-started |
 | [[Components/TemplatedView\|TemplatedView]] | `Controls/TemplatedView/` | not-started |
-| [[Components/TimePicker\|TimePicker]] | `Handlers/TimePicker/` | not-started |
+| [[Components/TimePicker\|TimePicker]] | `Handlers/TimePicker/` | android-real (Win TimePicker + Linux GtkSpinButton pair + Android TimePicker 24h; time_value hour/minute POD) |
 | [[Components/TitleBar\|TitleBar]] | `Controls/TitleBar/` | not-started |
 | [[Components/Toolbar\|Toolbar]] | `Handlers/Toolbar/` | not-started |
 | [[Components/View\|View]] | `Handlers/View/` | mock |

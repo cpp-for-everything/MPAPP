@@ -14,6 +14,7 @@
 #include "mpapp/box_view.hpp"
 #include "mpapp/date_picker.hpp"
 #include "mpapp/picker.hpp"
+#include "mpapp/time_picker.hpp"
 #include "mpapp/progress_bar.hpp"
 #include "mpapp/search_bar.hpp"
 #include "mpapp/button.hpp"
@@ -25,6 +26,7 @@
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/date_picker_handler.hpp"
 #include "mpapp/handlers/windows/picker_handler.hpp"
+#include "mpapp/handlers/windows/time_picker_handler.hpp"
 #include "mpapp/handlers/windows/progress_bar_handler.hpp"
 #include "mpapp/handlers/windows/search_bar_handler.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
@@ -192,6 +194,12 @@ void window_handler<platform::windows>::apply_content(view* v) {
     if (auto* dp = dynamic_cast<date_picker*>(v); dp != nullptr) {
         if (dp->has_handler()) {
             native_.Content(dp->handler().native());
+        }
+        return;
+    }
+    if (auto* tp = dynamic_cast<time_picker*>(v); tp != nullptr) {
+        if (tp->has_handler()) {
+            native_.Content(tp->handler().native());
         }
         return;
     }
