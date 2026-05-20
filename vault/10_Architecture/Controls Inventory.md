@@ -75,7 +75,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/TemplatedView\|TemplatedView]] | `Controls/TemplatedView/` | not-started |
 | [[Components/TimePicker\|TimePicker]] | `Handlers/TimePicker/` | android-real (Win TimePicker + Linux GtkSpinButton pair + Android TimePicker 24h; time_value hour/minute POD) |
 | [[Components/TitleBar\|TitleBar]] | `Controls/TitleBar/` | not-started |
-| [[Components/Toolbar\|Toolbar]] | `Handlers/Toolbar/` | not-started |
+| [[Components/Toolbar\|Toolbar]] | `Handlers/Toolbar/` | android-real (Win CommandBar + AppBarButton per item + Linux GtkActionBar + GtkButton per item + Android Toolbar with Menu items; items rebuilt on collection change) |
 | [[Components/View\|View]] | `Handlers/View/` | mock |
 | [[Components/WebView\|WebView]] | `Handlers/WebView/` | not-started |
 | [[Components/Window\|Window]] | `Handlers/Window/` | android-real (Windows + Linux + Android verified live) |
