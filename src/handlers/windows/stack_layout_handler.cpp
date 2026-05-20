@@ -11,6 +11,8 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
+#include "mpapp/handlers/windows/widget_dispatch.hpp"
+
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
@@ -148,6 +150,11 @@ void stack_layout_handler<platform::windows>::bind(stack_layout& s) {
 
 void stack_layout_handler<platform::windows>::add_child(view& child) {
     if (native_ == nullptr) {
+        return;
+    }
+    // ADR-0013: registry first.
+    if (auto el = detail::windows_dispatch::dispatch(&child); el != nullptr) {
+        native_.Children().Append(el);
         return;
     }
     if (auto* b = dynamic_cast<button*>(&child); b != nullptr) {

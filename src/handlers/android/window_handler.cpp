@@ -6,6 +6,7 @@
 #if defined(__ANDROID__)
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
+#include "mpapp/handlers/android/widget_dispatch.hpp"
 
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
@@ -55,6 +56,10 @@ namespace mpapp {
 namespace {
 
 jobject child_jobject(view* v) {
+    // ADR-0013: try the registry first.
+    if (jobject n = detail::android_dispatch::dispatch(v); n != nullptr) {
+        return n;
+    }
     if (auto* sl = dynamic_cast<stack_layout*>(v); sl && sl->has_handler()) {
         return sl->handler().native();
     }

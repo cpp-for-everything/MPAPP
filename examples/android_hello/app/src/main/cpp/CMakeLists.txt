@@ -2,6 +2,9 @@
 # T-0011 — Android example native CMakeLists. Invoked by Gradle's
 # externalNativeBuild with `ANDROID_PLATFORM`, `ANDROID_ABI`, etc.
 # pre-set.
+#
+# Per ADR-0013 the handler source list is a glob — adding a new
+# widget's *_handler.cpp doesn't require touching this file.
 
 cmake_minimum_required(VERSION 3.28)
 
@@ -12,34 +15,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(MPAPP_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../../../../..")
 
+file(GLOB MPAPP_ANDROID_HANDLERS CONFIGURE_DEPENDS
+    ${MPAPP_ROOT}/src/handlers/android/*.cpp
+)
+
 add_library(android_hello SHARED
     native_main.cpp
-    ${MPAPP_ROOT}/src/handlers/android/jni_bridge.cpp
-    ${MPAPP_ROOT}/src/handlers/android/window_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/stack_layout_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/button_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/label_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/entry_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/switch_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/check_box_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/radio_button_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/slider_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/stepper_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/editor_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/scroll_view_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/box_view_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/border_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/activity_indicator_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/progress_bar_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/search_bar_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/picker_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/date_picker_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/time_picker_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/image_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/image_button_handler.cpp
-    ${MPAPP_ROOT}/src/handlers/android/compound_button_dispatch.cpp
-    ${MPAPP_ROOT}/src/handlers/android/text_watcher_dispatch.cpp
     ${MPAPP_ROOT}/src/mpapp.cpp
+    ${MPAPP_ANDROID_HANDLERS}
 )
 
 target_include_directories(android_hello PRIVATE "${MPAPP_ROOT}/include")

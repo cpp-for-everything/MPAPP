@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: Apache-2.0
 # T-0011 — GTK4 hello-window example, rewritten against the MPAPP
 # app-shell abstraction. Compiles + runs only on UNIX (non-Apple).
+#
+# Per ADR-0013 the handler source list is a glob — adding a new
+# widget's *_handler.cpp doesn't require touching this file.
 
 if(NOT (UNIX AND NOT APPLE))
     return()
@@ -11,30 +14,12 @@ pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 
 # MPAPP Linux handler set — single small static library, mirrors the
 # Windows handler set layout (examples/windows_button_spike/CMakeLists).
+file(GLOB MPAPP_LINUX_HANDLERS CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/src/handlers/linux/*.cpp
+)
+
 add_library(mpapp-handlers-linux STATIC
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/application_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/window_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/stack_layout_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/button_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/label_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/entry_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/switch_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/check_box_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/radio_button_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/slider_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/stepper_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/editor_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/scroll_view_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/box_view_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/border_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/activity_indicator_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/progress_bar_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/search_bar_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/picker_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/date_picker_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/time_picker_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/image_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/linux/image_button_handler.cpp
+    ${MPAPP_LINUX_HANDLERS}
 )
 
 target_include_directories(mpapp-handlers-linux PUBLIC

@@ -17,6 +17,8 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Media.h>
 
+#include "mpapp/handlers/windows/widget_dispatch.hpp"
+
 #include "mpapp/box_view.hpp"
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
@@ -126,6 +128,7 @@ void border_handler<platform::windows>::apply_content(const std::shared_ptr<view
     if (native_ == nullptr) return;
     view* raw = v.get();
     if (raw == nullptr) { native_.Child(nullptr); return; }
+    if (auto el = detail::windows_dispatch::dispatch(raw); el != nullptr) { native_.Child(el); return; }
     if (auto* sl = dynamic_cast<stack_layout*>(raw); sl && sl->has_handler()) { native_.Child(sl->handler().native()); return; }
     if (auto* bn = dynamic_cast<button*>(raw);       bn && bn->has_handler()) { native_.Child(bn->handler().native()); return; }
     if (auto* l  = dynamic_cast<label*>(raw);        l  && l->has_handler())  { native_.Child(l->handler().native());  return; }

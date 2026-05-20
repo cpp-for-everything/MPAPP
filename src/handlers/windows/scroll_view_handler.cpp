@@ -10,6 +10,8 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
+#include "mpapp/handlers/windows/widget_dispatch.hpp"
+
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
@@ -66,6 +68,11 @@ void scroll_view_handler<platform::windows>::apply_content(const std::shared_ptr
     view* raw = v.get();
     if (raw == nullptr) {
         native_.Content(nullptr);
+        return;
+    }
+    // ADR-0013: registry first.
+    if (auto el = detail::windows_dispatch::dispatch(raw); el != nullptr) {
+        native_.Content(el);
         return;
     }
     // Dispatch on the known concrete subtypes (mirrors window_handler).

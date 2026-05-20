@@ -7,6 +7,8 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/handlers/linux/widget_dispatch.hpp"
+
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
@@ -139,6 +141,12 @@ void stack_layout_handler<platform::linux_>::bind(stack_layout& s) {
 void stack_layout_handler<platform::linux_>::add_child(view& child) {
     if (native_ == nullptr) return;
     GtkBox* box = GTK_BOX(static_cast<GtkWidget*>(native_));
+
+    // ADR-0013: try registry first.
+    if (GtkWidget* w = detail::linux_dispatch::dispatch(&child); w != nullptr) {
+        gtk_box_append(box, w);
+        return;
+    }
 
     if (auto* b = dynamic_cast<button*>(&child); b != nullptr && b->has_handler()) {
         gtk_box_append(box, GTK_WIDGET(b->handler().native()));

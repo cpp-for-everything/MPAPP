@@ -12,30 +12,14 @@ mpapp_install_windows_app_sdk()
 # Build the MPAPP Windows handler translation units into a small static
 # library so the example links against them just like a real consumer
 # would. (mpapp-core is platform-neutral; handlers live in their own TU.)
+#
+# Per ADR-0013 the handler source list is a glob — adding a new
+# widget's *_handler.cpp doesn't require touching this file.
+file(GLOB MPAPP_WINDOWS_HANDLERS CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/src/handlers/windows/*.cpp
+)
 add_library(mpapp-handlers-windows STATIC
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/button_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/label_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/application_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/window_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/stack_layout_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/entry_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/switch_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/check_box_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/radio_button_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/slider_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/stepper_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/editor_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/scroll_view_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/box_view_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/border_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/activity_indicator_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/progress_bar_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/search_bar_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/picker_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/date_picker_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/time_picker_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/image_handler.cpp
-    ${CMAKE_SOURCE_DIR}/src/handlers/windows/image_button_handler.cpp
+    ${MPAPP_WINDOWS_HANDLERS}
 )
 
 target_include_directories(mpapp-handlers-windows PUBLIC

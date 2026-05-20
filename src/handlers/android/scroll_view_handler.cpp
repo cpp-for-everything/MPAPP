@@ -6,6 +6,7 @@
 #if defined(__ANDROID__)
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
+#include "mpapp/handlers/android/widget_dispatch.hpp"
 
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
@@ -66,6 +67,7 @@ jobject make_scroll_view(JNIEnv* env, jobject context) {
 }
 
 jobject child_jobject(view* v) {
+    if (jobject n = detail::android_dispatch::dispatch(v); n != nullptr) return n;
     if (auto* sl = dynamic_cast<stack_layout*>(v); sl && sl->has_handler()) return sl->handler().native();
     if (auto* b  = dynamic_cast<button*>(v);       b  && b->has_handler())  return b->handler().native();
     if (auto* l  = dynamic_cast<label*>(v);        l  && l->has_handler())  return l->handler().native();

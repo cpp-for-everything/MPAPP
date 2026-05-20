@@ -31,36 +31,14 @@ add_subdirectory(template_type_spike)
 # Layout-group and simple-input handlers share a single Catch2 executable —
 # they pull in the same handler-base infrastructure and exercise the same
 # recording contract, so a combined binary keeps build cost low.
+#
+# Per ADR-0013 the test list is a glob — adding a new widget's
+# `<widget>_test.cpp` doesn't require touching this file.
+file(GLOB MPAPP_MOCK_TESTS CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/mock_handlers/*_test.cpp
+)
 add_executable(mock_handlers_test
-    mock_handlers/view_test.cpp
-    mock_handlers/layout_test.cpp
-    mock_handlers/bindable_layout_test.cpp
-    mock_handlers/scroll_view_test.cpp
-    mock_handlers/border_test.cpp
-    mock_handlers/frame_test.cpp
-    mock_handlers/box_view_test.cpp
-    mock_handlers/activity_indicator_test.cpp
-    mock_handlers/progress_bar_test.cpp
-    mock_handlers/search_bar_test.cpp
-    mock_handlers/picker_test.cpp
-    mock_handlers/date_picker_test.cpp
-    mock_handlers/time_picker_test.cpp
-    mock_handlers/image_test.cpp
-    mock_handlers/image_button_test.cpp
-    mock_handlers/button_test.cpp
-    mock_handlers/check_box_test.cpp
-    mock_handlers/editor_test.cpp
-    mock_handlers/entry_test.cpp
-    mock_handlers/label_test.cpp
-    mock_handlers/radio_button_test.cpp
-    mock_handlers/slider_test.cpp
-    mock_handlers/stepper_test.cpp
-    mock_handlers/switch_test.cpp
-    mock_handlers/application_test.cpp
-    mock_handlers/window_test.cpp
-    mock_handlers/page_test.cpp
-    mock_handlers/stack_layout_test.cpp
-    mock_handlers/grid_layout_test.cpp
+    ${MPAPP_MOCK_TESTS}
 )
 target_link_libraries(mock_handlers_test PRIVATE mpapp-core Catch2::Catch2WithMain)
 target_compile_options(mock_handlers_test PRIVATE

@@ -6,6 +6,7 @@
 #if defined(__ANDROID__)
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
+#include "mpapp/handlers/android/widget_dispatch.hpp"
 
 #include "mpapp/button.hpp"
 #include "mpapp/check_box.hpp"
@@ -229,7 +230,10 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
     if (env == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
-    jobject child_obj = nullptr;
+    // Try ADR-0013 registry first; fall through to legacy chain for
+    // widgets that haven't been migrated yet.
+    jobject child_obj = detail::android_dispatch::dispatch(&child);
+    if (child_obj == nullptr) {
     if (auto* b = dynamic_cast<button*>(&child); b && b->has_handler()) {
         child_obj = b->handler().native();
     } else if (auto* l = dynamic_cast<label*>(&child); l && l->has_handler()) {
@@ -271,6 +275,7 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
     } else if (auto* ib = dynamic_cast<image_button*>(&child); ib && ib->has_handler()) {
         child_obj = ib->handler().native();
     }
+    } // end legacy fallback (ADR-0013)
     if (child_obj == nullptr) return;
 
     jclass cls = env->FindClass("android/view/ViewGroup");

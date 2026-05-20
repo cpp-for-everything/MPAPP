@@ -9,6 +9,8 @@
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Microsoft.UI.Xaml.h>
 
+#include "mpapp/handlers/windows/widget_dispatch.hpp"
+
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
@@ -89,6 +91,11 @@ void window_handler<platform::windows>::apply_content(view* v) {
     }
     if (v == nullptr) {
         native_.Content(nullptr);
+        return;
+    }
+    // ADR-0013: registry first.
+    if (auto el = detail::windows_dispatch::dispatch(v); el != nullptr) {
+        native_.Content(el);
         return;
     }
     // Dispatch on the known concrete subtypes. As new handler-backed

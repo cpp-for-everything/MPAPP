@@ -7,6 +7,8 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/handlers/linux/widget_dispatch.hpp"
+
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
@@ -53,6 +55,7 @@ namespace mpapp {
 namespace {
 
 GtkWidget* native_widget_of(view* v) {
+    if (GtkWidget* w = detail::linux_dispatch::dispatch(v); w != nullptr) return w;
     if (auto* sl = dynamic_cast<stack_layout*>(v); sl && sl->has_handler()) return GTK_WIDGET(sl->handler().native());
     if (auto* b  = dynamic_cast<button*>(v);       b  && b->has_handler())  return GTK_WIDGET(b->handler().native());
     if (auto* l  = dynamic_cast<label*>(v);        l  && l->has_handler())  return GTK_WIDGET(l->handler().native());

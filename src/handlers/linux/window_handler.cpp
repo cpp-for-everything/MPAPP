@@ -7,6 +7,8 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/handlers/linux/widget_dispatch.hpp"
+
 #include "mpapp/activity_indicator.hpp"
 #include "mpapp/border.hpp"
 #include "mpapp/box_view.hpp"
@@ -85,6 +87,11 @@ void window_handler<platform::linux_>::apply_content(view* v) {
     GtkWindow* win = GTK_WINDOW(static_cast<GtkWidget*>(native_));
     if (v == nullptr) {
         gtk_window_set_child(win, nullptr);
+        return;
+    }
+    // ADR-0013: registry first.
+    if (GtkWidget* w = detail::linux_dispatch::dispatch(v); w != nullptr) {
+        gtk_window_set_child(win, w);
         return;
     }
     if (auto* sl = dynamic_cast<stack_layout*>(v); sl != nullptr && sl->has_handler()) {
