@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "Toolbar"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/toolbar"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # Toolbar
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Windows `mux::Controls::CommandBar` + `AppBarButton` per item, Linux `GtkActionBar` + `GtkButton` per item, Android `android.widget.Toolbar` with Menu items. Items rebuilt on collection change. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 
