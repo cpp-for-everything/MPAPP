@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "FlyoutPage"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/flyoutpage"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # FlyoutPage
 
 > [!info] Status
-> **mock** — flyout / detail slots + is_presented toggle + presented_changed signal + present/dismiss/toggle helpers + layout_behavior enum are all in place. Catch2 mock-handler tests cover the property-mapper recorders and the present/dismiss/toggle state transitions. Real per-platform handlers land under [[M-04c-handler-heavy-port|M-04c]].
+> **android-real** — Windows wraps `mux::Controls::SplitView` (Pane = flyout, Content = detail, IsPaneOpen mirrors is_presented). Linux uses a horizontal `GtkPaned` with the start child as the flyout pane (visibility toggled). Android uses a horizontal LinearLayout with a flyout FrameLayout (visibility toggled) + a detail FrameLayout. Both panes resolve their child page natives via the ADR-0013 dispatch registry. macOS / iOS real handlers pending Apple host.
 
 ## Overview
 

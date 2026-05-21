@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "TabbedPage"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/tabbedpage"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # TabbedPage
 
 > [!info] Status
-> **mock** — children + selected_index + computed current_page + tab-switch lifecycle signals are exercised by Catch2 mock-handler tests. Bar styling Observables exist as no-op holders. Real per-platform handlers land under [[M-04c-handler-heavy-port|M-04c]].
+> **android-real** — Windows wraps `mux::Controls::Pivot` with one PivotItem per child page (Header from page.title). Linux uses `GtkNotebook` with one page per child (tab label from page.title). Android uses a vertical LinearLayout with a horizontal tab strip of TextViews + a FrameLayout content host that swaps to the selected page's native. Children are resolved via the ADR-0013 dispatch registry on every collection change. Bar styling Observables still mock-only; real styling lands in M-05 polish.
 
 ## Overview
 

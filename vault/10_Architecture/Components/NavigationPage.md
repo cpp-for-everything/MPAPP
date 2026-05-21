@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "NavigationPage"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/navigationpage"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # NavigationPage
 
 > [!info] Status
-> **mock** — full mock surface plus the `page_stack` engine per [[ADR-0014-page-navigation-stack]] are landed. Push / pop / pop_to_root / insert_page_before / remove_page + attached-property store + lifecycle signals all exercised by Catch2 mock-handler tests. Real handlers per platform are tracked under [[M-04c-handler-heavy-port|M-04c]].
+> **android-real** — page_stack engine per [[ADR-0014-page-navigation-stack]] drives the real per-platform handlers. Windows wraps `mux::Controls::Page` with a Grid (back button + title row + content host). Linux uses a vertical GtkBox with a horizontal bar + content host. Android uses a vertical LinearLayout (bar + FrameLayout). The handler subscribes to `page_did_appear` and swaps the host's child via the ADR-0013 dispatch registry on every stack mutation. Back-button visibility tracks `stack_depth > 1`. macOS / iOS real handlers pending Apple host.
 
 ## Overview
 
