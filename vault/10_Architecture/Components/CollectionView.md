@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "CollectionView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/collectionview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # CollectionView
 
 > [!info] Status
-> **mock** — surface lives at `include/mpapp/collection_view.hpp`. Catch2 mock-handler tests cover items_source binding, selection_mode none/single/multiple, select/deselect/clear_selection helpers, and the selection observables (selected_index + selected_indices). Real virtualization is gated on the **virtualized-item-host ADR** (TBD); real per-platform handlers land under [[M-04c-handler-heavy-port|M-04c]].
+> **android-real** — Windows wraps `mux::Controls::ListView` with `SelectionMode` mapped to the cross-platform `collection_selection_mode` enum (None / Single / Multiple). Linux uses `GtkListBox` inside `GtkScrolledWindow` with matching `GtkSelectionMode`. Android wraps `android.widget.ListView` with `setChoiceMode` honoring the same mapping. All three wrap the native recycler per [[ADR-0020-virtualized-item-host-wrap-platform]]. The selection round-trip + tap-to-set is wired on Win/Linux; the Android `OnItemClickListener` router lands with M-05. **V1 limitations:** horizontal + grid layouts (governed by the `layout` enum) ship without per-platform implementation today; multi-select event reporting (events into `selected_indices`) lands when CollectionView's selection event surface lands. Item templates (custom row views) are tied to the cell-type tree in [[ADR-0021-tableview-cell-types]] (cells already shipped 2026-05-22) and a future item_template ADR.
 
 ## Overview
 
