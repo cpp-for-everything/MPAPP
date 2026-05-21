@@ -69,11 +69,13 @@ For each gated widget:
 | ListView | virtualized-item-host ADR TBD | **mock landed** — items_source + selected_index + item_tapped (2026-05-21) |
 | TableView | virtualized-item-host ADR TBD | **mock landed** — sections vec + intent + row_height + add_section/add_row helpers (2026-05-21) |
 | CollectionView | virtualized-item-host ADR TBD | **mock landed** — items_source + selection_mode none/single/multiple + select/deselect/clear (2026-05-21) |
-| WebView | RFC-0001 § Linux | not started |
-| HybridWebView | depends WebView | not started |
-| ShapeView | TBD | not started |
-| GraphicsView | TBD | not started |
-| Grid (real) | TBD | mock exists |
+| WebView | RFC-0001 § Linux licensing | **mock landed** — url + html + history + load/back/forward/reload + navigating/navigated (2026-05-21) |
+| HybridWebView | depends WebView | **mock landed** — extends WebView with hybrid_namespace + send_to_js/simulate_inbound + message_received/message_sent (2026-05-21) |
+| ShapeView | 2D graphics backend ADR TBD | **mock landed** — shape_kind enum + data path string + fill/stroke/stroke_thickness/opacity (2026-05-21) |
+| GraphicsView | 2D graphics backend ADR TBD | **mock landed** — width/height + draw_count + invalidate() + draw_requested signal (2026-05-21) |
+| Grid (real) | track-based layout ADR TBD | mock exists |
+
+**Status as of 2026-05-21 close:** Every widget in [[Controls Inventory]] is at **mock or better**. Zero `not-started` rows remain. The next pieces of work for M-04c are the gating ADRs (URI routing, virtualized item host, 2D graphics backend, track-based layout) plus per-platform real handlers for the 11 mocks above.
 
 ## See also
 
