@@ -207,4 +207,29 @@ void android_editor_dispatch_text_changed(editor_handler<platform::android>* h,
 
 } // namespace mpapp
 
+
+// ---------- Self-registration with the per-platform dispatch registry --
+// Phase 2 sweep per M-04b: register editor so ADR-0013 fall-through
+// dispatch can find its native handle without the legacy dynamic_cast chain.
+
+#include "mpapp/handlers/android/widget_dispatch.hpp"
+#include "mpapp/editor.hpp"
+
+namespace {
+
+jobject dispatch_editor(::mpapp::view* v) {
+    if (auto* w = dynamic_cast<::mpapp::editor*>(v); w && w->has_handler()) {
+        return w->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::android_dispatch::register_dispatcher(dispatch_editor); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // __ANDROID__

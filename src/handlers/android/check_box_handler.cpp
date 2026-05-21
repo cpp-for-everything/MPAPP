@@ -140,4 +140,29 @@ void android_check_box_dispatch_checked_changed(check_box_handler<platform::andr
 
 } // namespace mpapp
 
+
+// ---------- Self-registration with the per-platform dispatch registry --
+// Phase 2 sweep per M-04b: register check_box so ADR-0013 fall-through
+// dispatch can find its native handle without the legacy dynamic_cast chain.
+
+#include "mpapp/handlers/android/widget_dispatch.hpp"
+#include "mpapp/check_box.hpp"
+
+namespace {
+
+jobject dispatch_check_box(::mpapp::view* v) {
+    if (auto* w = dynamic_cast<::mpapp::check_box*>(v); w && w->has_handler()) {
+        return w->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::android_dispatch::register_dispatcher(dispatch_check_box); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // __ANDROID__

@@ -150,4 +150,29 @@ void picker_handler<platform::android>::map_title(picker& p) {
 
 } // namespace mpapp
 
+
+// ---------- Self-registration with the per-platform dispatch registry --
+// Phase 2 sweep per M-04b: register picker so ADR-0013 fall-through
+// dispatch can find its native handle without the legacy dynamic_cast chain.
+
+#include "mpapp/handlers/android/widget_dispatch.hpp"
+#include "mpapp/picker.hpp"
+
+namespace {
+
+jobject dispatch_picker(::mpapp::view* v) {
+    if (auto* w = dynamic_cast<::mpapp::picker*>(v); w && w->has_handler()) {
+        return w->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::android_dispatch::register_dispatcher(dispatch_picker); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // __ANDROID__

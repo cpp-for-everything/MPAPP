@@ -101,4 +101,29 @@ void stepper_handler<platform::linux_>::map_interval(stepper& s) {
 
 } // namespace mpapp
 
+
+// ---------- Self-registration with the per-platform dispatch registry --
+// Phase 2 sweep per M-04b: register stepper so ADR-0013 fall-through
+// dispatch can find its native handle without the legacy dynamic_cast chain.
+
+#include "mpapp/handlers/linux/widget_dispatch.hpp"
+#include "mpapp/stepper.hpp"
+
+namespace {
+
+GtkWidget* dispatch_stepper(::mpapp::view* v) {
+    if (auto* w = dynamic_cast<::mpapp::stepper*>(v); w && w->has_handler()) {
+        return GTK_WIDGET(w->handler().native());
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::linux_dispatch::register_dispatcher(dispatch_stepper); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // __linux__ && !__ANDROID__

@@ -119,4 +119,29 @@ void image_button_handler<platform::android>::map_aspect(image_button& b) {
 
 } // namespace mpapp
 
+
+// ---------- Self-registration with the per-platform dispatch registry --
+// Phase 2 sweep per M-04b: register image_button so ADR-0013 fall-through
+// dispatch can find its native handle without the legacy dynamic_cast chain.
+
+#include "mpapp/handlers/android/widget_dispatch.hpp"
+#include "mpapp/image_button.hpp"
+
+namespace {
+
+jobject dispatch_image_button(::mpapp::view* v) {
+    if (auto* w = dynamic_cast<::mpapp::image_button*>(v); w && w->has_handler()) {
+        return w->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::android_dispatch::register_dispatcher(dispatch_image_button); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // __ANDROID__

@@ -34,4 +34,25 @@ void label_handler<platform::windows>::map_text(label& l) {
 
 } // namespace mpapp
 
+// ---------- Self-registration with the per-platform dispatch registry --
+#include "mpapp/handlers/windows/widget_dispatch.hpp"
+#include "mpapp/label.hpp"
+
+namespace {
+
+::winrt::Microsoft::UI::Xaml::UIElement dispatch_label(::mpapp::view* v) {
+    if (auto* l = dynamic_cast<::mpapp::label*>(v); l && l->has_handler()) {
+        return l->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::windows_dispatch::register_dispatcher(dispatch_label); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // _WIN32

@@ -127,4 +127,29 @@ void android_switch_dispatch_checked_changed(switch_handler<platform::android>* 
 // compound-button handlers (switch_, check_box, …) can route through
 // the same Java listener with a 'kind' discriminator.
 
+
+// ---------- Self-registration with the per-platform dispatch registry --
+// Phase 2 sweep per M-04b: register switch_ so ADR-0013 fall-through
+// dispatch can find its native handle without the legacy dynamic_cast chain.
+
+#include "mpapp/handlers/android/widget_dispatch.hpp"
+#include "mpapp/switch_.hpp"
+
+namespace {
+
+jobject dispatch_switch(::mpapp::view* v) {
+    if (auto* w = dynamic_cast<::mpapp::switch_*>(v); w && w->has_handler()) {
+        return w->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::android_dispatch::register_dispatcher(dispatch_switch); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // __ANDROID__

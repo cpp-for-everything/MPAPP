@@ -186,4 +186,29 @@ void android_entry_dispatch_text_changed(entry_handler<platform::android>* h,
 // JNI trampoline moved to src/handlers/android/text_watcher_dispatch.cpp
 // so entry_handler and editor_handler share a single Java class.
 
+
+// ---------- Self-registration with the per-platform dispatch registry --
+// Phase 2 sweep per M-04b: register entry so ADR-0013 fall-through
+// dispatch can find its native handle without the legacy dynamic_cast chain.
+
+#include "mpapp/handlers/android/widget_dispatch.hpp"
+#include "mpapp/entry.hpp"
+
+namespace {
+
+jobject dispatch_entry(::mpapp::view* v) {
+    if (auto* w = dynamic_cast<::mpapp::entry*>(v); w && w->has_handler()) {
+        return w->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::android_dispatch::register_dispatcher(dispatch_entry); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // __ANDROID__

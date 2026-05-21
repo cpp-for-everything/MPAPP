@@ -67,4 +67,28 @@ void button_handler<platform::linux_>::map_clicked(button& b) {
 
 } // namespace mpapp
 
+// ---------- Self-registration with the per-platform dispatch registry --
+// Phase 2 sweep per M-04b: register button so ADR-0013 fall-through
+// dispatch can find its GtkWidget* without the legacy dynamic_cast chain.
+
+#include "mpapp/handlers/linux/widget_dispatch.hpp"
+#include "mpapp/button.hpp"
+
+namespace {
+
+GtkWidget* dispatch_button(::mpapp::view* v) {
+    if (auto* b = dynamic_cast<::mpapp::button*>(v); b && b->has_handler()) {
+        return GTK_WIDGET(b->handler().native());
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::linux_dispatch::register_dispatcher(dispatch_button); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
+
 #endif // __linux__ && !__ANDROID__
