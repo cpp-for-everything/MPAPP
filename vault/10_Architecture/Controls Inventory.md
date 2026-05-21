@@ -37,7 +37,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | not-started |
 | [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | android-real (Win NavigationView + Linux GtkPaned drawer + Android DrawerLayout w/ LinearLayout fallback; flyout + detail + is_presented) |
 | [[Components/Grid\|Grid]] | `Layouts/GridLayoutManager/` | mock |
-| [[Components/Frame\|Frame]] | `Controls/Frame/` | mock |
+| [[Components/Frame\|Frame]] | `Controls/Frame/` | android-real (Win mux::Border + Linux GtkBox + Android FrameLayout; [[deprecated]] alias for Border) |
 | [[Components/GraphicsView\|GraphicsView]] | `Handlers/GraphicsView/` | not-started |
 | [[Components/HybridWebView\|HybridWebView]] | `Handlers/HybridWebView/` | not-started |
 | [[Components/Image\|Image]] | `Handlers/Image/` | android-real (Win mux::Image + BitmapImage from file:// URI + Linux GtkPicture set_filename + Android ImageView + BitmapFactory.decodeFile; aspect_mode → Stretch/ContentFit/ScaleType) |
