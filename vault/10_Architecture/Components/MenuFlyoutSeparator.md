@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "MenuFlyoutSeparator"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menuflyoutseparator"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # MenuFlyoutSeparator
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Windows `mux::Controls::MenuFlyoutSeparator` + Linux horizontal `GtkSeparator` + Android `android.view.View` w/ 1px minimum height; pure marker type, no observable properties. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 

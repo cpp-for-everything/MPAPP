@@ -48,10 +48,10 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ListView\|ListView]] | `Controls/ListView/` | not-started |
 | [[Components/MenuBar\|MenuBar]] | `Handlers/MenuBar/` | android-real (Win mux::MenuBar + Linux GtkBox of GtkMenuButton + Android Toolbar acting as menu host; items rebuild on collection change, drops child views the dispatch registry does not resolve) |
 | [[Components/MenuBarItem\|MenuBarItem]] | `Handlers/MenuBarItem/` | android-real (Win mux::MenuBarItem + Linux GtkMenuButton with title label + Android TextView surfaced into parent menu_bar's Menu; title + items collection observed, popover/flyout children land with M-04c menu_flyout family) |
-| [[Components/MenuFlyout\|MenuFlyout]] | `Handlers/MenuFlyoutHandler/` | not-started |
-| [[Components/MenuFlyoutItem\|MenuFlyoutItem]] | `Handlers/MenuFlyoutItem/` | not-started |
-| [[Components/MenuFlyoutSeparator\|MenuFlyoutSeparator]] | `Handlers/MenuFlyoutSeparator/` | not-started |
-| [[Components/MenuFlyoutSubItem\|MenuFlyoutSubItem]] | `Handlers/MenuFlyoutSubItem/` | not-started |
+| [[Components/MenuFlyout\|MenuFlyout]] | `Handlers/MenuFlyoutHandler/` | android-real (Win mux::Controls::MenuFlyout + Linux GtkPopover w/ vertical GtkBox + Android vertical LinearLayout; items + is_open via ADR-0013 dispatch registry) |
+| [[Components/MenuFlyoutItem\|MenuFlyoutItem]] | `Handlers/MenuFlyoutItem/` | android-real (Win mux::Controls::MenuFlyoutItem w/ Click → clicked + Linux flat-styled GtkButton w/ "clicked" signal + Android android.widget.Button; text + is_enabled + clicked, Android click router deferred to M-05) |
+| [[Components/MenuFlyoutSeparator\|MenuFlyoutSeparator]] | `Handlers/MenuFlyoutSeparator/` | android-real (Win mux::Controls::MenuFlyoutSeparator + Linux horizontal GtkSeparator + Android 1-px-min-height android.view.View; pure marker type, no observable properties) |
+| [[Components/MenuFlyoutSubItem\|MenuFlyoutSubItem]] | `Handlers/MenuFlyoutSubItem/` | android-real (Win mux::Controls::MenuFlyoutSubItem + Linux GtkMenuButton wrapping nested GtkPopover + Android vertical LinearLayout w/ TextView header + inner items host; text + items via ADR-0013 dispatch) |
 | [[Components/NavigationPage\|NavigationPage]] | `Handlers/NavigationPage/` | not-started |
 | [[Components/Page\|Page]] | `Handlers/Page/` | android-real (Win mux::Page + Linux GtkBox vertical + Android LinearLayout vertical; title via TextBlock/GtkLabel/TextView, content via FrameLayout/Grid/Box) |
 | [[Components/Picker\|Picker]] | `Handlers/Picker/` | android-real (Win ComboBox + Linux GtkDropDown/GtkStringList + Android Spinner+ArrayAdapter; items + selected_index + title; title deferred on Linux/Android) |
