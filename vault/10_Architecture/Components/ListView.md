@@ -2,19 +2,19 @@
 type: component
 mauiHandler: "ListView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/listview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 > [!info] Status
-> **mock** — items_source + selected_index + row_height + has_unevenly_sized_rows + item_tapped signal exercised by Catch2 mock-handler tests. Real virtualization is gated on the virtualized-item-host ADR (also gates [[CollectionView]] and [[TableView]]). MAUI flags ListView as legacy in favor of CollectionView; MPAPP ships it for source-compat parity.
+> **android-real** — Windows wraps `mux::Controls::ListView` with the built-in `Items()` collection; selection round-trips via `SelectionChanged` ↔ `selected_index`. Linux uses `GtkListBox` inside a `GtkScrolledWindow`; row-selected signal round-trips back through a "mpapp_suppress" gobject-data flag to prevent feedback loops. Android wraps `android.widget.ListView` with a fresh `ArrayAdapter<String>` rebuilt on every items_source change; tap-to-set-selection router is deferred to M-05 polish. All three platforms wrap the native recycler per [[ADR-0020-virtualized-item-host-wrap-platform]] — no portable recycling layer ships. Item templates (custom row views) remain a follow-up tied to the cell-type tree ([[ADR-0021-tableview-cell-types]]) and CollectionView surfaces.
 
 # ListView
 
