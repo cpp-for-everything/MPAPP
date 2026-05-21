@@ -1,0 +1,41 @@
+// SPDX-License-Identifier: Apache-2.0
+// Mock handler for `mpapp::view_cell`.
+
+#ifndef MPAPP_HANDLERS_MOCK_VIEW_CELL_HANDLER_HPP
+#define MPAPP_HANDLERS_MOCK_VIEW_CELL_HANDLER_HPP
+
+#include "../../platform.hpp"
+#include "../../view_cell.hpp"
+#include "handler_base.hpp"
+
+namespace mpapp {
+
+template <>
+class view_cell_handler<platform::mock> : public mock_handler_base {
+public:
+    view_cell_handler() = default;
+    ~view_cell_handler() = default;
+
+    view_cell_handler(const view_cell_handler&)            = delete;
+    view_cell_handler& operator=(const view_cell_handler&) = delete;
+    view_cell_handler(view_cell_handler&&)                 = delete;
+    view_cell_handler& operator=(view_cell_handler&&)      = delete;
+
+    void map_content(view_cell& c) {
+        record_change("content.present", c.content.get() != nullptr);
+        c.content.changed.subscribe(slot_, cb_);
+    }
+
+private:
+    using self_t = view_cell_handler<platform::mock>;
+    struct recorder {
+        self_t* self = nullptr;
+        void operator()(view* v) const { self->record_change("content.present", v != nullptr); }
+    };
+    recorder              cb_{this};
+    signal_slot<view* const&> slot_{};
+};
+
+} // namespace mpapp
+
+#endif // MPAPP_HANDLERS_MOCK_VIEW_CELL_HANDLER_HPP

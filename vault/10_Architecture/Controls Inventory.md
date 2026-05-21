@@ -72,7 +72,12 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Switch\|Switch]] | `Handlers/Switch/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android) |
 | [[Components/TabbedPage\|TabbedPage]] | `Controls/TabbedPage/` | android-real (Win mux::Pivot + Linux GtkNotebook + Android LinearLayout w/ horizontal tab strip + FrameLayout content host; rebuild on children change; selection drives content swap) |
 | [[Components/TabbedView\|TabbedView]] | `Handlers/TabbedView/` | android-real (Win mux::TabView + Linux GtkNotebook + Android vertical LinearLayout host w/ Button tab strip + FrameLayout page area; tab_titles + selected_index) |
-| [[Components/TableView\|TableView]] | `Controls/TableView/` | mock (sections vec of {title,rows} + intent enum + row_height + has_unevenly_sized_rows + add_section/add_row helpers + total_row_count; cell-subclass tree deferred) |
+| [[Components/TableView\|TableView]] | `Controls/TableView/` | mock (sections vec of {title,rows} + intent enum + row_height + has_unevenly_sized_rows + add_section/add_row helpers + total_row_count; cell-subclass tree shipped 2026-05-22 — see below) |
+| [[Components/TextCell\|TextCell]] | `Controls/Cells/TextCell/` | mock (text + detail + text_color + detail_color + cell::is_enabled + cell::tapped per ADR-0021; real handlers gate on TableView wrap-platform-recycler) |
+| [[Components/EntryCell\|EntryCell]] | `Controls/Cells/EntryCell/` | mock (label + text + placeholder + keyboard_kind enum + completed signal per ADR-0021; real handlers deferred) |
+| [[Components/SwitchCell\|SwitchCell]] | `Controls/Cells/SwitchCell/` | mock (text + on + on_changed signal + toggle() helper per ADR-0021) |
+| [[Components/ViewCell\|ViewCell]] | `Controls/Cells/ViewCell/` | mock (content: view* — arbitrary-content escape hatch per ADR-0021) |
+| [[Components/ImageCell\|ImageCell]] | `Controls/Cells/ImageCell/` | mock (extends text_cell; adds image_uri per ADR-0021) |
 | [[Components/TemplatedView\|TemplatedView]] | `Controls/TemplatedView/` | android-real (Win ContentControl + Linux GtkBox single-child + Android FrameLayout; content slot live, template_id deferred to templating engine ADR) |
 | [[Components/TimePicker\|TimePicker]] | `Handlers/TimePicker/` | android-real (Win TimePicker + Linux GtkSpinButton pair + Android TimePicker 24h; time_value hour/minute POD) |
 | [[Components/TitleBar\|TitleBar]] | `Controls/TitleBar/` | android-real (Win mux::TitleBar + Linux GtkHeaderBar + Android android.widget.Toolbar; title + subtitle) |
@@ -81,7 +86,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/WebView\|WebView]] | `Handlers/WebView/` | mock (url + html_source + is_loading + can_go_back/forward + load/go_back/go_forward/reload + navigating/navigated signals; real per-platform binding deferred — Linux WebKitGTK gated on RFC-0001) |
 | [[Components/Window\|Window]] | `Handlers/Window/` | android-real (Windows + Linux + Android verified live) |
 
-**Total: 59 components** (CollectionView added 2026-05-21 per M-04b sweep; abstract bases View/Layout/Element annotated as terminal-mock).
+**Total: 64 components** (+5 TableView cells landed 2026-05-22 per [[ADR-0021-tableview-cell-types]]: text_cell, entry_cell, switch_cell, view_cell, image_cell. CollectionView added 2026-05-21 per M-04b sweep; abstract bases View/Layout/Element annotated as terminal-mock).
 
 ## How to update
 
