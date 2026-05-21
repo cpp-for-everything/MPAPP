@@ -35,7 +35,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Element\|Element]] | `Handlers/Element/` | not-started |
 | [[Components/Entry\|Entry]] | `Handlers/Entry/` | android-real (Windows + Linux + Android; bidirectional text-binding live-verified on Android) |
 | [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | not-started |
-| [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | not-started |
+| [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | android-real (Win NavigationView + Linux GtkPaned drawer + Android DrawerLayout w/ LinearLayout fallback; flyout + detail + is_presented) |
 | [[Components/Grid\|Grid]] | `Layouts/GridLayoutManager/` | mock |
 | [[Components/Frame\|Frame]] | `Controls/Frame/` | mock |
 | [[Components/GraphicsView\|GraphicsView]] | `Handlers/GraphicsView/` | not-started |
