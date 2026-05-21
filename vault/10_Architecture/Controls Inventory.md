@@ -39,8 +39,8 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | android-real (Win NavigationView + Linux GtkPaned drawer + Android DrawerLayout w/ LinearLayout fallback; flyout + detail + is_presented) |
 | [[Components/Grid\|Grid]] | `Layouts/GridLayoutManager/` | mock |
 | [[Components/Frame\|Frame]] | `Controls/Frame/` | android-real (Win mux::Border + Linux GtkBox + Android FrameLayout; [[deprecated]] alias for Border) |
-| [[Components/GraphicsView\|GraphicsView]] | `Handlers/GraphicsView/` | not-started |
-| [[Components/HybridWebView\|HybridWebView]] | `Handlers/HybridWebView/` | not-started |
+| [[Components/GraphicsView\|GraphicsView]] | `Handlers/GraphicsView/` | mock (width/height + draw_count + invalidate() + draw_requested signal; real canvas backend deferred with ShapeView graphics ADR) |
+| [[Components/HybridWebView\|HybridWebView]] | `Handlers/HybridWebView/` | mock (extends WebView; hybrid_namespace + last_message_in + send_to_js + simulate_inbound + message_received/message_sent signals; real bridge deferred with WebView) |
 | [[Components/Image\|Image]] | `Handlers/Image/` | android-real (Win mux::Image + BitmapImage from file:// URI + Linux GtkPicture set_filename + Android ImageView + BitmapFactory.decodeFile; aspect_mode → Stretch/ContentFit/ScaleType) |
 | [[Components/ImageButton\|ImageButton]] | `Handlers/ImageButton/` | android-real (Win Button + Image content; Linux GtkButton + GtkPicture child; Android ImageButton + BitmapFactory.decodeFile; click event deferred to M-05 polish) |
 | [[Components/IndicatorView\|IndicatorView]] | `Handlers/IndicatorView/` | android-real (Win StackPanel of Ellipses + Linux GtkBox of dot labels + Android LinearLayout of GradientDrawable-backed Views; count + position + colors; companion to CarouselView which is M-04c) |
@@ -61,7 +61,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/RefreshView\|RefreshView]] | `Handlers/RefreshView/` | android-real (Win RefreshContainer + Linux GtkBox with GtkSpinner overlay + Android SwipeRefreshLayout w/ FrameLayout+ProgressBar fallback; is_refreshing surface) |
 | [[Components/ScrollView\|ScrollView]] | `Handlers/ScrollView/` | android-real (Windows ScrollViewer + Linux GtkScrolledWindow + Android ScrollView; `bind_content(scroll_view&, view&)` helper wraps a non-owning child as null-deleter `shared_ptr<view>`; Android spike wraps the full widget stack and renders through it) |
 | [[Components/SearchBar\|SearchBar]] | `Handlers/SearchBar/` | android-real (Win AutoSuggestBox with Find icon + Linux GtkSearchEntry + Android SearchView; text + placeholder) |
-| [[Components/ShapeView\|ShapeView]] | `Handlers/ShapeView/` | not-started |
+| [[Components/ShapeView\|ShapeView]] | `Handlers/ShapeView/` | mock (kind enum + data path string + fill/stroke/stroke_thickness/opacity observables; real rendering gated on 2D graphics backend ADR) |
 | [[Components/Shell\|Shell]] | `Controls/Shell/` | mock (current_route + tabs + current_tab_index + flyout + register_route + go_to URI parser + navigated/flyout_toggled signals; route parameters + route guards + lifecycle Aware interfaces deferred to routing ADR) |
 | [[Components/Slider\|Slider]] | `Handlers/Slider/` | android-real (Windows + Linux + Android; bidirectional double-range binding live-verified on Android via SeekBar→int progress→double remap) |
 | [[Components/StackLayout\|StackLayout]] | `Layouts/StackLayoutManager/` | android-real (Windows + Linux + Android verified live) |
@@ -78,7 +78,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/TitleBar\|TitleBar]] | `Controls/TitleBar/` | android-real (Win mux::TitleBar + Linux GtkHeaderBar + Android android.widget.Toolbar; title + subtitle) |
 | [[Components/Toolbar\|Toolbar]] | `Handlers/Toolbar/` | android-real (Win CommandBar + AppBarButton per item + Linux GtkActionBar + GtkButton per item + Android Toolbar with Menu items; items rebuilt on collection change) |
 | [[Components/View\|View]] | `Handlers/View/` | mock — terminal (abstract base; all concrete widgets derive from view) |
-| [[Components/WebView\|WebView]] | `Handlers/WebView/` | not-started |
+| [[Components/WebView\|WebView]] | `Handlers/WebView/` | mock (url + html_source + is_loading + can_go_back/forward + load/go_back/go_forward/reload + navigating/navigated signals; real per-platform binding deferred — Linux WebKitGTK gated on RFC-0001) |
 | [[Components/Window\|Window]] | `Handlers/Window/` | android-real (Windows + Linux + Android verified live) |
 
 **Total: 59 components** (CollectionView added 2026-05-21 per M-04b sweep; abstract bases View/Layout/Element annotated as terminal-mock).
