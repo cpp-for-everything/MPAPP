@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "NavigationPage"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/navigationpage"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # NavigationPage
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — full mock surface plus the `page_stack` engine per [[ADR-0014-page-navigation-stack]] are landed. Push / pop / pop_to_root / insert_page_before / remove_page + attached-property store + lifecycle signals all exercised by Catch2 mock-handler tests. Real handlers per platform are tracked under [[M-04c-handler-heavy-port|M-04c]].
 
 ## Overview
 
