@@ -2,24 +2,21 @@
 type: component
 mauiHandler: "Shell"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/shell/"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
-
-> [!info] Status
-> **mock** — minimum routing primitives are in place: `current_route` + `tabs` + `current_tab_index` + `register_route()` + `go_to()` URI parser + flyout toggle + `navigated` and `flyout_toggled` signals. The full Shell surface (route parameters, route guards, route-aware lifecycle interfaces, hierarchical FlyoutItem / Tab / ShellSection / ShellContent type tree) is gated on the upcoming **URI routing ADR** which composes on top of [[ADR-0014-page-navigation-stack]]. Real per-platform handlers land under [[M-04c-handler-heavy-port|M-04c]].
 
 # Shell
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Windows wraps `mux::Controls::SplitView`: Pane = flyout host (toggled by is_flyout_open), Content = a vertical Grid with a horizontal StackPanel tab strip (Buttons) on top of a `ContentControl` bound to `current_content`. Linux uses a horizontal `GtkPaned`: start child = flyout host (visibility toggled), end child = vertical GtkBox with horizontal tab GtkBox + content GtkBox. Android uses a horizontal LinearLayout with a left FrameLayout (flyout, visibility toggled) + a right vertical LinearLayout containing the tab strip + a FrameLayout content host. Tab buttons set `current_tab_index` on click (Win/Linux; Android click router deferred to M-05). `current_content` swap routes through the ADR-0013 dispatch registry. The full compile-time route table per [[ADR-0016-shell-compile-time-routes]] is deferred; the mock's string-based `go_to()` URI parser still drives `current_route` + `current_tab_index`.
 
 ## Overview
 

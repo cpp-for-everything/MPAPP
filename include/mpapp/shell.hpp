@@ -49,6 +49,8 @@ public:
     Observable<int>                      current_tab_index{0};
     Observable<bool>                     is_flyout_open{false};
     Observable<page*>                    flyout_content{nullptr};
+    // Main content area. Apps swap this on tab-selection / go_to events.
+    Observable<page*>                    current_content{nullptr};
 
     // Known route names registered via register_route().
     Observable<std::vector<std::string>> registered_routes{};

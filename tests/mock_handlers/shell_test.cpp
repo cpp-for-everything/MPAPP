@@ -114,3 +114,20 @@ TEST_CASE("mock handler records route + tab + flyout changes",
         "is_flyout_open=true",
     });
 }
+
+TEST_CASE("shell.current_content tracks page swaps",
+          "[mock][shell]") {
+    page home, library;
+    shell s;
+
+    CHECK(s.current_content.get() == nullptr);
+
+    s.current_content = &home;
+    CHECK(s.current_content.get() == &home);
+
+    s.current_content = &library;
+    CHECK(s.current_content.get() == &library);
+
+    s.current_content = nullptr;
+    CHECK(s.current_content.get() == nullptr);
+}
