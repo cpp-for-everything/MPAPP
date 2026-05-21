@@ -29,10 +29,11 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Button\|Button]] | `Handlers/Button/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/CheckBox\|CheckBox]] | `Handlers/CheckBox/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android, shared compound-button JNI bridge with Switch) |
 | [[Components/ContentPage\|ContentPage]] | `Controls/ContentPage/` | android-real (Win Page wrapping Grid + Linux GtkBox vertical w/ GtkLabel + content + Android LinearLayout vertical w/ TextView + FrameLayout; title + content + padding) |
-| [[Components/ContentView\|ContentView]] | `Handlers/ContentView/` | not-started |
+| [[Components/ContentView\|ContentView]] | `Handlers/ContentView/` | android-real (Win mux::ContentControl + Linux GtkBox + Android FrameLayout; single content slot resolved via ADR-0013 dispatch registry; legacy dynamic_cast chain removed) |
 | [[Components/DatePicker\|DatePicker]] | `Handlers/DatePicker/` | android-real (Win CalendarDatePicker + Linux GtkCalendar + Android DatePicker; date_value POD year/month/day; format string applied on Windows only) |
 | [[Components/Editor\|Editor]] | `Handlers/Editor/` | android-real (Windows multi-line TextBox + Linux GtkTextView + Android multi-line EditText; shares text-binding bridge with Entry via shared MppTextWatcher kind discriminator) |
-| [[Components/Element\|Element]] | `Handlers/Element/` | not-started |
+| [[Components/CollectionView\|CollectionView]] | `Handlers/CollectionView/` | not-started (M-04c — virtualized item host; needs design ADR for recycler + items_source binding) |
+| [[Components/Element\|Element]] | `Handlers/Element/` | mock — terminal (abstract base; no native primitive) |
 | [[Components/Entry\|Entry]] | `Handlers/Entry/` | android-real (Windows + Linux + Android; bidirectional text-binding live-verified on Android) |
 | [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | not-started |
 | [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | android-real (Win NavigationView + Linux GtkPaned drawer + Android DrawerLayout w/ LinearLayout fallback; flyout + detail + is_presented) |
@@ -44,7 +45,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ImageButton\|ImageButton]] | `Handlers/ImageButton/` | android-real (Win Button + Image content; Linux GtkButton + GtkPicture child; Android ImageButton + BitmapFactory.decodeFile; click event deferred to M-05 polish) |
 | [[Components/IndicatorView\|IndicatorView]] | `Handlers/IndicatorView/` | android-real (Win StackPanel of Ellipses + Linux GtkBox of dot labels + Android LinearLayout of GradientDrawable-backed Views; count + position + colors; companion to CarouselView which is M-04c) |
 | [[Components/Label\|Label]] | `Handlers/Label/` | android-real (Windows + Linux + Android verified live) |
-| [[Components/Layout\|Layout]] | `Handlers/Layout/` | mock |
+| [[Components/Layout\|Layout]] | `Handlers/Layout/` | mock — terminal (abstract base; concrete layouts like StackLayout/Grid implement real handlers) |
 | [[Components/ListView\|ListView]] | `Controls/ListView/` | not-started |
 | [[Components/MenuBar\|MenuBar]] | `Handlers/MenuBar/` | android-real (Win mux::MenuBar + Linux GtkBox of GtkMenuButton + Android Toolbar acting as menu host; items rebuild on collection change, drops child views the dispatch registry does not resolve) |
 | [[Components/MenuBarItem\|MenuBarItem]] | `Handlers/MenuBarItem/` | android-real (Win mux::MenuBarItem + Linux GtkMenuButton with title label + Android TextView surfaced into parent menu_bar's Menu; title + items collection observed, popover/flyout children land with M-04c menu_flyout family) |
@@ -76,11 +77,11 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/TimePicker\|TimePicker]] | `Handlers/TimePicker/` | android-real (Win TimePicker + Linux GtkSpinButton pair + Android TimePicker 24h; time_value hour/minute POD) |
 | [[Components/TitleBar\|TitleBar]] | `Controls/TitleBar/` | android-real (Win mux::TitleBar + Linux GtkHeaderBar + Android android.widget.Toolbar; title + subtitle) |
 | [[Components/Toolbar\|Toolbar]] | `Handlers/Toolbar/` | android-real (Win CommandBar + AppBarButton per item + Linux GtkActionBar + GtkButton per item + Android Toolbar with Menu items; items rebuilt on collection change) |
-| [[Components/View\|View]] | `Handlers/View/` | mock |
+| [[Components/View\|View]] | `Handlers/View/` | mock — terminal (abstract base; all concrete widgets derive from view) |
 | [[Components/WebView\|WebView]] | `Handlers/WebView/` | not-started |
 | [[Components/Window\|Window]] | `Handlers/Window/` | android-real (Windows + Linux + Android verified live) |
 
-**Total: 55 components.**
+**Total: 59 components** (CollectionView added 2026-05-21 per M-04b sweep; abstract bases View/Layout/Element annotated as terminal-mock).
 
 ## How to update
 

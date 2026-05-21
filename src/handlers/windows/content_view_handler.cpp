@@ -10,26 +10,7 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-#include "mpapp/box_view.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
-#include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
-#include "mpapp/handlers/windows/box_view_handler.hpp"
-#include "mpapp/handlers/windows/button_handler.hpp"
-#include "mpapp/handlers/windows/check_box_handler.hpp"
-#include "mpapp/handlers/windows/editor_handler.hpp"
-#include "mpapp/handlers/windows/entry_handler.hpp"
-#include "mpapp/handlers/windows/label_handler.hpp"
-#include "mpapp/handlers/windows/radio_button_handler.hpp"
-#include "mpapp/handlers/windows/slider_handler.hpp"
-#include "mpapp/handlers/windows/stack_layout_handler.hpp"
-#include "mpapp/handlers/windows/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stack_layout.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/handlers/windows/widget_dispatch.hpp"
 
 namespace mpapp {
 
@@ -45,16 +26,15 @@ void content_view_handler<platform::windows>::apply_content(const std::shared_pt
     if (native_ == nullptr) return;
     view* raw = v.get();
     if (raw == nullptr) { native_.Content(nullptr); return; }
-    if (auto* sl = dynamic_cast<stack_layout*>(raw); sl && sl->has_handler()) { native_.Content(sl->handler().native()); return; }
-    if (auto* b  = dynamic_cast<button*>(raw);       b  && b->has_handler())  { native_.Content(b->handler().native());  return; }
-    if (auto* l  = dynamic_cast<label*>(raw);        l  && l->has_handler())  { native_.Content(l->handler().native());  return; }
-    if (auto* e  = dynamic_cast<entry*>(raw);        e  && e->has_handler())  { native_.Content(e->handler().native());  return; }
-    if (auto* sw = dynamic_cast<switch_*>(raw);      sw && sw->has_handler()) { native_.Content(sw->handler().native()); return; }
-    if (auto* cb = dynamic_cast<check_box*>(raw);    cb && cb->has_handler()) { native_.Content(cb->handler().native()); return; }
-    if (auto* rb = dynamic_cast<radio_button*>(raw); rb && rb->has_handler()) { native_.Content(rb->handler().native()); return; }
-    if (auto* s2 = dynamic_cast<slider*>(raw);       s2 && s2->has_handler()) { native_.Content(s2->handler().native()); return; }
-    if (auto* ed = dynamic_cast<editor*>(raw);       ed && ed->has_handler()) { native_.Content(ed->handler().native()); return; }
-    if (auto* bx = dynamic_cast<box_view*>(raw);     bx && bx->has_handler()) { native_.Content(bx->handler().native()); return; }
+    // ADR-0013: ask the per-platform dispatch registry. Each widget's .cpp
+    // self-registers a dispatcher that returns its native UIElement; the
+    // registry tries each registered dispatcher in order and returns the
+    // first non-null. This replaces the legacy dynamic_cast chain that
+    // had to be edited every time a new widget landed.
+    if (auto el = detail::windows_dispatch::dispatch(raw); el != nullptr) {
+        native_.Content(el);
+        return;
+    }
 }
 
 void content_view_handler<platform::windows>::map_content(content_view& c) {
@@ -67,5 +47,28 @@ void content_view_handler<platform::windows>::bind_content(content_view& c, view
 }
 
 } // namespace mpapp
+
+// ---------- Self-registration with the per-platform dispatch registry --
+// ContentView can host any widget AND can be hosted as a widget. The
+// self-registrar lets parent containers (stack_layout, scroll_view, etc.)
+// place a content_view as their child via the same ADR-0013 path.
+#include "mpapp/content_view.hpp"
+
+namespace {
+
+::winrt::Microsoft::UI::Xaml::UIElement dispatch_content_view(::mpapp::view* v) {
+    if (auto* cv = dynamic_cast<::mpapp::content_view*>(v); cv && cv->has_handler()) {
+        return cv->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::windows_dispatch::register_dispatcher(dispatch_content_view); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
 
 #endif // _WIN32
