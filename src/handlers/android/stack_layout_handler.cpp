@@ -230,52 +230,8 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
     if (env == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
-    // Try ADR-0013 registry first; fall through to legacy chain for
-    // widgets that haven't been migrated yet.
+    // ADR-0013: registry dispatch only — each widget self-registers.
     jobject child_obj = detail::android_dispatch::dispatch(&child);
-    if (child_obj == nullptr) {
-    if (auto* b = dynamic_cast<button*>(&child); b && b->has_handler()) {
-        child_obj = b->handler().native();
-    } else if (auto* l = dynamic_cast<label*>(&child); l && l->has_handler()) {
-        child_obj = l->handler().native();
-    } else if (auto* sl = dynamic_cast<stack_layout*>(&child); sl && sl->has_handler()) {
-        child_obj = sl->handler().native();
-    } else if (auto* e = dynamic_cast<entry*>(&child); e && e->has_handler()) {
-        child_obj = e->handler().native();
-    } else if (auto* sw = dynamic_cast<switch_*>(&child); sw && sw->has_handler()) {
-        child_obj = sw->handler().native();
-    } else if (auto* cb = dynamic_cast<check_box*>(&child); cb && cb->has_handler()) {
-        child_obj = cb->handler().native();
-    } else if (auto* rb = dynamic_cast<radio_button*>(&child); rb && rb->has_handler()) {
-        child_obj = rb->handler().native();
-    } else if (auto* sl = dynamic_cast<slider*>(&child); sl && sl->has_handler()) {
-        child_obj = sl->handler().native();
-    } else if (auto* st = dynamic_cast<stepper*>(&child); st && st->has_handler()) {
-        child_obj = st->handler().native();
-    } else if (auto* ed = dynamic_cast<editor*>(&child); ed && ed->has_handler()) {
-        child_obj = ed->handler().native();
-    } else if (auto* bx = dynamic_cast<box_view*>(&child); bx && bx->has_handler()) {
-        child_obj = bx->handler().native();
-    } else if (auto* br = dynamic_cast<border*>(&child); br && br->has_handler()) {
-        child_obj = br->handler().native();
-    } else if (auto* ai = dynamic_cast<activity_indicator*>(&child); ai && ai->has_handler()) {
-        child_obj = ai->handler().native();
-    } else if (auto* pb = dynamic_cast<progress_bar*>(&child); pb && pb->has_handler()) {
-        child_obj = pb->handler().native();
-    } else if (auto* sb = dynamic_cast<search_bar*>(&child); sb && sb->has_handler()) {
-        child_obj = sb->handler().native();
-    } else if (auto* pk = dynamic_cast<picker*>(&child); pk && pk->has_handler()) {
-        child_obj = pk->handler().native();
-    } else if (auto* dp = dynamic_cast<date_picker*>(&child); dp && dp->has_handler()) {
-        child_obj = dp->handler().native();
-    } else if (auto* tp = dynamic_cast<time_picker*>(&child); tp && tp->has_handler()) {
-        child_obj = tp->handler().native();
-    } else if (auto* im = dynamic_cast<image*>(&child); im && im->has_handler()) {
-        child_obj = im->handler().native();
-    } else if (auto* ib = dynamic_cast<image_button*>(&child); ib && ib->has_handler()) {
-        child_obj = ib->handler().native();
-    }
-    } // end legacy fallback (ADR-0013)
     if (child_obj == nullptr) return;
 
     jclass cls = env->FindClass("android/view/ViewGroup");
@@ -292,5 +248,23 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
 }
 
 } // namespace mpapp
+
+// ---------- Self-registration with the per-platform dispatch registry --
+namespace {
+
+jobject dispatch_stack_layout(::mpapp::view* v) {
+    if (auto* s = dynamic_cast<::mpapp::stack_layout*>(v); s && s->has_handler()) {
+        return s->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::android_dispatch::register_dispatcher(dispatch_stack_layout); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
 
 #endif // __ANDROID__

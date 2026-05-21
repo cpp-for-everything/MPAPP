@@ -75,67 +75,8 @@ void scroll_view_handler<platform::windows>::apply_content(const std::shared_ptr
         native_.Content(el);
         return;
     }
-    // Dispatch on the known concrete subtypes (mirrors window_handler).
-    if (auto* sl = dynamic_cast<stack_layout*>(raw); sl && sl->has_handler()) {
-        native_.Content(sl->handler().native()); return;
-    }
-    if (auto* b = dynamic_cast<button*>(raw); b && b->has_handler()) {
-        native_.Content(b->handler().native()); return;
-    }
-    if (auto* l = dynamic_cast<label*>(raw); l && l->has_handler()) {
-        native_.Content(l->handler().native()); return;
-    }
-    if (auto* e = dynamic_cast<entry*>(raw); e && e->has_handler()) {
-        native_.Content(e->handler().native()); return;
-    }
-    if (auto* sw = dynamic_cast<switch_*>(raw); sw && sw->has_handler()) {
-        native_.Content(sw->handler().native()); return;
-    }
-    if (auto* cb = dynamic_cast<check_box*>(raw); cb && cb->has_handler()) {
-        native_.Content(cb->handler().native()); return;
-    }
-    if (auto* rb = dynamic_cast<radio_button*>(raw); rb && rb->has_handler()) {
-        native_.Content(rb->handler().native()); return;
-    }
-    if (auto* sl2 = dynamic_cast<slider*>(raw); sl2 && sl2->has_handler()) {
-        native_.Content(sl2->handler().native()); return;
-    }
-    if (auto* st = dynamic_cast<stepper*>(raw); st && st->has_handler()) {
-        native_.Content(st->handler().native()); return;
-    }
-    if (auto* ed = dynamic_cast<editor*>(raw); ed && ed->has_handler()) {
-        native_.Content(ed->handler().native()); return;
-    }
-    if (auto* bx = dynamic_cast<box_view*>(raw); bx && bx->has_handler()) {
-        native_.Content(bx->handler().native()); return;
-    }
-    if (auto* br = dynamic_cast<border*>(raw); br && br->has_handler()) {
-        native_.Content(br->handler().native()); return;
-    }
-    if (auto* ai = dynamic_cast<activity_indicator*>(raw); ai && ai->has_handler()) {
-        native_.Content(ai->handler().native()); return;
-    }
-    if (auto* pb = dynamic_cast<progress_bar*>(raw); pb && pb->has_handler()) {
-        native_.Content(pb->handler().native()); return;
-    }
-    if (auto* sb = dynamic_cast<search_bar*>(raw); sb && sb->has_handler()) {
-        native_.Content(sb->handler().native()); return;
-    }
-    if (auto* pk = dynamic_cast<picker*>(raw); pk && pk->has_handler()) {
-        native_.Content(pk->handler().native()); return;
-    }
-    if (auto* dp = dynamic_cast<date_picker*>(raw); dp && dp->has_handler()) {
-        native_.Content(dp->handler().native()); return;
-    }
-    if (auto* tp = dynamic_cast<time_picker*>(raw); tp && tp->has_handler()) {
-        native_.Content(tp->handler().native()); return;
-    }
-    if (auto* im = dynamic_cast<image*>(raw); im && im->has_handler()) {
-        native_.Content(im->handler().native()); return;
-    }
-    if (auto* ib = dynamic_cast<image_button*>(raw); ib && ib->has_handler()) {
-        native_.Content(ib->handler().native()); return;
-    }
+    // All concrete widgets self-register via ADR-0013; the legacy
+    // dynamic_cast chain has been removed.
 }
 
 void scroll_view_handler<platform::windows>::apply_orientation(scroll_orientation o) {
@@ -186,5 +127,23 @@ void scroll_view_handler<platform::windows>::bind_content(scroll_view& s, view& 
 }
 
 } // namespace mpapp
+
+// ---------- Self-registration with the per-platform dispatch registry --
+namespace {
+
+::winrt::Microsoft::UI::Xaml::UIElement dispatch_scroll_view(::mpapp::view* v) {
+    if (auto* s = dynamic_cast<::mpapp::scroll_view*>(v); s && s->has_handler()) {
+        return s->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::windows_dispatch::register_dispatcher(dispatch_scroll_view); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
 
 #endif // _WIN32

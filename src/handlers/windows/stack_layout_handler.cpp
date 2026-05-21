@@ -157,130 +157,29 @@ void stack_layout_handler<platform::windows>::add_child(view& child) {
         native_.Children().Append(el);
         return;
     }
-    if (auto* b = dynamic_cast<button*>(&child); b != nullptr) {
-        if (b->has_handler()) {
-            native_.Children().Append(b->handler().native());
-        }
-        return;
-    }
-    if (auto* l = dynamic_cast<label*>(&child); l != nullptr) {
-        if (l->has_handler()) {
-            native_.Children().Append(l->handler().native());
-        }
-        return;
-    }
-    if (auto* sl = dynamic_cast<stack_layout*>(&child); sl != nullptr) {
-        if (sl->has_handler()) {
-            native_.Children().Append(sl->handler().native());
-        }
-        return;
-    }
-    if (auto* e = dynamic_cast<entry*>(&child); e != nullptr) {
-        if (e->has_handler()) {
-            native_.Children().Append(e->handler().native());
-        }
-        return;
-    }
-    if (auto* sw = dynamic_cast<switch_*>(&child); sw != nullptr) {
-        if (sw->has_handler()) {
-            native_.Children().Append(sw->handler().native());
-        }
-        return;
-    }
-    if (auto* cb = dynamic_cast<check_box*>(&child); cb != nullptr) {
-        if (cb->has_handler()) {
-            native_.Children().Append(cb->handler().native());
-        }
-        return;
-    }
-    if (auto* rb = dynamic_cast<radio_button*>(&child); rb != nullptr) {
-        if (rb->has_handler()) {
-            native_.Children().Append(rb->handler().native());
-        }
-        return;
-    }
-    if (auto* sl = dynamic_cast<slider*>(&child); sl != nullptr) {
-        if (sl->has_handler()) {
-            native_.Children().Append(sl->handler().native());
-        }
-        return;
-    }
-    if (auto* st = dynamic_cast<stepper*>(&child); st != nullptr) {
-        if (st->has_handler()) {
-            native_.Children().Append(st->handler().native());
-        }
-        return;
-    }
-    if (auto* ed = dynamic_cast<editor*>(&child); ed != nullptr) {
-        if (ed->has_handler()) {
-            native_.Children().Append(ed->handler().native());
-        }
-        return;
-    }
-    if (auto* bx = dynamic_cast<box_view*>(&child); bx != nullptr) {
-        if (bx->has_handler()) {
-            native_.Children().Append(bx->handler().native());
-        }
-        return;
-    }
-    if (auto* br = dynamic_cast<border*>(&child); br != nullptr) {
-        if (br->has_handler()) {
-            native_.Children().Append(br->handler().native());
-        }
-        return;
-    }
-    if (auto* ai = dynamic_cast<activity_indicator*>(&child); ai != nullptr) {
-        if (ai->has_handler()) {
-            native_.Children().Append(ai->handler().native());
-        }
-        return;
-    }
-    if (auto* pb = dynamic_cast<progress_bar*>(&child); pb != nullptr) {
-        if (pb->has_handler()) {
-            native_.Children().Append(pb->handler().native());
-        }
-        return;
-    }
-    if (auto* sb = dynamic_cast<search_bar*>(&child); sb != nullptr) {
-        if (sb->has_handler()) {
-            native_.Children().Append(sb->handler().native());
-        }
-        return;
-    }
-    if (auto* pk = dynamic_cast<picker*>(&child); pk != nullptr) {
-        if (pk->has_handler()) {
-            native_.Children().Append(pk->handler().native());
-        }
-        return;
-    }
-    if (auto* dp = dynamic_cast<date_picker*>(&child); dp != nullptr) {
-        if (dp->has_handler()) {
-            native_.Children().Append(dp->handler().native());
-        }
-        return;
-    }
-    if (auto* tp = dynamic_cast<time_picker*>(&child); tp != nullptr) {
-        if (tp->has_handler()) {
-            native_.Children().Append(tp->handler().native());
-        }
-        return;
-    }
-    if (auto* im = dynamic_cast<image*>(&child); im != nullptr) {
-        if (im->has_handler()) {
-            native_.Children().Append(im->handler().native());
-        }
-        return;
-    }
-    if (auto* ib = dynamic_cast<image_button*>(&child); ib != nullptr) {
-        if (ib->has_handler()) {
-            native_.Children().Append(ib->handler().native());
-        }
-        return;
-    }
-    // Unknown subtype — silently drop. As more handlers ship, append
-    // new branches here.
+    // Unknown subtype — silently drop. All concrete widgets now self-register
+    // via ADR-0013, so an unknown subtype here means a handler that has not
+    // been built into the link target.
 }
 
 } // namespace mpapp
+
+// ---------- Self-registration with the per-platform dispatch registry --
+namespace {
+
+::winrt::Microsoft::UI::Xaml::UIElement dispatch_stack_layout(::mpapp::view* v) {
+    if (auto* s = dynamic_cast<::mpapp::stack_layout*>(v); s && s->has_handler()) {
+        return s->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::windows_dispatch::register_dispatcher(dispatch_stack_layout); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
 
 #endif // _WIN32

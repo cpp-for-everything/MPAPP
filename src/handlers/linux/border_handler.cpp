@@ -95,19 +95,8 @@ corner4 parse_corners(const stroke_shape_desc& s) {
 }
 
 GtkWidget* native_widget_of(view* v) {
-    if (GtkWidget* w = detail::linux_dispatch::dispatch(v); w != nullptr) return w;
-    if (auto* sl = dynamic_cast<stack_layout*>(v); sl && sl->has_handler()) return GTK_WIDGET(sl->handler().native());
-    if (auto* b  = dynamic_cast<button*>(v);       b  && b->has_handler())  return GTK_WIDGET(b->handler().native());
-    if (auto* l  = dynamic_cast<label*>(v);        l  && l->has_handler())  return GTK_WIDGET(l->handler().native());
-    if (auto* e  = dynamic_cast<entry*>(v);        e  && e->has_handler())  return GTK_WIDGET(e->handler().native());
-    if (auto* sw = dynamic_cast<switch_*>(v);      sw && sw->has_handler()) return GTK_WIDGET(sw->handler().native());
-    if (auto* cb = dynamic_cast<check_box*>(v);    cb && cb->has_handler()) return GTK_WIDGET(cb->handler().native());
-    if (auto* rb = dynamic_cast<radio_button*>(v); rb && rb->has_handler()) return GTK_WIDGET(rb->handler().native());
-    if (auto* s2 = dynamic_cast<slider*>(v);       s2 && s2->has_handler()) return GTK_WIDGET(s2->handler().native());
-    if (auto* st = dynamic_cast<stepper*>(v);      st && st->has_handler()) return GTK_WIDGET(st->handler().native());
-    if (auto* ed = dynamic_cast<editor*>(v);       ed && ed->has_handler()) return GTK_WIDGET(ed->handler().native());
-    if (auto* bx = dynamic_cast<box_view*>(v);     bx && bx->has_handler()) return GTK_WIDGET(bx->handler().native());
-    return nullptr;
+    // ADR-0013: registry dispatch only — each widget self-registers.
+    return detail::linux_dispatch::dispatch(v);
 }
 
 int to255(double v) {
@@ -196,5 +185,23 @@ void border_handler<platform::linux_>::bind_content(border& b, view& child) {
 }
 
 } // namespace mpapp
+
+// ---------- Self-registration with the per-platform dispatch registry --
+namespace {
+
+GtkWidget* dispatch_border(::mpapp::view* v) {
+    if (auto* b = dynamic_cast<::mpapp::border*>(v); b && b->has_handler()) {
+        return GTK_WIDGET(b->handler().native());
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::linux_dispatch::register_dispatcher(dispatch_border); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
 
 #endif // __linux__ && !__ANDROID__

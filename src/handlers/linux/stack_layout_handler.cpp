@@ -148,88 +148,28 @@ void stack_layout_handler<platform::linux_>::add_child(view& child) {
         return;
     }
 
-    if (auto* b = dynamic_cast<button*>(&child); b != nullptr && b->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(b->handler().native()));
-        return;
-    }
-    if (auto* l = dynamic_cast<label*>(&child); l != nullptr && l->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(l->handler().native()));
-        return;
-    }
-    if (auto* sl = dynamic_cast<stack_layout*>(&child); sl != nullptr && sl->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(sl->handler().native()));
-        return;
-    }
-    if (auto* e = dynamic_cast<entry*>(&child); e != nullptr && e->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(e->handler().native()));
-        return;
-    }
-    if (auto* sw = dynamic_cast<switch_*>(&child); sw != nullptr && sw->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(sw->handler().native()));
-        return;
-    }
-    if (auto* cb = dynamic_cast<check_box*>(&child); cb != nullptr && cb->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(cb->handler().native()));
-        return;
-    }
-    if (auto* rb = dynamic_cast<radio_button*>(&child); rb != nullptr && rb->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(rb->handler().native()));
-        return;
-    }
-    if (auto* sl = dynamic_cast<slider*>(&child); sl != nullptr && sl->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(sl->handler().native()));
-        return;
-    }
-    if (auto* st = dynamic_cast<stepper*>(&child); st != nullptr && st->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(st->handler().native()));
-        return;
-    }
-    if (auto* ed = dynamic_cast<editor*>(&child); ed != nullptr && ed->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(ed->handler().native()));
-        return;
-    }
-    if (auto* bx = dynamic_cast<box_view*>(&child); bx != nullptr && bx->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(bx->handler().native()));
-        return;
-    }
-    if (auto* br = dynamic_cast<border*>(&child); br != nullptr && br->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(br->handler().native()));
-        return;
-    }
-    if (auto* ai = dynamic_cast<activity_indicator*>(&child); ai != nullptr && ai->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(ai->handler().native()));
-        return;
-    }
-    if (auto* pb = dynamic_cast<progress_bar*>(&child); pb != nullptr && pb->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(pb->handler().native()));
-        return;
-    }
-    if (auto* sb = dynamic_cast<search_bar*>(&child); sb != nullptr && sb->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(sb->handler().native()));
-        return;
-    }
-    if (auto* pk = dynamic_cast<picker*>(&child); pk != nullptr && pk->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(pk->handler().native()));
-        return;
-    }
-    if (auto* dp = dynamic_cast<date_picker*>(&child); dp != nullptr && dp->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(dp->handler().native()));
-        return;
-    }
-    if (auto* tp = dynamic_cast<time_picker*>(&child); tp != nullptr && tp->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(tp->handler().native()));
-        return;
-    }
-    if (auto* im = dynamic_cast<image*>(&child); im != nullptr && im->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(im->handler().native()));
-        return;
-    }
-    if (auto* ib = dynamic_cast<image_button*>(&child); ib != nullptr && ib->has_handler()) {
-        gtk_box_append(box, GTK_WIDGET(ib->handler().native()));
-        return;
-    }
+    // Unknown subtype — silently drop. All concrete widgets now self-register
+    // via ADR-0013; the legacy dynamic_cast chain has been removed.
 }
 
 } // namespace mpapp
+
+// ---------- Self-registration with the per-platform dispatch registry --
+namespace {
+
+GtkWidget* dispatch_stack_layout(::mpapp::view* v) {
+    if (auto* s = dynamic_cast<::mpapp::stack_layout*>(v); s && s->has_handler()) {
+        return GTK_WIDGET(s->handler().native());
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::linux_dispatch::register_dispatcher(dispatch_stack_layout); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
 
 #endif // __linux__ && !__ANDROID__

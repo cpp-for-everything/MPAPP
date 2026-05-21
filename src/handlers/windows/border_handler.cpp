@@ -128,18 +128,11 @@ void border_handler<platform::windows>::apply_content(const std::shared_ptr<view
     if (native_ == nullptr) return;
     view* raw = v.get();
     if (raw == nullptr) { native_.Child(nullptr); return; }
-    if (auto el = detail::windows_dispatch::dispatch(raw); el != nullptr) { native_.Child(el); return; }
-    if (auto* sl = dynamic_cast<stack_layout*>(raw); sl && sl->has_handler()) { native_.Child(sl->handler().native()); return; }
-    if (auto* bn = dynamic_cast<button*>(raw);       bn && bn->has_handler()) { native_.Child(bn->handler().native()); return; }
-    if (auto* l  = dynamic_cast<label*>(raw);        l  && l->has_handler())  { native_.Child(l->handler().native());  return; }
-    if (auto* e  = dynamic_cast<entry*>(raw);        e  && e->has_handler())  { native_.Child(e->handler().native());  return; }
-    if (auto* sw = dynamic_cast<switch_*>(raw);      sw && sw->has_handler()) { native_.Child(sw->handler().native()); return; }
-    if (auto* cb = dynamic_cast<check_box*>(raw);    cb && cb->has_handler()) { native_.Child(cb->handler().native()); return; }
-    if (auto* rb = dynamic_cast<radio_button*>(raw); rb && rb->has_handler()) { native_.Child(rb->handler().native()); return; }
-    if (auto* sl2= dynamic_cast<slider*>(raw);       sl2&& sl2->has_handler()){ native_.Child(sl2->handler().native()); return; }
-    if (auto* st = dynamic_cast<stepper*>(raw);      st && st->has_handler()) { native_.Child(st->handler().native()); return; }
-    if (auto* ed = dynamic_cast<editor*>(raw);       ed && ed->has_handler()) { native_.Child(ed->handler().native()); return; }
-    if (auto* bx = dynamic_cast<box_view*>(raw);     bx && bx->has_handler()) { native_.Child(bx->handler().native()); return; }
+    // ADR-0013: registry dispatch. Each widget self-registers in its own
+    // .cpp; we ask the registry for the native UIElement and assign it.
+    if (auto el = detail::windows_dispatch::dispatch(raw); el != nullptr) {
+        native_.Child(el);
+    }
 }
 
 void border_handler<platform::windows>::apply_padding(const thickness& t) {
@@ -175,5 +168,23 @@ void border_handler<platform::windows>::bind_content(border& b, view& child) {
 }
 
 } // namespace mpapp
+
+// ---------- Self-registration with the per-platform dispatch registry --
+namespace {
+
+::winrt::Microsoft::UI::Xaml::UIElement dispatch_border(::mpapp::view* v) {
+    if (auto* b = dynamic_cast<::mpapp::border*>(v); b && b->has_handler()) {
+        return b->handler().native();
+    }
+    return nullptr;
+}
+
+struct registrar {
+    registrar() { ::mpapp::detail::windows_dispatch::register_dispatcher(dispatch_border); }
+};
+
+[[maybe_unused]] registrar _reg;
+
+} // namespace
 
 #endif // _WIN32
