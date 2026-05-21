@@ -15,8 +15,8 @@ tags:
 
 # View
 
-> [!info] Status
-> **mock** — full cross-platform surface lives at `include/mpapp/view.hpp`; mock handler records every property mapper invocation. See [[Controls Inventory]] for the full porting matrix.
+> [!info] Terminal status (per [[40_Roadmap/M-04b-handler-bulk-port|M-04b]])
+> **mock** is the **terminal state** for `View`. It is the abstract base every visual control inherits from; the real handler work happens in concrete subclasses (Button, Label, BoxView, etc.). The mock handler records every property-mapper invocation so derived classes inherit a correct C++ template instantiation. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 

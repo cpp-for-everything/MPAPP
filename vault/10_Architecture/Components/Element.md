@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Element"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/element"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # Element
 
-> [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> [!info] Terminal status (per [[40_Roadmap/M-04b-handler-bulk-port|M-04b]])
+> **mock** is the **terminal state** for this widget. `Element` is an abstract base in MAUI's element tree; it has no native primitive on any platform. Concrete subclasses (`Button`, `Label`, etc.) own the real handlers. The mock surface exists only to satisfy the C++ type-system contract (every public widget must compile against a `<platform>` template instantiation). See [[Controls Inventory]].
 
 ## Overview
 

@@ -15,8 +15,8 @@ tags:
 
 # Layout
 
-> [!info] Status
-> **mock** — abstract container lives at `include/mpapp/layout.hpp` with explicit `add`/`insert`/`remove`/`clear`/`update_z_index` mutators; mock handler records both property and command mappers. See [[Controls Inventory]].
+> [!info] Terminal status (per [[40_Roadmap/M-04b-handler-bulk-port|M-04b]])
+> **mock** is the **terminal state** for `Layout`. It's the abstract base of every multi-child container; concrete layouts (`StackLayout`, `Grid`, `FlexLayout`, etc.) implement real handlers. The mock here records both property and command mappers so derived classes inherit a correct template instantiation. See [[Controls Inventory]].
 
 ## Overview
 
