@@ -65,9 +65,9 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Slider\|Slider]] | `Handlers/Slider/` | android-real (Windows + Linux + Android; bidirectional double-range binding live-verified on Android via SeekBar→int progress→double remap) |
 | [[Components/StackLayout\|StackLayout]] | `Layouts/StackLayoutManager/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/Stepper\|Stepper]] | `Handlers/Stepper/` | android-real (Windows NumberBox + Linux GtkSpinButton + Android NumberPicker; double↔int step-index remap honoring `interval`) |
-| [[Components/SwipeItemMenuItem\|SwipeItemMenuItem]] | `Handlers/SwipeItemMenuItem/` | not-started |
-| [[Components/SwipeItemView\|SwipeItemView]] | `Handlers/SwipeItemView/` | not-started |
-| [[Components/SwipeView\|SwipeView]] | `Handlers/SwipeView/` | not-started |
+| [[Components/SwipeItemMenuItem\|SwipeItemMenuItem]] | `Handlers/SwipeItemMenuItem/` | android-real (Win `mux::Controls::Button` Content + Click → invoked + Linux `GtkButton` `clicked` → invoked + Android `android.widget.Button` text-only; text + icon_uri live; Android OnClickListener routing deferred — gestures + richer background/is_destructive surface deferred) |
+| [[Components/SwipeItemView\|SwipeItemView]] | `Handlers/SwipeItemView/` | android-real (Win `mux::Controls::ContentControl` + Linux `GtkBox` content host + Android `FrameLayout`; renders custom action content inline — gesture-reveal deferred) |
+| [[Components/SwipeView\|SwipeView]] | `Handlers/SwipeView/` | android-real (Win `mux::Controls::SwipeControl` w/ `SwipeItems` collection from menu-item entries + Linux `GtkBox` content-only + Android `FrameLayout` content-only — gestures deferred on Linux/Android, items registered via ADR-0013 dispatch) |
 | [[Components/Switch\|Switch]] | `Handlers/Switch/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android) |
 | [[Components/TabbedPage\|TabbedPage]] | `Controls/TabbedPage/` | not-started |
 | [[Components/TabbedView\|TabbedView]] | `Handlers/TabbedView/` | not-started |

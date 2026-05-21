@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "SwipeView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/swipeview"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # SwipeView
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Windows `mux::Controls::SwipeControl` + Linux `GtkBox` content-only + Android `FrameLayout` content-only; `left_items` / `right_items` registered through ADR-0013 dispatch, gestures deferred on Linux/Android. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 
