@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "SwipeItemMenuItem"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/swipeview"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # SwipeItemMenuItem
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Windows `mux::Controls::Button` (Click → `invoked`) + Linux `GtkButton` (`"clicked"` → `invoked`) + Android `android.widget.Button` (text-only; OnClickListener routing deferred until MppClickRouter generalises beyond `button`). `text` + `icon_uri` are live; richer `background` / `is_destructive` surface deferred. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 
