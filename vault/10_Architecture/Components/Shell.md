@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "Shell"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/shell/"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,8 +10,11 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
+
+> [!info] Status
+> **mock** — minimum routing primitives are in place: `current_route` + `tabs` + `current_tab_index` + `register_route()` + `go_to()` URI parser + flyout toggle + `navigated` and `flyout_toggled` signals. The full Shell surface (route parameters, route guards, route-aware lifecycle interfaces, hierarchical FlyoutItem / Tab / ShellSection / ShellContent type tree) is gated on the upcoming **URI routing ADR** which composes on top of [[ADR-0014-page-navigation-stack]]. Real per-platform handlers land under [[M-04c-handler-heavy-port|M-04c]].
 
 # Shell
 

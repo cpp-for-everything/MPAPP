@@ -65,10 +65,10 @@ For each gated widget:
 | NavigationPage | ADR-0014 proposed | **mock landed** — page_stack engine + lifecycle signals + attached-prop store (2026-05-21) |
 | TabbedPage | ADR-0014 proposed | **mock landed** — children + selected_index + tab-switch lifecycle (2026-05-21) |
 | FlyoutPage | ADR-0014 proposed | **mock landed** — flyout/detail/is_presented + present/dismiss/toggle + presented_changed (2026-05-21) |
-| Shell | ADR-0014 + routing TBD | not started |
-| ListView | TBD | not started |
-| TableView | TBD | not started |
-| CollectionView | TBD | not started |
+| Shell | ADR-0014 + URI routing ADR TBD | **mock landed** — register_route + go_to URI parser + tabs/flyout/navigated/flyout_toggled (2026-05-21); full route templates + guards + Aware interfaces deferred |
+| ListView | virtualized-item-host ADR TBD | **mock landed** — items_source + selected_index + item_tapped (2026-05-21) |
+| TableView | virtualized-item-host ADR TBD | **mock landed** — sections vec + intent + row_height + add_section/add_row helpers (2026-05-21) |
+| CollectionView | virtualized-item-host ADR TBD | **mock landed** — items_source + selection_mode none/single/multiple + select/deselect/clear (2026-05-21) |
 | WebView | RFC-0001 § Linux | not started |
 | HybridWebView | depends WebView | not started |
 | ShapeView | TBD | not started |

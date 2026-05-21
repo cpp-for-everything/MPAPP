@@ -62,7 +62,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ScrollView\|ScrollView]] | `Handlers/ScrollView/` | android-real (Windows ScrollViewer + Linux GtkScrolledWindow + Android ScrollView; `bind_content(scroll_view&, view&)` helper wraps a non-owning child as null-deleter `shared_ptr<view>`; Android spike wraps the full widget stack and renders through it) |
 | [[Components/SearchBar\|SearchBar]] | `Handlers/SearchBar/` | android-real (Win AutoSuggestBox with Find icon + Linux GtkSearchEntry + Android SearchView; text + placeholder) |
 | [[Components/ShapeView\|ShapeView]] | `Handlers/ShapeView/` | not-started |
-| [[Components/Shell\|Shell]] | `Controls/Shell/` | not-started |
+| [[Components/Shell\|Shell]] | `Controls/Shell/` | mock (current_route + tabs + current_tab_index + flyout + register_route + go_to URI parser + navigated/flyout_toggled signals; route parameters + route guards + lifecycle Aware interfaces deferred to routing ADR) |
 | [[Components/Slider\|Slider]] | `Handlers/Slider/` | android-real (Windows + Linux + Android; bidirectional double-range binding live-verified on Android via SeekBar→int progress→double remap) |
 | [[Components/StackLayout\|StackLayout]] | `Layouts/StackLayoutManager/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/Stepper\|Stepper]] | `Handlers/Stepper/` | android-real (Windows NumberBox + Linux GtkSpinButton + Android NumberPicker; double↔int step-index remap honoring `interval`) |
