@@ -8,6 +8,7 @@
 if(WIN32)
     add_subdirectory(hot_reload_spike)
     add_subdirectory(windows_button_spike)
+    add_subdirectory(windows_nav_spike)
 endif()
 
 if(UNIX AND NOT APPLE)

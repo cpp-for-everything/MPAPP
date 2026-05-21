@@ -24,6 +24,7 @@
 #include <string_view>
 
 #include "detail/page_stack.hpp"
+#include "executor.hpp"
 #include "observable.hpp"
 #include "page.hpp"
 #include "platform.hpp"
@@ -79,6 +80,29 @@ public:
     void remove_page(page* p) {
         stack_.remove(p);
         sync_observables();
+    }
+
+    // ----- Async wrappers (ADR-0014 §Decision: sync as primitive) ------
+    //
+    // The async variants are thin coroutine wrappers around the sync
+    // mutators above. They suspend-and-resume immediately in the mock
+    // build; per-platform real handlers can override resumption to wait
+    // for transition animations once ADR-0019's native dispatchers wire
+    // through.
+
+    [[nodiscard]] task<void> push_async(page* p) {
+        push(p);
+        co_return;
+    }
+
+    [[nodiscard]] task<page*> pop_async() {
+        page* popped = pop();
+        co_return popped;
+    }
+
+    [[nodiscard]] task<void> pop_to_root_async() {
+        pop_to_root();
+        co_return;
     }
 
     // ----- Attached-property setters (child sets, host reads) ----------

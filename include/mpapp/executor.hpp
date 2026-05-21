@@ -15,7 +15,7 @@
 //                                  enqueues work; `co_await` resumes on the
 //                                  pool.
 //   * mpapp::task<T>             — eager-start coroutine return type.
-//                                  Cancellable via `std::stop_token`.
+//                                  Cancellable via `::mpapp::stop_token`.
 //   * mpapp::ui_task<T>          — same, but its final_suspend reschedules
 //                                  resumption of the continuation on
 //                                  `main_dispatcher()`.
@@ -34,7 +34,7 @@
 #include <coroutine>
 #include <exception>
 #include <functional>
-#include <stop_token>
+#include "detail/stop_token_compat.hpp"
 #include <type_traits>
 #include <utility>
 #include <variant>
@@ -107,7 +107,7 @@ public:
 // completes, then resumes it with the result. If the task threw, the
 // exception is rethrown on await_resume.
 //
-// Cancellation is observed via `std::stop_token`. Calling `request_stop()`
+// Cancellation is observed via `::mpapp::stop_token`. Calling `request_stop()`
 // signals the token; coroutines inside the task must check
 // `stop_token.stop_requested()` explicitly — no exception unwind (matches
 // `std::jthread`, per the architecture note).
@@ -161,7 +161,7 @@ template <class T, class FinalResumer>
 struct task_promise_base {
     result_slot<T>         slot;
     std::coroutine_handle<> continuation = nullptr;
-    std::stop_source       stop_src;
+    ::mpapp::stop_source       stop_src;
     std::atomic<bool>      done{false};
 
     struct final_awaiter {
@@ -256,8 +256,8 @@ struct basic_task {
         return h_ && h_.promise().stop_src.stop_requested();
     }
 
-    std::stop_token get_stop_token() const noexcept {
-        return h_ ? h_.promise().stop_src.get_token() : std::stop_token{};
+    ::mpapp::stop_token get_stop_token() const noexcept {
+        return h_ ? h_.promise().stop_src.get_token() : ::mpapp::stop_token{};
     }
 
     bool is_ready() const noexcept {
@@ -333,7 +333,7 @@ void post_after_on_main(std::chrono::steady_clock::duration d,
 template <class Rep, class Period>
 struct sleep_awaitable {
     std::chrono::duration<Rep, Period> dur;
-    std::stop_token                    stop;
+    ::mpapp::stop_token                    stop;
 
     bool await_ready() const noexcept {
         return stop.stop_requested() || dur.count() <= 0;
@@ -356,7 +356,7 @@ struct sleep_awaitable {
 
 template <class Rep, class Period>
 auto async_sleep(std::chrono::duration<Rep, Period> d,
-                 std::stop_token                    stop = {}) {
+                 ::mpapp::stop_token                    stop = {}) {
     return detail::sleep_awaitable<Rep, Period>{d, std::move(stop)};
 }
 

@@ -6,9 +6,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <mpapp/executor.hpp>
 #include <mpapp/handlers/mock/navigation_page_handler.hpp>
 #include <mpapp/navigation_page.hpp>
 #include <mpapp/page.hpp>
+#include <mpapp/test_dispatcher.hpp>
 
 using namespace mpapp;
 
@@ -140,4 +142,72 @@ TEST_CASE("remove_page removes top as pop and middle without changing top",
     nav.remove_page(&c);
     CHECK(nav.stack_depth.get()  == 1);
     CHECK(nav.current_page.get() == &a);
+}
+
+// --- Async wrappers (ADR-0014 + ADR-0019) -----------------------------------
+
+TEST_CASE("push_async completes synchronously in the mock build",
+          "[mock][navigation_page][async]") {
+    page home, details;
+    navigation_page nav(&home);
+
+    auto t = nav.push_async(&details);
+    // The coroutine body just calls push() — no suspension point —
+    // so the task is ready immediately after the eager-start.
+    REQUIRE(t.is_ready());
+    t.await_resume();   // void: no value to extract
+
+    CHECK(nav.stack_depth.get()  == 2);
+    CHECK(nav.current_page.get() == &details);
+}
+
+TEST_CASE("pop_async returns the popped page",
+          "[mock][navigation_page][async]") {
+    page home, details;
+    navigation_page nav(&home);
+    nav.push(&details);
+
+    auto t = nav.pop_async();
+    REQUIRE(t.is_ready());
+    page* popped = t.await_resume();
+
+    CHECK(popped == &details);
+    CHECK(nav.stack_depth.get()  == 1);
+    CHECK(nav.current_page.get() == &home);
+}
+
+TEST_CASE("pop_to_root_async collapses the stack",
+          "[mock][navigation_page][async]") {
+    page a, b, c, d;
+    navigation_page nav(&a);
+    nav.push(&b);
+    nav.push(&c);
+    nav.push(&d);
+    REQUIRE(nav.stack_depth.get() == 4);
+
+    auto t = nav.pop_to_root_async();
+    REQUIRE(t.is_ready());
+    t.await_resume();
+
+    CHECK(nav.stack_depth.get()  == 1);
+    CHECK(nav.current_page.get() == &a);
+}
+
+TEST_CASE("async wrappers compose under co_await",
+          "[mock][navigation_page][async]") {
+    page a, b, c;
+    navigation_page nav(&a);
+
+    auto scenario = [](navigation_page& n, page* x, page* y) -> task<int> {
+        co_await n.push_async(x);
+        co_await n.push_async(y);
+        auto* popped = co_await n.pop_async();
+        co_return (popped == y) ? 1 : 0;
+    };
+
+    auto t = scenario(nav, &b, &c);
+    REQUIRE(t.is_ready());
+    CHECK(t.await_resume()       == 1);
+    CHECK(nav.stack_depth.get()  == 2);
+    CHECK(nav.current_page.get() == &b);
 }
