@@ -53,7 +53,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/MenuFlyoutSeparator\|MenuFlyoutSeparator]] | `Handlers/MenuFlyoutSeparator/` | not-started |
 | [[Components/MenuFlyoutSubItem\|MenuFlyoutSubItem]] | `Handlers/MenuFlyoutSubItem/` | not-started |
 | [[Components/NavigationPage\|NavigationPage]] | `Handlers/NavigationPage/` | not-started |
-| [[Components/Page\|Page]] | `Handlers/Page/` | mock |
+| [[Components/Page\|Page]] | `Handlers/Page/` | android-real (Win mux::Page + Linux GtkBox vertical + Android LinearLayout vertical; title via TextBlock/GtkLabel/TextView, content via FrameLayout/Grid/Box) |
 | [[Components/Picker\|Picker]] | `Handlers/Picker/` | android-real (Win ComboBox + Linux GtkDropDown/GtkStringList + Android Spinner+ArrayAdapter; items + selected_index + title; title deferred on Linux/Android) |
 | [[Components/ProgressBar\|ProgressBar]] | `Handlers/ProgressBar/` | android-real (Windows ProgressBar + Linux GtkProgressBar + Android determinate ProgressBar; normalized 0..1 progress + color + background_color) |
 | [[Components/RadioButton\|RadioButton]] | `Handlers/RadioButton/` | android-real (Windows + Linux + Android; auto-grouping via group_name; shared compound-button JNI bridge kind=3) |
