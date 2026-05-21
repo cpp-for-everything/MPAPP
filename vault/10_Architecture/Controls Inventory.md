@@ -35,7 +35,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/CollectionView\|CollectionView]] | `Handlers/CollectionView/` | not-started (M-04c — virtualized item host; needs design ADR for recycler + items_source binding) |
 | [[Components/Element\|Element]] | `Handlers/Element/` | mock — terminal (abstract base; no native primitive) |
 | [[Components/Entry\|Entry]] | `Handlers/Entry/` | android-real (Windows + Linux + Android; bidirectional text-binding live-verified on Android) |
-| [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | not-started |
+| [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | mock (flyout/detail/is_presented + present/dismiss/toggle + presented_changed signal; real handlers pending per ADR-0014 wiring) |
 | [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | android-real (Win NavigationView + Linux GtkPaned drawer + Android DrawerLayout w/ LinearLayout fallback; flyout + detail + is_presented) |
 | [[Components/Grid\|Grid]] | `Layouts/GridLayoutManager/` | mock |
 | [[Components/Frame\|Frame]] | `Controls/Frame/` | android-real (Win mux::Border + Linux GtkBox + Android FrameLayout; [[deprecated]] alias for Border) |
@@ -70,7 +70,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/SwipeItemView\|SwipeItemView]] | `Handlers/SwipeItemView/` | android-real (Win `mux::Controls::ContentControl` + Linux `GtkBox` content host + Android `FrameLayout`; renders custom action content inline — gesture-reveal deferred) |
 | [[Components/SwipeView\|SwipeView]] | `Handlers/SwipeView/` | android-real (Win `mux::Controls::SwipeControl` w/ `SwipeItems` collection from menu-item entries + Linux `GtkBox` content-only + Android `FrameLayout` content-only — gestures deferred on Linux/Android, items registered via ADR-0013 dispatch) |
 | [[Components/Switch\|Switch]] | `Handlers/Switch/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android) |
-| [[Components/TabbedPage\|TabbedPage]] | `Controls/TabbedPage/` | not-started |
+| [[Components/TabbedPage\|TabbedPage]] | `Controls/TabbedPage/` | mock (children + selected_index + computed current_page + lifecycle signals on tab switch; real handlers pending per ADR-0014 wiring) |
 | [[Components/TabbedView\|TabbedView]] | `Handlers/TabbedView/` | android-real (Win mux::TabView + Linux GtkNotebook + Android vertical LinearLayout host w/ Button tab strip + FrameLayout page area; tab_titles + selected_index) |
 | [[Components/TableView\|TableView]] | `Controls/TableView/` | not-started |
 | [[Components/TemplatedView\|TemplatedView]] | `Controls/TemplatedView/` | android-real (Win ContentControl + Linux GtkBox single-child + Android FrameLayout; content slot live, template_id deferred to templating engine ADR) |

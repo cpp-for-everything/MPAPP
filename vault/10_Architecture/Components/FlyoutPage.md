@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "FlyoutPage"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/flyoutpage"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # FlyoutPage
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — flyout / detail slots + is_presented toggle + presented_changed signal + present/dismiss/toggle helpers + layout_behavior enum are all in place. Catch2 mock-handler tests cover the property-mapper recorders and the present/dismiss/toggle state transitions. Real per-platform handlers land under [[M-04c-handler-heavy-port|M-04c]].
 
 ## Overview
 

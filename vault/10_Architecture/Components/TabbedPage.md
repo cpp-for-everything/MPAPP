@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "TabbedPage"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/tabbedpage"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,13 +10,13 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
 
 # TabbedPage
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **mock** — children + selected_index + computed current_page + tab-switch lifecycle signals are exercised by Catch2 mock-handler tests. Bar styling Observables exist as no-op holders. Real per-platform handlers land under [[M-04c-handler-heavy-port|M-04c]].
 
 ## Overview
 
