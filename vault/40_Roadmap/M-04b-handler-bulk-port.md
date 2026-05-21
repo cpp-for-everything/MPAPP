@@ -101,6 +101,24 @@ Each Phase 1 worker creates a branch `bulk/widget/<name>`. After local verificat
 
 | Widget | Branch | Worker status | Merge status |
 |---|---|---|---|
+| title_bar | `bulk/widget/title_bar` | done | merged (d07d526) |
+| toolbar | `bulk/widget/toolbar` | done | merged |
+| indicator_view | `bulk/widget/indicator_view` | done | merged (62553c7) |
+| refresh_view | `bulk/widget/refresh_view` | done | merged (bdffd1c) |
+| content_page | `bulk/widget/content_page` | done | merged (0fca76b) |
+| page | `bulk/widget/page-recovery` | done | merged (9ea6663) — wave-2 recovery |
+| flyout_view | `bulk/widget/flyout_view` | done | merged (9eef0fb) — wave-2 recovery |
+| templated_view | `bulk/widget/templated_view` | done | merged (bfcfd35) — wave-2 recovery |
+| bindable_layout | `worktree-agent-aa35c156d70a971f8` | done | merged (dd76a88) — wave-2 recovery |
+| tabbed_view | `bulk/widget/tabbed_view` | wave-3 in flight | pending |
+| frame | `bulk/widget/frame` | wave-3 in flight | pending |
+| menu_bar + menu_bar_item | `bulk/widget/menu_bar_family` | wave-3 in flight | pending |
+| menu_flyout family (4) | `bulk/widget/menu_flyout_family` | wave-3 in flight | pending |
+| swipe family (3) | `bulk/widget/swipe_family` | wave-3 in flight | pending |
+
+**Wave-2 recovery note (2026-05-21):** Of the 5 wave-2 agents, 4 wrote complete file sets but failed to commit them — the worker prompt template needed explicit "you MUST commit" + "use relative paths only" instructions. Files were recovered by manually staging from worktrees and committing. The `page` worker's files leaked into main's wd (used absolute paths instead of worktree-relative); recovered the same way. `tabbed_view` worker left an empty worktree, redispatched as part of wave 3 with the corrected prompt.
+
+**Build state after wave-2 recovery:** Windows 160/160 tests pass; Linux green; Android `BUILD SUCCESSFUL`. All 3 platforms verified.
 
 (Updated as workers report in. Future sessions: this table is the single source of truth for what's in-flight.)
 

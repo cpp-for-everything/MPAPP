@@ -74,8 +74,10 @@ Pass this verbatim to `Agent` with `isolation: "worktree"` and `run_in_backgroun
 > - Android: `D:\GitHub\MPAPP\_build_android.bat`. Must reach `BUILD SUCCESSFUL`.
 > - All three must be green before you commit.
 >
-> **Commit:**
+> **Commit (CRITICAL — wave-2 lesson):**
 >
+> - **You MUST commit your work before reporting back.** Wave-2 workers wrote complete file sets but failed to commit, and the coordinator had to manually recover their files from worktrees.
+> - **Use ONLY relative paths inside your worktree** when writing files. `include/mpapp/{widget_name}.hpp`, NOT `D:\GitHub\MPAPP\include\mpapp\{widget_name}.hpp`. Absolute paths under `D:\GitHub\MPAPP\` stomp on main's working directory and cause cross-worker collisions. **READING via absolute path is fine** — only writes must be relative.
 > - One commit on a worktree branch named `bulk/widget/{widget_name}` with message: `feat(M-04b): {widget_name} handlers (3-of-5 platforms real) via ADR-0013 registry`.
 > - Don't push. The coordinator merges branches.
 >

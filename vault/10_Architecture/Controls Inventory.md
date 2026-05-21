@@ -17,7 +17,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 > [!info] Live view
 > Open [[_Bases/Components.base]] for the live, filterable, sortable view. The table below is a static snapshot.
 
-## Snapshot (2026-05-12)
+## Snapshot (2026-05-21)
 
 | Component | MAUI handler folder | Status |
 |---|---|---|
