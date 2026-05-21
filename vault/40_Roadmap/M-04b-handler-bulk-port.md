@@ -110,15 +110,17 @@ Each Phase 1 worker creates a branch `bulk/widget/<name>`. After local verificat
 | flyout_view | `bulk/widget/flyout_view` | done | merged (9eef0fb) — wave-2 recovery |
 | templated_view | `bulk/widget/templated_view` | done | merged (bfcfd35) — wave-2 recovery |
 | bindable_layout | `worktree-agent-aa35c156d70a971f8` | done | merged (dd76a88) — wave-2 recovery |
-| tabbed_view | `bulk/widget/tabbed_view` | wave-3 in flight | pending |
-| frame | `bulk/widget/frame` | wave-3 in flight | pending |
-| menu_bar + menu_bar_item | `bulk/widget/menu_bar_family` | wave-3 in flight | pending |
-| menu_flyout family (4) | `bulk/widget/menu_flyout_family` | wave-3 in flight | pending |
-| swipe family (3) | `bulk/widget/swipe_family` | wave-3 in flight | pending |
+| tabbed_view | `bulk/widget/tabbed_view-recovery` | done | merged — wave-3 recovery |
+| frame | `bulk/widget/frame-recovery` | done | merged — wave-3 recovery (deprecated alias for Border) |
+| menu_bar + menu_bar_item | `bulk/widget/menu_bar_family-recovery` | done | merged — wave-3 recovery |
+| menu_flyout family (4) | `bulk/widget/menu_flyout_family-recovery` | done | merged — wave-3 recovery |
+| swipe family (3) | `bulk/widget/swipe_family-recovery` | done | merged — wave-3 recovery |
 
-**Wave-2 recovery note (2026-05-21):** Of the 5 wave-2 agents, 4 wrote complete file sets but failed to commit them — the worker prompt template needed explicit "you MUST commit" + "use relative paths only" instructions. Files were recovered by manually staging from worktrees and committing. The `page` worker's files leaked into main's wd (used absolute paths instead of worktree-relative); recovered the same way. `tabbed_view` worker left an empty worktree, redispatched as part of wave 3 with the corrected prompt.
+**Wave-2 / wave-3 recovery note (2026-05-21):** Of the 5 wave-2 agents, 4 wrote complete file sets but failed to commit them — the worker prompt template needed explicit "you MUST commit" + "use relative paths only" instructions. Files were recovered by manually staging from worktrees and committing. Same pattern repeated for all 5 wave-3 agents — same fix, same recovery procedure. The worker template now warns about both pitfalls.
 
-**Build state after wave-2 recovery:** Windows 160/160 tests pass; Linux green; Android `BUILD SUCCESSFUL`. All 3 platforms verified.
+**Phase 2 sweep (2026-05-21):** 18 pre-existing widgets (button, label, entry, switch, check_box, radio_button, slider, stepper, editor, box_view, activity_indicator, progress_bar, search_bar, picker, date_picker, time_picker, image, image_button) gained self-registering ADR-0013 registrars via `_add_registrars.py`. Non-destructive — legacy `dynamic_cast` chains in stack_layout/window/scroll_view/border/content_view stay as fallback. 54 files (18 widgets × 3 platforms). Commit `0308d67`.
+
+**Build state after wave-3 recovery + Phase 2 sweep:** Windows 183/183 tests pass; Linux green; Android `BUILD SUCCESSFUL`. All 3 platforms verified.
 
 (Updated as workers report in. Future sessions: this table is the single source of truth for what's in-flight.)
 
