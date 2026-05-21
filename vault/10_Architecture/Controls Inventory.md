@@ -46,8 +46,8 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Label\|Label]] | `Handlers/Label/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/Layout\|Layout]] | `Handlers/Layout/` | mock |
 | [[Components/ListView\|ListView]] | `Controls/ListView/` | not-started |
-| [[Components/MenuBar\|MenuBar]] | `Handlers/MenuBar/` | not-started |
-| [[Components/MenuBarItem\|MenuBarItem]] | `Handlers/MenuBarItem/` | not-started |
+| [[Components/MenuBar\|MenuBar]] | `Handlers/MenuBar/` | android-real (Win mux::MenuBar + Linux GtkBox of GtkMenuButton + Android Toolbar acting as menu host; items rebuild on collection change, drops child views the dispatch registry does not resolve) |
+| [[Components/MenuBarItem\|MenuBarItem]] | `Handlers/MenuBarItem/` | android-real (Win mux::MenuBarItem + Linux GtkMenuButton with title label + Android TextView surfaced into parent menu_bar's Menu; title + items collection observed, popover/flyout children land with M-04c menu_flyout family) |
 | [[Components/MenuFlyout\|MenuFlyout]] | `Handlers/MenuFlyoutHandler/` | not-started |
 | [[Components/MenuFlyoutItem\|MenuFlyoutItem]] | `Handlers/MenuFlyoutItem/` | not-started |
 | [[Components/MenuFlyoutSeparator\|MenuFlyoutSeparator]] | `Handlers/MenuFlyoutSeparator/` | not-started |
