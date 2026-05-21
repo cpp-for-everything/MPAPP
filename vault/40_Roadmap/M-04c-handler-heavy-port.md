@@ -31,18 +31,20 @@ The final widget-porting milestone. Carves out the 12-ish widgets that need a **
 
 | Widget | Gating ADR | Status | Reason |
 |---|---|---|---|
-| `NavigationPage` | [[ADR-0014-page-navigation-stack]] | ADR proposed | Page stack semantics |
-| `TabbedPage` | [[ADR-0014-page-navigation-stack]] | shares ADR | Tab-host + stack composition |
-| `FlyoutPage` | [[ADR-0014-page-navigation-stack]] | shares ADR | Drawer + detail stack |
-| `Shell` | [[ADR-0014-page-navigation-stack]] + URI-routing ADR (TBD) | partial | Combines all the above + URI routing |
-| `ListView` | ADR — virtualized item host (TBD) | not started | Item recycling + items_source binding |
-| `TableView` | ADR — static section/row list (TBD, may piggy-back on CollectionView) | not started | Static section/row layout; could land in M-04b if pragmatic |
-| `CollectionView` | ADR — virtualized item host (TBD; row already in inventory) | not started | Modern MAUI list (replaces ListView) |
-| `WebView` | [[RFC-0001-licensing-and-patent-strategy]] § Linux WebKitGTK | RFC referenced | LGPL on Linux requires dynamic linking + rebuild path |
-| `HybridWebView` | depends on WebView ADR | not started | C++ ↔ JS interop bridge |
-| `ShapeView` | ADR — 2D graphics backend (TBD) | not started | Stroke/fill primitives |
-| `GraphicsView` | shares ShapeView ADR (Skia-style canvas) | not started | Canvas surface |
-| `Grid` (real layout engine) | ADR — track-based layout (TBD) | mock exists | Real `*` / `Auto` track definitions + child placement |
+| `NavigationPage` | [[ADR-0014-page-navigation-stack]] | ADR proposed; **handlers landed** | Page stack semantics |
+| `TabbedPage` | [[ADR-0014-page-navigation-stack]] | shares ADR; **handlers landed** | Tab-host + stack composition |
+| `FlyoutPage` | [[ADR-0014-page-navigation-stack]] | shares ADR; **handlers landed** | Drawer + detail stack |
+| `Shell` | [[ADR-0014-page-navigation-stack]] + [[ADR-0016-shell-compile-time-routes]] | ADRs proposed | Combines all the above + URI routing |
+| `ListView` | [[ADR-0020-virtualized-item-host-wrap-platform]] | ADR proposed | Item recycling + items_source binding |
+| `TableView` | [[ADR-0020-virtualized-item-host-wrap-platform]] + [[ADR-0021-tableview-cell-types]] | ADRs proposed | Static section/row layout + cell-type tree |
+| `CollectionView` | [[ADR-0020-virtualized-item-host-wrap-platform]] | ADR proposed | Modern MAUI list (replaces ListView) |
+| `WebView` | [[RFC-0001-licensing-and-patent-strategy]] § Linux WebKitGTK (resolved: WebKitGTK dynamic link) | decision recorded | LGPL on Linux requires dynamic linking + rebuild path |
+| `HybridWebView` | [[ADR-0018-hybrid-webview-typed-bridge]] | ADR proposed | C++ ↔ JS interop bridge |
+| `ShapeView` | [[ADR-0015-graphics-backend-dual]] | ADR proposed | Cairo (default) / Skia (opt-in) dual backend |
+| `GraphicsView` | shares ADR-0015 | ADR proposed | Canvas surface |
+| `Grid` (real layout engine) | [[ADR-0017-grid-track-definitions]] | ADR proposed | Real `*` / `Auto` track definitions + child placement |
+
+**Cross-cutting:** [[ADR-0019-async-executor-native-dispatcher]] gates `push_async` / `pop_async` (NavigationPage), the JS bridge's task<T>, and any future async surface across the framework.
 
 ## Process
 
