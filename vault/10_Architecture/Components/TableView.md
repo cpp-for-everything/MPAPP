@@ -2,19 +2,19 @@
 type: component
 mauiHandler: "TableView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/tableview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 > [!info] Status
-> **mock** — sections (vec of {title, rows}) + intent enum + row_height + has_unevenly_sized_rows + add_section/add_row helpers + total_row_count + row_tapped signal exercised by Catch2 mock-handler tests. Cell-subclass tree (text_cell / entry_cell / switch_cell / view_cell / image_cell) is deferred to a follow-up ADR; the mock holds plain `std::string` row labels.
+> **android-real** — Windows wraps `mux::Controls::ListView`, Linux uses `GtkListBox` in `GtkScrolledWindow`, Android wraps `android.widget.ListView` with `ArrayAdapter<String>`. Sections flatten to a section-title row (prefixed with `▾ `) followed by data rows. On Linux the section row is set non-selectable + non-activatable; on Win/Android the equivalent is a v2 enhancement. **Cell-typed rendering** per [[ADR-0021-tableview-cell-types]] is wired through string rows in v1; richer cell types land when the table_view surface evolves from `vec<{title, vec<string>}>` to `vec<table_section{title, vec<unique_ptr<cell>>}>`. `row_height` honoring deferred per platform.
 
 # TableView
 
