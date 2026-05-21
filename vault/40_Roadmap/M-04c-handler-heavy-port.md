@@ -68,16 +68,17 @@ For each gated widget:
 | TabbedPage | ADR-0014 proposed | **android-real (2026-05-21)** — 3-platform handlers |
 | FlyoutPage | ADR-0014 proposed | **android-real (2026-05-21)** — 3-platform handlers |
 | Shell | ADR-0014 + [[ADR-0016-shell-compile-time-routes]] | **android-real (2026-05-22)** — Win SplitView + Linux GtkPaned + Android LinearLayout w/ tab strip + content swap; compile-time route table per ADR-0016 deferred |
-| ListView | virtualized-item-host ADR TBD | **mock landed** — items_source + selected_index + item_tapped (2026-05-21) |
-| TableView | virtualized-item-host ADR TBD | **mock landed** — sections vec + intent + row_height + add_section/add_row helpers (2026-05-21) |
-| CollectionView | virtualized-item-host ADR TBD | **mock landed** — items_source + selection_mode none/single/multiple + select/deselect/clear (2026-05-21) |
+| ListView | [[ADR-0020-virtualized-item-host-wrap-platform]] | **android-real (2026-05-22)** — Win mux::ListView + Linux GtkListBox + Android android.widget.ListView w/ ArrayAdapter |
+| TableView | [[ADR-0020-virtualized-item-host-wrap-platform]] + [[ADR-0021-tableview-cell-types]] | **android-real (2026-05-22)** — section-flatten rendering on 3 platforms; cell-typed rendering pending table_view surface refactor |
+| CollectionView | [[ADR-0020-virtualized-item-host-wrap-platform]] | **android-real (2026-05-22)** — Win mux::ListView + Linux GtkListBox + Android ListView; selection_mode mapping wired; multi-select events + grid layouts deferred |
+| TableView cells | [[ADR-0021-tableview-cell-types]] | **mock landed (2026-05-22)** — text_cell + entry_cell + switch_cell + view_cell + image_cell + base cell |
 | WebView | RFC-0001 § Linux licensing | **mock landed** — url + html + history + load/back/forward/reload + navigating/navigated (2026-05-21) |
 | HybridWebView | depends WebView | **mock landed** — extends WebView with hybrid_namespace + send_to_js/simulate_inbound + message_received/message_sent (2026-05-21) |
-| ShapeView | 2D graphics backend ADR TBD | **mock landed** — shape_kind enum + data path string + fill/stroke/stroke_thickness/opacity (2026-05-21) |
-| GraphicsView | 2D graphics backend ADR TBD | **mock landed** — width/height + draw_count + invalidate() + draw_requested signal (2026-05-21) |
-| Grid (real) | track-based layout ADR TBD | mock exists |
+| ShapeView | [[ADR-0015-graphics-backend-dual]] | **mock landed** — shape_kind enum + data path string + fill/stroke/stroke_thickness/opacity (2026-05-21) |
+| GraphicsView | [[ADR-0015-graphics-backend-dual]] | **mock landed** — width/height + draw_count + invalidate() + draw_requested signal (2026-05-21) |
+| Grid (real) | [[ADR-0017-grid-track-definitions]] | mock exists |
 
-**Status as of 2026-05-21 close:** Every widget in [[Controls Inventory]] is at **mock or better**. Zero `not-started` rows remain. The next pieces of work for M-04c are the gating ADRs (URI routing, virtualized item host, 2D graphics backend, track-based layout) plus per-platform real handlers for the 11 mocks above.
+**Status as of 2026-05-22 close:** The page-level family (Nav / Tab / Flyout / Shell) **and** the list family (ListView / CollectionView / TableView) are all at android-real. Cell type tree (text/entry/switch/view/image) shipped at mock. Remaining real-handler work: WebView/HybridWebView (LGPL WebKitGTK + WebView2 + Android WebView), ShapeView/GraphicsView (Cairo facade per ADR-0015), Grid (real layout engine per ADR-0017). Compile-time route table per ADR-0016 still pending Shell follow-up.
 
 ## See also
 
