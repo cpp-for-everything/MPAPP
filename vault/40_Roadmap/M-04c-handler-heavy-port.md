@@ -62,9 +62,9 @@ For each gated widget:
 
 | Widget | ADR | Implementation status |
 |---|---|---|
-| NavigationPage | ADR-0014 proposed | not started |
-| TabbedPage | ADR-0014 proposed | not started |
-| FlyoutPage | ADR-0014 proposed | not started |
+| NavigationPage | ADR-0014 proposed | **mock landed** — page_stack engine + lifecycle signals + attached-prop store (2026-05-21) |
+| TabbedPage | ADR-0014 proposed | **mock landed** — children + selected_index + tab-switch lifecycle (2026-05-21) |
+| FlyoutPage | ADR-0014 proposed | **mock landed** — flyout/detail/is_presented + present/dismiss/toggle + presented_changed (2026-05-21) |
 | Shell | ADR-0014 + routing TBD | not started |
 | ListView | TBD | not started |
 | TableView | TBD | not started |
