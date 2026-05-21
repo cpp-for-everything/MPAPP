@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "MenuFlyoutItem"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menuflyoutitem"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # MenuFlyoutItem
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Windows `mux::Controls::MenuFlyoutItem` (Click → clicked) + Linux `GtkButton` (flat-styled, "clicked" signal) + Android `android.widget.Button` (Click router deferred to M-05); text + is_enabled + clicked. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 

@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "MenuFlyout"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/menuflyout"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # MenuFlyout
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Windows `mux::Controls::MenuFlyout` + Linux `GtkPopover` w/ vertical `GtkBox` + Android vertical `LinearLayout`; items + is_open via ADR-0013 dispatch. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 
