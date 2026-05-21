@@ -70,7 +70,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/SwipeView\|SwipeView]] | `Handlers/SwipeView/` | not-started |
 | [[Components/Switch\|Switch]] | `Handlers/Switch/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android) |
 | [[Components/TabbedPage\|TabbedPage]] | `Controls/TabbedPage/` | not-started |
-| [[Components/TabbedView\|TabbedView]] | `Handlers/TabbedView/` | not-started |
+| [[Components/TabbedView\|TabbedView]] | `Handlers/TabbedView/` | android-real (Win mux::TabView + Linux GtkNotebook + Android vertical LinearLayout host w/ Button tab strip + FrameLayout page area; tab_titles + selected_index) |
 | [[Components/TableView\|TableView]] | `Controls/TableView/` | not-started |
 | [[Components/TemplatedView\|TemplatedView]] | `Controls/TemplatedView/` | android-real (Win ContentControl + Linux GtkBox single-child + Android FrameLayout; content slot live, template_id deferred to templating engine ADR) |
 | [[Components/TimePicker\|TimePicker]] | `Handlers/TimePicker/` | android-real (Win TimePicker + Linux GtkSpinButton pair + Android TimePicker 24h; time_value hour/minute POD) |
