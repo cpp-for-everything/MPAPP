@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "TemplatedView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/templatedview"
-mpappStatus: not-started
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/android-real
 ---
 
 # TemplatedView
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — real handlers on Windows (`mux::Controls::ContentControl`), Linux (`GtkBox` single-child), and Android (`android.widget.FrameLayout`). The `content` slot is live on all three runtime platforms; `template_id` is recorded but template instantiation is deferred to the templating-engine ADR. See [[Controls Inventory]] for the full porting matrix.
 
 ## Overview
 
