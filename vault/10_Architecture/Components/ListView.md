@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "ListView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/listview"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,8 +10,11 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
+
+> [!info] Status
+> **mock** — items_source + selected_index + row_height + has_unevenly_sized_rows + item_tapped signal exercised by Catch2 mock-handler tests. Real virtualization is gated on the virtualized-item-host ADR (also gates [[CollectionView]] and [[TableView]]). MAUI flags ListView as legacy in favor of CollectionView; MPAPP ships it for source-compat parity.
 
 # ListView
 

@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: Apache-2.0
+// Part of MPAPP. Mock handler for `mpapp::list_view`.
+
+#ifndef MPAPP_HANDLERS_MOCK_LIST_VIEW_HANDLER_HPP
+#define MPAPP_HANDLERS_MOCK_LIST_VIEW_HANDLER_HPP
+
+#include <cstddef>
+#include <string>
+#include <vector>
+
+#include "../../list_view.hpp"
+#include "../../platform.hpp"
+#include "handler_base.hpp"
+
+namespace mpapp {
+
+template <>
+class list_view_handler<platform::mock> : public mock_handler_base {
+public:
+    list_view_handler() = default;
+    ~list_view_handler() = default;
+
+    list_view_handler(const list_view_handler&)            = delete;
+    list_view_handler& operator=(const list_view_handler&) = delete;
+    list_view_handler(list_view_handler&&)                 = delete;
+    list_view_handler& operator=(list_view_handler&&)      = delete;
+
+    void map_items_source(list_view& lv) {
+        record_change("items_source.count", lv.items_source.get().size());
+        lv.items_source.changed.subscribe(slot_items_, items_cb_);
+    }
+
+    void map_selected_index(list_view& lv) {
+        record_change("selected_index", lv.selected_index.get());
+        lv.selected_index.changed.subscribe(slot_sel_, sel_cb_);
+    }
+
+private:
+    using self_t = list_view_handler<platform::mock>;
+
+    struct items_recorder {
+        self_t* self = nullptr;
+        void operator()(const std::vector<std::string>& v) const {
+            self->record_change("items_source.count", v.size());
+        }
+    };
+    struct sel_recorder {
+        self_t* self = nullptr;
+        void operator()(int v) const { self->record_change("selected_index", v); }
+    };
+
+    items_recorder items_cb_{this};
+    sel_recorder   sel_cb_{this};
+
+    signal_slot<const std::vector<std::string>&> slot_items_{};
+    signal_slot<const int&>                      slot_sel_{};
+};
+
+} // namespace mpapp
+
+#endif // MPAPP_HANDLERS_MOCK_LIST_VIEW_HANDLER_HPP

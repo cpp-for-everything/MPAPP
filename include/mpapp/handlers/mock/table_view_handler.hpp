@@ -1,0 +1,60 @@
+// SPDX-License-Identifier: Apache-2.0
+// Part of MPAPP. Mock handler for `mpapp::table_view`.
+
+#ifndef MPAPP_HANDLERS_MOCK_TABLE_VIEW_HANDLER_HPP
+#define MPAPP_HANDLERS_MOCK_TABLE_VIEW_HANDLER_HPP
+
+#include <cstddef>
+#include <vector>
+
+#include "../../platform.hpp"
+#include "../../table_view.hpp"
+#include "handler_base.hpp"
+
+namespace mpapp {
+
+template <>
+class table_view_handler<platform::mock> : public mock_handler_base {
+public:
+    table_view_handler() = default;
+    ~table_view_handler() = default;
+
+    table_view_handler(const table_view_handler&)            = delete;
+    table_view_handler& operator=(const table_view_handler&) = delete;
+    table_view_handler(table_view_handler&&)                 = delete;
+    table_view_handler& operator=(table_view_handler&&)      = delete;
+
+    void map_sections(table_view& tv) {
+        record_change("sections.count", tv.sections.get().size());
+        tv.sections.changed.subscribe(slot_sec_, sec_cb_);
+    }
+
+    void map_row_height(table_view& tv) {
+        record_change("row_height", tv.row_height.get());
+        tv.row_height.changed.subscribe(slot_rh_, rh_cb_);
+    }
+
+private:
+    using self_t = table_view_handler<platform::mock>;
+
+    struct sec_recorder {
+        self_t* self = nullptr;
+        void operator()(const std::vector<table_section_data>& v) const {
+            self->record_change("sections.count", v.size());
+        }
+    };
+    struct rh_recorder {
+        self_t* self = nullptr;
+        void operator()(int v) const { self->record_change("row_height", v); }
+    };
+
+    sec_recorder sec_cb_{this};
+    rh_recorder  rh_cb_{this};
+
+    signal_slot<const std::vector<table_section_data>&> slot_sec_{};
+    signal_slot<const int&>                             slot_rh_{};
+};
+
+} // namespace mpapp
+
+#endif // MPAPP_HANDLERS_MOCK_TABLE_VIEW_HANDLER_HPP

@@ -2,7 +2,7 @@
 type: component
 mauiHandler: "TableView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/tableview"
-mpappStatus: not-started
+mpappStatus: mock
 platformWindows: false
 platformAndroid: false
 platformLinux: false
@@ -10,8 +10,11 @@ platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/not-started
+  - status/mock
 ---
+
+> [!info] Status
+> **mock** — sections (vec of {title, rows}) + intent enum + row_height + has_unevenly_sized_rows + add_section/add_row helpers + total_row_count + row_tapped signal exercised by Catch2 mock-handler tests. Cell-subclass tree (text_cell / entry_cell / switch_cell / view_cell / image_cell) is deferred to a follow-up ADR; the mock holds plain `std::string` row labels.
 
 # TableView
 

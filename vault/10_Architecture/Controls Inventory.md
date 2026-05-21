@@ -32,7 +32,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/ContentView\|ContentView]] | `Handlers/ContentView/` | android-real (Win mux::ContentControl + Linux GtkBox + Android FrameLayout; single content slot resolved via ADR-0013 dispatch registry; legacy dynamic_cast chain removed) |
 | [[Components/DatePicker\|DatePicker]] | `Handlers/DatePicker/` | android-real (Win CalendarDatePicker + Linux GtkCalendar + Android DatePicker; date_value POD year/month/day; format string applied on Windows only) |
 | [[Components/Editor\|Editor]] | `Handlers/Editor/` | android-real (Windows multi-line TextBox + Linux GtkTextView + Android multi-line EditText; shares text-binding bridge with Entry via shared MppTextWatcher kind discriminator) |
-| [[Components/CollectionView\|CollectionView]] | `Handlers/CollectionView/` | not-started (M-04c — virtualized item host; needs design ADR for recycler + items_source binding) |
+| [[Components/CollectionView\|CollectionView]] | `Handlers/CollectionView/` | mock (items_source + selection_mode none/single/multiple + selected_index + selected_indices + select/deselect/clear_selection + layout + span; real virtualization deferred to virtualized-item-host ADR) |
 | [[Components/Element\|Element]] | `Handlers/Element/` | mock — terminal (abstract base; no native primitive) |
 | [[Components/Entry\|Entry]] | `Handlers/Entry/` | android-real (Windows + Linux + Android; bidirectional text-binding live-verified on Android) |
 | [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | mock (flyout/detail/is_presented + present/dismiss/toggle + presented_changed signal; real handlers pending per ADR-0014 wiring) |
@@ -46,7 +46,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/IndicatorView\|IndicatorView]] | `Handlers/IndicatorView/` | android-real (Win StackPanel of Ellipses + Linux GtkBox of dot labels + Android LinearLayout of GradientDrawable-backed Views; count + position + colors; companion to CarouselView which is M-04c) |
 | [[Components/Label\|Label]] | `Handlers/Label/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/Layout\|Layout]] | `Handlers/Layout/` | mock — terminal (abstract base; concrete layouts like StackLayout/Grid implement real handlers) |
-| [[Components/ListView\|ListView]] | `Controls/ListView/` | not-started |
+| [[Components/ListView\|ListView]] | `Controls/ListView/` | mock (items_source + selected_index + item_tapped signal; real virtualization deferred to virtualized-item-host ADR) |
 | [[Components/MenuBar\|MenuBar]] | `Handlers/MenuBar/` | android-real (Win mux::MenuBar + Linux GtkBox of GtkMenuButton + Android Toolbar acting as menu host; items rebuild on collection change, drops child views the dispatch registry does not resolve) |
 | [[Components/MenuBarItem\|MenuBarItem]] | `Handlers/MenuBarItem/` | android-real (Win mux::MenuBarItem + Linux GtkMenuButton with title label + Android TextView surfaced into parent menu_bar's Menu; title + items collection observed, popover/flyout children land with M-04c menu_flyout family) |
 | [[Components/MenuFlyout\|MenuFlyout]] | `Handlers/MenuFlyoutHandler/` | android-real (Win mux::Controls::MenuFlyout + Linux GtkPopover w/ vertical GtkBox + Android vertical LinearLayout; items + is_open via ADR-0013 dispatch registry) |
@@ -72,7 +72,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Switch\|Switch]] | `Handlers/Switch/` | android-real (Windows + Linux + Android; bidirectional bool-binding live-verified on Android) |
 | [[Components/TabbedPage\|TabbedPage]] | `Controls/TabbedPage/` | mock (children + selected_index + computed current_page + lifecycle signals on tab switch; real handlers pending per ADR-0014 wiring) |
 | [[Components/TabbedView\|TabbedView]] | `Handlers/TabbedView/` | android-real (Win mux::TabView + Linux GtkNotebook + Android vertical LinearLayout host w/ Button tab strip + FrameLayout page area; tab_titles + selected_index) |
-| [[Components/TableView\|TableView]] | `Controls/TableView/` | not-started |
+| [[Components/TableView\|TableView]] | `Controls/TableView/` | mock (sections vec of {title,rows} + intent enum + row_height + has_unevenly_sized_rows + add_section/add_row helpers + total_row_count; cell-subclass tree deferred) |
 | [[Components/TemplatedView\|TemplatedView]] | `Controls/TemplatedView/` | android-real (Win ContentControl + Linux GtkBox single-child + Android FrameLayout; content slot live, template_id deferred to templating engine ADR) |
 | [[Components/TimePicker\|TimePicker]] | `Handlers/TimePicker/` | android-real (Win TimePicker + Linux GtkSpinButton pair + Android TimePicker 24h; time_value hour/minute POD) |
 | [[Components/TitleBar\|TitleBar]] | `Controls/TitleBar/` | android-real (Win mux::TitleBar + Linux GtkHeaderBar + Android android.widget.Toolbar; title + subtitle) |

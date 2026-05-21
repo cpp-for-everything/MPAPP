@@ -1,0 +1,74 @@
+// SPDX-License-Identifier: Apache-2.0
+// Part of MPAPP. Mock handler for `mpapp::collection_view`.
+
+#ifndef MPAPP_HANDLERS_MOCK_COLLECTION_VIEW_HANDLER_HPP
+#define MPAPP_HANDLERS_MOCK_COLLECTION_VIEW_HANDLER_HPP
+
+#include <cstddef>
+#include <string>
+#include <vector>
+
+#include "../../collection_view.hpp"
+#include "../../platform.hpp"
+#include "handler_base.hpp"
+
+namespace mpapp {
+
+template <>
+class collection_view_handler<platform::mock> : public mock_handler_base {
+public:
+    collection_view_handler() = default;
+    ~collection_view_handler() = default;
+
+    collection_view_handler(const collection_view_handler&)            = delete;
+    collection_view_handler& operator=(const collection_view_handler&) = delete;
+    collection_view_handler(collection_view_handler&&)                 = delete;
+    collection_view_handler& operator=(collection_view_handler&&)      = delete;
+
+    void map_items_source(collection_view& cv) {
+        record_change("items_source.count", cv.items_source.get().size());
+        cv.items_source.changed.subscribe(slot_items_, items_cb_);
+    }
+
+    void map_selected_index(collection_view& cv) {
+        record_change("selected_index", cv.selected_index.get());
+        cv.selected_index.changed.subscribe(slot_sel_, sel_cb_);
+    }
+
+    void map_selected_indices(collection_view& cv) {
+        record_change("selected_indices.count", cv.selected_indices.get().size());
+        cv.selected_indices.changed.subscribe(slot_seli_, seli_cb_);
+    }
+
+private:
+    using self_t = collection_view_handler<platform::mock>;
+
+    struct items_recorder {
+        self_t* self = nullptr;
+        void operator()(const std::vector<std::string>& v) const {
+            self->record_change("items_source.count", v.size());
+        }
+    };
+    struct sel_recorder {
+        self_t* self = nullptr;
+        void operator()(int v) const { self->record_change("selected_index", v); }
+    };
+    struct seli_recorder {
+        self_t* self = nullptr;
+        void operator()(const std::vector<int>& v) const {
+            self->record_change("selected_indices.count", v.size());
+        }
+    };
+
+    items_recorder items_cb_{this};
+    sel_recorder   sel_cb_{this};
+    seli_recorder  seli_cb_{this};
+
+    signal_slot<const std::vector<std::string>&> slot_items_{};
+    signal_slot<const int&>                      slot_sel_{};
+    signal_slot<const std::vector<int>&>         slot_seli_{};
+};
+
+} // namespace mpapp
+
+#endif // MPAPP_HANDLERS_MOCK_COLLECTION_VIEW_HANDLER_HPP
