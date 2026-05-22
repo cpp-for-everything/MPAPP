@@ -131,3 +131,84 @@ TEST_CASE("shell.current_content tracks page swaps",
     s.current_content = nullptr;
     CHECK(s.current_content.get() == nullptr);
 }
+
+TEST_CASE("can_activate guard blocks navigation when false",
+          "[mock][shell][guard]") {
+    shell s;
+    s.add_tab("home");
+    s.add_tab("settings");
+    s.go_to("//home");
+
+    bool guard_called = false;
+    std::string seen_target;
+    s.can_activate = [&](std::string_view target) {
+        guard_called = true;
+        seen_target  = std::string{target};
+        return false;
+    };
+
+    int blocked_hits = 0;
+    std::string blocked_target;
+    struct cb_t {
+        int*         hits;
+        std::string* target;
+        void operator()(const std::string& v) const { ++*hits; *target = v; }
+    };
+    cb_t cb{&blocked_hits, &blocked_target};
+    signal_slot<const std::string&> slot{};
+    s.navigation_blocked.subscribe(slot, cb);
+
+    s.go_to("//settings");
+
+    CHECK(guard_called);
+    CHECK(seen_target           == "//settings");
+    CHECK(blocked_hits          == 1);
+    CHECK(blocked_target        == "//settings");
+    // State unchanged.
+    CHECK(s.current_route.get()     == "//home");
+    CHECK(s.current_tab_index.get() == 0);
+}
+
+TEST_CASE("can_activate returning true lets navigation proceed",
+          "[mock][shell][guard]") {
+    shell s;
+    s.add_tab("home");
+    s.add_tab("settings");
+
+    int guard_calls = 0;
+    s.can_activate = [&](std::string_view) {
+        ++guard_calls;
+        return true;
+    };
+
+    s.go_to("//settings");
+    CHECK(guard_calls               == 1);
+    CHECK(s.current_route.get()     == "//settings");
+    CHECK(s.current_tab_index.get() == 1);
+}
+
+TEST_CASE("can_activate guard applies to typed go_to too",
+          "[mock][shell][guard][route]") {
+    // The typed go_to<Path, &Table>(args...) delegates to the
+    // string-based go_to, so a single guard covers both.
+    struct dummy_page : page {};
+    static constexpr auto routes = route_table{
+        route<"home",        dummy_page>{},
+        route<"home/details", dummy_page,
+              param<"id", int>>{},
+    };
+
+    shell s;
+    s.add_tab("home");
+    s.can_activate = [](std::string_view target) {
+        // Block anything with a query string.
+        return target.find('?') == std::string_view::npos;
+    };
+
+    s.go_to<"home", &routes>();
+    CHECK(s.current_route.get() == "//home");
+
+    s.go_to<"home/details", &routes>(42);
+    // Blocked by guard.
+    CHECK(s.current_route.get() == "//home");
+}

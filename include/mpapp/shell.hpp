@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <functional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -56,10 +57,30 @@ public:
     // Known route names registered via register_route().
     Observable<std::vector<std::string>> registered_routes{};
 
+    // Route guard. If set, called before each `go_to(uri)` with the
+    // target URI; returning false aborts the navigation (current_route
+    // stays where it was, navigated does NOT fire, navigation_blocked
+    // does). Apps use this for "you have unsaved changes" patterns:
+    //
+    //   shell.can_activate = [&](std::string_view target) {
+    //       if (form.is_dirty()) {
+    //           show_dirty_dialog();
+    //           return false;
+    //       }
+    //       return true;
+    //   };
+    //
+    // The guard fires for both the string-based `go_to(uri)` and the
+    // typed `go_to<Path, &Table>(args...)` because the latter
+    // delegates to the former after URI building.
+    using nav_guard_t = std::function<bool(std::string_view /*target*/)>;
+    Observable<nav_guard_t>              can_activate{};
+
     // ----- Signals ------------------------------------------------------
 
-    signal<const std::string&> navigated{};      // emits the route after go_to() lands
-    signal<bool>               flyout_toggled{}; // emits new is_flyout_open after flip
+    signal<const std::string&> navigated{};            // emits the route after go_to() lands
+    signal<const std::string&> navigation_blocked{};   // emits the target uri when can_activate returns false
+    signal<bool>               flyout_toggled{};       // emits new is_flyout_open after flip
 
     // ----- Mutators -----------------------------------------------------
 
@@ -89,6 +110,11 @@ public:
     // Unrecognized routes still set current_route so observers see the change;
     // the tab index doesn't move.
     void go_to(std::string_view uri) {
+        // Route-guard check (Observable may hold an empty function).
+        if (const auto& guard = can_activate.get(); guard && !guard(uri)) {
+            navigation_blocked.emit(std::string{uri});
+            return;
+        }
         std::string u(uri);
         if (u.rfind("//", 0) == 0) {
             std::string_view tail = std::string_view{u}.substr(2);
