@@ -86,7 +86,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/WebView\|WebView]] | `Handlers/WebView/` | android-real (Win muxc::WebView2 + NavigationStarting/Completed bound to is_loading/navigating/navigated + can_go_back/forward; Linux WebKitGTK 6.x via "load-changed" signal — LGPL dynamic-link per Rule 9; Android android.webkit.WebView w/ custom MppWebViewClient routing onPageStarted/onPageFinished + INTERNET perm + JS enabled. Linux stubs out cleanly if WebKitGTK is missing at configure time.) |
 | [[Components/Window\|Window]] | `Handlers/Window/` | android-real (Windows + Linux + Android verified live) |
 
-**Total: 64 components** (+5 TableView cells landed 2026-05-22 per [[ADR-0021-tableview-cell-types]]: text_cell, entry_cell, switch_cell, view_cell, image_cell. CollectionView added 2026-05-21 per M-04b sweep; abstract bases View/Layout/Element annotated as terminal-mock).
+**Total: 64 components.** As of 2026-05-22 close: only ShapeView + GraphicsView remain at `mock` (gated on [[ADR-0015-graphics-backend-dual]]); the three abstract bases (View / Layout / Element) are terminal-mock. Everything else — 59 widgets — is `android-real` on Win / Linux / Android. macOS + iOS pending Apple host.
 
 ## How to update
 
