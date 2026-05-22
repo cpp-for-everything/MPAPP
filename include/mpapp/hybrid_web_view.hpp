@@ -23,12 +23,17 @@
 #ifndef MPAPP_HYBRID_WEB_VIEW_HPP
 #define MPAPP_HYBRID_WEB_VIEW_HPP
 
+#include <functional>
 #include <memory>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include "detail/json.hpp"
 #include "hybrid_bridge.hpp"
 #include "observable.hpp"
 #include "platform.hpp"
@@ -90,21 +95,60 @@ public:
 
     // The single inbound choke point. Platform handlers (Win, Linux,
     // Android) call this with the raw payload they received from the
-    // native messaging path. We:
-    //   * record `last_message_in` for debug observers,
-    //   * if a bridge is attached AND the payload looks like a JSON
-    //     envelope, dispatch through it and post the response back
-    //     via `send_to_js`,
-    //   * otherwise fire `message_received` (raw-string path).
+    // native messaging path. Tri-state envelope classification:
+    //
+    //   * Envelope with a "method" field    →  inbound bridge call.
+    //     Dispatch through bridge_ if attached; post the response
+    //     back via send_to_js.
+    //
+    //   * Envelope with a "result"/"error" field + matching pending
+    //     callback id  →  response to an earlier invoke_js_cb.
+    //     Invoke the callback with the parsed result; remove from
+    //     pending_responses_.
+    //
+    //   * Anything else  →  emit `message_received` (raw-string path).
+    //
+    // last_message_in is set in every path so debug observers see the
+    // raw traffic regardless.
     void process_inbound(const std::string& payload) {
         last_message_in.set(payload);
-        if (bridge_ != nullptr && !payload.empty() && payload.front() == '{') {
-            std::string response;
-            (void)bridge_->dispatch(payload, response);
-            // dispatch() always writes a well-formed envelope — success
-            // or error — so the JS side can match by id either way.
-            send_to_js(response);
-            return;
+
+        if (!payload.empty() && payload.front() == '{') {
+            // Classify envelope by walking it once.
+            int  envelope_id          = -1;
+            bool has_method           = false;
+            bool has_result_or_error  = false;
+            {
+                detail::json::reader peek{payload};
+                if (peek.expect_object_begin()) {
+                    std::string field;
+                    while (peek.next_field(field)) {
+                        if      (field == "method") { has_method = true; (void)peek.skip_value(); }
+                        else if (field == "result" || field == "error") {
+                            has_result_or_error = true;
+                            (void)peek.skip_value();
+                        }
+                        else if (field == "id")     { (void)peek.read(envelope_id); }
+                        else                         { (void)peek.skip_value(); }
+                    }
+                }
+            }
+
+            if (has_method && bridge_ != nullptr) {
+                std::string response;
+                (void)bridge_->dispatch(payload, response);
+                send_to_js(response);
+                return;
+            }
+            if (has_result_or_error) {
+                auto it = pending_responses_.find(envelope_id);
+                if (it != pending_responses_.end()) {
+                    auto cb = std::move(it->second);
+                    pending_responses_.erase(it);
+                    cb(payload);
+                    return;
+                }
+            }
         }
         message_received.emit(payload);
     }
@@ -165,6 +209,69 @@ public:
         return id;
     }
 
+    // Same as invoke_js, but registers a callback to receive the JS-
+    // side response. The callback fires with `std::optional<T>` —
+    // empty if JS posted an `error` envelope or the response couldn't
+    // be parsed, populated with the parsed `result` value otherwise.
+    //
+    // Callbacks fire once and are then discarded. If no response ever
+    // arrives, the callback leaks until the hybrid_web_view is
+    // destroyed.
+    //
+    // T must have a json::read overload (primitives, std::string,
+    // std::vector<T>, std::optional<T>, ADL-extended user types).
+    template <class T, class... Args>
+    int invoke_js_cb(std::string_view method_name,
+                     std::function<void(std::optional<T>)> on_result,
+                     const Args&... args) {
+        const int id = next_outbound_id_++;
+
+        // Wrap the user callback into a string-parsing callback that
+        // pending_responses_ stores by id.
+        auto wrapped = [user_cb = std::move(on_result)](const std::string& response_payload) {
+            std::optional<T> parsed;
+            bool             had_error = false;
+            detail::json::reader r{response_payload};
+            if (r.expect_object_begin()) {
+                std::string field;
+                while (r.next_field(field)) {
+                    if (field == "result") {
+                        T v{};
+                        if (r.read(v)) parsed = std::move(v);
+                        // If the read fails we leave `parsed` empty — the
+                        // caller treats that the same as an error response.
+                    } else if (field == "error") {
+                        had_error = true;
+                        (void)r.skip_value();
+                    } else {
+                        (void)r.skip_value();
+                    }
+                }
+            }
+            if (had_error) parsed.reset();
+            user_cb(std::move(parsed));
+        };
+        pending_responses_.emplace(id, std::move(wrapped));
+
+        std::string envelope;
+        {
+            detail::json::writer w{envelope};
+            w.begin_object();
+            w.field("id",     id);
+            w.field("method", method_name);
+            w.field_array("args", args...);
+            w.end_object();
+        }
+        send_to_js(envelope);
+        return id;
+    }
+
+    // How many invoke_js_cb calls are awaiting a response. For tests
+    // and leak debugging.
+    [[nodiscard]] std::size_t pending_response_count() const noexcept {
+        return pending_responses_.size();
+    }
+
     // ----- Handler ------------------------------------------------------
 
     hybrid_web_view_handler<platform::current>&       hwv_handler() noexcept       { return *hwv_handler_; }
@@ -176,6 +283,11 @@ private:
     std::string                                 last_message_out_{};
     std::unique_ptr<hybrid_bridge>              bridge_{};
     int                                         next_outbound_id_ = 1;
+    // Pending outbound calls keyed by id. The value is invoked exactly
+    // once when the JS side posts a matching {"id":N,"result"|"error":…}
+    // envelope.
+    std::unordered_map<int, std::function<void(const std::string& /*response_payload*/)>>
+                                                pending_responses_{};
     hybrid_web_view_handler<platform::current>* hwv_handler_ = nullptr;
 };
 

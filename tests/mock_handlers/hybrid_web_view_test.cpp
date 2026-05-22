@@ -217,3 +217,91 @@ TEST_CASE("invoke_js + bridge dispatch interleave on message_sent",
     CHECK(outbound[1] == R"({"id":99,"result":5})");
     CHECK(outbound[2] == R"({"id":2,"method":"notify","args":["done"]})");
 }
+
+TEST_CASE("invoke_js_cb fires the callback when JS posts a response",
+          "[mock][hybrid_web_view][bridge]") {
+    hybrid_web_view h;
+
+    std::optional<int> received_result;
+    int                hits = 0;
+    auto cb = [&](std::optional<int> r) {
+        received_result = r;
+        ++hits;
+    };
+
+    const int id = h.invoke_js_cb<int>("add", cb, 3, 4);
+    CHECK(id == 1);
+    CHECK(h.pending_response_count() == 1);
+    CHECK(h.last_message_out() == R"({"id":1,"method":"add","args":[3,4]})");
+
+    // JS posts the response.
+    h.simulate_inbound(R"({"id":1,"result":7})");
+
+    CHECK(hits == 1);
+    REQUIRE(received_result.has_value());
+    CHECK(*received_result == 7);
+    // Map was cleaned up after dispatch.
+    CHECK(h.pending_response_count() == 0);
+}
+
+TEST_CASE("invoke_js_cb fires with nullopt on error response",
+          "[mock][hybrid_web_view][bridge]") {
+    hybrid_web_view h;
+    std::optional<std::string> received;
+    int                        hits = 0;
+    auto cb = [&](std::optional<std::string> r) {
+        received = std::move(r);
+        ++hits;
+    };
+
+    h.invoke_js_cb<std::string>("greet", cb, std::string{"Ada"});
+    h.simulate_inbound(R"({"id":1,"error":"unknown method: greet"})");
+
+    CHECK(hits == 1);
+    CHECK(!received.has_value());
+    CHECK(h.pending_response_count() == 0);
+}
+
+TEST_CASE("invoke_js_cb pending callbacks route to the right id",
+          "[mock][hybrid_web_view][bridge]") {
+    hybrid_web_view h;
+
+    std::vector<std::pair<int, std::optional<int>>> got;
+    auto make_cb = [&](int label) {
+        return [&got, label](std::optional<int> r) { got.emplace_back(label, r); };
+    };
+
+    h.invoke_js_cb<int>("a", make_cb(100), 1);   // id=1
+    h.invoke_js_cb<int>("b", make_cb(200), 2);   // id=2
+    h.invoke_js_cb<int>("c", make_cb(300), 3);   // id=3
+    CHECK(h.pending_response_count() == 3);
+
+    // Responses arrive out of order.
+    h.simulate_inbound(R"({"id":2,"result":222})");
+    h.simulate_inbound(R"({"id":3,"result":333})");
+    h.simulate_inbound(R"({"id":1,"result":111})");
+
+    REQUIRE(got.size() == 3);
+    CHECK(got[0].first == 200); REQUIRE(got[0].second.has_value()); CHECK(*got[0].second == 222);
+    CHECK(got[1].first == 300); REQUIRE(got[1].second.has_value()); CHECK(*got[1].second == 333);
+    CHECK(got[2].first == 100); REQUIRE(got[2].second.has_value()); CHECK(*got[2].second == 111);
+    CHECK(h.pending_response_count() == 0);
+}
+
+TEST_CASE("response with no matching pending callback falls through to message_received",
+          "[mock][hybrid_web_view][bridge]") {
+    hybrid_web_view h;
+    std::string received;
+    struct rb_t {
+        std::string* dst;
+        void operator()(const std::string& v) const { *dst = v; }
+    };
+    rb_t cb{&received};
+    signal_slot<const std::string&> slot{};
+    h.message_received.subscribe(slot, cb);
+
+    // No callback registered for id=42. The envelope just looks like
+    // raw inbound traffic to the listener.
+    h.simulate_inbound(R"({"id":42,"result":"stale"})");
+    CHECK(received == R"({"id":42,"result":"stale"})");
+}
