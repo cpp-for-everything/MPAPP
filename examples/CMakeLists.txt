@@ -9,6 +9,7 @@ if(WIN32)
     add_subdirectory(hot_reload_spike)
     add_subdirectory(windows_button_spike)
     add_subdirectory(windows_nav_spike)
+    add_subdirectory(windows_tableview_demo)
 endif()
 
 if(UNIX AND NOT APPLE)
