@@ -305,3 +305,58 @@ TEST_CASE("response with no matching pending callback falls through to message_r
     h.simulate_inbound(R"({"id":42,"result":"stale"})");
     CHECK(received == R"({"id":42,"result":"stale"})");
 }
+
+#include <mpapp/executor.hpp>
+
+namespace {
+
+// Driver coroutine for the Phase E task<T> async-bridge tests. Stores
+// the result so the test can inspect it after simulate_inbound resumes
+// the coroutine.
+mpapp::task<void> drive_invoke_js_async(hybrid_web_view& wv, std::optional<int>& out) {
+    out = co_await wv.invoke_js_async<int>("add", 3, 4);
+    co_return;
+}
+
+mpapp::task<void> drive_invoke_js_async_error(hybrid_web_view& wv, std::optional<std::string>& out) {
+    out = co_await wv.invoke_js_async<std::string>("greet", std::string{"Ada"});
+    co_return;
+}
+
+} // namespace
+
+TEST_CASE("invoke_js_async resolves the coroutine when JS posts a response",
+          "[mock][hybrid_web_view][bridge][async]") {
+    hybrid_web_view h;
+    std::optional<int> received;
+
+    // Eager-start coroutine — runs until the first co_await suspends.
+    auto t = drive_invoke_js_async(h, received);
+
+    CHECK(h.pending_response_count() == 1);
+    CHECK(!t.is_ready());
+    CHECK(h.last_message_out() == R"({"id":1,"method":"add","args":[3,4]})");
+
+    // Drive the response. invoke_js_cb's stored callback fires inline
+    // from process_inbound, which resumes the coroutine.
+    h.simulate_inbound(R"({"id":1,"result":7})");
+
+    CHECK(t.is_ready());
+    REQUIRE(received.has_value());
+    CHECK(*received == 7);
+    CHECK(h.pending_response_count() == 0);
+}
+
+TEST_CASE("invoke_js_async error response resolves the coroutine to nullopt",
+          "[mock][hybrid_web_view][bridge][async]") {
+    hybrid_web_view h;
+    std::optional<std::string> received;
+    auto t = drive_invoke_js_async_error(h, received);
+
+    CHECK(h.pending_response_count() == 1);
+    h.simulate_inbound(R"({"id":1,"error":"unknown method: greet"})");
+
+    CHECK(t.is_ready());
+    CHECK(!received.has_value());
+    CHECK(h.pending_response_count() == 0);
+}

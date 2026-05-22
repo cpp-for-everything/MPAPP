@@ -23,11 +23,13 @@
 #ifndef MPAPP_HYBRID_WEB_VIEW_HPP
 #define MPAPP_HYBRID_WEB_VIEW_HPP
 
+#include <coroutine>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -270,6 +272,52 @@ public:
     // and leak debugging.
     [[nodiscard]] std::size_t pending_response_count() const noexcept {
         return pending_responses_.size();
+    }
+
+    // Coroutine-friendly version of invoke_js_cb. Returns an awaiter
+    // that resumes the calling coroutine with `std::optional<T>` once
+    // the JS side posts a matching response envelope.
+    //
+    // Usage:
+    //   mpapp::task<int> add_via_bridge(hybrid_web_view& wv) {
+    //       auto r = co_await wv.invoke_js_async<int>("add", 1, 2);
+    //       co_return r.value_or(-1);
+    //   }
+    //
+    // The result is `std::optional<T>` to match invoke_js_cb's
+    // semantics: empty means JS posted an error envelope or the
+    // result couldn't be parsed as T.
+    template <class T, class... Args>
+    [[nodiscard]] auto invoke_js_async(std::string_view method_name, const Args&... args) {
+        // Awaiter — stores enough state to register the callback at
+        // await_suspend time, then yield std::optional<T> at resume.
+        struct awaiter {
+            hybrid_web_view*                     self;
+            std::string                          method;
+            std::tuple<std::decay_t<Args>...>    args_tuple;
+            std::optional<T>                     result_slot;
+
+            bool await_ready() const noexcept { return false; }
+
+            void await_suspend(std::coroutine_handle<> h) {
+                std::apply([this, h](auto&... a) {
+                    self->template invoke_js_cb<T>(
+                        method,
+                        [this, h](std::optional<T> r) mutable {
+                            result_slot = std::move(r);
+                            h.resume();
+                        },
+                        a...);
+                }, args_tuple);
+            }
+
+            std::optional<T> await_resume() noexcept {
+                return std::move(result_slot);
+            }
+        };
+        return awaiter{this, std::string{method_name},
+                       std::tuple<std::decay_t<Args>...>{args...},
+                       std::nullopt};
     }
 
     // ----- Handler ------------------------------------------------------
