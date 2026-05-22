@@ -12,6 +12,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
 
+#include "mpapp/cell.hpp"
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 #include "winrt_strings.hpp"
 
@@ -39,14 +40,48 @@ void table_view_handler<platform::windows>::rebuild_items(const std::vector<tabl
     }
 }
 
+void table_view_handler<platform::windows>::rebuild_typed(const std::vector<table_section_typed>& sections) {
+    if (native_ == nullptr) return;
+    native_.Items().Clear();
+    for (const auto& sec : sections) {
+        // Section header — still a plain bold-marked string for v1.
+        std::string header = "▾ " + sec.title;
+        native_.Items().Append(winrt::box_value(detail::to_hstring_utf8(header)));
+        for (cell* c : sec.rows) {
+            if (c == nullptr) continue;
+            auto el = detail::windows_dispatch::dispatch(c);
+            if (el != nullptr) {
+                native_.Items().Append(el);
+            }
+        }
+    }
+}
+
+void table_view_handler<platform::windows>::rebuild_active() {
+    if (bound_ == nullptr) return;
+    const auto& typed = bound_->typed_sections.get();
+    if (!typed.empty()) {
+        rebuild_typed(typed);
+    } else {
+        rebuild_items(bound_->sections.get());
+    }
+}
+
 void table_view_handler<platform::windows>::apply_row_height(int /*h*/) {
     // row_height honoring is tied to ItemContainerStyle customization;
     // not wired in v1.
 }
 
 void table_view_handler<platform::windows>::map_sections(table_view& tv) {
-    rebuild_items(tv.sections.get());
+    bound_ = &tv;
+    rebuild_active();
     tv.sections.changed.subscribe(sec_slot_, sec_cb_);
+}
+
+void table_view_handler<platform::windows>::map_typed_sections(table_view& tv) {
+    bound_ = &tv;
+    rebuild_active();
+    tv.typed_sections.changed.subscribe(typed_slot_, typed_cb_);
 }
 
 void table_view_handler<platform::windows>::map_row_height(table_view& tv) {

@@ -1,11 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/TableView.md
 //
-// `mpapp::table_view` — static section/row list. The mock surface keeps
-// the data shape simple: sections are titles + flat string row labels.
-// Cell-subclass handling (text_cell / entry_cell / switch_cell / etc.)
-// is deferred to the cell-type-tree ADR; only the section/row layout
-// surface ships at mock.
+// `mpapp::table_view` — static section/row list. Two parallel surfaces:
+//
+//   1. `sections`        — title + vector<string> rows. Flat-string
+//                          rendering. Useful for tests and quick
+//                          static lists.
+//   2. `typed_sections`  — title + vector<cell*> rows. Each cell is a
+//                          fully-typed row from the cell tree
+//                          (text_cell / entry_cell / switch_cell /
+//                          view_cell / image_cell). The handler
+//                          renders each cell via its own native widget
+//                          through ADR-0013 dispatch. Cells are
+//                          non-owning — the app owns the cell
+//                          lifetime, the table_view just references.
+//
+// When `typed_sections` is non-empty, the typed path wins. Setting
+// both is supported only as a transitional convenience.
 
 #ifndef MPAPP_TABLE_VIEW_HPP
 #define MPAPP_TABLE_VIEW_HPP
@@ -35,6 +46,17 @@ struct table_section_data {
     bool operator==(const table_section_data&) const = default;
 };
 
+// Forward-declare cell so this header doesn't have to pull in the full
+// cell tree.
+class cell;
+
+struct table_section_typed {
+    std::string         title{};
+    std::vector<cell*>  rows{};   // non-owning — app owns each cell
+
+    bool operator==(const table_section_typed&) const = default;
+};
+
 template <class Platform>
 class table_view_handler;
 
@@ -50,10 +72,11 @@ public:
 
     // ----- Surface ------------------------------------------------------
 
-    Observable<std::vector<table_section_data>> sections{};
-    Observable<table_intent>                    intent{table_intent::data};
-    Observable<int>                             row_height{-1};       // -1 = native default
-    Observable<bool>                            has_unevenly_sized_rows{false};
+    Observable<std::vector<table_section_data>>  sections{};
+    Observable<std::vector<table_section_typed>> typed_sections{};
+    Observable<table_intent>                     intent{table_intent::data};
+    Observable<int>                              row_height{-1};       // -1 = native default
+    Observable<bool>                             has_unevenly_sized_rows{false};
 
     // ----- Events -------------------------------------------------------
 

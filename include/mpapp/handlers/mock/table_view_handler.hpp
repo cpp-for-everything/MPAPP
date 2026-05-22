@@ -29,6 +29,11 @@ public:
         tv.sections.changed.subscribe(slot_sec_, sec_cb_);
     }
 
+    void map_typed_sections(table_view& tv) {
+        record_change("typed_sections.count", tv.typed_sections.get().size());
+        tv.typed_sections.changed.subscribe(slot_typed_, typed_cb_);
+    }
+
     void map_row_height(table_view& tv) {
         record_change("row_height", tv.row_height.get());
         tv.row_height.changed.subscribe(slot_rh_, rh_cb_);
@@ -43,16 +48,24 @@ private:
             self->record_change("sections.count", v.size());
         }
     };
+    struct typed_recorder {
+        self_t* self = nullptr;
+        void operator()(const std::vector<table_section_typed>& v) const {
+            self->record_change("typed_sections.count", v.size());
+        }
+    };
     struct rh_recorder {
         self_t* self = nullptr;
         void operator()(int v) const { self->record_change("row_height", v); }
     };
 
-    sec_recorder sec_cb_{this};
-    rh_recorder  rh_cb_{this};
+    sec_recorder   sec_cb_{this};
+    typed_recorder typed_cb_{this};
+    rh_recorder    rh_cb_{this};
 
-    signal_slot<const std::vector<table_section_data>&> slot_sec_{};
-    signal_slot<const int&>                             slot_rh_{};
+    signal_slot<const std::vector<table_section_data>&>  slot_sec_{};
+    signal_slot<const std::vector<table_section_typed>&> slot_typed_{};
+    signal_slot<const int&>                              slot_rh_{};
 };
 
 } // namespace mpapp

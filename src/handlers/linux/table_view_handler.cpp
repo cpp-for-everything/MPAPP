@@ -7,6 +7,7 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/cell.hpp"
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
 namespace mpapp {
@@ -24,30 +25,65 @@ table_view_handler<platform::linux_>::table_view_handler() {
 
 table_view_handler<platform::linux_>::~table_view_handler() = default;
 
-void table_view_handler<platform::linux_>::rebuild_items(const std::vector<table_section_data>& sections) {
-    GtkListBox* box = GTK_LIST_BOX(static_cast<GtkWidget*>(list_box_));
+namespace {
+
+void clear_listbox(GtkListBox* box) {
     GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
     while (child != nullptr) {
         GtkWidget* next = gtk_widget_get_next_sibling(child);
         gtk_list_box_remove(box, child);
         child = next;
     }
-    for (const auto& sec : sections) {
-        // Section header row (non-selectable, distinct styling via leading marker).
-        std::string header = "▾ " + sec.title;
-        GtkWidget* hdr = gtk_label_new(header.c_str());
-        gtk_widget_set_halign(hdr, GTK_ALIGN_START);
-        GtkWidget* hdr_row = gtk_list_box_row_new();
-        gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(hdr_row), hdr);
-        gtk_list_box_row_set_selectable(GTK_LIST_BOX_ROW(hdr_row), FALSE);
-        gtk_list_box_row_set_activatable(GTK_LIST_BOX_ROW(hdr_row), FALSE);
-        gtk_list_box_append(box, hdr_row);
+}
 
+void append_section_header(GtkListBox* box, const std::string& title) {
+    const std::string header = "\xe2\x96\xbe " + title;  // "▾ " + title
+    GtkWidget* hdr = gtk_label_new(header.c_str());
+    gtk_widget_set_halign(hdr, GTK_ALIGN_START);
+    GtkWidget* hdr_row = gtk_list_box_row_new();
+    gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(hdr_row), hdr);
+    gtk_list_box_row_set_selectable(GTK_LIST_BOX_ROW(hdr_row), FALSE);
+    gtk_list_box_row_set_activatable(GTK_LIST_BOX_ROW(hdr_row), FALSE);
+    gtk_list_box_append(box, hdr_row);
+}
+
+} // namespace
+
+void table_view_handler<platform::linux_>::rebuild_items(const std::vector<table_section_data>& sections) {
+    GtkListBox* box = GTK_LIST_BOX(static_cast<GtkWidget*>(list_box_));
+    clear_listbox(box);
+    for (const auto& sec : sections) {
+        append_section_header(box, sec.title);
         for (const auto& row : sec.rows) {
             GtkWidget* lbl = gtk_label_new(row.c_str());
             gtk_widget_set_halign(lbl, GTK_ALIGN_START);
             gtk_list_box_append(box, lbl);
         }
+    }
+}
+
+void table_view_handler<platform::linux_>::rebuild_typed(const std::vector<table_section_typed>& sections) {
+    GtkListBox* box = GTK_LIST_BOX(static_cast<GtkWidget*>(list_box_));
+    clear_listbox(box);
+    for (const auto& sec : sections) {
+        append_section_header(box, sec.title);
+        for (cell* c : sec.rows) {
+            if (c == nullptr) continue;
+            GtkWidget* w = detail::linux_dispatch::dispatch(c);
+            if (w != nullptr) {
+                gtk_list_box_append(box, w);
+            }
+        }
+    }
+}
+
+void table_view_handler<platform::linux_>::rebuild_active() {
+    if (bound_ == nullptr) return;
+    const auto& typed = bound_->typed_sections.get();
+    if (!typed.empty()) {
+        rebuild_typed(typed);
+    } else {
+        rebuild_items(bound_->sections.get());
     }
 }
 
@@ -57,8 +93,15 @@ void table_view_handler<platform::linux_>::apply_row_height(int /*h*/) {
 }
 
 void table_view_handler<platform::linux_>::map_sections(table_view& tv) {
-    rebuild_items(tv.sections.get());
+    bound_ = &tv;
+    rebuild_active();
     tv.sections.changed.subscribe(sec_slot_, sec_cb_);
+}
+
+void table_view_handler<platform::linux_>::map_typed_sections(table_view& tv) {
+    bound_ = &tv;
+    rebuild_active();
+    tv.typed_sections.changed.subscribe(typed_slot_, typed_cb_);
 }
 
 void table_view_handler<platform::linux_>::map_row_height(table_view& tv) {
