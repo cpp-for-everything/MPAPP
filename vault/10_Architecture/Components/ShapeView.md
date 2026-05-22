@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "ShapeView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/shapeview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # ShapeView
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real (v1)** — Per-platform native shape primitives. Win `muxc::Border` wrapping `muxc::Shapes::Rectangle/Ellipse/Line`. Linux `GtkDrawingArea` with a cairo draw callback. Android custom `MppShapeView` (extends `android.view.View`) overriding `onDraw`. `fill` / `stroke` parse hex color strings (`#RGB`, `#RRGGBB`, `#AARRGGBB`); `data` parses "M x1 y1 L x2 y2" for line endpoints. `polygon` and `path` render as the bounding rectangle in v1 — full SVG-path parsing + unified canvas facade are gated on [[ADR-0015-graphics-backend-dual]].
 
 ## Overview
 

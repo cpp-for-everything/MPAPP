@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "GraphicsView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/graphicsview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # GraphicsView
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real (v1)** — Native drawing host wired on all 3 platforms: Win `muxc::Canvas`, Linux `GtkDrawingArea`, Android plain `android.view.View`. `width` / `height` propagate to the native widget (`Width/Height` / `gtk_drawing_area_set_content_*` / `setMinimumWidth/Height`). The user-facing canvas-drawing API (Skia / Cairo facade) remains gated on [[ADR-0015-graphics-backend-dual]]; for v1, `invalidate()` still bumps `draw_count` and emits `draw_requested` for consumers to observe.
 
 ## Overview
 
