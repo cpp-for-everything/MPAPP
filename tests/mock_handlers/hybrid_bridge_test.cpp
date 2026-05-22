@@ -2,7 +2,9 @@
 // Tests for mpapp::hybrid_bridge — the typed JSON-RPC bridge layer
 // underneath HybridWebView per ADR-0018.
 
+#include <functional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -143,4 +145,181 @@ TEST_CASE("bridge tolerates field order in envelope",
     // method first, id last
     REQUIRE(b.dispatch(R"({"method":"add","args":[5,6],"id":12})", out));
     CHECK(out == R"({"id":12,"result":11})");
+}
+
+// ---- Phase F: async dispatch -----------------------------------------------
+
+namespace {
+
+class async_bridge : public mpapp::hybrid_bridge {
+public:
+    async_bridge() {
+        // Sync method registered the normal way — for "sync goes
+        // through async path" coverage.
+        register_method("add_sync", &async_bridge::add_sync);
+
+        // Async method that responds inline (calls respond before
+        // returning) — for "async fires before dispatch_async
+        // returns".
+        register_async_method<int>("add_async_sync",
+                                   &async_bridge::add_async_sync);
+
+        // Async method that captures the respond callback for later
+        // resolution.
+        register_async_method<int>("defer_add",
+                                   &async_bridge::defer_add);
+
+        // Async method that returns a string.
+        register_async_method<std::string>("defer_greet",
+                                           &async_bridge::defer_greet);
+
+        // Async method that intentionally calls respond twice — the
+        // shared_ptr<bool> guard should drop the second.
+        register_async_method<int>("double_respond",
+                                   &async_bridge::double_respond);
+    }
+
+    int add_sync(int a, int b) { return a + b; }
+
+    void add_async_sync(int a, int b, std::function<void(int)> respond) {
+        respond(a + b);
+    }
+
+    void defer_add(int a, int b, std::function<void(int)> respond) {
+        pending_int_a_       = a;
+        pending_int_b_       = b;
+        pending_int_respond_ = std::move(respond);
+    }
+
+    void defer_greet(const std::string& name,
+                     std::function<void(std::string)> respond) {
+        pending_str_name_    = name;
+        pending_str_respond_ = std::move(respond);
+    }
+
+    void double_respond(int a, int b, std::function<void(int)> respond) {
+        respond(a + b);
+        respond(999);  // should be dropped by the fired-guard
+    }
+
+    void resolve_int()    { if (pending_int_respond_) pending_int_respond_(pending_int_a_ + pending_int_b_); }
+    void resolve_string() { if (pending_str_respond_) pending_str_respond_("hi " + pending_str_name_); }
+
+private:
+    int                              pending_int_a_ = 0;
+    int                              pending_int_b_ = 0;
+    std::function<void(int)>         pending_int_respond_;
+    std::string                      pending_str_name_;
+    std::function<void(std::string)> pending_str_respond_;
+};
+
+} // namespace
+
+TEST_CASE("dispatch_async fires inline for sync method",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  captured;
+    bool         fired = false;
+    b.dispatch_async(R"({"id":1,"method":"add_sync","args":[2,3]})",
+                     [&](std::string r) { captured = std::move(r); fired = true; });
+    CHECK(fired);
+    CHECK(captured == R"({"id":1,"result":5})");
+}
+
+TEST_CASE("dispatch_async handles inline-responding async method",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  captured;
+    bool         fired = false;
+    b.dispatch_async(R"({"id":2,"method":"add_async_sync","args":[10,20]})",
+                     [&](std::string r) { captured = std::move(r); fired = true; });
+    CHECK(fired);
+    CHECK(captured == R"({"id":2,"result":30})");
+}
+
+TEST_CASE("dispatch_async defers when method captures respond",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  captured;
+    bool         fired = false;
+    b.dispatch_async(R"({"id":3,"method":"defer_add","args":[7,8]})",
+                     [&](std::string r) { captured = std::move(r); fired = true; });
+    // Method captured the callback — no envelope yet.
+    CHECK_FALSE(fired);
+    CHECK(captured.empty());
+
+    // Resolve later.
+    b.resolve_int();
+    CHECK(fired);
+    CHECK(captured == R"({"id":3,"result":15})");
+}
+
+TEST_CASE("dispatch_async deferred string-result async method",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  captured;
+    bool         fired = false;
+    b.dispatch_async(R"({"id":4,"method":"defer_greet","args":["Ada"]})",
+                     [&](std::string r) { captured = std::move(r); fired = true; });
+    CHECK_FALSE(fired);
+    b.resolve_string();
+    CHECK(fired);
+    CHECK(captured == R"({"id":4,"result":"hi Ada"})");
+}
+
+TEST_CASE("dispatch_async double-respond drops the second call",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  captured;
+    int          fire_count = 0;
+    b.dispatch_async(R"({"id":5,"method":"double_respond","args":[1,2]})",
+                     [&](std::string r) { captured = std::move(r); ++fire_count; });
+    CHECK(fire_count == 1);
+    CHECK(captured == R"({"id":5,"result":3})");
+}
+
+TEST_CASE("dispatch_async handles unknown method with error envelope",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  captured;
+    b.dispatch_async(R"({"id":6,"method":"missing","args":[]})",
+                     [&](std::string r) { captured = std::move(r); });
+    CHECK(captured == R"({"id":6,"error":"unknown method: missing"})");
+}
+
+TEST_CASE("dispatch_async handles malformed envelope with error",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  captured;
+    b.dispatch_async("not json", [&](std::string r) { captured = std::move(r); });
+    CHECK(captured == R"({"id":-1,"error":"malformed envelope"})");
+}
+
+TEST_CASE("dispatch_async on async method with bad args returns error",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  captured;
+    b.dispatch_async(R"({"id":7,"method":"defer_add","args":["bad","args"]})",
+                     [&](std::string r) { captured = std::move(r); });
+    CHECK(captured == R"({"id":7,"error":"args mismatch for 'defer_add'"})");
+}
+
+TEST_CASE("sync dispatch on async-only method returns error",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    std::string  out;
+    CHECK_FALSE(b.dispatch(R"({"id":8,"method":"defer_add","args":[1,2]})", out));
+    CHECK(out == R"({"id":8,"error":"method is async: defer_add"})");
+}
+
+TEST_CASE("async bridge has both sync and async methods registered",
+          "[bridge][hybrid_bridge][async]") {
+    async_bridge b;
+    auto names = b.method_names();
+    REQUIRE(names.size() == 5);
+    CHECK(names[0] == "add_sync");
+    CHECK(names[1] == "add_async_sync");
+    CHECK(names[2] == "defer_add");
+    CHECK(names[3] == "defer_greet");
+    CHECK(names[4] == "double_respond");
 }

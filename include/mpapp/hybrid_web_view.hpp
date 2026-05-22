@@ -137,9 +137,14 @@ public:
             }
 
             if (has_method && bridge_ != nullptr) {
-                std::string response;
-                (void)bridge_->dispatch(payload, response);
-                send_to_js(response);
+                // Route through dispatch_async — sync methods fire the
+                // callback inline (preserving v1 behavior); async
+                // methods defer it until their respond() callback
+                // resolves.
+                bridge_->dispatch_async(payload,
+                    [this](std::string response) {
+                        send_to_js(response);
+                    });
                 return;
             }
             if (has_result_or_error) {

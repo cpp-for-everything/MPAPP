@@ -360,3 +360,71 @@ TEST_CASE("invoke_js_async error response resolves the coroutine to nullopt",
     CHECK(!received.has_value());
     CHECK(h.pending_response_count() == 0);
 }
+
+// ---- Phase F: async-method bridge through process_inbound ------------------
+
+namespace {
+
+class deferred_bridge : public hybrid_bridge {
+public:
+    deferred_bridge() {
+        register_async_method<int>("compute", &deferred_bridge::compute);
+    }
+    void compute(int a, int b, std::function<void(int)> respond) {
+        a_       = a;
+        b_       = b;
+        respond_ = std::move(respond);
+    }
+    void resolve() {
+        if (respond_) respond_(a_ + b_);
+    }
+private:
+    int                      a_{};
+    int                      b_{};
+    std::function<void(int)> respond_;
+};
+
+} // namespace
+
+TEST_CASE("bridge async method defers response across process_inbound",
+          "[mock][hybrid_web_view][bridge][async]") {
+    hybrid_web_view h;
+    auto& b = h.set_bridge<deferred_bridge>();
+
+    std::vector<std::string> outbound;
+    struct cb_t {
+        std::vector<std::string>* out;
+        void operator()(const std::string& v) const { out->push_back(v); }
+    };
+    cb_t cb{&outbound};
+    signal_slot<const std::string&> slot{};
+    h.message_sent.subscribe(slot, cb);
+
+    h.simulate_inbound(R"({"id":42,"method":"compute","args":[10,5]})");
+    // Async method captured the respond callback; nothing on the wire
+    // yet.
+    CHECK(outbound.empty());
+
+    // Resolve later — the same id should appear on the bridge response.
+    b.resolve();
+    REQUIRE(outbound.size() == 1);
+    CHECK(outbound[0] == R"({"id":42,"result":15})");
+}
+
+TEST_CASE("bridge async method bad-args still posts error inline",
+          "[mock][hybrid_web_view][bridge][async]") {
+    hybrid_web_view h;
+    h.set_bridge<deferred_bridge>();
+
+    std::string last_response;
+    struct cb_t {
+        std::string* dst;
+        void operator()(const std::string& v) const { *dst = v; }
+    };
+    cb_t cb{&last_response};
+    signal_slot<const std::string&> slot{};
+    h.message_sent.subscribe(slot, cb);
+
+    h.simulate_inbound(R"({"id":3,"method":"compute","args":["bad","args"]})");
+    CHECK(last_response == R"({"id":3,"error":"args mismatch for 'compute'"})");
+}
