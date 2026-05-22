@@ -176,14 +176,55 @@ void navigation_page_handler<platform::android>::apply_back_visibility(std::size
     view_set_visibility(env, back_button_, depth > 1 ? VIEW_VISIBLE : VIEW_GONE);
 }
 
+// Install an MppActionRouter(navigation_page*, kind=0, payload=0) as the
+// back button's OnClickListener. The router fires nav.pop() on the
+// owning navigation_page when the user taps the back chrome.
+namespace {
+
+void install_back_router(JNIEnv* env, jobject button, mpapp::navigation_page* np) {
+    if (env == nullptr || button == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass router_cls = env->FindClass("io/mpapp/MppActionRouter");
+    if (router_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JII)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
+    jobject router = env->NewObject(router_cls,
+                                    ctor,
+                                    reinterpret_cast<jlong>(np),
+                                    static_cast<jint>(0 /* nav_back kind */),
+                                    static_cast<jint>(0 /* payload */));
+    if (env->ExceptionCheck() || router == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    env->DeleteLocalRef(router_cls);
+
+    // button.setOnClickListener(router)
+    jclass view_cls = env->FindClass("android/view/View");
+    if (view_cls != nullptr) {
+        jmethodID set_listener = env->GetMethodID(view_cls, "setOnClickListener",
+            "(Landroid/view/View$OnClickListener;)V");
+        if (set_listener != nullptr) {
+            env->CallVoidMethod(button, set_listener, router);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(view_cls);
+    }
+    env->DeleteLocalRef(router);
+}
+
+} // namespace
+
 void navigation_page_handler<platform::android>::map_stack(navigation_page& np) {
     bound_ = &np;
     apply_top(np.stack().top());
     apply_back_visibility(np.stack().depth());
     np.stack().page_did_appear.subscribe(did_appear_slot_, did_appear_cb_);
     np.stack_depth.changed.subscribe(depth_slot_, depth_cb_);
-    // Back-button OnClickListener wiring is deferred to M-05 polish —
-    // the mock surface still exposes nav.pop() directly to user code.
+    // Wire the back-button OnClickListener via MppActionRouter (kind=0).
+    JNIEnv* env = detail::attach_current_thread();
+    if (env != nullptr) install_back_router(env, back_button_, &np);
 }
 
 } // namespace mpapp

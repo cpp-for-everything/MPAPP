@@ -137,6 +137,44 @@ shell_handler<platform::android>::~shell_handler() {
     }
 }
 
+namespace {
+
+// Install an MppActionRouter(shell*, kind=1, payload=tab_index) as the
+// tab button's OnClickListener so user taps set current_tab_index.
+void install_tab_router(JNIEnv* env, jobject button, shell* s, int tab_index) {
+    if (env == nullptr || button == nullptr || s == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass router_cls = env->FindClass("io/mpapp/MppActionRouter");
+    if (router_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JII)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
+    jobject router = env->NewObject(router_cls,
+                                    ctor,
+                                    reinterpret_cast<jlong>(s),
+                                    static_cast<jint>(1 /* shell_tab kind */),
+                                    static_cast<jint>(tab_index));
+    if (env->ExceptionCheck() || router == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    env->DeleteLocalRef(router_cls);
+
+    jclass view_cls = env->FindClass("android/view/View");
+    if (view_cls != nullptr) {
+        jmethodID set_listener = env->GetMethodID(view_cls, "setOnClickListener",
+            "(Landroid/view/View$OnClickListener;)V");
+        if (set_listener != nullptr) {
+            env->CallVoidMethod(button, set_listener, router);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(view_cls);
+    }
+    env->DeleteLocalRef(router);
+}
+
+} // namespace
+
 void shell_handler<platform::android>::rebuild_tab_strip(const std::vector<std::string>& labels) {
     if (tab_strip_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
@@ -147,12 +185,11 @@ void shell_handler<platform::android>::rebuild_tab_strip(const std::vector<std::
         jobject btn = make_object(env, "android/widget/Button", ctx);
         if (btn != nullptr) {
             view_set_text(env, btn, labels[i].c_str());
+            install_tab_router(env, btn, bound_, static_cast<int>(i));
             vg_add(env, tab_strip_, btn);
             env->DeleteGlobalRef(btn);
         }
     }
-    // OnClickListener wiring to set current_tab_index is deferred to
-    // M-05 polish — same approach as the navigation_page Android handler.
 }
 
 void shell_handler<platform::android>::apply_selection(int /*idx*/) {
