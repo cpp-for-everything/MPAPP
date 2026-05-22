@@ -126,3 +126,69 @@ TEST_CASE("typed_sections + flat sections can coexist on the surface",
     CHECK(tv.typed_sections.get().size()            == 1);
     CHECK(tv.typed_sections.get()[0].rows.size()    == 1);
 }
+
+TEST_CASE("cell_at resolves typed-section coordinates",
+          "[mock][table_view][typed]") {
+    table_view  tv;
+    text_cell   a{};
+    text_cell   b{};
+    switch_cell c{};
+
+    tv.typed_sections = std::vector<table_section_typed>{
+        table_section_typed{ "Profile", std::vector<cell*>{ &a, &b } },
+        table_section_typed{ "Prefs",   std::vector<cell*>{ &c }     },
+    };
+
+    CHECK(tv.cell_at(0, 0) == &a);
+    CHECK(tv.cell_at(0, 1) == &b);
+    CHECK(tv.cell_at(1, 0) == &c);
+
+    // Out-of-range coordinates return nullptr.
+    CHECK(tv.cell_at(0, 2)  == nullptr);   // row past end
+    CHECK(tv.cell_at(2, 0)  == nullptr);   // section past end
+    CHECK(tv.cell_at(-1, 0) == nullptr);   // negative section
+    CHECK(tv.cell_at(0, -1) == nullptr);   // negative row
+}
+
+TEST_CASE("cell_at returns nullptr when typed_sections is empty",
+          "[mock][table_view][typed]") {
+    // Flat sections only — cell_at can't resolve any coordinate.
+    table_view tv;
+    tv.add_section("Flat");
+    tv.add_row(0, "Row 0");
+    tv.add_row(0, "Row 1");
+
+    CHECK(tv.cell_at(0, 0) == nullptr);
+    CHECK(tv.cell_at(0, 1) == nullptr);
+}
+
+TEST_CASE("cell.tapped emits via cell_at lookup as handlers do at runtime",
+          "[mock][table_view][typed]") {
+    // Simulates what handlers do after row_tapped: look up the cell at
+    // (section, row) via cell_at() and emit its tapped signal.
+    table_view tv;
+    text_cell  row{};
+
+    tv.typed_sections = std::vector<table_section_typed>{
+        table_section_typed{ "Settings", std::vector<cell*>{ &row } }
+    };
+
+    int hits = 0;
+    struct cb_t { int* hits; void operator()() const { ++*hits; } };
+    cb_t cb{&hits};
+    signal_slot<> slot{};
+    row.tapped.subscribe(slot, cb);
+
+    // Handler-side dispatch: a tap on (0, 0) resolves the cell and
+    // fires its tapped signal.
+    if (cell* c = tv.cell_at(0, 0); c != nullptr) {
+        c->tapped.emit();
+    }
+    CHECK(hits == 1);
+
+    // A tap on an invalid coordinate is a no-op.
+    if (cell* c = tv.cell_at(5, 0); c != nullptr) {
+        c->tapped.emit();
+    }
+    CHECK(hits == 1);
+}
