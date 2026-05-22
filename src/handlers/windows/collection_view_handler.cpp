@@ -117,6 +117,29 @@ void collection_view_handler<platform::windows>::rebuild_items(const std::vector
     suppress_selection_event_ = false;
 }
 
+void collection_view_handler<platform::windows>::rebuild_typed(const std::vector<view*>& v) {
+    if (inner_ == nullptr) return;
+    suppress_selection_event_ = true;
+    inner_.Items().Clear();
+    for (view* item : v) {
+        if (item == nullptr) continue;
+        if (auto el = detail::windows_dispatch::dispatch(item); el != nullptr) {
+            inner_.Items().Append(el);
+        }
+    }
+    if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
+    suppress_selection_event_ = false;
+}
+
+void collection_view_handler<platform::windows>::rebuild_active() {
+    if (bound_ == nullptr) return;
+    if (!bound_->typed_items.get().empty()) {
+        rebuild_typed(bound_->typed_items.get());
+    } else {
+        rebuild_items(bound_->items_source.get());
+    }
+}
+
 void collection_view_handler<platform::windows>::apply_selection(int idx) {
     if (inner_ == nullptr) return;
     suppress_selection_event_ = true;
@@ -155,14 +178,20 @@ void collection_view_handler<platform::windows>::apply_layout(collection_layout 
     // Re-apply current state into the fresh widget.
     if (bound_ != nullptr) {
         apply_selection_mode(bound_->selection_mode.get());
-        rebuild_items(bound_->items_source.get());
+        rebuild_active();
     }
 }
 
 void collection_view_handler<platform::windows>::map_items_source(collection_view& cv) {
     bound_ = &cv;
-    rebuild_items(cv.items_source.get());
+    rebuild_active();
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
+}
+
+void collection_view_handler<platform::windows>::map_typed_items(collection_view& cv) {
+    bound_ = &cv;
+    rebuild_active();
+    cv.typed_items.changed.subscribe(typed_slot_, typed_cb_);
 }
 
 void collection_view_handler<platform::windows>::map_selected_index(collection_view& cv) {

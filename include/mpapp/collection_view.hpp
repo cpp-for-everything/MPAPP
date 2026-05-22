@@ -1,9 +1,27 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. Modern MAUI virtualized item host (supersedes
-// [[ListView]]). Mock surface keeps items as a flat
-// `std::vector<std::string>` for symmetry with list_view; real
-// item_template + layout switching arrive with the virtualized-item-
-// host ADR.
+// [[ListView]]).
+//
+// Two parallel item surfaces:
+//
+//   1. `items_source`  — title + vector<string> rows. Flat-string
+//                        rendering through the platform recycler
+//                        (ListView/GtkListBox/GtkFlowBox/GridView).
+//                        Full virtualization. Good for thousands of
+//                        homogeneous rows.
+//
+//   2. `typed_items`   — vector<view*>. Each entry is a fully-typed
+//                        widget (cell tree, label, image, custom
+//                        view). The handler renders each via its
+//                        native widget through ADR-0013 dispatch.
+//                        Non-virtualizing in v1 (one native widget
+//                        per item) — good for small lists with rich
+//                        item content. Cells / views are non-owning;
+//                        the app owns each.
+//
+// When typed_items is non-empty, the typed path wins. The handler
+// falls back to items_source rendering otherwise. Both surfaces
+// hold values independently and can coexist.
 
 #ifndef MPAPP_COLLECTION_VIEW_HPP
 #define MPAPP_COLLECTION_VIEW_HPP
@@ -49,6 +67,8 @@ public:
     // ----- Surface ------------------------------------------------------
 
     Observable<std::vector<std::string>>   items_source{};
+    // Parallel typed surface — see header comment for the trade-off.
+    Observable<std::vector<view*>>         typed_items{};
     Observable<collection_selection_mode>  selection_mode{collection_selection_mode::single};
     Observable<int>                        selected_index{-1};                  // for single-select
     Observable<std::vector<int>>           selected_indices{};                  // for multi-select

@@ -116,7 +116,10 @@ public:
         *out_ += ':';
         *out_ += '[';
         bool first = true;
-        auto write_one = [this, &first](const auto& v) {
+        // [[maybe_unused]] silences GCC's "set but not used" when the
+        // pack is empty — `write_one` is declared but the fold below
+        // expands to nothing.
+        [[maybe_unused]] auto write_one = [this, &first](const auto& v) {
             if (!first) *out_ += ',';
             first = false;
             write(v);

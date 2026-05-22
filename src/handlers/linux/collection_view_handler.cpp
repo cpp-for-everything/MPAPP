@@ -180,6 +180,33 @@ void collection_view_handler<platform::linux_>::rebuild_items(const std::vector<
     set_suppress(inner_, false);
 }
 
+void collection_view_handler<platform::linux_>::rebuild_typed(const std::vector<view*>& v) {
+    if (inner_ == nullptr) return;
+    set_suppress(inner_, true);
+    clear_inner(static_cast<GtkWidget*>(inner_), is_grid_);
+    for (view* item : v) {
+        if (item == nullptr) continue;
+        GtkWidget* w = detail::linux_dispatch::dispatch(item);
+        if (w == nullptr) continue;
+        if (is_grid_) {
+            gtk_flow_box_append(GTK_FLOW_BOX(static_cast<GtkWidget*>(inner_)), w);
+        } else {
+            gtk_list_box_append(GTK_LIST_BOX(static_cast<GtkWidget*>(inner_)), w);
+        }
+    }
+    if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
+    set_suppress(inner_, false);
+}
+
+void collection_view_handler<platform::linux_>::rebuild_active() {
+    if (bound_ == nullptr) return;
+    if (!bound_->typed_items.get().empty()) {
+        rebuild_typed(bound_->typed_items.get());
+    } else {
+        rebuild_items(bound_->items_source.get());
+    }
+}
+
 void collection_view_handler<platform::linux_>::apply_selection(int idx) {
     if (inner_ == nullptr) return;
     set_suppress(inner_, true);
@@ -229,15 +256,22 @@ void collection_view_handler<platform::linux_>::apply_layout(collection_layout l
 
     if (bound_ != nullptr) {
         apply_selection_mode(bound_->selection_mode.get());
-        rebuild_items(bound_->items_source.get());
+        rebuild_active();
     }
 }
 
 void collection_view_handler<platform::linux_>::map_items_source(collection_view& cv) {
     bound_ = &cv;
     wire_tap_signals();
-    rebuild_items(cv.items_source.get());
+    rebuild_active();
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
+}
+
+void collection_view_handler<platform::linux_>::map_typed_items(collection_view& cv) {
+    bound_ = &cv;
+    wire_tap_signals();
+    rebuild_active();
+    cv.typed_items.changed.subscribe(typed_slot_, typed_cb_);
 }
 
 void collection_view_handler<platform::linux_>::map_selected_index(collection_view& cv) {

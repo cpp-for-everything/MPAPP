@@ -265,6 +265,107 @@ void collection_view_handler<platform::android>::rebuild_items(const std::vector
     if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
 }
 
+namespace {
+
+// In typed mode the outer FrameLayout wraps a ScrollView containing a
+// vertical LinearLayout. Each typed item's native View is added as a
+// direct child. Selection / multi-select are not supported in this
+// mode — typed cells own their interaction surface (taps, toggles,
+// IME completion all flow through each cell's own native event path).
+
+void linear_set_orientation_vertical(JNIEnv* env, jobject ll) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/LinearLayout");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setOrientation", "(I)V");
+    constexpr jint VERTICAL = 1;
+    if (m != nullptr) {
+        env->CallVoidMethod(ll, m, VERTICAL);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+void vg_add(JNIEnv* env, jobject parent, jobject child) {
+    if (child == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/view/ViewGroup");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "addView", "(Landroid/view/View;)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(parent, m, child);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+} // namespace
+
+void collection_view_handler<platform::android>::rebuild_typed(const std::vector<view*>& items) {
+    if (native_ == nullptr) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+
+    // Tear down the current AdapterView inner (if any).
+    if (inner_ != nullptr) {
+        vg_remove_all(env, native_);
+        env->DeleteGlobalRef(inner_);
+        inner_ = nullptr;
+    }
+
+    // Replace with ScrollView + LinearLayout(VERTICAL).
+    jobject scroll = make_object(env, "android/widget/ScrollView", detail::get_activity());
+    jobject lin    = make_object(env, "android/widget/LinearLayout", detail::get_activity());
+    if (lin != nullptr) linear_set_orientation_vertical(env, lin);
+    if (scroll != nullptr && lin != nullptr) {
+        // ScrollView extends FrameLayout — addView with MATCH_PARENT
+        // layout params lets the inner LinearLayout fill it.
+        framelayout_add_match(env, scroll, lin);
+    }
+    if (native_ != nullptr && scroll != nullptr) {
+        framelayout_add_match(env, native_, scroll);
+    }
+
+    // Populate the LinearLayout with each cell/view's native handle.
+    for (view* item : items) {
+        if (item == nullptr || lin == nullptr) continue;
+        jobject native_item = detail::android_dispatch::dispatch(item);
+        if (native_item != nullptr) {
+            vg_add(env, lin, native_item);
+        }
+    }
+
+    // Keep the ScrollView as inner_ so destructor releases it. The
+    // LinearLayout is a local ref — we let ScrollView retain it as a
+    // child after addView; once we release `scroll` as a local, we
+    // re-promote to global.
+    if (lin != nullptr) env->DeleteLocalRef(lin);
+    if (scroll != nullptr) {
+        inner_ = env->NewGlobalRef(scroll);
+        env->DeleteLocalRef(scroll);
+    }
+    is_grid_ = false;
+}
+
+void collection_view_handler<platform::android>::rebuild_active() {
+    if (bound_ == nullptr) return;
+    if (!bound_->typed_items.get().empty()) {
+        rebuild_typed(bound_->typed_items.get());
+    } else {
+        // Flat mode — ensure inner_ matches the current layout enum.
+        const collection_layout l = bound_->layout.get();
+        const bool want_grid = (l == collection_layout::vertical_grid
+                             || l == collection_layout::horizontal_grid);
+        // If inner_ doesn't exist or is wrong type, rebuild.
+        rebuild_inner_for_layout(l);
+        (void)want_grid;
+        apply_selection_mode(bound_->selection_mode.get());
+        rebuild_items(bound_->items_source.get());
+        JNIEnv* env = detail::attach_current_thread();
+        if (env != nullptr) install_item_click_router(env, inner_, bound_);
+    }
+}
+
 void collection_view_handler<platform::android>::apply_selection(int idx) {
     if (inner_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
@@ -287,6 +388,11 @@ void collection_view_handler<platform::android>::apply_selection_mode(collection
 }
 
 void collection_view_handler<platform::android>::apply_layout(collection_layout l) {
+    if (bound_ != nullptr && !bound_->typed_items.get().empty()) {
+        // In typed mode the layout enum is ignored — we use a
+        // vertical LinearLayout regardless. Skip the inner rebuild.
+        return;
+    }
     const bool want_grid = (l == collection_layout::vertical_grid
                          || l == collection_layout::horizontal_grid);
     if (want_grid == is_grid_ && inner_ != nullptr) return;
@@ -347,10 +453,14 @@ void collection_view_handler<platform::android>::refresh_multi_selection_from_na
 
 void collection_view_handler<platform::android>::map_items_source(collection_view& cv) {
     bound_ = &cv;
-    rebuild_items(cv.items_source.get());
+    rebuild_active();
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
-    JNIEnv* env = detail::attach_current_thread();
-    if (env != nullptr) install_item_click_router(env, inner_, &cv);
+}
+
+void collection_view_handler<platform::android>::map_typed_items(collection_view& cv) {
+    bound_ = &cv;
+    rebuild_active();
+    cv.typed_items.changed.subscribe(typed_slot_, typed_cb_);
 }
 
 void collection_view_handler<platform::android>::map_selected_index(collection_view& cv) {

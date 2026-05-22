@@ -39,6 +39,7 @@ public:
     collection_view_handler& operator=(collection_view_handler&&)      = delete;
 
     void map_items_source(collection_view& cv);
+    void map_typed_items(collection_view& cv);
     void map_selected_index(collection_view& cv);
     void map_selection_mode(collection_view& cv);
     void map_layout(collection_view& cv);
@@ -48,14 +49,20 @@ public:
 
 private:
     void rebuild_items(const std::vector<std::string>& v);
+    void rebuild_typed(const std::vector<view*>& v);
     void apply_selection(int idx);
     void apply_selection_mode(collection_selection_mode m);
     void apply_layout(collection_layout l);
     void wire_inner_selection_changed();
+    void rebuild_active();   // dispatches typed vs flat based on which is non-empty
 
     struct items_cb_t {
         collection_view_handler<platform::windows>* self;
-        void operator()(const std::vector<std::string>& v) const { self->rebuild_items(v); }
+        void operator()(const std::vector<std::string>&) const { self->rebuild_active(); }
+    };
+    struct typed_cb_t {
+        collection_view_handler<platform::windows>* self;
+        void operator()(const std::vector<view*>&) const { self->rebuild_active(); }
     };
     struct sel_cb_t {
         collection_view_handler<platform::windows>* self;
@@ -77,10 +84,12 @@ private:
     bool             suppress_selection_event_ = false;
 
     items_cb_t  items_cb_{this};
+    typed_cb_t  typed_cb_{this};
     sel_cb_t    sel_cb_{this};
     mode_cb_t   mode_cb_{this};
     layout_cb_t layout_cb_{this};
     signal_slot<const std::vector<std::string>&>          items_slot_{};
+    signal_slot<const std::vector<view*>&>                typed_slot_{};
     signal_slot<const int&>                                sel_slot_{};
     signal_slot<const collection_selection_mode&>          mode_slot_{};
     signal_slot<const collection_layout&>                  layout_slot_{};
