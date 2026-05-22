@@ -23,6 +23,9 @@
 #include <mpapp/slider.hpp>
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/switch_.hpp>
+#include <mpapp/switch_cell.hpp>
+#include <mpapp/table_view.hpp>
+#include <mpapp/text_cell.hpp>
 #include <mpapp/window.hpp>
 
 #include <mpapp/handlers/android/box_view_handler.hpp>
@@ -34,7 +37,10 @@
 #include <mpapp/handlers/android/scroll_view_handler.hpp>
 #include <mpapp/handlers/android/slider_handler.hpp>
 #include <mpapp/handlers/android/stack_layout_handler.hpp>
+#include <mpapp/handlers/android/switch_cell_handler.hpp>
 #include <mpapp/handlers/android/switch_handler.hpp>
+#include <mpapp/handlers/android/table_view_handler.hpp>
+#include <mpapp/handlers/android/text_cell_handler.hpp>
 #include <mpapp/handlers/android/window_handler.hpp>
 
 namespace {
@@ -55,6 +61,34 @@ public:
         layout_.set_handler(layout_handler_);
         scroll_.set_handler(scroll_handler_);
         box_.set_handler(box_handler_);
+        // Cell-typed TableView demo — proves the typed_sections surface
+        // composes on Android (mirrors gtk4_tableview_demo + windows_tableview_demo).
+        profile_cell_.text   = "Profile";
+        profile_cell_.detail = "Ada Lovelace";
+        profile_cell_handler_.map_text(profile_cell_);
+        profile_cell_handler_.map_detail(profile_cell_);
+        profile_cell_.set_tc_handler(profile_cell_handler_);
+
+        push_cell_.text = "Push notifications";
+        push_cell_.on   = true;
+        push_cell_handler_.map_text(push_cell_);
+        push_cell_handler_.map_on(push_cell_);
+        push_cell_.set_sc_handler(push_cell_handler_);
+
+        tv_.typed_sections = std::vector<mpapp::table_section_typed>{
+            mpapp::table_section_typed{
+                "Account",
+                std::vector<mpapp::cell*>{ &profile_cell_ }
+            },
+            mpapp::table_section_typed{
+                "Preferences",
+                std::vector<mpapp::cell*>{ &push_cell_ }
+            },
+        };
+        tv_handler_.map_typed_sections(tv_);
+        tv_handler_.map_sections(tv_);
+        tv_handler_.map_row_height(tv_);
+        tv_.set_tv_handler(tv_handler_);
 
         btn_.text         = "Click me";
         lbl_.text         = "Count: 0 — hello, world";
@@ -102,6 +136,7 @@ public:
         layout_.add(exclaim_);
         layout_.add(repeat_);
         layout_.add(btn_);
+        layout_.add(tv_);   // typed_sections demo at the bottom of the stack
         layout_handler_.bind(layout_);
         scroll_handler_.bind_content(scroll_, layout_);
 
@@ -164,6 +199,9 @@ private:
     mpapp::stack_layout     layout_{};
     mpapp::scroll_view      scroll_{};
     mpapp::box_view         box_{};
+    mpapp::table_view       tv_{};
+    mpapp::text_cell        profile_cell_{};
+    mpapp::switch_cell      push_cell_{};
     mpapp::window           window_{};
 
     mpapp::button_handler<mpapp::platform::android>       btn_handler_{};
@@ -175,6 +213,9 @@ private:
     mpapp::stack_layout_handler<mpapp::platform::android> layout_handler_{};
     mpapp::scroll_view_handler<mpapp::platform::android>  scroll_handler_{};
     mpapp::box_view_handler<mpapp::platform::android>     box_handler_{};
+    mpapp::table_view_handler<mpapp::platform::android>   tv_handler_{};
+    mpapp::text_cell_handler<mpapp::platform::android>    profile_cell_handler_{};
+    mpapp::switch_cell_handler<mpapp::platform::android>  push_cell_handler_{};
     mpapp::window_handler<mpapp::platform::android>       window_handler_{};
 
     click_cb_t                             click_cb_{this};
