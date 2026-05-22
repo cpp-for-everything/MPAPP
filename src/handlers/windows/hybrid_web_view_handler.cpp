@@ -85,8 +85,10 @@ void hybrid_web_view_handler<platform::windows>::wire_bridge() {
             try {
                 const std::wstring wide{args.TryGetWebMessageAsString()};
                 const std::string utf8 = detail::wstring_to_utf8(wide);
-                target->last_message_in.set(utf8);
-                target->message_received.emit(utf8);
+                // Single choke point — hybrid_web_view::process_inbound
+                // decides whether to route through an attached bridge
+                // or fall through to the raw message_received signal.
+                target->process_inbound(utf8);
             } catch (...) {}
         });
     wired_ = true;

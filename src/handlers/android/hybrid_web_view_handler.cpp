@@ -184,8 +184,10 @@ void hybrid_web_view_handler<platform::android>::send_outbound(const std::string
 
 void hybrid_web_view_handler<platform::android>::on_native_inbound(const std::string& payload) {
     if (bound_ == nullptr) return;
-    bound_->last_message_in.set(payload);
-    bound_->message_received.emit(payload);
+    // Single choke point — hybrid_web_view::process_inbound decides
+    // whether to route through an attached bridge or fall through to
+    // the raw message_received signal.
+    bound_->process_inbound(payload);
 }
 
 void hybrid_web_view_handler<platform::android>::map_messages(hybrid_web_view& h) {
