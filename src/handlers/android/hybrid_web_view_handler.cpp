@@ -88,17 +88,48 @@ jobject install_js_bridge(JNIEnv* env, jobject wv, jlong handler_ptr) {
     return global;
 }
 
-// JS shim — exposes window.mpapp.{send, on, _receive} where `send`
-// routes to the @JavascriptInterface bridge MppJsBridge.send.
+// See the Windows handler for the full surface description. Identical
+// shim except for the platform-specific `send` (this one routes
+// through the @JavascriptInterface bridge MppJsBridge.send). The
+// "javascript:" prefix is needed because we inject this via
+// WebView.loadUrl rather than evaluateJavascript.
 constexpr const char* kBridgeShim =
     "javascript:(function(){"
     "  if (window.mpapp && window.mpapp.__mpapp) return;"
     "  var listeners = [];"
+    "  var methods   = {};"
+    "  var nextId    = 0;"
     "  window.mpapp = {"
     "    __mpapp: true,"
     "    send: function(p) { if (window.mpapp_native) window.mpapp_native.send(String(p)); },"
     "    on:   function(fn) { listeners.push(fn); },"
-    "    _receive: function(p) { for (var i=0; i<listeners.length; ++i) try { listeners[i](p); } catch(e) {} }"
+    "    register: function(name, fn) { methods[name] = fn; },"
+    "    call: function(name) {"
+    "      var id = ++nextId;"
+    "      var args = Array.prototype.slice.call(arguments, 1);"
+    "      window.mpapp.send(JSON.stringify({id: id, method: name, args: args}));"
+    "      return id;"
+    "    },"
+    "    _receive: function(p) {"
+    "      var env = null;"
+    "      try { env = JSON.parse(p); } catch (e) { env = null; }"
+    "      if (env && typeof env === 'object' && typeof env.method === 'string'"
+    "          && Object.prototype.hasOwnProperty.call(methods, env.method)) {"
+    "        var ret;"
+    "        try { ret = methods[env.method].apply(null, env.args || []); }"
+    "        catch (e) {"
+    "          window.mpapp.send(JSON.stringify({id: env.id, error: String(e)}));"
+    "          return;"
+    "        }"
+    "        window.mpapp.send(JSON.stringify({"
+    "          id: env.id,"
+    "          result: ret === undefined ? null : ret"
+    "        }));"
+    "        return;"
+    "      }"
+    "      for (var i = 0; i < listeners.length; ++i)"
+    "        try { listeners[i](p); } catch (e) {}"
+    "    }"
     "  };"
     "})();";
 

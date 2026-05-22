@@ -23,17 +23,55 @@ namespace wf   = ::winrt::Windows::Foundation;
 
 namespace {
 
-// JS shim — exposes window.mpapp = { send(p), _receive(p) }. `send`
-// posts up to the host, `_receive` is invoked by C++ via eval.
+// JS shim. Three surfaces in one object:
+//   * Raw bridge: send(p) posts a string to the host; on(fn) registers
+//     a listener that fires for every inbound payload not consumed by
+//     the typed bridge below.
+//   * Typed JS-side method registration: register(name, fn) registers
+//     a JS function callable from C++ via wv->invoke_js("name", args).
+//     When C++ invokes a registered method, the return value is posted
+//     back as {"id":N,"result":<value>} for the C++-side response
+//     router to pick up.
+//   * Typed JS->C++ call: call(name, ...args) posts a JSON-RPC
+//     envelope to C++. The C++ side dispatches through its attached
+//     hybrid_bridge.
 constexpr const char* kBridgeShim =
     "(function(){"
     "  if (window.mpapp && window.mpapp.__mpapp) return;"
     "  var listeners = [];"
+    "  var methods   = {};"
+    "  var nextId    = 0;"
     "  window.mpapp = {"
     "    __mpapp: true,"
     "    send: function(p) { window.chrome.webview.postMessage(String(p)); },"
     "    on:   function(fn) { listeners.push(fn); },"
-    "    _receive: function(p) { for (var i=0; i<listeners.length; ++i) try { listeners[i](p); } catch(e) {} }"
+    "    register: function(name, fn) { methods[name] = fn; },"
+    "    call: function(name) {"
+    "      var id = ++nextId;"
+    "      var args = Array.prototype.slice.call(arguments, 1);"
+    "      window.mpapp.send(JSON.stringify({id: id, method: name, args: args}));"
+    "      return id;"
+    "    },"
+    "    _receive: function(p) {"
+    "      var env = null;"
+    "      try { env = JSON.parse(p); } catch (e) { env = null; }"
+    "      if (env && typeof env === 'object' && typeof env.method === 'string'"
+    "          && Object.prototype.hasOwnProperty.call(methods, env.method)) {"
+    "        var ret;"
+    "        try { ret = methods[env.method].apply(null, env.args || []); }"
+    "        catch (e) {"
+    "          window.mpapp.send(JSON.stringify({id: env.id, error: String(e)}));"
+    "          return;"
+    "        }"
+    "        window.mpapp.send(JSON.stringify({"
+    "          id: env.id,"
+    "          result: ret === undefined ? null : ret"
+    "        }));"
+    "        return;"
+    "      }"
+    "      for (var i = 0; i < listeners.length; ++i)"
+    "        try { listeners[i](p); } catch (e) {}"
+    "    }"
     "  };"
     "})();";
 
