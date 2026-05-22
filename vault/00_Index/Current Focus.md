@@ -6,56 +6,68 @@ tags:
 
 # Current Focus
 
-> [!important] Status — 2026-W20 (late)
-> **Phases P3 / P4 / P5 active in parallel.** [[M-02-Infrastructure]] closed; [[M-03-Mock-Surface]] effectively done; M-04+ work running across three platforms simultaneously.
+> [!important] Status — 2026-W21 (close)
+> **M-04b done. M-04c functionally complete — `active` pending ADR-acceptance pass.**
 >
-> **Just-completed**: [[_Archive/T-0011-app-shell-abstraction|T-0011]] app-shell abstraction landed and **live-verified on three platforms** — Windows (WinUI 3, Count: 0 → 7), Linux (GTK4 via WSLg, Count: 0 → 5), and Android (NDK r26 emulator, Count: 0 → 7). Same C++ source on all three; only the handler template arguments differ. macOS + iOS handlers code-complete pending an Apple host. [[_Archive/T-0007-wslg-gtk4-hello|T-0007]] (WSLg) closed in the same batch since it was unblocked organically during the live Linux verification. [[ADR-0012-application-window-handler-abstraction]] promoted to **accepted**.
+> **61 of 64 components are at `android-real` on Win + Linux + Android.** The remaining `mock` rows are 4 abstract bases (View / Layout / Element / Cell) that have no native primitives by design; their concrete subclasses own the real handlers.
 >
-> 126/126 mock-handler tests passing. Five components (Application / Window / StackLayout / Button / Label) now ship as `android-real` (Windows + Linux + Android verified live).
+> The autonomous push that landed [[40_Roadmap/M-04c-handler-heavy-port|M-04c]] covered: the page-level family (NavigationPage / TabbedPage / FlyoutPage / Shell with async push/pop + page_stack engine), the list family (ListView / CollectionView / TableView with wrap-platform-recycler per [[ADR-0020-virtualized-item-host-wrap-platform]]), the full cell tree (text/view/switch/image/entry per [[ADR-0021-tableview-cell-types]]), Grid as a real layout engine, WebView + HybridWebView (WebView2 / WebKitGTK 6.x / android.webkit.WebView + JS-bridge shim on each), and ShapeView + GraphicsView v1 (per-platform native primitives).
 
-## This week (2026-W20)
+## Where we are now
 
-- [x] Spike [[_Archive/T-0011-app-shell-abstraction|T-0011]] mock surface — `application`, `window`, `page`, `stack_layout`, `grid_layout` mock handlers + lifecycle tests.
-- [x] WinUI 3 real handlers for `application` / `window` / `stack_layout`.
-- [x] Rewrite `examples/windows_button_spike/main.cpp` against the new surface — zero `winrt::`/`mux::`/`muxc::`/`Mdd*` tokens in user-facing code.
-- [x] Promote [[ADR-0012-application-window-handler-abstraction]] proposed → accepted.
-- [x] Resolve [[_Archive/T-0007-wslg-gtk4-hello|T-0007]] WSL-install blocker (Ubuntu-24.04 on this host; GTK4 dev packages installed; cross-platform `gtk4_hello` rewrite verified end-to-end via WSLg).
-- [x] **GTK4 (Linux) real handlers** — application / window / stack_layout / button / label.
-- [x] **Android (JNI) real handlers** — Activity bridge + LinearLayout / Button / TextView via JNI, click routed back via `MppClickRouter`.
-- [x] **AppKit + UIKit handlers** — code-complete (Objective-C++ `.mm`, no Apple host to verify yet).
+| Layer | Status |
+|---|---|
+| Page family (NavigationPage / TabbedPage / FlyoutPage / Shell) | **android-real** + `task<T>` async push/pop wrappers |
+| List family (ListView / CollectionView / TableView) | **android-real** + multi-select event round-trip on all 3 platforms |
+| Cell tree (text/view/switch/image/entry) | **android-real** — every cell with bidirectional bindings where the surface has them |
+| Grid (real layout engine) | **android-real** — native Grid wrap + per-child placement via attached property store |
+| WebView / HybridWebView | **android-real** — native messaging end-to-end (WebMessageReceived / script-message-handler / addJavascriptInterface) |
+| ShapeView / GraphicsView | **android-real (v1)** — per-platform native primitives. Full unified canvas facade is v2 per [[ADR-0015-graphics-backend-dual]]. |
+| macOS / iOS | code-complete on app-shell layer; the M-04b/M-04c sweep stayed on Win/Linux/Android pending an Apple host |
 
-## Next up (P3 / P4 / P5 expansion)
+## What's still open (in priority order)
 
-The app-shell layer proves the handler pattern works across five platforms. The next batches port more of MAUI's control surface to the same three-platform-real bar:
-
-- **CollectionView, Entry, Editor, Switch, Slider, Stepper, CheckBox, RadioButton** — already have mock handlers (Unit 8 in batch 3). Promote each to `windows-real` + `linux-real` + `android-real` per the T-0011 template.
-- **Image, ImageButton** — mock surface first, then real on three platforms.
-- **Page navigation** — mock `Page` exists; needs the real handlers on Windows/Linux/Android. WinUI 3 will use `muxc::Frame`; GTK4 will use `GtkStack`; Android will use `Fragment`.
-- **Grid layout track definitions** — `grid_layout` mock has row/col counts; needs the full star/auto/abs sizing surface + per-child placement.
-- **Hot reload on Linux + Android** — [[_Archive/T-0010-hot-reload-spike|T-0010]] proved the LLVM hot-reload approach on Windows; same shape on Linux (`dlopen`/`dlclose` of `.so`) and Android (Activity `dlopen` of bundled `.so`).
+1. **ADR acceptance pass** for proposed ADRs 0014–0021. Code is implemented and shipping; review-gate is the missing step per Rule 4. Once deciders fill in, each ADR's frontmatter flips `proposed → accepted`.
+2. **macOS + iOS sweep** across the entire widget set. Requires an Apple host. Existing Objective-C++ handlers on app-shell are the template; the rest need to follow.
+3. **ADR-0016 compile-time route table for Shell** — heavy template-metaprogramming follow-up. Design is documented; user-facing `shell.go_to<"home/details">(42)` syntax with compile-time route + type validation. Currently the string-based `go_to(uri)` parser drives `current_route`.
+4. **ADR-0015 v2 unified canvas facade** — Cairo (default) / Skia (opt-in) compile-time selectable backend. v1 already ships per-platform native primitives so apps that need basic shapes don't block on this.
+5. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
 
 ## Active milestone
 
-[[M-03-Mock-Surface]] (effectively complete for the app-shell + 16 layout/input controls) and **M-04** (Windows real platform expansion) + **M-05** (Android real platform expansion) running in parallel. [[M-06-macOS]] gated on a self-hosted Mac runner.
+[[40_Roadmap/M-04c-handler-heavy-port|M-04c]] (`active`) — exits to `shipped` once the proposed ADRs are accepted and the user signs off.
 
-## Recently accepted
+## Recently accepted ADRs
 
-- [[ADR-0012-application-window-handler-abstraction]] (2026-05-18, **accepted**) — extends the widget-handler pattern to Application / Window / Page / Layout. Proved live on 3 platforms by [[_Archive/T-0011-app-shell-abstraction|T-0011]].
-- [[ADR-0011-cross-compilation-toolchain]] (2026-05-12, accepted) — Zig (`zig cc`) is the primary cross-compilation toolchain; closes [[RFC-0002-cross-compilation-toolchain]].
-- [[ADR-0010-licensing-and-patent-strategy]] (2026-05-12, accepted) — Apache 2.0 + commercial dual license, Apache-style CLA, LGPL-dynamic-only deps, deferred patent filing; closes [[RFC-0001-licensing-and-patent-strategy]].
-- [[ADR-0009-public-api-template-wrappers-only]] — template wrapper types only; option B (attributes) rejected.
-- [[ADR-0008-mock-first-implementation]] — mock-first strategy.
-- (See [[Decision Log]] for the full day-1 burst.)
+(Newer ADRs 0014–0021 are still `proposed`; the code that they describe is implemented.)
 
-## Active tasks
+- [[ADR-0013-data-driven-widget-dispatch]] (M-04b foundation — per-platform dispatch registry)
+- [[ADR-0012-application-window-handler-abstraction]] — app-shell handler template; proved by T-0011
+- [[ADR-0011-cross-compilation-toolchain]] — Zig (`zig cc`)
+- [[ADR-0010-licensing-and-patent-strategy]] — Apache 2.0 + commercial dual
+- [[ADR-0009-public-api-template-wrappers-only]] — template wrappers only
 
-- [[T-0004-jni-codegen-spike]] — Android JNI codegen with `fbjni`. T-0011 verified the *manual* JNI-bridge pattern works end-to-end; the codegen tool now has a known-good target to generate against.
-- [[T-0009-cross-compilation-matrix]] — Windows host validation still at 4/6 (Android + iOS blocked by Zig 0.13 SDK gaps). Linux + Android targets are NOW provably buildable via the alternate paths (WSL native + Android NDK), which informs the matrix decision.
+(See [[Decision Log]] for the full chain.)
 
-## Pinned reading
+## Pinned reading for new contributors
 
 - [[CLAUDE]] — vault rules.
-- [[Type System]] — the template-wrapper-type design.
+- [[Controls Inventory]] — single source of truth for widget porting status.
+- [[40_Roadmap/M-04c-handler-heavy-port]] — the most recent milestone tracker.
+- [[Type System]] — template-wrapper-type design.
 - [[Build System]] — cross-compilation matrix.
-- [[dotnet-maui-deep-dive]] — the spec MPAPP mirrors.
-- [[_Archive/T-0011-app-shell-abstraction/screenshots/evidence|T-0011 live-verification evidence]] — the canonical reference for what "3-platform-real" looks like in practice.
+- [[60_Research/dotnet-maui-deep-dive]] — the spec MPAPP mirrors.
+- [[90_Logs/2026-W21-autonomous-m04c-push|2026-W21 session log]] — narrative of how M-04c got to functionally complete.
+
+## Where to pick up next
+
+Look for the highest tractable item that doesn't need a human-only step:
+
+- The CollectionView `layout` enum (vertical_list / horizontal_list / vertical_grid / horizontal_grid) still only renders vertical_list. Wiring the remaining three across mux::GridView / GtkFlowBox / android.widget.GridView is well-scoped.
+- TableView's surface refactor (`vec<table_section{title, vec<unique_ptr<cell>>}>`) so its rows render through the cell-type tree instead of being plain strings.
+- TabbedPage + Shell bar styling polish (selected-tab color emphasis).
+- HybridWebView typed JS bridge per [[ADR-0018-hybrid-webview-typed-bridge]] — current v1 ships an untyped string bridge; the ADR proposes JSON-RPC + `[[mpapp::js_method]]` attribute-driven typing.
+
+For things gated on a human:
+- ADR acceptance pass (0014–0021).
+- macOS + iOS host availability.

@@ -89,12 +89,11 @@ See [[CLAUDE]] for the full text.
 
 ## Quick navigation
 
-- 11 accepted ADRs: see [[Decisions MOC]] or [[_Bases/ADRs.base]]
+- **13 accepted + 8 proposed ADRs** (proposed are M-04c gating: ADR-0014–0021): see [[Decisions MOC]] or [[_Bases/ADRs.base]]
 - 0 open RFCs (RFC-0001 and RFC-0002 both accepted): see [[_Bases/RFCs.base]]
-- 10 milestones (M-01 active): [[Roadmap MOC]] or [[_Canvases/Phase-Roadmap.canvas|Phase Roadmap canvas]]
-- 56 component stubs: [[Components MOC]] or [[Controls Inventory]]
-- 10 active tasks: [[_Bases/Tasks.base]]
+- **12 milestones** (M-04c `active`): [[Roadmap MOC]] or [[_Canvases/Phase-Roadmap.canvas|Phase Roadmap canvas]]
+- **64 components, 61 at `android-real` on Win + Linux + Android**: [[Components MOC]] or [[Controls Inventory]]
 - Architecture canvases: [[_Canvases/Architecture-Overview.canvas|Architecture]], [[_Canvases/Build-Dependency-Graph.canvas|Build Graph]], [[_Canvases/Phase-Roadmap.canvas|Roadmap]], [[_Canvases/Interop-Parity-Matrix.canvas|Interop Parity]], [[_Canvases/Cross-Compilation-Matrix.canvas|Cross-compilation]]
-- Weekly log: [[2026-W19-Weekly]]
+- Most recent log: [[90_Logs/2026-W21-autonomous-m04c-push|2026-W21 autonomous M-04c push]]
 - Decision log: [[Decision Log]]
 - MAUI deep-dive (moved-in research): [[dotnet-maui-deep-dive]]
