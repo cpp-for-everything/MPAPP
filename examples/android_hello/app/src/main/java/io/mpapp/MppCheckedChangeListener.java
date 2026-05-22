@@ -4,7 +4,8 @@
 // state reaches the corresponding C++ Observable.
 //
 // `kind` discriminates which native handler type the long pointer
-// refers to: 1 = switch_, 2 = check_box, 3 = radio_button.
+// refers to: 1 = switch_, 2 = check_box, 3 = radio_button,
+// 4 = switch_cell.
 
 package io.mpapp;
 

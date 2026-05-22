@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "SwitchCell"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/cells"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # SwitchCell
 
 > [!info] Status
-> **mock** — surface at `include/mpapp/switch_cell.hpp` per [[ADR-0021-tableview-cell-types]]. Mock handler tests cover `text` + `on` mappers and verify the `toggle()` helper emits `on_changed`.
+> **android-real** — Win `mux::Controls::Border` wrapping a 2-column Grid (TextBlock + ToggleSwitch) + Linux horizontal `GtkBox` (GtkLabel + GtkSwitch) + Android horizontal `LinearLayout` (TextView weight=1 + Switch). Two-way `on` binding: user flips on the native widget echo back into the Observable (suppress-echo guard prevents reentry). Android route reuses the shared `MppCheckedChangeListener` with `kind=4`.
 
 ## Overview
 
