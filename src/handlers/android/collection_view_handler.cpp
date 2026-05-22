@@ -155,6 +155,51 @@ void collection_view_handler<platform::android>::apply_selection_mode(collection
     list_view_set_choice_mode(env, native_, mode);
 }
 
+void collection_view_handler<platform::android>::refresh_multi_selection_from_native() {
+    if (native_ == nullptr || bound_ == nullptr) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
+    // SparseBooleanArray ListView.getCheckedItemPositions()
+    jclass lv_cls = env->FindClass("android/widget/ListView");
+    if (lv_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID get_checked = env->GetMethodID(lv_cls, "getCheckedItemPositions",
+        "()Landroid/util/SparseBooleanArray;");
+    jobject sparse = (get_checked != nullptr) ? env->CallObjectMethod(native_, get_checked) : nullptr;
+    env->DeleteLocalRef(lv_cls);
+    if (sparse == nullptr) { env->ExceptionClear(); return; }
+
+    jclass sba_cls = env->FindClass("android/util/SparseBooleanArray");
+    if (sba_cls == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(sparse);
+        return;
+    }
+    jmethodID size_m = env->GetMethodID(sba_cls, "size",    "()I");
+    jmethodID key_at = env->GetMethodID(sba_cls, "keyAt",   "(I)I");
+    jmethodID val_at = env->GetMethodID(sba_cls, "valueAt", "(I)Z");
+    std::vector<int> idxs;
+    if (size_m != nullptr && key_at != nullptr && val_at != nullptr) {
+        const jint n = env->CallIntMethod(sparse, size_m);
+        idxs.reserve(static_cast<std::size_t>(n));
+        for (jint i = 0; i < n; ++i) {
+            jboolean v = env->CallBooleanMethod(sparse, val_at, i);
+            if (v == JNI_TRUE) {
+                jint k = env->CallIntMethod(sparse, key_at, i);
+                idxs.push_back(static_cast<int>(k));
+            }
+        }
+    }
+    env->DeleteLocalRef(sba_cls);
+    env->DeleteLocalRef(sparse);
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
+    if (bound_->selected_indices.get() != idxs) {
+        bound_->selected_indices.set(std::move(idxs));
+    }
+}
+
 namespace {
 
 // Install MppItemClickRouter(collection_view*, kind=1) — same shape as

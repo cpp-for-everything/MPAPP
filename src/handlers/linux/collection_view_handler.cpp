@@ -22,6 +22,27 @@ void on_row_selected(GtkListBox* box, GtkListBoxRow* row, gpointer user_data) {
     if (idx >= 0) cv->item_tapped.emit(idx);
 }
 
+// In multi-select, GtkListBox fires "selected-rows-changed" on every
+// selection-set transition. Walk gtk_list_box_get_selected_rows() and
+// echo the full set into cv->selected_indices.
+void on_selected_rows_changed(GtkListBox* box, gpointer user_data) {
+    auto* cv = static_cast<collection_view*>(user_data);
+    if (cv == nullptr) return;
+    if (g_object_get_data(G_OBJECT(box), "mpapp_suppress") != nullptr) return;
+    if (cv->selection_mode.get() != collection_selection_mode::multiple) return;
+
+    std::vector<int> idxs;
+    GList* rows = gtk_list_box_get_selected_rows(box);
+    for (GList* l = rows; l != nullptr; l = l->next) {
+        auto* r = GTK_LIST_BOX_ROW(l->data);
+        if (r != nullptr) idxs.push_back(gtk_list_box_row_get_index(r));
+    }
+    g_list_free(rows);
+    if (cv->selected_indices.get() != idxs) {
+        cv->selected_indices.set(std::move(idxs));
+    }
+}
+
 void set_suppress(void* list_box, bool on) {
     g_object_set_data(G_OBJECT(static_cast<GtkWidget*>(list_box)),
                       "mpapp_suppress",
@@ -95,6 +116,8 @@ void collection_view_handler<platform::linux_>::map_items_source(collection_view
     bound_ = &cv;
     g_signal_connect(static_cast<GtkWidget*>(list_box_), "row-selected",
                      G_CALLBACK(on_row_selected), &cv);
+    g_signal_connect(static_cast<GtkWidget*>(list_box_), "selected-rows-changed",
+                     G_CALLBACK(on_selected_rows_changed), &cv);
     rebuild_items(cv.items_source.get());
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
 }

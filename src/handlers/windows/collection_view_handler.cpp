@@ -29,11 +29,32 @@ collection_view_handler<platform::windows>::collection_view_handler() {
         winrt::Microsoft::UI::Xaml::Controls::SelectionChangedEventArgs const&) {
         if (self->suppress_selection_event_) return;
         if (self->bound_ == nullptr) return;
+
+        // Always echo the primary selected_index (matches single + multi).
         int new_idx = static_cast<int>(self->native_.SelectedIndex());
         if (self->bound_->selected_index.get() != new_idx) {
             self->bound_->selected_index.set(new_idx);
         }
         if (new_idx >= 0) self->bound_->item_tapped.emit(new_idx);
+
+        // In multi mode, mirror the full SelectedItems set as indices.
+        if (self->bound_->selection_mode.get() == collection_selection_mode::multiple) {
+            std::vector<int> idxs;
+            auto items_view  = self->native_.Items();
+            auto selected_iv = self->native_.SelectedItems();
+            const uint32_t total = items_view.Size();
+            const uint32_t sel_n = selected_iv.Size();
+            idxs.reserve(sel_n);
+            for (uint32_t i = 0; i < sel_n; ++i) {
+                uint32_t pos = 0;
+                if (items_view.IndexOf(selected_iv.GetAt(i), pos) && pos < total) {
+                    idxs.push_back(static_cast<int>(pos));
+                }
+            }
+            if (self->bound_->selected_indices.get() != idxs) {
+                self->bound_->selected_indices.set(std::move(idxs));
+            }
+        }
     });
 }
 

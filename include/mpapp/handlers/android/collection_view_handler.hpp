@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // Android collection_view handler. Same wrap pattern as list_view —
-// android.widget.ListView + ArrayAdapter<String>. Multi-select would
-// switch to setChoiceMode(CHOICE_MODE_MULTIPLE); v1 ships single-select.
+// android.widget.ListView + ArrayAdapter<String>. setChoiceMode honors
+// the cross-platform selection_mode enum (None/Single/Multiple). Multi
+// mode echoes the full checked-item set back into selected_indices
+// after each tap via refresh_multi_selection_from_native().
 
 #ifndef MPAPP_HANDLERS_ANDROID_COLLECTION_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_COLLECTION_VIEW_HANDLER_HPP
@@ -35,6 +37,11 @@ public:
     void map_selection_mode(collection_view& cv);
 
     jobject native() const noexcept { return native_; }
+
+    // Invoked by item_click_router after each multi-mode tap. Reads
+    // ListView.getCheckedItemPositions() and writes the indices vector
+    // into the bound collection_view.
+    void refresh_multi_selection_from_native();
 
 private:
     void rebuild_items(const std::vector<std::string>& v);

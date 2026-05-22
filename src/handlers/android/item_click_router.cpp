@@ -7,6 +7,7 @@
 #include <jni.h>
 
 #include "mpapp/collection_view.hpp"
+#include "mpapp/handlers/android/collection_view_handler.hpp"
 #include "mpapp/list_view.hpp"
 #include "mpapp/table_view.hpp"
 
@@ -63,6 +64,14 @@ void dispatch_android_item_click(jlong owner_ptr, jint kind, jint position) {
                 cv->selected_index.set(static_cast<int>(position));
             }
             cv->item_tapped.emit(static_cast<int>(position));
+            // In multi-select mode, ListView has already toggled the
+            // checked state for the tapped row by the time we get here.
+            // Pull the full set out via getCheckedItemPositions() and
+            // mirror it into selected_indices.
+            if (cv->selection_mode.get() == collection_selection_mode::multiple
+                && cv->has_cv_handler()) {
+                cv->cv_handler().refresh_multi_selection_from_native();
+            }
             break;
         }
         case item_click_kind::table_view: {
