@@ -153,6 +153,7 @@ Picks up after the page + list families landed. Drove the remaining widgets exce
 |---|---|---|
 | `658ccee` | **ShapeView + GraphicsView** real handlers (v1). Per-platform native primitives — Win muxc::Border+Shapes / muxc::Canvas; Linux GtkDrawingArea + cairo draw callback / sized GtkDrawingArea; Android custom `MppShapeView` w/ onDraw / plain `android.view.View` w/ setMinimumWidth/Height. polygon+path → bounding rect in v1. Unified canvas facade per ADR-0015 deferred to v2. | Win/Linux/Android green |
 | `4ad32ea` | M-04c milestone: `planned` → `active`; tracker shows every concrete widget at android-real. | docs |
+| `df2e25f` | **CollectionView multi-select event round-trip** on 3 platforms. Win SelectedItems→IndexOf, Linux "selected-rows-changed"→get_selected_rows, Android getCheckedItemPositions() from item_click_router. Closes the deferred multi-select gap. | Win/Linux/Android green |
 
 **M-04c is functionally complete.** Every concrete widget in the Controls Inventory is `android-real` on Win + Linux + Android. The remaining open items are process-level:
 
