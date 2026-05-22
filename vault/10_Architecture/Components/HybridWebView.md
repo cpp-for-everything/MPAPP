@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "HybridWebView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/hybridwebview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # HybridWebView
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — JS-bridge surface on top of [[WebView]] across all 3 platforms. Each handler injects a `window.mpapp` shim into the loaded document, exposing `send(p)` / `on(fn)` for the JS side. C++ → JS via native eval; JS → C++ routes through `CoreWebView2.WebMessageReceived` (Win), `WebKitUserContentManager.script-message-received::mpapp_send` (Linux), and `WebView.addJavascriptInterface("mpapp_native", MppJsBridge)` (Android). Each handler subscribes to `message_sent` so user calls to `hybrid_web_view::send_to_js()` propagate through the platform's native messaging path.
 
 ## Overview
 

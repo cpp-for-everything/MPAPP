@@ -1,0 +1,61 @@
+// SPDX-License-Identifier: Apache-2.0
+// GTK4 hybrid_web_view handler — extends the WebKitGTK surface with a
+// JS <-> C++ bridge. Inbound through WebKitUserContentManager
+// "script-message-received::mpapp_send"; outbound through
+// webkit_web_view_evaluate_javascript. A small JS shim is injected at
+// document-start exposing `window.mpapp`.
+
+#ifndef MPAPP_HANDLERS_LINUX_HYBRID_WEB_VIEW_HANDLER_HPP
+#define MPAPP_HANDLERS_LINUX_HYBRID_WEB_VIEW_HANDLER_HPP
+
+#include <string>
+
+#include "../../hybrid_web_view.hpp"
+#include "../../platform.hpp"
+#include "../../signal.hpp"
+
+#if defined(__linux__) && !defined(__ANDROID__)
+
+namespace mpapp {
+
+template <>
+class hybrid_web_view_handler<platform::linux_> {
+public:
+    hybrid_web_view_handler();
+    ~hybrid_web_view_handler();
+
+    hybrid_web_view_handler(const hybrid_web_view_handler&)            = delete;
+    hybrid_web_view_handler& operator=(const hybrid_web_view_handler&) = delete;
+    hybrid_web_view_handler(hybrid_web_view_handler&&)                 = delete;
+    hybrid_web_view_handler& operator=(hybrid_web_view_handler&&)      = delete;
+
+    void map_messages(hybrid_web_view& h);
+
+    void*       native() noexcept       { return native_; }
+    const void* native() const noexcept { return native_; }
+
+    // Called by the script-message-received GTK callback.
+    void on_native_inbound(const std::string& payload);
+
+private:
+    void send_outbound(const std::string& payload);
+
+    struct sent_cb_t {
+        hybrid_web_view_handler<platform::linux_>* self;
+        void operator()(const std::string& v) const { self->send_outbound(v); }
+    };
+
+    void*            native_      = nullptr;  // WebKitWebView*
+    void*            content_mgr_ = nullptr;  // WebKitUserContentManager*
+    unsigned long    msg_handler_id_ = 0;
+    hybrid_web_view* bound_ = nullptr;
+    bool             wired_ = false;
+
+    sent_cb_t                       sent_cb_{this};
+    signal_slot<const std::string&> sent_slot_{};
+};
+
+} // namespace mpapp
+
+#endif // __linux__ && !__ANDROID__
+#endif // MPAPP_HANDLERS_LINUX_HYBRID_WEB_VIEW_HANDLER_HPP

@@ -7,17 +7,7 @@
 #if defined(__linux__) && !defined(__ANDROID__) && defined(MPAPP_HAS_WEBKITGTK)
 
 #include <gtk/gtk.h>
-// WebKitGTK header layout differs between the modern 6.0 binding
-// (<webkit/webkit.h>) and the 4.1 binding shipped on Ubuntu 24.04
-// (<webkit2/webkit2.h>). Probe for either; the pkg-config check in
-// gtk4_hello/CMakeLists.txt already picked one or the other.
-#if __has_include(<webkit/webkit.h>)
-#  include <webkit/webkit.h>
-#elif __has_include(<webkit2/webkit2.h>)
-#  include <webkit2/webkit2.h>
-#else
-#  error "WebKitGTK headers not found on include path"
-#endif
+#include <webkit/webkit.h>
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 

@@ -12,12 +12,10 @@ endif()
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4)
 # WebKitGTK (LGPL, dynamically linked per Rule 9 / RFC-0001) — drives
-# the Linux web_view handler. Try the modern 6.0 GTK4 binding first;
-# fall back to 4.1 (GTK4 binding shipping with older distros).
+# the Linux web_view / hybrid_web_view handlers. Require the modern
+# webkitgtk-6.0 binding: the legacy webkit2gtk-4.1 is GTK3-only and
+# its headers can't be combined with a GTK4 build.
 pkg_check_modules(WEBKIT_GTK QUIET IMPORTED_TARGET webkitgtk-6.0)
-if(NOT WEBKIT_GTK_FOUND)
-    pkg_check_modules(WEBKIT_GTK QUIET IMPORTED_TARGET webkit2gtk-4.1)
-endif()
 
 # MPAPP Linux handler set — single small static library, mirrors the
 # Windows handler set layout (examples/windows_button_spike/CMakeLists).
