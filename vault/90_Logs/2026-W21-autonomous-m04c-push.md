@@ -184,6 +184,16 @@ After the widget surface reached completion, a small wave of polish followed:
 
 This closes the largest remaining "the surface ships but you can't actually use it together" gap from the cell-tree work.
 
+## TableView demo pass
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `fadc164` | Mock tests for typed_sections — 246→248 ctest. Builds `vector<table_section_typed>` from real text_cell + switch_cell instances; asserts identity, structure, and the mock recorder fires "typed_sections.count=N". | Win+Linux green |
+| `563c37e` | **`examples/gtk4_tableview_demo/`** — Linux end-to-end demo. Two sections, mixed cells (text/entry/switch), live two-way bindings + completed signal. Proves the typed surface composes via GtkListBox + cell native widgets through ADR-0013 dispatch. | Linux green |
+| `b97217f` | **`examples/windows_tableview_demo/`** — WinUI 3 counterpart. Same view-model code; only handler template arguments swap. Proves the typed surface composes via mux::ListView.Items.Append on a meaningfully different stack. | Win green |
+
+**Net:** typed_sections is now demonstrated end-to-end on two of three target platforms with identical view-model code. The Android counterpart is a deferred follow-up — extending `examples/android_hello/app/src/main/cpp/native_main.cpp` would intermix with the existing rich app-shell spike; a sibling `android_tableview_demo/` would duplicate the Gradle scaffolding. Either is a defensible path for the next session.
+
 ## See also
 
 - [[40_Roadmap/M-04c-handler-heavy-port]] — canonical tracker.
