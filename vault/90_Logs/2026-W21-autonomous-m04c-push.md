@@ -147,6 +147,20 @@ Picks up after the page + list families landed. Drove the remaining widgets exce
 
 **Net result:** Every widget in M-04c reaches android-real *except* the ShapeView/GraphicsView pair (gated on ADR-0015 graphics facade) and the macOS/iOS platforms (gated on Apple host). The cell-type tree is now fully wired, including bidirectional bindings on switch_cell + entry_cell with native event echoes through the kind-discriminated router family.
 
+## Final push (2026-05-22 close)
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `658ccee` | **ShapeView + GraphicsView** real handlers (v1). Per-platform native primitives — Win muxc::Border+Shapes / muxc::Canvas; Linux GtkDrawingArea + cairo draw callback / sized GtkDrawingArea; Android custom `MppShapeView` w/ onDraw / plain `android.view.View` w/ setMinimumWidth/Height. polygon+path → bounding rect in v1. Unified canvas facade per ADR-0015 deferred to v2. | Win/Linux/Android green |
+| `4ad32ea` | M-04c milestone: `planned` → `active`; tracker shows every concrete widget at android-real. | docs |
+
+**M-04c is functionally complete.** Every concrete widget in the Controls Inventory is `android-real` on Win + Linux + Android. The remaining open items are process-level:
+
+1. ADR acceptance pass for 0014–0021 (decisions are implemented; review gate is the missing step per Rule 4).
+2. ADR-0016 compile-time route table for Shell — heavy template-metaprogramming follow-up.
+3. ADR-0015 v2 unified canvas facade (Cairo + Skia compile-time selectable).
+4. macOS / iOS handlers across the entire widget set — gated on Apple host.
+
 ## See also
 
 - [[40_Roadmap/M-04c-handler-heavy-port]] — canonical tracker.
