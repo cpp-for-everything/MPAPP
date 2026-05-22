@@ -13,4 +13,5 @@ endif()
 
 if(UNIX AND NOT APPLE)
     add_subdirectory(gtk4_hello)
+    add_subdirectory(gtk4_tableview_demo)
 endif()
