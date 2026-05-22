@@ -310,13 +310,27 @@ public:
     // next_field which returns true and populates `name` until the
     // closing '}' is consumed (then returns false). For each field the
     // caller pulls its value via read(...).
+    //
+    // The first_field_ flag is scoped per object: expect_object_begin
+    // sets it true, next_field flips it to false on the first call,
+    // and the '}' branch restores it to false so the *outer* scope
+    // (which had just finished consuming a value) continues to expect
+    // a ',' before its next field. The single-flag-multiple-scopes
+    // trick works because after any nested object closes, the outer's
+    // first_field_ should indeed be false (the outer just finished
+    // reading a value, which by definition was preceded by a field).
     bool expect_object_begin() {
         skip_ws();
-        return consume_char('{');
+        if (!consume_char('{')) return false;
+        first_field_ = true;
+        return true;
     }
     bool next_field(std::string& name) {
         skip_ws();
-        if (consume_char('}')) return false;
+        if (consume_char('}')) {
+            first_field_ = false;
+            return false;
+        }
         if (!first_field_) {
             if (!consume_char(',')) { fail(); return false; }
             skip_ws();
@@ -326,6 +340,46 @@ public:
         skip_ws();
         if (!consume_char(':')) { fail(); return false; }
         return true;
+    }
+
+    // Array reading: parallel to expect_object_begin / next_field but
+    // for arrays. Used by typed-tuple consumers (method-args parsing
+    // in the future HybridWebView bridge) where each element has its
+    // own static type.
+    //
+    // Usage:
+    //   r.expect_array_begin();
+    //   while (r.next_element()) { r.read(x); }
+    bool expect_array_begin() {
+        skip_ws();
+        if (!consume_char('[')) return false;
+        first_element_ = true;
+        return true;
+    }
+    bool next_element() {
+        skip_ws();
+        if (consume_char(']')) {
+            first_element_ = false;
+            return false;
+        }
+        if (!first_element_) {
+            if (!consume_char(',')) { fail(); return false; }
+            skip_ws();
+        }
+        first_element_ = false;
+        return true;
+    }
+
+    // Capture the raw substring of the next JSON value without
+    // committing to a typed read. Advances the cursor past the value.
+    // Useful when a value is going to be re-parsed later — e.g., a
+    // JSON-RPC envelope captures `args` here and re-parses it once
+    // the method is resolved.
+    std::string_view capture_value() {
+        skip_ws();
+        const std::size_t start = pos_;
+        if (!skip_value()) return {};
+        return in_.substr(start, pos_ - start);
     }
 
     // Skip the next value (used to ignore unknown fields).
@@ -435,8 +489,9 @@ private:
 
     std::string_view in_;
     std::size_t      pos_;
-    bool             err_ = false;
-    bool             first_field_ = true;
+    bool             err_           = false;
+    bool             first_field_   = true;
+    bool             first_element_ = true;
 };
 
 // ---------- Free function overloads for ADL extension --------------------
