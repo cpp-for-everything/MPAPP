@@ -22,8 +22,11 @@ Session log for the autonomous run that landed the bulk of M-04c real handlers. 
 | `704ce65` | TableView real handlers — sections flatten to title-row + data-row pairs | Win 240/240 |
 | `e6257f4` | M-04c tracker update | docs |
 | `f020dff` | Grid `track_def` + MAUI string parser per ADR-0017 phase 1; per-platform handlers follow up | Win 246/246 |
+| `9be4f86` | Session log in vault | docs |
+| `<grid-phase2>` | Grid real handlers phase 2 — wrap mux::Grid / GtkGrid / GridLayout + per-child placement attached store | Win 246/246 |
+| `<cell-docs>` | Components/Cell + TextCell/EntryCell/SwitchCell/ViewCell/ImageCell .md files | docs |
 
-**Net result:** every page-level widget (NavigationPage / TabbedPage / FlyoutPage / Shell) and every list-family widget (ListView / CollectionView / TableView) is at **android-real** on all 3 platforms.
+**Net result:** every page-level widget (NavigationPage / TabbedPage / FlyoutPage / Shell), every list-family widget (ListView / CollectionView / TableView), and **Grid as a real layout engine** are all at **android-real** on all 3 platforms.
 
 ## Status of M-04c at session close
 
@@ -37,7 +40,7 @@ Session log for the autonomous run that landed the bulk of M-04c real handlers. 
 | CollectionView | android-real (multi-select events + grid layouts deferred) |
 | TableView | android-real (cell-typed rendering tied to surface refactor) |
 | TableView cells (text/entry/switch/view/image) | mock |
-| Grid (real) | track_def + parser shipped; per-platform handlers follow up |
+| Grid (real) | **android-real** — native Grid wrap on Win/Linux/Android + placement attached store |
 | ShapeView, GraphicsView | mock (Cairo facade per ADR-0015 follow up) |
 | WebView, HybridWebView | mock (WebKitGTK/WebView2/Android WebView follow up) |
 
