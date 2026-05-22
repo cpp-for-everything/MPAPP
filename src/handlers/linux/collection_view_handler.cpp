@@ -13,22 +13,33 @@ namespace mpapp {
 
 namespace {
 
+void set_suppress(void* inner, bool on) {
+    if (inner == nullptr) return;
+    g_object_set_data(G_OBJECT(static_cast<GtkWidget*>(inner)),
+                      "mpapp_suppress",
+                      on ? GINT_TO_POINTER(1) : nullptr);
+}
+
+bool is_suppressed(void* inner) {
+    return inner != nullptr
+        && g_object_get_data(G_OBJECT(static_cast<GtkWidget*>(inner)), "mpapp_suppress") != nullptr;
+}
+
+// --- GtkListBox row events ----------------------------------------------
+
 void on_row_selected(GtkListBox* box, GtkListBoxRow* row, gpointer user_data) {
     auto* cv = static_cast<collection_view*>(user_data);
     if (cv == nullptr) return;
-    if (g_object_get_data(G_OBJECT(box), "mpapp_suppress") != nullptr) return;
+    if (is_suppressed(box)) return;
     int idx = (row != nullptr) ? gtk_list_box_row_get_index(row) : -1;
     if (cv->selected_index.get() != idx) cv->selected_index.set(idx);
     if (idx >= 0) cv->item_tapped.emit(idx);
 }
 
-// In multi-select, GtkListBox fires "selected-rows-changed" on every
-// selection-set transition. Walk gtk_list_box_get_selected_rows() and
-// echo the full set into cv->selected_indices.
 void on_selected_rows_changed(GtkListBox* box, gpointer user_data) {
     auto* cv = static_cast<collection_view*>(user_data);
     if (cv == nullptr) return;
-    if (g_object_get_data(G_OBJECT(box), "mpapp_suppress") != nullptr) return;
+    if (is_suppressed(box)) return;
     if (cv->selection_mode.get() != collection_selection_mode::multiple) return;
 
     std::vector<int> idxs;
@@ -43,81 +54,188 @@ void on_selected_rows_changed(GtkListBox* box, gpointer user_data) {
     }
 }
 
-void set_suppress(void* list_box, bool on) {
-    g_object_set_data(G_OBJECT(static_cast<GtkWidget*>(list_box)),
-                      "mpapp_suppress",
-                      on ? GINT_TO_POINTER(1) : nullptr);
+// --- GtkFlowBox child events --------------------------------------------
+
+void on_child_activated(GtkFlowBox* box, GtkFlowBoxChild* child, gpointer user_data) {
+    auto* cv = static_cast<collection_view*>(user_data);
+    if (cv == nullptr || child == nullptr) return;
+    if (is_suppressed(box)) return;
+    const int idx = gtk_flow_box_child_get_index(child);
+    if (cv->selected_index.get() != idx) cv->selected_index.set(idx);
+    cv->item_tapped.emit(idx);
+}
+
+void on_selected_children_changed(GtkFlowBox* box, gpointer user_data) {
+    auto* cv = static_cast<collection_view*>(user_data);
+    if (cv == nullptr) return;
+    if (is_suppressed(box)) return;
+    if (cv->selection_mode.get() != collection_selection_mode::multiple) return;
+
+    std::vector<int> idxs;
+    GList* children = gtk_flow_box_get_selected_children(box);
+    for (GList* l = children; l != nullptr; l = l->next) {
+        auto* c = GTK_FLOW_BOX_CHILD(l->data);
+        if (c != nullptr) idxs.push_back(gtk_flow_box_child_get_index(c));
+    }
+    g_list_free(children);
+    if (cv->selected_indices.get() != idxs) {
+        cv->selected_indices.set(std::move(idxs));
+    }
+}
+
+// --- inner-widget construction ------------------------------------------
+
+GtkSelectionMode to_native_mode(collection_selection_mode m) {
+    switch (m) {
+        case collection_selection_mode::none:     return GTK_SELECTION_NONE;
+        case collection_selection_mode::multiple: return GTK_SELECTION_MULTIPLE;
+        case collection_selection_mode::single:
+        default:                                  return GTK_SELECTION_SINGLE;
+    }
+}
+
+GtkWidget* make_inner_listbox() {
+    GtkWidget* w = gtk_list_box_new();
+    gtk_list_box_set_selection_mode(GTK_LIST_BOX(w), GTK_SELECTION_SINGLE);
+    return w;
+}
+
+GtkWidget* make_inner_flowbox() {
+    GtkWidget* w = gtk_flow_box_new();
+    gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(w), GTK_SELECTION_SINGLE);
+    // Wrap to fill — items flow horizontally and wrap to a new row
+    // when they run out of width, like MAUI's vertical_grid.
+    gtk_flow_box_set_max_children_per_line(GTK_FLOW_BOX(w), 16);
+    gtk_flow_box_set_homogeneous(GTK_FLOW_BOX(w), TRUE);
+    return w;
+}
+
+void clear_inner(GtkWidget* inner, bool is_grid) {
+    if (is_grid) {
+        GtkFlowBox* box = GTK_FLOW_BOX(inner);
+        GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
+        while (child != nullptr) {
+            GtkWidget* next = gtk_widget_get_next_sibling(child);
+            gtk_flow_box_remove(box, child);
+            child = next;
+        }
+    } else {
+        GtkListBox* box = GTK_LIST_BOX(inner);
+        GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
+        while (child != nullptr) {
+            GtkWidget* next = gtk_widget_get_next_sibling(child);
+            gtk_list_box_remove(box, child);
+            child = next;
+        }
+    }
+}
+
+void append_item(GtkWidget* inner, bool is_grid, const char* text) {
+    GtkWidget* lbl = gtk_label_new(text);
+    gtk_widget_set_halign(lbl, GTK_ALIGN_START);
+    if (is_grid) {
+        gtk_flow_box_append(GTK_FLOW_BOX(inner), lbl);
+    } else {
+        gtk_list_box_append(GTK_LIST_BOX(inner), lbl);
+    }
 }
 
 } // namespace
 
 collection_view_handler<platform::linux_>::collection_view_handler() {
-    native_   = gtk_scrolled_window_new();
-    list_box_ = gtk_list_box_new();
-    gtk_list_box_set_selection_mode(GTK_LIST_BOX(static_cast<GtkWidget*>(list_box_)),
-                                    GTK_SELECTION_SINGLE);
+    native_  = gtk_scrolled_window_new();
+    inner_   = make_inner_listbox();
+    is_grid_ = false;
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(static_cast<GtkWidget*>(native_)),
-                                  static_cast<GtkWidget*>(list_box_));
+                                  static_cast<GtkWidget*>(inner_));
     gtk_widget_set_vexpand(static_cast<GtkWidget*>(native_), TRUE);
     gtk_widget_set_hexpand(static_cast<GtkWidget*>(native_), TRUE);
 }
 
 collection_view_handler<platform::linux_>::~collection_view_handler() = default;
 
-void collection_view_handler<platform::linux_>::rebuild_items(const std::vector<std::string>& v) {
-    GtkListBox* box = GTK_LIST_BOX(static_cast<GtkWidget*>(list_box_));
-    set_suppress(list_box_, true);
-    GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
-    while (child != nullptr) {
-        GtkWidget* next = gtk_widget_get_next_sibling(child);
-        gtk_list_box_remove(box, child);
-        child = next;
+void collection_view_handler<platform::linux_>::wire_tap_signals() {
+    if (inner_ == nullptr || bound_ == nullptr) return;
+    if (is_grid_) {
+        g_signal_connect(static_cast<GtkWidget*>(inner_), "child-activated",
+                         G_CALLBACK(on_child_activated), bound_);
+        g_signal_connect(static_cast<GtkWidget*>(inner_), "selected-children-changed",
+                         G_CALLBACK(on_selected_children_changed), bound_);
+    } else {
+        g_signal_connect(static_cast<GtkWidget*>(inner_), "row-selected",
+                         G_CALLBACK(on_row_selected), bound_);
+        g_signal_connect(static_cast<GtkWidget*>(inner_), "selected-rows-changed",
+                         G_CALLBACK(on_selected_rows_changed), bound_);
     }
+}
+
+void collection_view_handler<platform::linux_>::rebuild_items(const std::vector<std::string>& v) {
+    if (inner_ == nullptr) return;
+    set_suppress(inner_, true);
+    clear_inner(static_cast<GtkWidget*>(inner_), is_grid_);
     for (const auto& s : v) {
-        GtkWidget* lbl = gtk_label_new(s.c_str());
-        gtk_widget_set_halign(lbl, GTK_ALIGN_START);
-        gtk_list_box_append(box, lbl);
+        append_item(static_cast<GtkWidget*>(inner_), is_grid_, s.c_str());
     }
     if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
-    set_suppress(list_box_, false);
+    set_suppress(inner_, false);
 }
 
 void collection_view_handler<platform::linux_>::apply_selection(int idx) {
-    if (list_box_ == nullptr) return;
-    GtkListBox* box = GTK_LIST_BOX(static_cast<GtkWidget*>(list_box_));
-    set_suppress(list_box_, true);
-    if (idx < 0) {
-        gtk_list_box_unselect_all(box);
+    if (inner_ == nullptr) return;
+    set_suppress(inner_, true);
+    if (is_grid_) {
+        GtkFlowBox* box = GTK_FLOW_BOX(static_cast<GtkWidget*>(inner_));
+        gtk_flow_box_unselect_all(box);
+        if (idx >= 0) {
+            GtkFlowBoxChild* child = gtk_flow_box_get_child_at_index(box, idx);
+            if (child != nullptr) gtk_flow_box_select_child(box, child);
+        }
     } else {
-        GtkListBoxRow* row = gtk_list_box_get_row_at_index(box, idx);
-        if (row != nullptr) gtk_list_box_select_row(box, row);
+        GtkListBox* box = GTK_LIST_BOX(static_cast<GtkWidget*>(inner_));
+        if (idx < 0) {
+            gtk_list_box_unselect_all(box);
+        } else {
+            GtkListBoxRow* row = gtk_list_box_get_row_at_index(box, idx);
+            if (row != nullptr) gtk_list_box_select_row(box, row);
+        }
     }
-    set_suppress(list_box_, false);
+    set_suppress(inner_, false);
 }
 
 void collection_view_handler<platform::linux_>::apply_selection_mode(collection_selection_mode m) {
-    if (list_box_ == nullptr) return;
-    GtkListBox* box = GTK_LIST_BOX(static_cast<GtkWidget*>(list_box_));
-    switch (m) {
-        case collection_selection_mode::none:
-            gtk_list_box_set_selection_mode(box, GTK_SELECTION_NONE);
-            break;
-        case collection_selection_mode::multiple:
-            gtk_list_box_set_selection_mode(box, GTK_SELECTION_MULTIPLE);
-            break;
-        case collection_selection_mode::single:
-        default:
-            gtk_list_box_set_selection_mode(box, GTK_SELECTION_SINGLE);
-            break;
+    if (inner_ == nullptr) return;
+    if (is_grid_) {
+        gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(static_cast<GtkWidget*>(inner_)),
+                                        to_native_mode(m));
+    } else {
+        gtk_list_box_set_selection_mode(GTK_LIST_BOX(static_cast<GtkWidget*>(inner_)),
+                                        to_native_mode(m));
+    }
+}
+
+void collection_view_handler<platform::linux_>::apply_layout(collection_layout l) {
+    if (native_ == nullptr) return;
+    const bool want_grid = (l == collection_layout::vertical_grid
+                         || l == collection_layout::horizontal_grid);
+    if (want_grid == is_grid_) return;   // already matches
+
+    // Tear down old inner; the GtkScrolledWindow drops the previous
+    // child when we set a new one.
+    inner_   = want_grid ? make_inner_flowbox() : make_inner_listbox();
+    is_grid_ = want_grid;
+    gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(static_cast<GtkWidget*>(native_)),
+                                  static_cast<GtkWidget*>(inner_));
+    wire_tap_signals();
+
+    if (bound_ != nullptr) {
+        apply_selection_mode(bound_->selection_mode.get());
+        rebuild_items(bound_->items_source.get());
     }
 }
 
 void collection_view_handler<platform::linux_>::map_items_source(collection_view& cv) {
     bound_ = &cv;
-    g_signal_connect(static_cast<GtkWidget*>(list_box_), "row-selected",
-                     G_CALLBACK(on_row_selected), &cv);
-    g_signal_connect(static_cast<GtkWidget*>(list_box_), "selected-rows-changed",
-                     G_CALLBACK(on_selected_rows_changed), &cv);
+    wire_tap_signals();
     rebuild_items(cv.items_source.get());
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
 }
@@ -130,6 +248,11 @@ void collection_view_handler<platform::linux_>::map_selected_index(collection_vi
 void collection_view_handler<platform::linux_>::map_selection_mode(collection_view& cv) {
     apply_selection_mode(cv.selection_mode.get());
     cv.selection_mode.changed.subscribe(mode_slot_, mode_cb_);
+}
+
+void collection_view_handler<platform::linux_>::map_layout(collection_view& cv) {
+    apply_layout(cv.layout.get());
+    cv.layout.changed.subscribe(layout_slot_, layout_cb_);
 }
 
 } // namespace mpapp

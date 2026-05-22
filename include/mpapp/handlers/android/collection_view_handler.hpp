@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android collection_view handler. Same wrap pattern as list_view —
-// android.widget.ListView + ArrayAdapter<String>. setChoiceMode honors
-// the cross-platform selection_mode enum (None/Single/Multiple). Multi
-// mode echoes the full checked-item set back into selected_indices
-// after each tap via refresh_multi_selection_from_native().
+// Android collection_view handler. Outer FrameLayout (native_) is
+// stable so the ADR-0013 dispatch handle doesn't move; inner_ is the
+// active list-or-grid widget:
+//   * vertical_list → android.widget.ListView (single column)
+//   * vertical_grid → android.widget.GridView (auto-column wrap)
+//
+// Both inherit from AdapterView so setChoiceMode + checked-position
+// query semantics are uniform — refresh_multi_selection_from_native()
+// works against either.
 
 #ifndef MPAPP_HANDLERS_ANDROID_COLLECTION_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_COLLECTION_VIEW_HANDLER_HPP
@@ -35,18 +39,25 @@ public:
     void map_items_source(collection_view& cv);
     void map_selected_index(collection_view& cv);
     void map_selection_mode(collection_view& cv);
+    void map_layout(collection_view& cv);
 
     jobject native() const noexcept { return native_; }
 
     // Invoked by item_click_router after each multi-mode tap. Reads
-    // ListView.getCheckedItemPositions() and writes the indices vector
-    // into the bound collection_view.
+    // ListView/GridView.getCheckedItemPositions() and writes the
+    // indices vector into the bound collection_view.
     void refresh_multi_selection_from_native();
+
+    // The list-or-grid inner widget; item_click_router uses this to
+    // resolve which AdapterView fired the event.
+    jobject inner() const noexcept { return inner_; }
 
 private:
     void rebuild_items(const std::vector<std::string>& v);
     void apply_selection(int idx);
     void apply_selection_mode(collection_selection_mode m);
+    void apply_layout(collection_layout l);
+    void rebuild_inner_for_layout(collection_layout l);
 
     struct items_cb_t {
         collection_view_handler<platform::android>* self;
@@ -60,16 +71,24 @@ private:
         collection_view_handler<platform::android>* self;
         void operator()(collection_selection_mode m) const { self->apply_selection_mode(m); }
     };
+    struct layout_cb_t {
+        collection_view_handler<platform::android>* self;
+        void operator()(collection_layout l) const { self->apply_layout(l); }
+    };
 
-    jobject native_ = nullptr;
+    jobject native_  = nullptr;   // FrameLayout (outer)
+    jobject inner_   = nullptr;   // ListView or GridView (whichever matches layout)
+    bool    is_grid_ = false;
     collection_view* bound_ = nullptr;
 
-    items_cb_t items_cb_{this};
-    sel_cb_t   sel_cb_{this};
-    mode_cb_t  mode_cb_{this};
+    items_cb_t  items_cb_{this};
+    sel_cb_t    sel_cb_{this};
+    mode_cb_t   mode_cb_{this};
+    layout_cb_t layout_cb_{this};
     signal_slot<const std::vector<std::string>&>          items_slot_{};
     signal_slot<const int&>                                sel_slot_{};
     signal_slot<const collection_selection_mode&>          mode_slot_{};
+    signal_slot<const collection_layout&>                  layout_slot_{};
 };
 
 } // namespace mpapp

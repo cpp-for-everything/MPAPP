@@ -17,9 +17,12 @@ constexpr jint CHOICE_MODE_SINGLE                  = 1;
 constexpr jint CHOICE_MODE_MULTIPLE                = 2;
 constexpr jint CHOICE_MODE_NONE                    = 0;
 
-jobject make_list_view(JNIEnv* env, jobject context) {
+// MATCH_PARENT for FrameLayout.LayoutParams.
+constexpr jint LP_MATCH_PARENT = -1;
+
+jobject make_object(JNIEnv* env, const char* cls_name, jobject context) {
     if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass cls = env->FindClass("android/widget/ListView");
+    jclass cls = env->FindClass(cls_name);
     if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
     jmethodID ctor = env->GetMethodID(cls, "<init>", "(Landroid/content/Context;)V");
     if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
@@ -35,7 +38,53 @@ jobject make_list_view(JNIEnv* env, jobject context) {
     return global;
 }
 
-void install_adapter(JNIEnv* env, jobject context, jobject list_view,
+void framelayout_add_match(JNIEnv* env, jobject parent, jobject child) {
+    if (child == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass lp_cls = env->FindClass("android/widget/FrameLayout$LayoutParams");
+    if (lp_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID ctor = env->GetMethodID(lp_cls, "<init>", "(II)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(lp_cls); return; }
+    jobject lp = env->NewObject(lp_cls, ctor, LP_MATCH_PARENT, LP_MATCH_PARENT);
+    env->DeleteLocalRef(lp_cls);
+    if (lp == nullptr) { env->ExceptionClear(); return; }
+
+    jclass view_cls = env->FindClass("android/view/View");
+    if (view_cls != nullptr) {
+        jmethodID set_lp = env->GetMethodID(view_cls, "setLayoutParams",
+            "(Landroid/view/ViewGroup$LayoutParams;)V");
+        if (set_lp != nullptr) {
+            env->CallVoidMethod(child, set_lp, lp);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(view_cls);
+    }
+    env->DeleteLocalRef(lp);
+
+    jclass vg = env->FindClass("android/view/ViewGroup");
+    if (vg != nullptr) {
+        jmethodID add = env->GetMethodID(vg, "addView", "(Landroid/view/View;)V");
+        if (add != nullptr) {
+            env->CallVoidMethod(parent, add, child);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(vg);
+    }
+}
+
+void vg_remove_all(JNIEnv* env, jobject parent) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/view/ViewGroup");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "removeAllViews", "()V");
+    if (m != nullptr) {
+        env->CallVoidMethod(parent, m);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+void install_adapter(JNIEnv* env, jobject context, jobject adapter_view,
                      const std::vector<std::string>& items) {
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass string_cls = env->FindClass("java/lang/String");
@@ -74,41 +123,98 @@ void install_adapter(JNIEnv* env, jobject context, jobject list_view,
     }
     env->DeleteLocalRef(adapter_cls);
 
-    jclass lv_cls = env->FindClass("android/widget/ListView");
-    if (lv_cls != nullptr) {
-        jmethodID set_adapter = env->GetMethodID(lv_cls, "setAdapter",
+    // setAdapter lives on AdapterView<T> — shared base of ListView and
+    // GridView. The expected argument type differs across the two
+    // (ListAdapter for ListView, ListAdapter for GridView in practice
+    // since ArrayAdapter implements both), so the generic descriptor
+    // works.
+    jclass av_cls = env->FindClass("android/widget/AdapterView");
+    if (av_cls != nullptr) {
+        // For ListView: setAdapter(ListAdapter); for GridView: same.
+        // We use the concrete subclass to dispatch via the right vtable.
+        jclass concrete = env->GetObjectClass(adapter_view);
+        jmethodID set_adapter = env->GetMethodID(concrete, "setAdapter",
             "(Landroid/widget/ListAdapter;)V");
         if (set_adapter != nullptr) {
-            env->CallVoidMethod(list_view, set_adapter, adapter);
+            env->CallVoidMethod(adapter_view, set_adapter, adapter);
             if (env->ExceptionCheck()) env->ExceptionClear();
         }
-        env->DeleteLocalRef(lv_cls);
+        env->DeleteLocalRef(concrete);
+        env->DeleteLocalRef(av_cls);
     }
     env->DeleteLocalRef(adapter);
 }
 
-void list_view_set_selection(JNIEnv* env, jobject list_view, int idx) {
+void adapter_view_set_selection(JNIEnv* env, jobject av, int idx) {
     if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass cls = env->FindClass("android/widget/ListView");
+    jclass cls = env->GetObjectClass(av);
     if (cls == nullptr) { env->ExceptionClear(); return; }
     jmethodID m = env->GetMethodID(cls, "setSelection", "(I)V");
     if (m != nullptr && idx >= 0) {
-        env->CallVoidMethod(list_view, m, static_cast<jint>(idx));
+        env->CallVoidMethod(av, m, static_cast<jint>(idx));
         if (env->ExceptionCheck()) env->ExceptionClear();
     }
     env->DeleteLocalRef(cls);
 }
 
-void list_view_set_choice_mode(JNIEnv* env, jobject list_view, jint mode) {
+void abs_list_view_set_choice_mode(JNIEnv* env, jobject av, jint mode) {
+    // setChoiceMode is on android.widget.AbsListView (parent of both
+    // ListView and GridView).
     if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass cls = env->FindClass("android/widget/ListView");
+    jclass cls = env->FindClass("android/widget/AbsListView");
     if (cls == nullptr) { env->ExceptionClear(); return; }
     jmethodID m = env->GetMethodID(cls, "setChoiceMode", "(I)V");
     if (m != nullptr) {
-        env->CallVoidMethod(list_view, m, mode);
+        env->CallVoidMethod(av, m, mode);
         if (env->ExceptionCheck()) env->ExceptionClear();
     }
     env->DeleteLocalRef(cls);
+}
+
+void grid_view_set_num_columns_auto(JNIEnv* env, jobject gv) {
+    // GridView.setNumColumns(GridView.AUTO_FIT) lets the system pick a
+    // sensible default column count for the screen width.
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass gv_cls = env->FindClass("android/widget/GridView");
+    if (gv_cls == nullptr) { env->ExceptionClear(); return; }
+    constexpr jint AUTO_FIT = -1;
+    jmethodID m = env->GetMethodID(gv_cls, "setNumColumns", "(I)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(gv, m, AUTO_FIT);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(gv_cls);
+}
+
+void install_item_click_router(JNIEnv* env, jobject adapter_view, collection_view* cv) {
+    if (env == nullptr || adapter_view == nullptr || cv == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
+    jclass router_cls = env->FindClass("io/mpapp/MppItemClickRouter");
+    if (router_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JI)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
+    jobject router = env->NewObject(router_cls, ctor,
+                                    reinterpret_cast<jlong>(cv),
+                                    static_cast<jint>(1 /* collection_view kind */));
+    if (env->ExceptionCheck() || router == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    env->DeleteLocalRef(router_cls);
+
+    jclass av_cls = env->FindClass("android/widget/AdapterView");
+    if (av_cls != nullptr) {
+        jmethodID set_listener = env->GetMethodID(av_cls, "setOnItemClickListener",
+            "(Landroid/widget/AdapterView$OnItemClickListener;)V");
+        if (set_listener != nullptr) {
+            env->CallVoidMethod(adapter_view, set_listener, router);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(av_cls);
+    }
+    env->DeleteLocalRef(router);
 }
 
 } // namespace
@@ -116,33 +222,58 @@ void list_view_set_choice_mode(JNIEnv* env, jobject list_view, jint mode) {
 collection_view_handler<platform::android>::collection_view_handler() {
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    native_ = make_list_view(env, detail::get_activity());
-    if (native_ != nullptr) list_view_set_choice_mode(env, native_, CHOICE_MODE_SINGLE);
+    native_ = make_object(env, "android/widget/FrameLayout", detail::get_activity());
+    rebuild_inner_for_layout(collection_layout::vertical_list);
 }
 
 collection_view_handler<platform::android>::~collection_view_handler() {
     if (JNIEnv* env = detail::attach_current_thread(); env != nullptr) {
+        if (inner_  != nullptr) { env->DeleteGlobalRef(inner_);  inner_  = nullptr; }
         if (native_ != nullptr) { env->DeleteGlobalRef(native_); native_ = nullptr; }
     }
 }
 
-void collection_view_handler<platform::android>::rebuild_items(const std::vector<std::string>& v) {
+void collection_view_handler<platform::android>::rebuild_inner_for_layout(collection_layout l) {
     if (native_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    install_adapter(env, detail::get_activity(), native_, v);
+
+    if (inner_ != nullptr) {
+        vg_remove_all(env, native_);
+        env->DeleteGlobalRef(inner_);
+        inner_ = nullptr;
+    }
+
+    const bool want_grid = (l == collection_layout::vertical_grid
+                         || l == collection_layout::horizontal_grid);
+    inner_ = make_object(env,
+        want_grid ? "android/widget/GridView" : "android/widget/ListView",
+        detail::get_activity());
+    is_grid_ = want_grid;
+
+    if (inner_ == nullptr) return;
+    if (want_grid) grid_view_set_num_columns_auto(env, inner_);
+    abs_list_view_set_choice_mode(env, inner_, CHOICE_MODE_SINGLE);
+    framelayout_add_match(env, native_, inner_);
+}
+
+void collection_view_handler<platform::android>::rebuild_items(const std::vector<std::string>& v) {
+    if (inner_ == nullptr) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    install_adapter(env, detail::get_activity(), inner_, v);
     if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
 }
 
 void collection_view_handler<platform::android>::apply_selection(int idx) {
-    if (native_ == nullptr) return;
+    if (inner_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    list_view_set_selection(env, native_, idx);
+    adapter_view_set_selection(env, inner_, idx);
 }
 
 void collection_view_handler<platform::android>::apply_selection_mode(collection_selection_mode m) {
-    if (native_ == nullptr) return;
+    if (inner_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
     jint mode = CHOICE_MODE_SINGLE;
@@ -152,22 +283,36 @@ void collection_view_handler<platform::android>::apply_selection_mode(collection
         case collection_selection_mode::single:
         default:                                  mode = CHOICE_MODE_SINGLE;   break;
     }
-    list_view_set_choice_mode(env, native_, mode);
+    abs_list_view_set_choice_mode(env, inner_, mode);
+}
+
+void collection_view_handler<platform::android>::apply_layout(collection_layout l) {
+    const bool want_grid = (l == collection_layout::vertical_grid
+                         || l == collection_layout::horizontal_grid);
+    if (want_grid == is_grid_ && inner_ != nullptr) return;
+
+    rebuild_inner_for_layout(l);
+    if (bound_ != nullptr) {
+        apply_selection_mode(bound_->selection_mode.get());
+        rebuild_items(bound_->items_source.get());
+        JNIEnv* env = detail::attach_current_thread();
+        if (env != nullptr) install_item_click_router(env, inner_, bound_);
+    }
 }
 
 void collection_view_handler<platform::android>::refresh_multi_selection_from_native() {
-    if (native_ == nullptr || bound_ == nullptr) return;
+    if (inner_ == nullptr || bound_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
-    // SparseBooleanArray ListView.getCheckedItemPositions()
-    jclass lv_cls = env->FindClass("android/widget/ListView");
-    if (lv_cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID get_checked = env->GetMethodID(lv_cls, "getCheckedItemPositions",
+    // SparseBooleanArray AbsListView.getCheckedItemPositions()
+    jclass av_cls = env->FindClass("android/widget/AbsListView");
+    if (av_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID get_checked = env->GetMethodID(av_cls, "getCheckedItemPositions",
         "()Landroid/util/SparseBooleanArray;");
-    jobject sparse = (get_checked != nullptr) ? env->CallObjectMethod(native_, get_checked) : nullptr;
-    env->DeleteLocalRef(lv_cls);
+    jobject sparse = (get_checked != nullptr) ? env->CallObjectMethod(inner_, get_checked) : nullptr;
+    env->DeleteLocalRef(av_cls);
     if (sparse == nullptr) { env->ExceptionClear(); return; }
 
     jclass sba_cls = env->FindClass("android/util/SparseBooleanArray");
@@ -200,49 +345,12 @@ void collection_view_handler<platform::android>::refresh_multi_selection_from_na
     }
 }
 
-namespace {
-
-// Install MppItemClickRouter(collection_view*, kind=1) — same shape as
-// the list_view router, different kind code.
-void install_item_click_router(JNIEnv* env, jobject list_view_obj, collection_view* cv) {
-    if (env == nullptr || list_view_obj == nullptr || cv == nullptr) return;
-    if (env->ExceptionCheck()) env->ExceptionClear();
-
-    jclass router_cls = env->FindClass("io/mpapp/MppItemClickRouter");
-    if (router_cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JI)V");
-    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
-    jobject router = env->NewObject(router_cls, ctor,
-                                    reinterpret_cast<jlong>(cv),
-                                    static_cast<jint>(1 /* collection_view kind */));
-    if (env->ExceptionCheck() || router == nullptr) {
-        env->ExceptionClear();
-        env->DeleteLocalRef(router_cls);
-        return;
-    }
-    env->DeleteLocalRef(router_cls);
-
-    jclass av_cls = env->FindClass("android/widget/AdapterView");
-    if (av_cls != nullptr) {
-        jmethodID set_listener = env->GetMethodID(av_cls, "setOnItemClickListener",
-            "(Landroid/widget/AdapterView$OnItemClickListener;)V");
-        if (set_listener != nullptr) {
-            env->CallVoidMethod(list_view_obj, set_listener, router);
-            if (env->ExceptionCheck()) env->ExceptionClear();
-        }
-        env->DeleteLocalRef(av_cls);
-    }
-    env->DeleteLocalRef(router);
-}
-
-} // namespace
-
 void collection_view_handler<platform::android>::map_items_source(collection_view& cv) {
     bound_ = &cv;
     rebuild_items(cv.items_source.get());
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
     JNIEnv* env = detail::attach_current_thread();
-    if (env != nullptr) install_item_click_router(env, native_, &cv);
+    if (env != nullptr) install_item_click_router(env, inner_, &cv);
 }
 
 void collection_view_handler<platform::android>::map_selected_index(collection_view& cv) {
@@ -253,6 +361,11 @@ void collection_view_handler<platform::android>::map_selected_index(collection_v
 void collection_view_handler<platform::android>::map_selection_mode(collection_view& cv) {
     apply_selection_mode(cv.selection_mode.get());
     cv.selection_mode.changed.subscribe(mode_slot_, mode_cb_);
+}
+
+void collection_view_handler<platform::android>::map_layout(collection_view& cv) {
+    apply_layout(cv.layout.get());
+    cv.layout.changed.subscribe(layout_slot_, layout_cb_);
 }
 
 } // namespace mpapp
