@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "ImageCell"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/cells"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # ImageCell
 
 > [!info] Status
-> **mock** — surface at `include/mpapp/image_cell.hpp` per [[ADR-0021-tableview-cell-types]]. Extends [[TextCell]]; adds `image_uri`. Mock handler tests cover the `text` + `image_uri` mappers and verify the inherited `detail` field survives the inheritance.
+> **android-real** — Win `mux::Controls::Border` + 2-col Grid (Image 40×40 auto-col + vertical StackPanel(TextBlock+TextBlock)) — BitmapImage source handles file://, http://, ms-appx://. Linux horizontal `GtkBox` (`GtkImage` 40px + vertical GtkBox of label pair) — `icon:foo` prefix routes through `gtk_image_set_from_icon_name`, plain paths through `gtk_image_set_from_file`. Android horizontal `LinearLayout` (ImageView 80px + vertical LinearLayout of TextView pair weight=1) — BitmapFactory.decodeFile for filesystem paths.
 
 ## Overview
 
