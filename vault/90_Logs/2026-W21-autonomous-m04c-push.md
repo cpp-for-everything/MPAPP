@@ -109,6 +109,44 @@ vault/10_Architecture/Components/*.md                  (per-widget status + desc
 5. **ADR-0016 compile-time route table** for Shell — heavy template metaprogramming.
 6. **macOS + iOS real handlers** for everything already at android-real — Apple host required.
 
+---
+
+## Continued autonomous run (2026-05-22, late session)
+
+Picks up after the page + list families landed. Drove the remaining widgets except the graphics pair through to android-real.
+
+### Commits landed
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `c306916` | **view_cell** real handlers — Win Border w/ Child swap + Linux GtkBox single-slot + Android FrameLayout. Content resolved through ADR-0013 dispatch. | Win/Linux/Android green |
+| `4c94b6a` | **switch_cell** real handlers — Win Border+Grid (TextBlock+ToggleSwitch) + Linux horizontal GtkBox (GtkLabel+GtkSwitch) + Android LinearLayout (TextView weight=1 + Switch). Two-way `on` binding via `MppCheckedChangeListener` kind=4. Emits `on_changed` on user flips. | Win/Linux/Android green |
+| `9556131` | **image_cell** real handlers — Win Border+Grid (Image 40px + StackPanel(TextBlock pair)) + Linux GtkBox (GtkImage 40px + label pair) + Android LinearLayout (ImageView 80px + label pair weight=1). BitmapImage / `gtk_image_set_from_file` / `BitmapFactory.decodeFile` loaders. | Win/Linux/Android green |
+| `83a710e` | **entry_cell** real handlers — TextBox/GtkEntry/EditText with keyboard_kind→InputScope/InputPurpose/InputType mapping; two-way text via existing TextWatcher (kind=3); new `MppEditorActionListener` carries IME terminal actions (DONE/GO/NEXT/SEARCH/SEND) to `completed`. | Win/Linux/Android green |
+| `9d8a45c` | **WebView** real handlers — Win `muxc::WebView2` + Linux `WebKitGTK 6.x` (LGPL dynamic per Rule 9) + Android `android.webkit.WebView` w/ MppWebViewClient. Wires url + html_source + is_loading + can_go_back/forward + navigating/navigated end-to-end. Added INTERNET permission + `usesCleartextTraffic` to android_hello manifest. Linux stubs out cleanly if WebKitGTK missing at configure. | Win/Linux/Android green |
+| `00761be` | **HybridWebView** real handlers — JS<->C++ bridge across all 3 platforms. Win WebView2 PostWebMessageAsString + AddScriptToExecuteOnDocumentCreatedAsync; Linux WebKitUserContentManager script-message-handler (`mpapp_send`) + user-script at document-start; Android `addJavascriptInterface("mpapp_native", MppJsBridge)`. Shared injected JS shim: `window.mpapp = { send(p), on(fn), _receive(p) }`. | Win/Linux/Android green |
+
+### Cross-cutting tech added this run
+
+- **`MppEditorActionListener` (kind-discriminated)** — third generic Android router after MppActionRouter and MppCheckedChangeListener. Filters IME action IDs (`DONE`/`GO`/`NEXT`/`SEARCH`/`SEND`) before invoking the native handler — non-terminal events drop on the floor.
+- **`MppWebViewClient`** — bespoke WebViewClient subclass routing `onPageStarted`/`onPageFinished` into `web_view_client_dispatch.cpp`.
+- **`MppJsBridge`** — `@JavascriptInterface` host object that exposes `send(payload)` to the JS shim and trampolines into `hybrid_web_view_handler` via `js_bridge_dispatch.cpp`.
+- **WebKitGTK 6.x standardization** — initial attempt fell back to `webkit2gtk-4.1` but its GTK3 headers can't combine with our GTK4 build. Dropped the fallback. `libwebkitgtk-6.0-dev` is now a documented Linux build requirement.
+
+### Status as of late session 2026-05-22
+
+| Widget | Status |
+|---|---|
+| NavigationPage / TabbedPage / FlyoutPage / Shell | android-real |
+| ListView / CollectionView / TableView | android-real |
+| TableView cells (text/view/switch/image/entry) | **android-real** ← all 5 landed today |
+| Grid (real) | android-real |
+| **WebView / HybridWebView** | **android-real** ← landed today |
+| ShapeView / GraphicsView | mock — Cairo facade per ADR-0015 still pending |
+| macOS / iOS | pending Apple host |
+
+**Net result:** Every widget in M-04c reaches android-real *except* the ShapeView/GraphicsView pair (gated on ADR-0015 graphics facade) and the macOS/iOS platforms (gated on Apple host). The cell-type tree is now fully wired, including bidirectional bindings on switch_cell + entry_cell with native event echoes through the kind-discriminated router family.
+
 ## See also
 
 - [[40_Roadmap/M-04c-handler-heavy-port]] — canonical tracker.

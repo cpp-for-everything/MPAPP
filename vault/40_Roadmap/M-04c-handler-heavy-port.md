@@ -71,14 +71,14 @@ For each gated widget:
 | ListView | [[ADR-0020-virtualized-item-host-wrap-platform]] | **android-real (2026-05-22)** — Win mux::ListView + Linux GtkListBox + Android android.widget.ListView w/ ArrayAdapter |
 | TableView | [[ADR-0020-virtualized-item-host-wrap-platform]] + [[ADR-0021-tableview-cell-types]] | **android-real (2026-05-22)** — section-flatten rendering on 3 platforms; cell-typed rendering pending table_view surface refactor |
 | CollectionView | [[ADR-0020-virtualized-item-host-wrap-platform]] | **android-real (2026-05-22)** — Win mux::ListView + Linux GtkListBox + Android ListView; selection_mode mapping wired; multi-select events + grid layouts deferred |
-| TableView cells | [[ADR-0021-tableview-cell-types]] | **mock landed (2026-05-22)** — text_cell + entry_cell + switch_cell + view_cell + image_cell + base cell |
-| WebView | RFC-0001 § Linux licensing | **mock landed** — url + html + history + load/back/forward/reload + navigating/navigated (2026-05-21) |
-| HybridWebView | depends WebView | **mock landed** — extends WebView with hybrid_namespace + send_to_js/simulate_inbound + message_received/message_sent (2026-05-21) |
+| TableView cells | [[ADR-0021-tableview-cell-types]] | **android-real (2026-05-22)** — text_cell + view_cell + switch_cell + image_cell + entry_cell all 3 platforms; new shared `MppEditorActionListener` carries IME terminal actions to entry_cell.completed |
+| WebView | RFC-0001 § Linux licensing | **android-real (2026-05-22)** — Win muxc::WebView2 + Linux WebKitGTK 6.x (LGPL dynamic) + Android android.webkit.WebView; navigating/navigated/is_loading/can_go_back/forward wired via NavigationStarting/Completed + "load-changed" + MppWebViewClient |
+| HybridWebView | depends WebView + [[ADR-0018-hybrid-webview-typed-bridge]] | **android-real (2026-05-22)** — `window.mpapp` JS shim injected on each page; Win WebView2 WebMessageReceived/PostWebMessageAsString + Linux WebKitUserContentManager script-message-handler + Android addJavascriptInterface MppJsBridge |
 | ShapeView | [[ADR-0015-graphics-backend-dual]] | **mock landed** — shape_kind enum + data path string + fill/stroke/stroke_thickness/opacity (2026-05-21) |
 | GraphicsView | [[ADR-0015-graphics-backend-dual]] | **mock landed** — width/height + draw_count + invalidate() + draw_requested signal (2026-05-21) |
 | Grid (real) | [[ADR-0017-grid-track-definitions]] | **android-real (2026-05-22)** — Win mux::Grid w/ GridLength + Linux GtkGrid w/ hexpand bridging + Android GridLayout w/ Spec-based LayoutParams; per-child placement via grid.set_row/set_column attached store. Star sizing is approximate on Linux/Android — exact only on Win. |
 
-**Status as of 2026-05-22 close:** The page-level family (Nav / Tab / Flyout / Shell) **and** the list family (ListView / CollectionView / TableView) are all at android-real. Cell type tree (text/entry/switch/view/image) shipped at mock. Remaining real-handler work: WebView/HybridWebView (LGPL WebKitGTK + WebView2 + Android WebView), ShapeView/GraphicsView (Cairo facade per ADR-0015), Grid (real layout engine per ADR-0017). Compile-time route table per ADR-0016 still pending Shell follow-up.
+**Status as of 2026-05-22 close:** Every widget except the graphics-backend pair (ShapeView, GraphicsView) is at android-real. Cell type tree (text/view/switch/image/entry) all live, WebView + HybridWebView both wire native messaging end-to-end. Remaining real-handler work: ShapeView/GraphicsView (Cairo facade per ADR-0015 + Android Canvas adapter). Compile-time route table per ADR-0016 still pending Shell follow-up.
 
 ## See also
 
