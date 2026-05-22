@@ -243,6 +243,14 @@ The only remaining gap is Phase F (the *other* Phase F — async bridge methods 
 
 **Net:** ADR-0018 is now fully complete in both directions. Bridge methods can be sync (return-by-value) or async (capture-and-defer-respond). The dispatch_async path is the canonical one going forward; the original sync `dispatch()` remains for callers who only need the synchronous return-string shape. ctest 290 → 302 across the +12 new async test cases; the suite stays green on every platform.
 
+## ADR-0016 — compile-time Shell route table
+
+| Commit | Scope | Build state |
+|---|---|---|
+| _(pending)_ | **route_table NTTP** — `include/mpapp/detail/fixed_string.hpp` (C++20 class-type NTTP wrapper) + `include/mpapp/route.hpp` (`param<"name", T>`, `route<"path", Page, Params...>`, `route_table<Routes...>`). `shell::go_to<Path, &Table>(args...)` templated entry point that static_asserts route-not-found, arg count, and per-arg type convertibility; falls through to the existing string-based `go_to(uri)` after building the `//path?p1=v1&p2=v2` URI so `current_route` / `current_tab_index` / `navigated` semantics are preserved. The string-based parser was extended to cut at `?` (in addition to `/`) so the typed path's query strings don't break tab matching. Route finder is index-sequence based rather than recursive partial specialization → clean static_assert diagnostic. ADL-customizable `to_route_string` for argument stringification (built-ins for int/long/long long/unsigned/double/bool/string). 6 ctest cases + ~15 compile-time `static_assert`s. | Win 308/308 + Linux 308/308 + Android APK builds clean |
+
+**Net:** the compile-time path is open for new C++ code without breaking the runtime path that the XAML compiler still uses. Apps can mix string-based and typed `go_to` freely. Two remaining ADR-0016 follow-ups (route guards, route-aware lifecycle) need the executor (already shipped per ADR-0019) and are tracked as future work.
+
 ## CollectionView typed_items
 
 | Commit | Scope | Build state |
