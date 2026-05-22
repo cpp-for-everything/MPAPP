@@ -6,7 +6,8 @@
 //
 // Kinds defined today (kept in sync with src/handlers/android/action_router.cpp):
 //   0 — NavigationPage back button     (ownerPtr = navigation_page*, payload unused)
-//   1 — Shell tab strip button         (ownerPtr = shell*, payload = tab index)
+//   1 — Shell tab strip button         (ownerPtr = shell*,           payload = tab index)
+//   2 — TabbedPage tab strip button    (ownerPtr = tabbed_page*,     payload = tab index)
 //
 // Adding a new event source: pick the next free kind, wire it on both
 // sides, and use this single listener class.

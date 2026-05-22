@@ -85,6 +85,96 @@ void vg_remove_all(JNIEnv* env, jobject parent) {
     env->DeleteLocalRef(cls);
 }
 
+void view_set_padding(JNIEnv* env, jobject view_obj, int l, int t, int r, int b) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/view/View");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setPadding", "(IIII)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(view_obj, m,
+                            static_cast<jint>(l), static_cast<jint>(t),
+                            static_cast<jint>(r), static_cast<jint>(b));
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+void tv_set_text_color(JNIEnv* env, jobject tv, jint argb) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/TextView");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setTextColor", "(I)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(tv, m, argb);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+// android.graphics.Typeface.DEFAULT / DEFAULT_BOLD via static field access.
+jobject typeface_default(JNIEnv* env, bool bold) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/graphics/Typeface");
+    if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
+    jfieldID fid = env->GetStaticFieldID(cls,
+        bold ? "DEFAULT_BOLD" : "DEFAULT", "Landroid/graphics/Typeface;");
+    jobject tf = (fid != nullptr) ? env->GetStaticObjectField(cls, fid) : nullptr;
+    env->DeleteLocalRef(cls);
+    return tf;
+}
+
+void tv_set_typeface(JNIEnv* env, jobject tv, jobject typeface) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/TextView");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setTypeface", "(Landroid/graphics/Typeface;)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(tv, m, typeface);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+// Install MppActionRouter(tp, kind=2, payload=tab_index) on a tab TextView.
+void install_tab_click_router(JNIEnv* env, jobject tab_view,
+                              jlong owner_ptr, jint tab_index) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass router_cls = env->FindClass("io/mpapp/MppActionRouter");
+    if (router_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JII)V");
+    if (ctor == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    jobject router = env->NewObject(router_cls, ctor,
+                                    owner_ptr,
+                                    static_cast<jint>(2 /* tabbed_page_tab kind */),
+                                    tab_index);
+    if (env->ExceptionCheck() || router == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    env->DeleteLocalRef(router_cls);
+
+    jclass view_cls = env->FindClass("android/view/View");
+    if (view_cls != nullptr) {
+        jmethodID set_l = env->GetMethodID(view_cls, "setOnClickListener",
+            "(Landroid/view/View$OnClickListener;)V");
+        if (set_l != nullptr) {
+            env->CallVoidMethod(tab_view, set_l, router);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(view_cls);
+    }
+    env->DeleteLocalRef(router);
+}
+
+// Material-ish color hints: 0xFF1976D2 = primary blue, 0xFF606060 = grey.
+constexpr jint COLOR_SELECTED   = static_cast<jint>(0xFF1976D2u);
+constexpr jint COLOR_UNSELECTED = static_cast<jint>(0xFF606060u);
+
 } // namespace
 
 tabbed_page_handler<platform::android>::tabbed_page_handler() {
@@ -107,6 +197,10 @@ tabbed_page_handler<platform::android>::tabbed_page_handler() {
 
 tabbed_page_handler<platform::android>::~tabbed_page_handler() {
     if (JNIEnv* env = detail::attach_current_thread(); env != nullptr) {
+        for (jobject t : tab_views_) {
+            if (t != nullptr) env->DeleteGlobalRef(t);
+        }
+        tab_views_.clear();
         if (content_host_ != nullptr) { env->DeleteGlobalRef(content_host_); content_host_ = nullptr; }
         if (tab_strip_    != nullptr) { env->DeleteGlobalRef(tab_strip_);    tab_strip_    = nullptr; }
         if (native_       != nullptr) { env->DeleteGlobalRef(native_);       native_       = nullptr; }
@@ -117,24 +211,59 @@ void tabbed_page_handler<platform::android>::rebuild_children(const std::vector<
     current_kids_ = kids;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
+
+    // Release any previous tab-view global refs before clearing the strip.
+    for (jobject t : tab_views_) {
+        if (t != nullptr) env->DeleteGlobalRef(t);
+    }
+    tab_views_.clear();
+
     vg_remove_all(env, tab_strip_);
     jobject ctx = detail::get_activity();
-    for (page* p : kids) {
-        if (p == nullptr) continue;
+    for (std::size_t i = 0; i < kids.size(); ++i) {
+        page* p = kids[i];
+        if (p == nullptr) {
+            tab_views_.push_back(nullptr);
+            continue;
+        }
         jobject label = make_object(env, "android/widget/TextView", ctx);
         if (label != nullptr) {
             tv_set_text(env, label, p->title.get().c_str());
+            view_set_padding(env, label, 32, 16, 32, 16);
+            install_tab_click_router(env, label,
+                                     reinterpret_cast<jlong>(bound_),
+                                     static_cast<jint>(i));
             vg_add(env, tab_strip_, label);
-            env->DeleteGlobalRef(label);
+            // Keep a strong (global) ref so apply_selection can restyle it.
+            tab_views_.push_back(label);
+        } else {
+            tab_views_.push_back(nullptr);
         }
     }
-    // Render current selection content.
+    // Render current selection content + restyle tabs.
     if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
 }
 
 void tabbed_page_handler<platform::android>::apply_selection(int idx) {
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
+
+    // Restyle every tab: selected gets primary color + bold, others get
+    // grey + regular. The selected-index out-of-range case (e.g. empty
+    // children) restyles all tabs as unselected.
+    jobject tf_bold    = typeface_default(env, true);
+    jobject tf_regular = typeface_default(env, false);
+    for (std::size_t i = 0; i < tab_views_.size(); ++i) {
+        jobject t = tab_views_[i];
+        if (t == nullptr) continue;
+        const bool is_selected = (static_cast<int>(i) == idx);
+        tv_set_text_color(env, t, is_selected ? COLOR_SELECTED : COLOR_UNSELECTED);
+        tv_set_typeface(env, t, is_selected ? tf_bold : tf_regular);
+    }
+    if (tf_bold    != nullptr) env->DeleteLocalRef(tf_bold);
+    if (tf_regular != nullptr) env->DeleteLocalRef(tf_regular);
+
+    // Swap content area.
     vg_remove_all(env, content_host_);
     if (idx < 0 || idx >= static_cast<int>(current_kids_.size())) return;
     page* sel = current_kids_[static_cast<std::size_t>(idx)];

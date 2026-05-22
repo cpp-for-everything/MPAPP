@@ -54,7 +54,10 @@ private:
     jobject tab_strip_    = nullptr;  // LinearLayout horizontal
     jobject content_host_ = nullptr;  // FrameLayout
 
-    std::vector<page*> current_kids_{};
+    std::vector<page*>   current_kids_{};
+    // Tab-strip TextView refs kept around so apply_selection can restyle
+    // the active vs inactive tabs. Sized to match current_kids_.
+    std::vector<jobject> tab_views_{};
 
     tabbed_page* bound_ = nullptr;
 
