@@ -132,6 +132,39 @@ public:
     [[nodiscard]] const hybrid_bridge* bridge() const noexcept { return bridge_.get(); }
     [[nodiscard]] bool                 has_bridge()   const noexcept { return bridge_ != nullptr; }
 
+    // Invoke a JS-side method with typed arguments. Constructs a JSON-RPC
+    // envelope of the form
+    //   {"id":N,"method":"<method_name>","args":[<arg0>,<arg1>,...]}
+    // and posts it through send_to_js. The id auto-increments per call
+    // so the JS side (or its eventual codegen'd response router) can
+    // correlate.
+    //
+    // v1 is fire-and-forget — there's no return-value plumbing yet.
+    // The `task<T>` async-return shape from ADR-0018 § Decision is v2.
+    //
+    // The args' types must each have a `write` overload in the json
+    // layer (primitives, std::string, std::vector<T>, std::optional<T>,
+    // or user types that overload `to_json(writer&, const T&)` via ADL).
+    //
+    // Returns the id used in the envelope so the caller can match
+    // responses on `message_received` (typed-response routing on the
+    // C++ side is also v2).
+    template <class... Args>
+    int invoke_js(std::string_view method_name, const Args&... args) {
+        const int id = next_outbound_id_++;
+        std::string envelope;
+        {
+            detail::json::writer w{envelope};
+            w.begin_object();
+            w.field("id",     id);
+            w.field("method", method_name);
+            w.field_array("args", args...);
+            w.end_object();
+        }
+        send_to_js(envelope);
+        return id;
+    }
+
     // ----- Handler ------------------------------------------------------
 
     hybrid_web_view_handler<platform::current>&       hwv_handler() noexcept       { return *hwv_handler_; }
@@ -142,6 +175,7 @@ public:
 private:
     std::string                                 last_message_out_{};
     std::unique_ptr<hybrid_bridge>              bridge_{};
+    int                                         next_outbound_id_ = 1;
     hybrid_web_view_handler<platform::current>* hwv_handler_ = nullptr;
 };
 

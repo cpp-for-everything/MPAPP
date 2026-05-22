@@ -104,6 +104,27 @@ public:
         write(value);
     }
 
+    // Convenience: write a field whose value is a fixed-size array of
+    // typed values, each potentially a different type. Used by the
+    // HybridWebView typed-bridge outbound path to write the "args"
+    // field of a JSON-RPC envelope from a variadic pack.
+    template <class... Vs>
+    void field_array(std::string_view name, const Vs&... values) {
+        if (!first_field_) *out_ += ',';
+        first_field_ = false;
+        append_quoted(name);
+        *out_ += ':';
+        *out_ += '[';
+        bool first = true;
+        auto write_one = [this, &first](const auto& v) {
+            if (!first) *out_ += ',';
+            first = false;
+            write(v);
+        };
+        (write_one(values), ...);
+        *out_ += ']';
+    }
+
     // Array scope alternative when caller wants to mix typed elements.
     void begin_array() { *out_ += '['; array_first_ = true; }
     void end_array()   { *out_ += ']'; array_first_ = false; }
