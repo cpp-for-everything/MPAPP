@@ -125,3 +125,128 @@ TEST_CASE("typed_items + items_source can coexist on the surface",
     CHECK(cv.typed_items.get().size()  == 1);
     CHECK(cv.typed_items.get()[0]      == &a);
 }
+
+// ---- item_template ---------------------------------------------------------
+
+TEST_CASE("item_template materializes a cell per items_source row",
+          "[mock][collection_view][template]") {
+    collection_view cv;
+
+    cv.item_template = [](int i) -> std::unique_ptr<view> {
+        auto c  = std::make_unique<text_cell>();
+        c->text = "row-" + std::to_string(i);
+        return c;
+    };
+    cv.items_source = std::vector<std::string>{"a", "b", "c", "d"};
+
+    REQUIRE(cv.materialized_count() == 4);
+    auto vs = cv.materialized_views();
+    REQUIRE(vs.size() == 4);
+    // We constructed text_cell so each pointer should be non-null and
+    // downcast-able. Check via static_cast (we know the concrete type).
+    for (int i = 0; i < 4; ++i) {
+        auto* tc = static_cast<text_cell*>(vs[static_cast<std::size_t>(i)]);
+        REQUIRE(tc != nullptr);
+        CHECK(tc->text.get() == "row-" + std::to_string(i));
+    }
+}
+
+TEST_CASE("item_template re-materializes when items_source changes",
+          "[mock][collection_view][template]") {
+    collection_view cv;
+    cv.item_template = [](int) -> std::unique_ptr<view> {
+        return std::make_unique<text_cell>();
+    };
+
+    cv.items_source = std::vector<std::string>{"a", "b"};
+    CHECK(cv.materialized_count() == 2);
+
+    cv.items_source = std::vector<std::string>{"x", "y", "z", "w", "u"};
+    CHECK(cv.materialized_count() == 5);
+
+    cv.items_source = std::vector<std::string>{};
+    CHECK(cv.materialized_count() == 0);
+}
+
+TEST_CASE("item_template re-materializes when template changes",
+          "[mock][collection_view][template]") {
+    collection_view cv;
+    cv.items_source = std::vector<std::string>{"a", "b", "c"};
+
+    // No template set yet — materialized is empty.
+    CHECK(cv.materialized_count() == 0);
+
+    cv.item_template = [](int) { return std::make_unique<text_cell>(); };
+    CHECK(cv.materialized_count() == 3);
+
+    // Replace with a different template — re-materialize.
+    cv.item_template = [](int) { return std::make_unique<label>(); };
+    CHECK(cv.materialized_count() == 3);
+
+    // Clear the template — materialized clears.
+    cv.item_template = collection_view::item_factory_t{};
+    CHECK(cv.materialized_count() == 0);
+}
+
+TEST_CASE("item_template factory receives the row index",
+          "[mock][collection_view][template]") {
+    collection_view  cv;
+    std::vector<int> seen;
+
+    // Capture by value won't survive — capture by reference into a
+    // member-like external so the lambda is short-lived but the
+    // observed-during-materialize behavior is recorded.
+    cv.item_template = [&seen](int i) -> std::unique_ptr<view> {
+        seen.push_back(i);
+        return std::make_unique<text_cell>();
+    };
+    cv.items_source = std::vector<std::string>{"r0", "r1", "r2"};
+
+    REQUIRE(seen.size() == 3);
+    CHECK(seen[0] == 0);
+    CHECK(seen[1] == 1);
+    CHECK(seen[2] == 2);
+}
+
+TEST_CASE("item_template doesn't override typed_items on the surface",
+          "[mock][collection_view][template]") {
+    // The surface holds both; the handler decides precedence. Verify
+    // they remain independent on the C++ side.
+    collection_view cv;
+    label           a{};
+    cv.typed_items  = std::vector<view*>{ &a };
+    cv.item_template = [](int) { return std::make_unique<text_cell>(); };
+    cv.items_source = std::vector<std::string>{"a", "b"};
+
+    CHECK(cv.typed_items.get().size() == 1);
+    CHECK(cv.materialized_count()     == 2);
+}
+
+TEST_CASE("materialized_changed fires on rematerialize",
+          "[mock][collection_view][template]") {
+    collection_view cv;
+    int hits = 0;
+    struct cb_t {
+        int* hits;
+        void operator()() const { ++*hits; }
+    };
+    cb_t cb{&hits};
+    signal_slot<> slot{};
+    cv.materialized_changed.subscribe(slot, cb);
+
+    // No template + items change → still fires (with empty materialize).
+    cv.items_source = std::vector<std::string>{"a"};
+    CHECK(hits == 1);
+
+    // Template set → fires.
+    cv.item_template = [](int) { return std::make_unique<text_cell>(); };
+    CHECK(hits == 2);
+
+    // items_source change → fires.
+    cv.items_source = std::vector<std::string>{"x", "y"};
+    CHECK(hits == 3);
+
+    // Template cleared → fires (materialize empties).
+    cv.item_template = collection_view::item_factory_t{};
+    CHECK(hits == 4);
+}

@@ -351,6 +351,10 @@ void collection_view_handler<platform::android>::rebuild_active() {
     if (bound_ == nullptr) return;
     if (!bound_->typed_items.get().empty()) {
         rebuild_typed(bound_->typed_items.get());
+    } else if (bound_->materialized_count() > 0) {
+        // item_template materialized — render through typed pipeline
+        // (same Android non-virtualizing path).
+        rebuild_typed(bound_->materialized_views());
     } else {
         // Flat mode — ensure inner_ matches the current layout enum.
         const collection_layout l = bound_->layout.get();
@@ -461,6 +465,7 @@ void collection_view_handler<platform::android>::map_typed_items(collection_view
     bound_ = &cv;
     rebuild_active();
     cv.typed_items.changed.subscribe(typed_slot_, typed_cb_);
+    cv.materialized_changed.subscribe(materialized_slot_, materialized_cb_);
 }
 
 void collection_view_handler<platform::android>::map_selected_index(collection_view& cv) {

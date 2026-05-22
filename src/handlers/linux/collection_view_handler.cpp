@@ -202,6 +202,9 @@ void collection_view_handler<platform::linux_>::rebuild_active() {
     if (bound_ == nullptr) return;
     if (!bound_->typed_items.get().empty()) {
         rebuild_typed(bound_->typed_items.get());
+    } else if (bound_->materialized_count() > 0) {
+        // item_template materialized — render through typed pipeline.
+        rebuild_typed(bound_->materialized_views());
     } else {
         rebuild_items(bound_->items_source.get());
     }
@@ -272,6 +275,7 @@ void collection_view_handler<platform::linux_>::map_typed_items(collection_view&
     wire_tap_signals();
     rebuild_active();
     cv.typed_items.changed.subscribe(typed_slot_, typed_cb_);
+    cv.materialized_changed.subscribe(materialized_slot_, materialized_cb_);
 }
 
 void collection_view_handler<platform::linux_>::map_selected_index(collection_view& cv) {

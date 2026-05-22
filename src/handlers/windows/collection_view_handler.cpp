@@ -135,6 +135,10 @@ void collection_view_handler<platform::windows>::rebuild_active() {
     if (bound_ == nullptr) return;
     if (!bound_->typed_items.get().empty()) {
         rebuild_typed(bound_->typed_items.get());
+    } else if (bound_->materialized_count() > 0) {
+        // item_template materialized — render the materialized cells
+        // through the same typed pipeline.
+        rebuild_typed(bound_->materialized_views());
     } else {
         rebuild_items(bound_->items_source.get());
     }
@@ -192,6 +196,10 @@ void collection_view_handler<platform::windows>::map_typed_items(collection_view
     bound_ = &cv;
     rebuild_active();
     cv.typed_items.changed.subscribe(typed_slot_, typed_cb_);
+    // Listen for item_template materialize events too — fire a
+    // rebuild_active when materialized_ changes so template-driven
+    // updates flow into the native widget.
+    cv.materialized_changed.subscribe(materialized_slot_, materialized_cb_);
 }
 
 void collection_view_handler<platform::windows>::map_selected_index(collection_view& cv) {

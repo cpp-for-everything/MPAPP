@@ -76,6 +76,10 @@ private:
         collection_view_handler<platform::windows>* self;
         void operator()(collection_layout l) const { self->apply_layout(l); }
     };
+    struct materialized_cb_t {
+        collection_view_handler<platform::windows>* self;
+        void operator()() const { self->rebuild_active(); }
+    };
 
     winrt::Microsoft::UI::Xaml::Controls::Border       native_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::ListViewBase inner_{nullptr};
@@ -83,16 +87,18 @@ private:
     collection_view* bound_ = nullptr;
     bool             suppress_selection_event_ = false;
 
-    items_cb_t  items_cb_{this};
-    typed_cb_t  typed_cb_{this};
-    sel_cb_t    sel_cb_{this};
-    mode_cb_t   mode_cb_{this};
-    layout_cb_t layout_cb_{this};
+    items_cb_t        items_cb_{this};
+    typed_cb_t        typed_cb_{this};
+    sel_cb_t          sel_cb_{this};
+    mode_cb_t         mode_cb_{this};
+    layout_cb_t       layout_cb_{this};
+    materialized_cb_t materialized_cb_{this};
     signal_slot<const std::vector<std::string>&>          items_slot_{};
     signal_slot<const std::vector<view*>&>                typed_slot_{};
     signal_slot<const int&>                                sel_slot_{};
     signal_slot<const collection_selection_mode&>          mode_slot_{};
     signal_slot<const collection_layout&>                  layout_slot_{};
+    signal_slot<>                                          materialized_slot_{};
 };
 
 } // namespace mpapp
