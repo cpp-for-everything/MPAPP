@@ -25,6 +25,7 @@
 #include "observable.hpp"
 #include "page.hpp"
 #include "platform.hpp"
+#include "route.hpp"
 #include "signal.hpp"
 
 namespace mpapp {
@@ -92,8 +93,12 @@ public:
         if (u.rfind("//", 0) == 0) {
             std::string_view tail = std::string_view{u}.substr(2);
             std::string_view tab_name = tail;
-            auto slash = tab_name.find('/');
-            if (slash != std::string_view::npos) tab_name = tab_name.substr(0, slash);
+            // Cut at the first delimiter — either '/' (leaf path) or
+            // '?' (query string). Whichever comes first wins.
+            const auto slash = tab_name.find('/');
+            const auto qmark = tab_name.find('?');
+            const auto cut   = std::min(slash, qmark);
+            if (cut != std::string_view::npos) tab_name = tab_name.substr(0, cut);
             if (!tab_name.empty()) {
                 const auto& v = tabs.get();
                 for (std::size_t i = 0; i < v.size(); ++i) {
@@ -106,6 +111,37 @@ public:
         }
         current_route.set(std::move(u));
         navigated.emit(current_route.get());
+    }
+
+    // Compile-time-checked navigation per
+    // [[ADR-0016-shell-compile-time-routes]]. Path must be a route in
+    // Table; arg count + types must match the route's params. Builds
+    // the "//path?p1=v1&p2=v2" URI and delegates to the string-based
+    // go_to() — so all the runtime side effects (current_route,
+    // current_tab_index, navigated) work the same way regardless of
+    // which entry point you took.
+    //
+    //   inline constexpr auto routes = mpapp::route_table{
+    //       mpapp::route<"home/details", details_page,
+    //                    mpapp::param<"id", int>>{},
+    //   };
+    //   shell.go_to<"home/details", &routes>(42);
+    //
+    // Table is taken by pointer so it can be a non-type template
+    // parameter (C++20 — the pointed-to object must be a
+    // constexpr-initialized variable with linkage; `inline constexpr`
+    // covers it).
+    template <detail::fixed_string Path, auto* Table, class... Args>
+    void go_to(Args&&... args) {
+        using table_type = std::remove_pointer_t<decltype(Table)>;
+        static_assert(table_type::template has<Path>(),
+                      "shell::go_to: route not in route_table");
+        using route_t = typename table_type::template route_for<Path>;
+        static_assert(std::tuple_size_v<typename route_t::params_t> == sizeof...(Args),
+                      "shell::go_to: argument count doesn't match route's param count");
+        // Per-arg type checking happens inside build_uri's append_args.
+        std::string uri = table_type::template build_uri<Path>(std::forward<Args>(args)...);
+        go_to(std::string_view{uri});
     }
 
     void open_flyout()  { set_flyout(true);  }
