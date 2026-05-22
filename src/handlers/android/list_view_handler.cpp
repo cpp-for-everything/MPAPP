@@ -140,10 +140,53 @@ void list_view_handler<platform::android>::apply_selection(int idx) {
     list_view_set_selection(env, native_, idx);
 }
 
+namespace {
+
+// Install MppItemClickRouter(list_view*, kind=0) on the ListView's
+// OnItemClickListener slot — user taps then update selected_index +
+// emit item_tapped.
+void install_item_click_router(JNIEnv* env, jobject list_view_obj, list_view* lv) {
+    if (env == nullptr || list_view_obj == nullptr || lv == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
+    jclass router_cls = env->FindClass("io/mpapp/MppItemClickRouter");
+    if (router_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JI)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
+    jobject router = env->NewObject(router_cls, ctor,
+                                    reinterpret_cast<jlong>(lv),
+                                    static_cast<jint>(0 /* list_view kind */));
+    if (env->ExceptionCheck() || router == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    env->DeleteLocalRef(router_cls);
+
+    // listView.setOnItemClickListener(router)
+    jclass av_cls = env->FindClass("android/widget/AdapterView");
+    if (av_cls != nullptr) {
+        jmethodID set_listener = env->GetMethodID(av_cls, "setOnItemClickListener",
+            "(Landroid/widget/AdapterView$OnItemClickListener;)V");
+        if (set_listener != nullptr) {
+            env->CallVoidMethod(list_view_obj, set_listener, router);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(av_cls);
+    }
+    env->DeleteLocalRef(router);
+}
+
+} // namespace
+
 void list_view_handler<platform::android>::map_items_source(list_view& lv) {
     bound_ = &lv;
     rebuild_items(lv.items_source.get());
     lv.items_source.changed.subscribe(items_slot_, items_cb_);
+    // Wire the item-click router now that we know which list_view to
+    // forward tap events to.
+    JNIEnv* env = detail::attach_current_thread();
+    if (env != nullptr) install_item_click_router(env, native_, &lv);
 }
 
 void list_view_handler<platform::android>::map_selected_index(list_view& lv) {

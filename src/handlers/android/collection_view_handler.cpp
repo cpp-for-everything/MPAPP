@@ -155,10 +155,49 @@ void collection_view_handler<platform::android>::apply_selection_mode(collection
     list_view_set_choice_mode(env, native_, mode);
 }
 
+namespace {
+
+// Install MppItemClickRouter(collection_view*, kind=1) — same shape as
+// the list_view router, different kind code.
+void install_item_click_router(JNIEnv* env, jobject list_view_obj, collection_view* cv) {
+    if (env == nullptr || list_view_obj == nullptr || cv == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
+    jclass router_cls = env->FindClass("io/mpapp/MppItemClickRouter");
+    if (router_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JI)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
+    jobject router = env->NewObject(router_cls, ctor,
+                                    reinterpret_cast<jlong>(cv),
+                                    static_cast<jint>(1 /* collection_view kind */));
+    if (env->ExceptionCheck() || router == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    env->DeleteLocalRef(router_cls);
+
+    jclass av_cls = env->FindClass("android/widget/AdapterView");
+    if (av_cls != nullptr) {
+        jmethodID set_listener = env->GetMethodID(av_cls, "setOnItemClickListener",
+            "(Landroid/widget/AdapterView$OnItemClickListener;)V");
+        if (set_listener != nullptr) {
+            env->CallVoidMethod(list_view_obj, set_listener, router);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(av_cls);
+    }
+    env->DeleteLocalRef(router);
+}
+
+} // namespace
+
 void collection_view_handler<platform::android>::map_items_source(collection_view& cv) {
     bound_ = &cv;
     rebuild_items(cv.items_source.get());
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
+    JNIEnv* env = detail::attach_current_thread();
+    if (env != nullptr) install_item_click_router(env, native_, &cv);
 }
 
 void collection_view_handler<platform::android>::map_selected_index(collection_view& cv) {
