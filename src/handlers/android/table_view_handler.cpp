@@ -111,9 +111,50 @@ void table_view_handler<platform::android>::apply_row_height(int /*h*/) {
     // setLayoutParams; not wired in v1.
 }
 
+namespace {
+
+// Install MppItemClickRouter(table_view*, kind=2) on the ListView's
+// OnItemClickListener slot — user taps then resolve back to (section,
+// row) and emit row_tapped via the native dispatcher in
+// item_click_router.cpp.
+void install_item_click_router(JNIEnv* env, jobject list_view_obj, table_view* tv) {
+    if (env == nullptr || list_view_obj == nullptr || tv == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+
+    jclass router_cls = env->FindClass("io/mpapp/MppItemClickRouter");
+    if (router_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JI)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
+    jobject router = env->NewObject(router_cls, ctor,
+                                    reinterpret_cast<jlong>(tv),
+                                    static_cast<jint>(2 /* table_view kind */));
+    if (env->ExceptionCheck() || router == nullptr) {
+        env->ExceptionClear();
+        env->DeleteLocalRef(router_cls);
+        return;
+    }
+    env->DeleteLocalRef(router_cls);
+
+    jclass av_cls = env->FindClass("android/widget/AdapterView");
+    if (av_cls != nullptr) {
+        jmethodID set_listener = env->GetMethodID(av_cls, "setOnItemClickListener",
+            "(Landroid/widget/AdapterView$OnItemClickListener;)V");
+        if (set_listener != nullptr) {
+            env->CallVoidMethod(list_view_obj, set_listener, router);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(av_cls);
+    }
+    env->DeleteLocalRef(router);
+}
+
+} // namespace
+
 void table_view_handler<platform::android>::map_sections(table_view& tv) {
     rebuild_items(tv.sections.get());
     tv.sections.changed.subscribe(sec_slot_, sec_cb_);
+    JNIEnv* env = detail::attach_current_thread();
+    if (env != nullptr) install_item_click_router(env, native_, &tv);
 }
 
 void table_view_handler<platform::android>::map_row_height(table_view& tv) {
