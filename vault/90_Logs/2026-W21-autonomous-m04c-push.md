@@ -251,6 +251,14 @@ The only remaining gap is Phase F (the *other* Phase F — async bridge methods 
 
 **Net:** the compile-time path is open for new C++ code without breaking the runtime path that the XAML compiler still uses. Apps can mix string-based and typed `go_to` freely. Two remaining ADR-0016 follow-ups (route guards, route-aware lifecycle) need the executor (already shipped per ADR-0019) and are tracked as future work.
 
+## CollectionView item_template — factory-based typed cells
+
+| Commit | Scope | Build state |
+|---|---|---|
+| _(pending)_ | **CollectionView::item_template** — `Observable<function<unique_ptr<view>(int)>>` parallel surface alongside items_source + typed_items. When the factory is set, the collection_view auto-materializes one cell per items_source row (owned in `std::vector<unique_ptr<view>> materialized_`), then emits a new `materialized_changed` signal. The three platform handlers extend `rebuild_active()` with a new precedence: typed_items → materialized_views() → flat items_source. Each map_typed_items now also subscribes to `materialized_changed` so template re-fires drive a fresh typed-render through the existing pipeline. Functor-struct callback pattern (rather than ad-hoc lambdas) keeps the callback addresses stable for the slot lifetime — the same trick the existing handlers use. Tests cover materialize-on-items-change, materialize-on-template-change, factory receives index, coexists with typed_items, and the materialized_changed signal-fire contract (including empty-state fires). | Win 266/266 mock + Linux 266/266 mock + Android APK builds clean (ctest 314 total) |
+
+**Net:** apps with small-to-medium typed-cell lists can declare `cv.item_template = [](int i) { ... };` instead of manually managing a parallel `vector<unique_ptr<cell>>`. The framework owns the cells, re-materializes on items_source/item_template change, and surfaces them through the existing typed-render path on each platform. True virtualization (RecyclerView / ItemsRepeater) remains future work — item_template materializes the entire items_source eagerly.
+
 ## CollectionView typed_items
 
 | Commit | Scope | Build state |

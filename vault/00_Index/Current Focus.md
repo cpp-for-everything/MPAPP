@@ -29,9 +29,8 @@ tags:
 
 1. **ADR acceptance pass** for proposed ADRs 0014–0022 (9 ADRs). Code is implemented and shipping; review-gate is the missing step per Rule 4. Once deciders fill in, each ADR's frontmatter flips `proposed → accepted`.
 2. **macOS + iOS sweep** across the entire widget set. Requires an Apple host. Existing Objective-C++ handlers on app-shell are the template; the rest need to follow.
-3. **CollectionView item_template** tied to the cell-type tree — would let users supply a cell factory and have CollectionView render typed cells instead of plain string items. Composes with the new vertical_grid path.
-4. **ADR-0015 v2 unified canvas facade** — Cairo (default) / Skia (opt-in) compile-time selectable backend. v1 already ships per-platform native primitives so apps that need basic shapes don't block on this.
-5. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
+3. **ADR-0015 v2 unified canvas facade** — Cairo (default) / Skia (opt-in) compile-time selectable backend. v1 already ships per-platform native primitives so apps that need basic shapes don't block on this.
+4. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
 
 ## Active milestone
 
@@ -69,6 +68,7 @@ The Current-Focus "pickup list" caught up to itself across the W21 close push. T
 - ✅ **HybridWebView typed JS bridge v1** per [[ADR-0018-hybrid-webview-typed-bridge]] — `set_bridge<MyBridge>()` for inbound JSON-RPC dispatch + `invoke_js("method", args...)` for outbound. Built on a header-only JSON layer (`include/mpapp/detail/json.hpp`, ~520 LOC) + a cross-platform `process_inbound` choke point so the bridge-or-raw decision lives in one file.
 - ✅ **HybridWebView typed JS bridge v2** — outbound callback (`invoke_js_cb<T>`) + coroutine (`invoke_js_async<T>`) APIs, plus inbound async dispatch via `register_async_method<T>` and `dispatch_async(payload, on_response)`. Async bridge methods accept a trailing `std::function<void(T)> respond` callback they invoke when ready (synchronously or deferred). Routes through partial-specialization `async_invoker_builder<T, Method>` to sidestep the "Args... in non-trailing position is non-deducible" C++ rule. Sync methods still fire inline through dispatch_async for v1 compatibility.
 - ✅ **ADR-0016 compile-time Shell route table** — `mpapp::route_table{ route<"home", home_page>{}, route<"home/details", details_page, param<"id", int>>{}, ... }` declared as an `inline constexpr` value; `shell.go_to<"home/details", &routes>(42)` is compile-time-checked against the table for both route name and argument types. Implementation rests on a `fixed_string<N>` NTTP wrapper (C++20 class-type NTTP), an index-sequence-based route finder that emits a clear `static_assert` on lookup failure, and an ADL-customizable `to_route_string` for URI argument stringification. The string-based `go_to(std::string_view)` parser was extended to also cut at `?` so the typed `go_to<>` path's `//path?p1=v1&p2=v2` URIs still drive `current_tab_index` by tab label.
+- ✅ **CollectionView item_template** — `Observable<function<unique_ptr<view>(int)>> item_template`. When set, the collection_view auto-materializes one cell per items_source row, owns the lifetime, and emits `materialized_changed` so handlers know to rebuild. Composes with the existing typed render pipeline on all 3 platforms — `rebuild_active()` precedence is now typed_items → materialized_views → flat items_source, and each handler's map_typed_items subscribes to `materialized_changed` to pick up template re-fires.
 
 What's left at code level:
 

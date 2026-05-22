@@ -16,14 +16,16 @@ tags:
 # CollectionView
 
 > [!info] Status
-> **android-real** — Cross-platform recycler with stable-outer-container + swappable-inner-widget pattern. Three layout modes shipped (vertical_list, vertical_grid; horizontal modes degrade to vertical for v1). Multi-select event round-trip wired on all 3 platforms. **Typed_items** parallel surface lets apps supply `vector<view*>` of cells/views; handler renders each through ADR-0013 dispatch (Android swaps inner to ScrollView+LinearLayout in typed mode).
+> **android-real** — Cross-platform recycler with stable-outer-container + swappable-inner-widget pattern. Three layout modes shipped (vertical_list, vertical_grid; horizontal modes degrade to vertical for v1). Multi-select event round-trip wired on all 3 platforms. Three item-source surfaces: **items_source** (flat strings, virtualized), **typed_items** (vector<view*> non-owning), and **item_template** (factory `function<unique_ptr<view>(int)>` — the collection_view owns the materialized cells). Handlers render each typed entry through ADR-0013 dispatch (Android swaps inner to ScrollView+LinearLayout in typed mode).
 >
 > Native plumbing:
 > - **Windows** — outer `mux::Border` wraps `muxc::ListViewBase` (concretely `ListView` for vertical_list or `GridView` for vertical_grid). `SelectionMode` mapped to None/Single/Multiple; multi-select echoes via `SelectedItems` + `Items.IndexOf`.
 > - **Linux** — outer `GtkScrolledWindow` wraps `GtkListBox` (list) or `GtkFlowBox` (grid). `GtkSelectionMode` mapped from the cross-platform enum; multi-select echoes via `gtk_list_box_get_selected_rows` / `gtk_flow_box_get_selected_children`.
 > - **Android** — outer `FrameLayout` wraps `android.widget.ListView` (list) or `android.widget.GridView` (grid). Both extend `AbsListView` so `setChoiceMode` + `getCheckedItemPositions` work uniformly. `MppItemClickRouter` (kind=1) routes taps + multi-select refresh.
 >
-> **V1 limitations:** horizontal_list / horizontal_grid degrade to their vertical counterparts (would require ItemsPanelTemplate on Win + GtkOrientable on Linux + RecyclerView on Android). Selection / multi-select don't apply in typed_items mode (cells own their interaction). Android's layout enum is ignored in typed mode (always vertical LinearLayout). Item templates (true virtualized cell factories) are still future work — typed_items is a non-virtualizing static approach.
+> Render precedence in each handler's `rebuild_active()`: typed_items non-empty → typed render; otherwise materialized_count > 0 (item_template) → typed render of materialized_views; otherwise flat items_source render.
+>
+> **V1 limitations:** horizontal_list / horizontal_grid degrade to their vertical counterparts (would require ItemsPanelTemplate on Win + GtkOrientable on Linux + RecyclerView on Android). Selection / multi-select don't apply in typed_items / item_template modes (cells own their interaction). Android's layout enum is ignored in typed mode (always vertical LinearLayout). item_template materializes the full items_source eagerly (non-virtualizing) — true virtualized cell factories require RecyclerView on Android + ItemsRepeater on Win and stay future work.
 
 ## Overview
 
