@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "TextCell"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/cells"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # TextCell
 
 > [!info] Status
-> **mock** — surface lives at `include/mpapp/text_cell.hpp` per [[ADR-0021-tableview-cell-types]]. Catch2 mock-handler tests exercise the `text` + `detail` mappers + the inherited `cell::is_enabled` / `cell::tapped`. Real per-platform handlers land alongside the TableView surface refactor that swaps `vec<{title, vec<string>}>` for `vec<table_section{title, vec<unique_ptr<cell>>}>`.
+> **android-real** — Windows wraps `mux::Controls::Border` containing a vertical `StackPanel` of two `TextBlock`s (primary + detail). Linux wraps a vertical `GtkBox` of two `GtkLabel`s. Android wraps a vertical `LinearLayout` of two `TextView`s. Detail row hides via `Visibility::Collapsed` / `gtk_widget_set_visible(FALSE)` / `VIEW_GONE` when the detail string is empty. Native row padding (12px horizontal / 6px vertical) baked in so cells look right when used as a list item. text_cell self-registers via the ADR-0013 dispatch registry so it can be nested anywhere a view fits — useful today inside `view_cell` / `border` / `stack_layout`, and inside `table_view` once the cell-typed-section surface refactor lands. macOS / iOS pending Apple host.
 
 ## Overview
 
