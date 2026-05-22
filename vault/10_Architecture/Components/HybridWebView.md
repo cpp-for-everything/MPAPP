@@ -16,7 +16,20 @@ tags:
 # HybridWebView
 
 > [!info] Status
-> **android-real** — JS-bridge surface on top of [[WebView]] across all 3 platforms. Each handler injects a `window.mpapp` shim into the loaded document, exposing `send(p)` / `on(fn)` for the JS side. C++ → JS via native eval; JS → C++ routes through `CoreWebView2.WebMessageReceived` (Win), `WebKitUserContentManager.script-message-received::mpapp_send` (Linux), and `WebView.addJavascriptInterface("mpapp_native", MppJsBridge)` (Android). Each handler subscribes to `message_sent` so user calls to `hybrid_web_view::send_to_js()` propagate through the platform's native messaging path.
+> **android-real, typed-bridge v2** — Raw + typed bridge surfaces stacked on the same native messaging pipe across all 3 platforms. Each handler injects a `window.mpapp` shim into the loaded document. The bridge has two layers:
+>
+> **Raw bridge** (always available):
+> - `send_to_js(payload)` / `message_sent` signal on the C++ side
+> - `window.mpapp.send(p)` / `window.mpapp.on(fn)` on the JS side
+> - JS → C++ routes through `CoreWebView2.WebMessageReceived` (Win), `WebKitUserContentManager.script-message-received::mpapp_send` (Linux), `WebView.addJavascriptInterface("mpapp_native", MppJsBridge)` (Android).
+>
+> **Typed JSON-RPC bridge** (opt-in, per [[ADR-0018-hybrid-webview-typed-bridge]]):
+> - C++ side: `wv->set_bridge<MyBridge>()` with `register_method` registration. Outbound via `invoke_js` / `invoke_js_cb<T>(...)` / `invoke_js_async<T>(...)` (callback + coroutine APIs).
+> - JS side: `window.mpapp.register(name, fn)` for typed JS-side methods; `window.mpapp.call(name, args...)` for outbound. The shim's `_receive` auto-dispatches by method name and posts result/error envelopes.
+> - Wire format: `{"id":N,"method":"name","args":[...]}` calls; `{"id":N,"result":...}` / `{"id":N,"error":"..."}` responses.
+> - Symmetric typed round-trips end-to-end. Bridge methods are sync in v1 — async (task<T>-returning bridge methods) is the only remaining gap.
+>
+> Implementation lives in `include/mpapp/{hybrid_bridge.hpp,hybrid_web_view.hpp,detail/json.hpp}` (~1100 LOC total) + the 3 platform handlers + the JS shim in each handler's `kBridgeShim`.
 
 ## Overview
 
