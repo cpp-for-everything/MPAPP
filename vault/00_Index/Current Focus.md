@@ -21,17 +21,18 @@ tags:
 | List family (ListView / CollectionView / TableView) | **android-real** + multi-select event round-trip on all 3 platforms; CollectionView vertical_grid layout swap on all 3 platforms |
 | Cell tree (text/view/switch/image/entry) | **android-real** — every cell with bidirectional bindings where the surface has them; row→cell.tapped routing through `table_view::cell_at` |
 | Grid (real layout engine) | **android-real** — native Grid wrap + per-child placement via attached property store |
-| WebView / HybridWebView | **android-real** — native messaging end-to-end (WebMessageReceived / script-message-handler / addJavascriptInterface) |
+| WebView / HybridWebView | **android-real** — native messaging end-to-end (WebMessageReceived / script-message-handler / addJavascriptInterface); typed JSON-RPC bridge layered on top per ADR-0018: `set_bridge<T>()` inbound dispatch + `invoke_js("method", args...)` outbound, both shipping, sync only (task<T> async is v2) |
 | ShapeView / GraphicsView | **android-real (v1)** — per-platform native primitives. Full unified canvas facade is v2 per [[ADR-0015-graphics-backend-dual]]. |
 | macOS / iOS | code-complete on app-shell layer; the M-04b/M-04c sweep stayed on Win/Linux/Android pending an Apple host |
 
 ## What's still open (in priority order)
 
-1. **ADR acceptance pass** for proposed ADRs 0014–0021. Code is implemented and shipping; review-gate is the missing step per Rule 4. Once deciders fill in, each ADR's frontmatter flips `proposed → accepted`.
+1. **ADR acceptance pass** for proposed ADRs 0014–0022 (9 ADRs). Code is implemented and shipping; review-gate is the missing step per Rule 4. Once deciders fill in, each ADR's frontmatter flips `proposed → accepted`.
 2. **macOS + iOS sweep** across the entire widget set. Requires an Apple host. Existing Objective-C++ handlers on app-shell are the template; the rest need to follow.
-3. **ADR-0016 compile-time route table for Shell** — heavy template-metaprogramming follow-up. Design is documented; user-facing `shell.go_to<"home/details">(42)` syntax with compile-time route + type validation. Currently the string-based `go_to(uri)` parser drives `current_route`.
-4. **ADR-0015 v2 unified canvas facade** — Cairo (default) / Skia (opt-in) compile-time selectable backend. v1 already ships per-platform native primitives so apps that need basic shapes don't block on this.
-5. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
+3. **ADR-0018 v2 async return values** — typed bridge ships sync-only in v1; v2 wraps bridge methods + `invoke_js` returns in `task<T>` so `co_await wv->invoke_js<"add">(1,2)` resolves once JS responds. Reuses the ADR-0019 executor; needs a C++-side id→continuation map for response routing.
+4. **ADR-0016 compile-time route table for Shell** — heavy template-metaprogramming follow-up. Design is documented; user-facing `shell.go_to<"home/details">(42)` syntax with compile-time route + type validation. Currently the string-based `go_to(uri)` parser drives `current_route`.
+5. **ADR-0015 v2 unified canvas facade** — Cairo (default) / Skia (opt-in) compile-time selectable backend. v1 already ships per-platform native primitives so apps that need basic shapes don't block on this.
+6. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
 
 ## Active milestone
 
@@ -66,13 +67,15 @@ The Current-Focus "pickup list" caught up to itself across the W21 close push. T
 - ✅ CollectionView `layout` enum — vertical_grid wired on all 3 platforms via the outer-container + inner-widget-swap pattern (mux::GridView / GtkFlowBox / android.widget.GridView). horizontal_list / horizontal_grid still degrade to vertical for v1 (would require ItemsPanelTemplate work on Win + GtkOrientable on Linux + RecyclerView on Android).
 - ✅ TableView typed_sections — `vector<table_section_typed{title, vec<cell*>}>` parallel surface renders cell-tree rows through ADR-0013 dispatch. row_tapped wired on Win + Linux (was Android-only); cell.tapped routes through `table_view::cell_at` on all 3 platforms.
 - ✅ TabbedPage + Shell selected-tab styling — Android handlers now restyle the active tab with primary-blue + bold; Win/Linux already had this via the native widget.
+- ✅ **HybridWebView typed JS bridge v1** per [[ADR-0018-hybrid-webview-typed-bridge]] — `set_bridge<MyBridge>()` for inbound JSON-RPC dispatch + `invoke_js("method", args...)` for outbound. Built on a header-only JSON layer (`include/mpapp/detail/json.hpp`, ~520 LOC) + a cross-platform `process_inbound` choke point so the bridge-or-raw decision lives in one file. Sync only — `task<T>` async is v2.
 
 What's left at code level:
 
-- **HybridWebView typed JS bridge** per [[ADR-0018-hybrid-webview-typed-bridge]] — current v1 ships an untyped string bridge; the ADR proposes JSON-RPC + `[[mpapp::js_method]]` attribute-driven typing. Substantial: JSON layer (~500 LOC tag_invoke-based) + bridge plumbing + opt-in opt-in `set_bridge<MyBridge>()` codegen point.
+- **ADR-0018 v2 — async typed bridge.** Wrap bridge methods + `invoke_js` returns in `task<T>` so `co_await wv->invoke_js<"add">(1,2)` resolves once JS responds. The C++-side response router is a small id→continuation map; the JS shim already broadcasts responses via `message_received` so the matching logic is straightforward.
 - **ADR-0016 compile-time Shell route table** — heavy template metaprogramming around NTTP string literals. The string-based runtime `go_to(uri)` parser already works; this adds the compile-time-checked `shell.go_to<"home/details">(42)` syntax.
 - **ADR-0015 v2 unified canvas facade** (Cairo + Skia compile-time selectable) — ShapeView + GraphicsView v1 already ship per-platform native primitives, so apps that need basic shapes don't block on this.
 - **CollectionView item_template** tied to the cell-type tree — would let users supply a cell factory and have CollectionView use it instead of plain string items. Composes with the new vertical_grid path.
+- **JS shim ergonomics** — current shim broadcasts inbound to listeners; user JS code does its own envelope dispatch + response posting. A `window.mpapp.register(name, fn)` + auto-response shim would mirror the C++-side `register_method` ergonomics. Not blocking — pure ergonomics.
 
 What's left at process / host level:
 
