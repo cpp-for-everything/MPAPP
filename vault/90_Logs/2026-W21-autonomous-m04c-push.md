@@ -259,6 +259,14 @@ The only remaining gap is Phase F (the *other* Phase F — async bridge methods 
 
 **Net:** apps with small-to-medium typed-cell lists can declare `cv.item_template = [](int i) { ... };` instead of manually managing a parallel `vector<unique_ptr<cell>>`. The framework owns the cells, re-materializes on items_source/item_template change, and surfaces them through the existing typed-render path on each platform. True virtualization (RecyclerView / ItemsRepeater) remains future work — item_template materializes the entire items_source eagerly.
 
+## Shell route guard — can_activate
+
+| Commit | Scope | Build state |
+|---|---|---|
+| _(pending)_ | **shell::can_activate** — `Observable<function<bool(string_view target)>>` consulted by `go_to(uri)` before navigation. False aborts: `current_route` stays where it was, `navigated` does NOT fire, but a new `navigation_blocked` signal emits the rejected target URI. The typed `go_to<Path, &Table>(args...)` delegates to the string-based path so the guard fires for both. 3 ctest cases: block on false, proceed on true, applies to typed `go_to` too. ctest 314 → 317. | Win + Linux + Android green |
+
+**Net:** closes ADR-0016's "route guards deferred to follow-up ADR" item for the simpler activate case. `can_deactivate` (current-route-aware) and route-lifecycle hooks (`OnNavigatedTo`/`OnNavigatedFrom`) remain future work tied to ADR-0019's executor.
+
 ## CollectionView typed_items
 
 | Commit | Scope | Build state |
