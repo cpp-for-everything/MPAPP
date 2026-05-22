@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- WebView needs INTERNET to load remote URLs. Listed here so the
+         android.webkit.WebView handler can navigate to https:// targets
+         from the example app. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:label="MPAPP Hello"
+        android:usesCleartextTraffic="true"
         android:allowBackup="true">
 
         <activity

@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "WebView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/webview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # WebView
 
 > [!info] Status
-> **not-started** — placeholder. See [[Controls Inventory]] for the full porting matrix.
+> **android-real** — Win `muxc::WebView2` (Chromium/Edge) wired through `NavigationStarting/Completed`; Linux `WebKitGTK 6.x` (LGPL dynamic-link per Rule 9) wired through `load-changed`; Android `android.webkit.WebView` + custom `MppWebViewClient` routing `onPageStarted/onPageFinished`. `url` / `html_source` two-way through native loader; `is_loading` + `can_go_back/forward` + `navigating(url)` + `navigated(url, success)` propagated from each engine. JavaScript enabled by default on Android; INTERNET permission added to example manifest. Linux build conditionally compiles to a no-op stub when WebKitGTK is missing at configure time.
 
 ## Overview
 
