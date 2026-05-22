@@ -76,7 +76,7 @@ For each gated widget:
 | HybridWebView | depends WebView | **mock landed** — extends WebView with hybrid_namespace + send_to_js/simulate_inbound + message_received/message_sent (2026-05-21) |
 | ShapeView | [[ADR-0015-graphics-backend-dual]] | **mock landed** — shape_kind enum + data path string + fill/stroke/stroke_thickness/opacity (2026-05-21) |
 | GraphicsView | [[ADR-0015-graphics-backend-dual]] | **mock landed** — width/height + draw_count + invalidate() + draw_requested signal (2026-05-21) |
-| Grid (real) | [[ADR-0017-grid-track-definitions]] | mock exists |
+| Grid (real) | [[ADR-0017-grid-track-definitions]] | **android-real (2026-05-22)** — Win mux::Grid w/ GridLength + Linux GtkGrid w/ hexpand bridging + Android GridLayout w/ Spec-based LayoutParams; per-child placement via grid.set_row/set_column attached store. Star sizing is approximate on Linux/Android — exact only on Win. |
 
 **Status as of 2026-05-22 close:** The page-level family (Nav / Tab / Flyout / Shell) **and** the list family (ListView / CollectionView / TableView) are all at android-real. Cell type tree (text/entry/switch/view/image) shipped at mock. Remaining real-handler work: WebView/HybridWebView (LGPL WebKitGTK + WebView2 + Android WebView), ShapeView/GraphicsView (Cairo facade per ADR-0015), Grid (real layout engine per ADR-0017). Compile-time route table per ADR-0016 still pending Shell follow-up.
 

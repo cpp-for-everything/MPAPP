@@ -16,11 +16,13 @@
 #include <cstdlib>
 #include <string>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 #include "layout.hpp"
 #include "observable.hpp"
 #include "platform.hpp"
+#include "view.hpp"
 
 namespace mpapp {
 
@@ -112,13 +114,47 @@ public:
         column_definitions.set(track_def::parse(spec));
     }
 
+    // ----- Per-child placement attached properties --------------------
+    //
+    // MAUI: Grid.SetRow(child, 1); Grid.SetColumn(child, 0); ...
+    // MPAPP: grid.set_row(child, 1); grid.set_column(child, 0); ...
+    //
+    // Storage is a side map keyed on the child's view*. The grid's real
+    // handler reads these in its add_child path to drive the native
+    // placement API.
+
+    struct cell_placement {
+        int row        = 0;
+        int column     = 0;
+        int row_span   = 1;
+        int column_span = 1;
+    };
+
+    void set_row       (view& v, int r)  { placement_for(v).row = r; }
+    void set_column    (view& v, int c)  { placement_for(v).column = c; }
+    void set_row_span  (view& v, int rs) { placement_for(v).row_span = rs < 1 ? 1 : rs; }
+    void set_column_span(view& v, int cs){ placement_for(v).column_span = cs < 1 ? 1 : cs; }
+
+    [[nodiscard]] cell_placement get_placement(const view& v) const {
+        auto it = placements_.find(const_cast<view*>(&v));
+        return (it == placements_.end()) ? cell_placement{} : it->second;
+    }
+
     grid_layout_handler<platform::current>&       handler() noexcept       { return *grid_handler_; }
     const grid_layout_handler<platform::current>& handler() const noexcept { return *grid_handler_; }
     bool                                          has_handler() const noexcept { return grid_handler_ != nullptr; }
     void                                          set_handler(grid_layout_handler<platform::current>& h) noexcept { grid_handler_ = &h; }
 
 private:
+    cell_placement& placement_for(view& v) {
+        return placements_[&v];
+    }
+
     grid_layout_handler<platform::current>* grid_handler_ = nullptr;
+    // Attached-property store. Keyed on the child view*; cleared by the
+    // application before the child's lifetime ends (mirrors the
+    // page_stack attached store pattern from ADR-0014).
+    std::unordered_map<view*, cell_placement> placements_{};
 };
 
 } // namespace mpapp

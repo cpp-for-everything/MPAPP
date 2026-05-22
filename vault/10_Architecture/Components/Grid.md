@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "Grid"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/layouts/grid"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # Grid
 
 > [!info] Status
-> **mock** — public surface + mock handler landed in [[T-0011-app-shell-abstraction]]. The mock-surface API ships row_count / column_count / row_spacing / column_spacing — enough to validate the handler-binding contract and start the WinUI 3 real handler. Full track definitions (star sizing, min/max constraints, per-child `(row, column)` placement) are M-04 work.
+> **android-real** — `row_definitions` / `column_definitions` of `track_def` (Auto / Star(w) / Fixed(px)) per [[ADR-0017-grid-track-definitions]]. Per-child placement via attached properties (`grid.set_row(view, r)` etc.) stored in a side map keyed on `view*`. Windows wraps `mux::Controls::Grid` with `RowDefinitions` / `ColumnDefinitions` populated via `GridLength{value, GridUnitType::{Pixel,Star,Auto}}`; Linux wraps `GtkGrid` and bridges Star tracks to `hexpand`/`vexpand` on the attached child (GtkGrid has no explicit Star sizing); Android wraps `android.widget.GridLayout` with `GridLayout.LayoutParams{spec(row, rowSpan), spec(col, colSpan)}` built per attach. **V1 limitations**: Linux Star sizing is approximate (no equivalent of explicit weights); Android grid spacing per-row/col is not exposed (use per-child margins); macOS/iOS pending Apple host.
 
 ## Overview
 
