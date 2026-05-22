@@ -162,6 +162,18 @@ Picks up after the page + list families landed. Drove the remaining widgets exce
 3. ADR-0015 v2 unified canvas facade (Cairo + Skia compile-time selectable).
 4. macOS / iOS handlers across the entire widget set — gated on Apple host.
 
+## Polish pass (2026-05-22 very-close)
+
+After the widget surface reached completion, a small wave of polish followed:
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `82e5d90` | Refresh `Current Focus.md` + `Home.md` — was W20-era, predated everything in M-04b/M-04c. New version reflects 61/64 widgets at android-real and documents the pick-up-here list. | docs |
+| `1df1f84` | Android tabbed_page — tab clicks + selected-tab styling. Adds `tabbed_page_tab` (kind=2) to MppActionRouter dispatch; restyles active tab w/ primary-blue+bold. | Win/Linux/Android green |
+| `854a377` | Android Shell — selected-tab styling. Same shape as tabbed_page; `apply_selection` was previously a no-op. Shared color palette across the two handlers. | Android green (Win+Linux untouched) |
+
+**Why these matter:** the Win + Linux Shell/TabbedPage handlers wrap native widgets (`mux::SplitView` / `GtkPaned` for Shell; `mux::Pivot` / `GtkNotebook` for TabbedPage) that handle tab clicks + selected-tab visual emphasis automatically. The Android handlers hand-rolled the tab strip from TextViews/Buttons, leaving both gaps. Now the user-visible cross-platform behavior matches.
+
 ## See also
 
 - [[40_Roadmap/M-04c-handler-heavy-port]] — canonical tracker.
