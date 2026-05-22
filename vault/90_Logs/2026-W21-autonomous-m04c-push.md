@@ -174,6 +174,16 @@ After the widget surface reached completion, a small wave of polish followed:
 
 **Why these matter:** the Win + Linux Shell/TabbedPage handlers wrap native widgets (`mux::SplitView` / `GtkPaned` for Shell; `mux::Pivot` / `GtkNotebook` for TabbedPage) that handle tab clicks + selected-tab visual emphasis automatically. The Android handlers hand-rolled the tab strip from TextViews/Buttons, leaving both gaps. Now the user-visible cross-platform behavior matches.
 
+## TableView typed-sections pass
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `ab6add0` | **TableView typed_sections** — render the ADR-0021 cell tree end-to-end. Parallel surface to flat `sections`. Win mux::ListView.Items.Append(cell_native); Linux gtk_list_box_append per cell widget; Android outer FrameLayout swaps between ListView (flat) and ScrollView+LinearLayout w/ section-header TextViews + cell native views (typed). | Win/Linux/Android green, 246/246 tests pass |
+
+**Why this matters:** the cell-type tree (text_cell / view_cell / switch_cell / image_cell / entry_cell) shipped with full per-platform native handlers earlier in the session, but TableView itself could only render flat strings — its primary host couldn't actually display the typed cells. Now `table_view.typed_sections` carries `vector<table_section_typed{title, vec<cell*>}>`; when populated, the handler walks each cell, pulls its native handle via ADR-0013 dispatch, and stitches it into the table's section/row layout. Flat-string rendering remains as the fallback when typed_sections is empty, so existing call sites + tests don't break.
+
+This closes the largest remaining "the surface ships but you can't actually use it together" gap from the cell-tree work.
+
 ## See also
 
 - [[40_Roadmap/M-04c-handler-heavy-port]] — canonical tracker.
