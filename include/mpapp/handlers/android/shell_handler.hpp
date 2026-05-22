@@ -73,6 +73,10 @@ private:
     jobject tab_strip_    = nullptr;  // LinearLayout horizontal
     jobject content_host_ = nullptr;  // FrameLayout
 
+    // Tab Button refs retained for selection restyle (size matches
+    // current_tab_index domain).
+    std::vector<jobject> tab_buttons_{};
+
     shell* bound_ = nullptr;
 
     tabs_cb_t           tabs_cb_{this};

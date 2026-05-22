@@ -98,6 +98,46 @@ void vg_remove_all(JNIEnv* env, jobject parent) {
     env->DeleteLocalRef(cls);
 }
 
+void tv_set_text_color(JNIEnv* env, jobject tv, jint argb) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/TextView");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setTextColor", "(I)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(tv, m, argb);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+jobject typeface_default(JNIEnv* env, bool bold) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/graphics/Typeface");
+    if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
+    jfieldID fid = env->GetStaticFieldID(cls,
+        bold ? "DEFAULT_BOLD" : "DEFAULT", "Landroid/graphics/Typeface;");
+    jobject tf = (fid != nullptr) ? env->GetStaticObjectField(cls, fid) : nullptr;
+    env->DeleteLocalRef(cls);
+    return tf;
+}
+
+void tv_set_typeface(JNIEnv* env, jobject tv, jobject typeface) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/TextView");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setTypeface", "(Landroid/graphics/Typeface;)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(tv, m, typeface);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+// Mirrors the tabbed_page color palette: primary-blue for active,
+// grey for inactive. Keep these in sync.
+constexpr jint COLOR_SELECTED   = static_cast<jint>(0xFF1976D2u);
+constexpr jint COLOR_UNSELECTED = static_cast<jint>(0xFF606060u);
+
 } // namespace
 
 shell_handler<platform::android>::shell_handler() {
@@ -129,6 +169,10 @@ shell_handler<platform::android>::shell_handler() {
 
 shell_handler<platform::android>::~shell_handler() {
     if (JNIEnv* env = detail::attach_current_thread(); env != nullptr) {
+        for (jobject b : tab_buttons_) {
+            if (b != nullptr) env->DeleteGlobalRef(b);
+        }
+        tab_buttons_.clear();
         if (content_host_ != nullptr) { env->DeleteGlobalRef(content_host_); content_host_ = nullptr; }
         if (tab_strip_    != nullptr) { env->DeleteGlobalRef(tab_strip_);    tab_strip_    = nullptr; }
         if (main_host_    != nullptr) { env->DeleteGlobalRef(main_host_);    main_host_    = nullptr; }
@@ -179,6 +223,13 @@ void shell_handler<platform::android>::rebuild_tab_strip(const std::vector<std::
     if (tab_strip_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
+
+    // Release any previous tab-button global refs.
+    for (jobject b : tab_buttons_) {
+        if (b != nullptr) env->DeleteGlobalRef(b);
+    }
+    tab_buttons_.clear();
+
     vg_remove_all(env, tab_strip_);
     jobject ctx = detail::get_activity();
     for (std::size_t i = 0; i < labels.size(); ++i) {
@@ -187,13 +238,33 @@ void shell_handler<platform::android>::rebuild_tab_strip(const std::vector<std::
             view_set_text(env, btn, labels[i].c_str());
             install_tab_router(env, btn, bound_, static_cast<int>(i));
             vg_add(env, tab_strip_, btn);
-            env->DeleteGlobalRef(btn);
+            // Keep a global ref so apply_selection can restyle without
+            // walking back through the parent.
+            tab_buttons_.push_back(btn);
+        } else {
+            tab_buttons_.push_back(nullptr);
         }
     }
+    // Drive initial styling.
+    if (bound_ != nullptr) apply_selection(bound_->current_tab_index.get());
 }
 
-void shell_handler<platform::android>::apply_selection(int /*idx*/) {
-    // Visual highlight deferred.
+void shell_handler<platform::android>::apply_selection(int idx) {
+    if (tab_buttons_.empty()) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+
+    jobject tf_bold    = typeface_default(env, true);
+    jobject tf_regular = typeface_default(env, false);
+    for (std::size_t i = 0; i < tab_buttons_.size(); ++i) {
+        jobject b = tab_buttons_[i];
+        if (b == nullptr) continue;
+        const bool is_selected = (static_cast<int>(i) == idx);
+        tv_set_text_color(env, b, is_selected ? COLOR_SELECTED : COLOR_UNSELECTED);
+        tv_set_typeface(env, b, is_selected ? tf_bold : tf_regular);
+    }
+    if (tf_bold    != nullptr) env->DeleteLocalRef(tf_bold);
+    if (tf_regular != nullptr) env->DeleteLocalRef(tf_regular);
 }
 
 void shell_handler<platform::android>::apply_is_flyout_open(bool v) {
