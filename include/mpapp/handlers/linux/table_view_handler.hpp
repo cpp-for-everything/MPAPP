@@ -56,6 +56,7 @@ private:
 
     void* native_   = nullptr;  // GtkScrolledWindow*
     void* list_box_ = nullptr;  // GtkListBox*
+    bool  tap_wired_ = false;
     table_view* bound_ = nullptr;
 
     sec_cb_t   sec_cb_{this};

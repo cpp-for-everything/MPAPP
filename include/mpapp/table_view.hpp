@@ -103,6 +103,19 @@ public:
         sections.set(std::move(v));
     }
 
+    // Resolve a (section, row) coordinate to its typed `cell*`, or
+    // `nullptr` if the coordinate is out of range or the row isn't
+    // typed. Handlers use this after emitting `row_tapped` to route
+    // the same tap into the cell's own `tapped` signal.
+    [[nodiscard]] cell* cell_at(int section, int row) const noexcept {
+        if (section < 0 || row < 0) return nullptr;
+        const auto& s = typed_sections.get();
+        if (static_cast<std::size_t>(section) >= s.size()) return nullptr;
+        const auto& rs = s[static_cast<std::size_t>(section)].rows;
+        if (static_cast<std::size_t>(row) >= rs.size()) return nullptr;
+        return rs[static_cast<std::size_t>(row)];
+    }
+
     // ----- Handler ------------------------------------------------------
 
     table_view_handler<platform::current>&       tv_handler() noexcept       { return *tv_handler_; }

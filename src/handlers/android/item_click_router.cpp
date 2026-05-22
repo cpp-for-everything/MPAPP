@@ -6,6 +6,7 @@
 
 #include <jni.h>
 
+#include "mpapp/cell.hpp"
 #include "mpapp/collection_view.hpp"
 #include "mpapp/handlers/android/collection_view_handler.hpp"
 #include "mpapp/list_view.hpp"
@@ -80,6 +81,12 @@ void dispatch_android_item_click(jlong owner_ptr, jint kind, jint position) {
             int section = 0, row = 0;
             if (decode_table_position(*tv, static_cast<int>(position), section, row)) {
                 tv->row_tapped.emit(section, row);
+                // Cross-platform cell-tapped routing: when typed_sections
+                // is populated, look up the cell at this coordinate and
+                // bubble the tap into its own `tapped` signal.
+                if (cell* c = tv->cell_at(section, row); c != nullptr) {
+                    c->tapped.emit();
+                }
             }
             break;
         }

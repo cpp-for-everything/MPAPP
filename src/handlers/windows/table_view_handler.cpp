@@ -20,9 +20,67 @@ namespace mpapp {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
+namespace {
+
+// Decode a flat ListView position (section-header row + data rows
+// concatenated, same shape as rebuild_items / rebuild_typed) back to
+// (section, row). Returns true if `position` lands on a data row;
+// false if it's a header (or out of range).
+//
+// Template-duck-typed on whichever section vector the table_view has
+// populated — both `table_section_data` and `table_section_typed`
+// expose `.rows.size()`.
+template <class SectionVec>
+bool decode_position(const SectionVec& sections,
+                     int position,
+                     int& out_section,
+                     int& out_row) {
+    int idx = position;
+    for (std::size_t s = 0; s < sections.size(); ++s) {
+        if (idx == 0) return false;             // header row — not a tap target
+        idx -= 1;
+        const int rows_in = static_cast<int>(sections[s].rows.size());
+        if (idx < rows_in) {
+            out_section = static_cast<int>(s);
+            out_row     = idx;
+            return true;
+        }
+        idx -= rows_in;
+    }
+    return false;
+}
+
+} // namespace
+
 table_view_handler<platform::windows>::table_view_handler() {
     native_ = muxc::ListView{};
     native_.SelectionMode(muxc::ListViewSelectionMode::Single);
+
+    // Wire row taps via SelectionChanged. We immediately deselect after
+    // emitting so the row doesn't stay highlighted — matches MAUI's
+    // TableView semantics.
+    auto* self = this;
+    native_.SelectionChanged([self](
+        winrt::Windows::Foundation::IInspectable const&,
+        muxc::SelectionChangedEventArgs const&) {
+        if (self->bound_ == nullptr) return;
+        const int idx = static_cast<int>(self->native_.SelectedIndex());
+        if (idx < 0) return;
+
+        int section = 0, row = 0;
+        const auto& typed = self->bound_->typed_sections.get();
+        const bool ok = !typed.empty()
+            ? decode_position(typed, idx, section, row)
+            : decode_position(self->bound_->sections.get(), idx, section, row);
+        // Clear selection so taps don't stick.
+        self->native_.SelectedIndex(-1);
+        if (!ok) return;
+
+        self->bound_->row_tapped.emit(section, row);
+        if (cell* c = self->bound_->cell_at(section, row); c != nullptr) {
+            c->tapped.emit();
+        }
+    });
 }
 
 table_view_handler<platform::windows>::~table_view_handler() = default;
