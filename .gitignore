@@ -12,13 +12,18 @@ CMakeUserPresets.json
 # Claude Code worktrees / helper scripts
 .claude/worktrees/
 .claude/update-paths.py
+.claude/scheduled_tasks.lock
 
 # Local build-script helpers used by Claude Code workers (vcvars wrappers).
 # Each worker generates its own; not part of the canonical build interface.
 _build*.bat
+_run_*.bat
+_run_*.sh
+_logs_recovery_*.log
 _gtk_smoke.c
 _run_gtk_bg.sh
 _mpapp_spike.log
+_add_registrars.py
 
 # OS
 Thumbs.db
