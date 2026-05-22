@@ -24,12 +24,12 @@ tags:
 > - JS → C++ routes through `CoreWebView2.WebMessageReceived` (Win), `WebKitUserContentManager.script-message-received::mpapp_send` (Linux), `WebView.addJavascriptInterface("mpapp_native", MppJsBridge)` (Android).
 >
 > **Typed JSON-RPC bridge** (opt-in, per [[ADR-0018-hybrid-webview-typed-bridge]]):
-> - C++ side: `wv->set_bridge<MyBridge>()` with `register_method` registration. Outbound via `invoke_js` / `invoke_js_cb<T>(...)` / `invoke_js_async<T>(...)` (callback + coroutine APIs).
+> - C++ side: `wv->set_bridge<MyBridge>()` with `register_method` (sync) + `register_async_method<T>` (async) registration. Outbound via `invoke_js` / `invoke_js_cb<T>(...)` / `invoke_js_async<T>(...)` (callback + coroutine APIs).
 > - JS side: `window.mpapp.register(name, fn)` for typed JS-side methods; `window.mpapp.call(name, args...)` for outbound. The shim's `_receive` auto-dispatches by method name and posts result/error envelopes.
 > - Wire format: `{"id":N,"method":"name","args":[...]}` calls; `{"id":N,"result":...}` / `{"id":N,"error":"..."}` responses.
-> - Symmetric typed round-trips end-to-end. Bridge methods are sync in v1 — async (task<T>-returning bridge methods) is the only remaining gap.
+> - Symmetric typed round-trips end-to-end. Async bridge methods take a trailing `std::function<void(T)> respond` callback they invoke when ready (sync or deferred); `process_inbound` routes through `dispatch_async(payload, on_response)` so sync methods still fire inline but async methods can defer the response until their `respond()` resolves. The `async_invoker_builder<T, Method>` partial specialization works around the C++ "pack in non-trailing position is non-deducible" rule.
 >
-> Implementation lives in `include/mpapp/{hybrid_bridge.hpp,hybrid_web_view.hpp,detail/json.hpp}` (~1100 LOC total) + the 3 platform handlers + the JS shim in each handler's `kBridgeShim`.
+> Implementation lives in `include/mpapp/{hybrid_bridge.hpp,hybrid_web_view.hpp,detail/json.hpp}` (~1400 LOC total) + the 3 platform handlers + the JS shim in each handler's `kBridgeShim`.
 
 ## Overview
 

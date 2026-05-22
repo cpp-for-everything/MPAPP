@@ -235,6 +235,14 @@ The biggest single architectural feature shipped this session. Built bottom-up o
 
 The only remaining gap is Phase F (the *other* Phase F — async bridge methods returning `task<T>` themselves, which requires refactoring `hybrid_bridge::dispatch` to a callback-style `dispatch_async`). Documented as a "Phase F" pickup item; not blocking since sync bridge methods cover the common case.
 
+## ADR-0018 Phase F — async bridge method dispatch
+
+| Commit | Scope | Build state |
+|---|---|---|
+| _(pending)_ | **register_async_method + dispatch_async** — `hybrid_bridge` gains an `async_invoke` field on `method_entry` alongside the existing sync `invoke`; `register_async_method<T>(name, &Self::method)` registers a method with trailing `std::function<void(T)> respond` callback that the user invokes when ready. `dispatch_async(payload, on_response)` handles both kinds uniformly — sync methods fire `on_response` inline (preserving v1 behavior); async methods defer until the user method's `respond()` resolves. `hybrid_web_view::process_inbound` now routes through `dispatch_async` so both shapes go through the same code path. `async_invoker_builder<T, Method>` is a partial specialization on the full member-function-pointer type that internally splits `A...` into `Args... + std::function<void(T)>` via `index_sequence<N-1>` — sidesteps the "pack in non-trailing position is non-deducible" rule that bit both MSVC and GCC on the naïve formulation. shared_ptr<bool> "fired" guard on `respond` makes double-fire a silent no-op. Tests cover sync-through-async-path, async with sync respond, async with deferred respond, double-respond, args-mismatch, unknown-method, malformed-envelope, and end-to-end through `hybrid_web_view::process_inbound`. | Win 302/302 + Linux green + Android APK builds clean |
+
+**Net:** ADR-0018 is now fully complete in both directions. Bridge methods can be sync (return-by-value) or async (capture-and-defer-respond). The dispatch_async path is the canonical one going forward; the original sync `dispatch()` remains for callers who only need the synchronous return-string shape. ctest 290 → 302 across the +12 new async test cases; the suite stays green on every platform.
+
 ## CollectionView typed_items
 
 | Commit | Scope | Build state |
