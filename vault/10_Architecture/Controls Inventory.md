@@ -76,7 +76,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/TextCell\|TextCell]] | `Controls/Cells/TextCell/` | android-real (Win Border+StackPanel+TextBlock pair + Linux GtkBox+GtkLabel pair + Android LinearLayout+TextView pair; detail row hides on empty; 12/6 padding for native row feel; self-registered for nesting anywhere a view fits) |
 | [[Components/EntryCell\|EntryCell]] | `Controls/Cells/EntryCell/` | mock (label + text + placeholder + keyboard_kind enum + completed signal per ADR-0021; real handlers deferred) |
 | [[Components/SwitchCell\|SwitchCell]] | `Controls/Cells/SwitchCell/` | mock (text + on + on_changed signal + toggle() helper per ADR-0021) |
-| [[Components/ViewCell\|ViewCell]] | `Controls/Cells/ViewCell/` | mock (content: view* — arbitrary-content escape hatch per ADR-0021) |
+| [[Components/ViewCell\|ViewCell]] | `Controls/Cells/ViewCell/` | android-real (Win Border w/ Child swap + Linux GtkBox single-slot + Android FrameLayout; content resolved via ADR-0013 dispatch; native row padding to match text_cell aesthetic) |
 | [[Components/ImageCell\|ImageCell]] | `Controls/Cells/ImageCell/` | mock (extends text_cell; adds image_uri per ADR-0021) |
 | [[Components/TemplatedView\|TemplatedView]] | `Controls/TemplatedView/` | android-real (Win ContentControl + Linux GtkBox single-child + Android FrameLayout; content slot live, template_id deferred to templating engine ADR) |
 | [[Components/TimePicker\|TimePicker]] | `Handlers/TimePicker/` | android-real (Win TimePicker + Linux GtkSpinButton pair + Android TimePicker 24h; time_value hour/minute POD) |

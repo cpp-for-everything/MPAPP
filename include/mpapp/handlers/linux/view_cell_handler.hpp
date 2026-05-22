@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: Apache-2.0
+// GTK4 view_cell handler — vertical GtkBox single-child host with row
+// padding margins; child resolved via ADR-0013 dispatch.
+
+#ifndef MPAPP_HANDLERS_LINUX_VIEW_CELL_HANDLER_HPP
+#define MPAPP_HANDLERS_LINUX_VIEW_CELL_HANDLER_HPP
+
+#include "../../platform.hpp"
+#include "../../signal.hpp"
+#include "../../view_cell.hpp"
+
+#if defined(__linux__) && !defined(__ANDROID__)
+
+namespace mpapp {
+
+template <>
+class view_cell_handler<platform::linux_> {
+public:
+    view_cell_handler();
+    ~view_cell_handler();
+
+    view_cell_handler(const view_cell_handler&)            = delete;
+    view_cell_handler& operator=(const view_cell_handler&) = delete;
+    view_cell_handler(view_cell_handler&&)                 = delete;
+    view_cell_handler& operator=(view_cell_handler&&)      = delete;
+
+    void map_content(view_cell& c);
+
+    void*       native() noexcept       { return native_; }
+    const void* native() const noexcept { return native_; }
+
+private:
+    void apply_content(view* v);
+
+    struct content_cb_t {
+        view_cell_handler<platform::linux_>* self;
+        void operator()(view* v) const { self->apply_content(v); }
+    };
+
+    void* native_        = nullptr;  // GtkBox (vertical, single slot)
+    void* current_child_ = nullptr;  // currently-attached GtkWidget*
+
+    content_cb_t content_cb_{this};
+    signal_slot<view* const&> content_slot_{};
+};
+
+} // namespace mpapp
+
+#endif // __linux__ && !__ANDROID__
+#endif // MPAPP_HANDLERS_LINUX_VIEW_CELL_HANDLER_HPP

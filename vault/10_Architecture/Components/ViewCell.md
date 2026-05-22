@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "ViewCell"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/cells"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # ViewCell
 
 > [!info] Status
-> **mock** — surface at `include/mpapp/view_cell.hpp` per [[ADR-0021-tableview-cell-types]]. Mock handler tests verify `content.present` transitions.
+> **android-real** — Win `mux::Controls::Border` with `Child` swap + Linux `GtkBox` single-slot + Android `FrameLayout` with `removeAllViews`/`addView`. Content resolved through ADR-0013 widget_dispatch so any registered view can nest. Native row padding (12/6 px on Win/Linux, 24/12 dp on Android) matches text_cell aesthetic.
 
 ## Overview
 
