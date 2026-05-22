@@ -18,8 +18,8 @@ tags:
 | Layer | Status |
 |---|---|
 | Page family (NavigationPage / TabbedPage / FlyoutPage / Shell) | **android-real** + `task<T>` async push/pop wrappers |
-| List family (ListView / CollectionView / TableView) | **android-real** + multi-select event round-trip on all 3 platforms |
-| Cell tree (text/view/switch/image/entry) | **android-real** — every cell with bidirectional bindings where the surface has them |
+| List family (ListView / CollectionView / TableView) | **android-real** + multi-select event round-trip on all 3 platforms; CollectionView vertical_grid layout swap on all 3 platforms |
+| Cell tree (text/view/switch/image/entry) | **android-real** — every cell with bidirectional bindings where the surface has them; row→cell.tapped routing through `table_view::cell_at` |
 | Grid (real layout engine) | **android-real** — native Grid wrap + per-child placement via attached property store |
 | WebView / HybridWebView | **android-real** — native messaging end-to-end (WebMessageReceived / script-message-handler / addJavascriptInterface) |
 | ShapeView / GraphicsView | **android-real (v1)** — per-platform native primitives. Full unified canvas facade is v2 per [[ADR-0015-graphics-backend-dual]]. |
@@ -61,13 +61,20 @@ tags:
 
 ## Where to pick up next
 
-Look for the highest tractable item that doesn't need a human-only step:
+The Current-Focus "pickup list" caught up to itself across the W21 close push. The polish items it called out are now landed:
 
-- The CollectionView `layout` enum (vertical_list / horizontal_list / vertical_grid / horizontal_grid) still only renders vertical_list. Wiring the remaining three across mux::GridView / GtkFlowBox / android.widget.GridView is well-scoped.
-- TableView's surface refactor (`vec<table_section{title, vec<unique_ptr<cell>>}>`) so its rows render through the cell-type tree instead of being plain strings.
-- TabbedPage + Shell bar styling polish (selected-tab color emphasis).
-- HybridWebView typed JS bridge per [[ADR-0018-hybrid-webview-typed-bridge]] — current v1 ships an untyped string bridge; the ADR proposes JSON-RPC + `[[mpapp::js_method]]` attribute-driven typing.
+- ✅ CollectionView `layout` enum — vertical_grid wired on all 3 platforms via the outer-container + inner-widget-swap pattern (mux::GridView / GtkFlowBox / android.widget.GridView). horizontal_list / horizontal_grid still degrade to vertical for v1 (would require ItemsPanelTemplate work on Win + GtkOrientable on Linux + RecyclerView on Android).
+- ✅ TableView typed_sections — `vector<table_section_typed{title, vec<cell*>}>` parallel surface renders cell-tree rows through ADR-0013 dispatch. row_tapped wired on Win + Linux (was Android-only); cell.tapped routes through `table_view::cell_at` on all 3 platforms.
+- ✅ TabbedPage + Shell selected-tab styling — Android handlers now restyle the active tab with primary-blue + bold; Win/Linux already had this via the native widget.
 
-For things gated on a human:
-- ADR acceptance pass (0014–0021).
-- macOS + iOS host availability.
+What's left at code level:
+
+- **HybridWebView typed JS bridge** per [[ADR-0018-hybrid-webview-typed-bridge]] — current v1 ships an untyped string bridge; the ADR proposes JSON-RPC + `[[mpapp::js_method]]` attribute-driven typing. Substantial: JSON layer (~500 LOC tag_invoke-based) + bridge plumbing + opt-in opt-in `set_bridge<MyBridge>()` codegen point.
+- **ADR-0016 compile-time Shell route table** — heavy template metaprogramming around NTTP string literals. The string-based runtime `go_to(uri)` parser already works; this adds the compile-time-checked `shell.go_to<"home/details">(42)` syntax.
+- **ADR-0015 v2 unified canvas facade** (Cairo + Skia compile-time selectable) — ShapeView + GraphicsView v1 already ship per-platform native primitives, so apps that need basic shapes don't block on this.
+- **CollectionView item_template** tied to the cell-type tree — would let users supply a cell factory and have CollectionView use it instead of plain string items. Composes with the new vertical_grid path.
+
+What's left at process / host level:
+
+- **ADR acceptance pass** for 0014–0022 (9 proposed ADRs). Code is implemented and shipping; review-gate per Rule 4.
+- **macOS + iOS handler sweep** across the widget set. Existing Objective-C++ handlers on app-shell are the template.
