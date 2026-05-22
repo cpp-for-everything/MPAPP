@@ -3,7 +3,7 @@ type: milestone
 id: M-04c
 title: Handler heavy port — ADR-gated widgets
 phase: p3
-status: planned
+status: active
 deliverables:
   - Every M-04c-listed widget reaches `android-real` status (Win + Linux + Android verified)
   - One design ADR per heavy widget or widget family, accepted before code lands
@@ -14,6 +14,7 @@ exitCriteria:
   - Each gated ADR is `accepted`
 tags:
   - type/milestone
+  - status/active
   - phase/p3
   - phase/p4
   - phase/p5
@@ -74,11 +75,16 @@ For each gated widget:
 | TableView cells | [[ADR-0021-tableview-cell-types]] | **android-real (2026-05-22)** — text_cell + view_cell + switch_cell + image_cell + entry_cell all 3 platforms; new shared `MppEditorActionListener` carries IME terminal actions to entry_cell.completed |
 | WebView | RFC-0001 § Linux licensing | **android-real (2026-05-22)** — Win muxc::WebView2 + Linux WebKitGTK 6.x (LGPL dynamic) + Android android.webkit.WebView; navigating/navigated/is_loading/can_go_back/forward wired via NavigationStarting/Completed + "load-changed" + MppWebViewClient |
 | HybridWebView | depends WebView + [[ADR-0018-hybrid-webview-typed-bridge]] | **android-real (2026-05-22)** — `window.mpapp` JS shim injected on each page; Win WebView2 WebMessageReceived/PostWebMessageAsString + Linux WebKitUserContentManager script-message-handler + Android addJavascriptInterface MppJsBridge |
-| ShapeView | [[ADR-0015-graphics-backend-dual]] | **mock landed** — shape_kind enum + data path string + fill/stroke/stroke_thickness/opacity (2026-05-21) |
-| GraphicsView | [[ADR-0015-graphics-backend-dual]] | **mock landed** — width/height + draw_count + invalidate() + draw_requested signal (2026-05-21) |
+| ShapeView | [[ADR-0015-graphics-backend-dual]] | **android-real (2026-05-22, v1)** — Win muxc::Border + muxc::Shapes::Rectangle/Ellipse/Line; Linux GtkDrawingArea + cairo draw callback; Android MppShapeView w/ onDraw. polygon+path render as bounding rect; full SVG path parsing + unified canvas facade per ADR-0015 is v2 scope. |
+| GraphicsView | [[ADR-0015-graphics-backend-dual]] | **android-real (2026-05-22, v1)** — Win muxc::Canvas + Linux GtkDrawingArea + Android android.view.View; width/height propagated to native widget. User-facing draw API still gated on ADR-0015 v2 canvas facade. |
 | Grid (real) | [[ADR-0017-grid-track-definitions]] | **android-real (2026-05-22)** — Win mux::Grid w/ GridLength + Linux GtkGrid w/ hexpand bridging + Android GridLayout w/ Spec-based LayoutParams; per-child placement via grid.set_row/set_column attached store. Star sizing is approximate on Linux/Android — exact only on Win. |
 
-**Status as of 2026-05-22 close:** Every widget except the graphics-backend pair (ShapeView, GraphicsView) is at android-real. Cell type tree (text/view/switch/image/entry) all live, WebView + HybridWebView both wire native messaging end-to-end. Remaining real-handler work: ShapeView/GraphicsView (Cairo facade per ADR-0015 + Android Canvas adapter). Compile-time route table per ADR-0016 still pending Shell follow-up.
+**Status as of 2026-05-22 close (final):** **Every concrete widget in M-04c is at android-real on Win/Linux/Android.** ShapeView + GraphicsView shipped v1 with per-platform native primitives (deferring the unified canvas facade per ADR-0015 to v2). Remaining work is process-level rather than code-level:
+
+- Each proposed ADR (0014–0021) needs a formal acceptance pass before M-04c flips from `active` to `shipped`. The decisions are already implemented; this is the review-gate part of Rule 4.
+- Compile-time route table per ADR-0016 for Shell — design is documented, implementation is template-metaprogramming heavy and ships as a Shell follow-up.
+- ShapeView/GraphicsView v2 (Cairo+Skia compile-time selectable graphics facade) per ADR-0015.
+- macOS + iOS handlers across the entire widget set — gated on Apple host.
 
 ## See also
 
