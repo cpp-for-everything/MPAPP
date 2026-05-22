@@ -195,6 +195,62 @@ This closes the largest remaining "the surface ships but you can't actually use 
 
 **Net:** typed_sections is now demonstrated end-to-end on **all three target platforms** with identical view-model code. The cell tree composes through ADR-0013 dispatch on GtkListBox, mux::ListView, and Android's FrameLayout-wrapped ScrollView+LinearLayout. Cross-platform parity for the typed surface is now provable, not just contractual.
 
+## TableView row→cell tap routing
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `afed31f` | **TableView row_tapped → cell.tapped** on 3 platforms. Win + Linux row-tap wiring was Android-only before; now all 3 platforms emit `table_view::row_tapped(section, row)` and additionally fire the targeted cell's `tapped` signal through a shared `cell_at(section, row)` helper. | Win/Linux/Android green |
+| `4cabac8` | Three test cases locking in the cell_at contract (typed/flat lookups, out-of-range, simulated handler dispatch). | Win 251/251 |
+
+The em-dash bug from the W20 era recurred in one of the new test names and broke Catch2's ctest filter — caught + fixed in the same commit.
+
+## CollectionView vertical_grid + multi-select polish
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `df2e25f` | **CollectionView multi-select event round-trip** on 3 platforms. Native widget toggles a row's checked state in `selection_mode=multiple` → handler echoes the full set back into `selected_indices`. Win iterates SelectedItems via Items.IndexOf; Linux walks gtk_list_box_get_selected_rows on "selected-rows-changed"; Android calls getCheckedItemPositions() after each multi-mode tap. | Win/Linux/Android green |
+| `78c4e54` | **CollectionView vertical_grid layout** on 3 platforms. Outer stable container + inner widget swap pattern: mux::Border + ListView/GridView (Win); GtkScrolledWindow + GtkListBox/GtkFlowBox (Linux); FrameLayout + ListView/GridView (Android). map_layout swaps the inner widget at runtime; SelectionMode + items + tap router transfer to the fresh inner. horizontal_* still degrades to vertical for v1. | Win/Linux/Android green |
+
+## ADR-0022 — Android router pattern codification
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `6421408` | ADR-0022 codifying the kind-discriminated Android listener family pattern. Catalogs current kind allocations across MppActionRouter / MppItemClickRouter / MppCheckedChangeListener / MppTextWatcher / MppEditorActionListener / MppWebViewClient / MppJsBridge / MppNumberPickerListener / MppSeekBarChangeListener. Documents the procedure for adding a new kind on an existing listener vs allocating a brand-new listener class. | docs |
+
+## ADR-0018 typed JS bridge — full v2 stack (5 phases)
+
+The biggest single architectural feature shipped this session. Built bottom-up over five focused commits.
+
+| Phase | Commit | Surface | Coverage |
+|---|---|---|---|
+| **A** — JSON layer | `52d579a` | `include/mpapp/detail/json.hpp` (~520 LOC) — header-only encode/decode for primitives + vector + optional + ADL extension. Writer appends to `std::string&`; reader is pull-style over `std::string_view`. | +11 ctest |
+| **B** — bridge base + inbound | `85a485b` | `include/mpapp/hybrid_bridge.hpp` — `register_method` + JSON-RPC dispatcher. Sync methods; `task<T>` async deferred. Args parsed into typed `std::tuple<Args...>`; void returns write `null`. | +12 ctest |
+| **C** — wire bridge into hybrid_web_view | `f1eff1d` | `hybrid_web_view::set_bridge<T>()` + `process_inbound` choke point. 3-platform handler refactor — Win/Linux/Android handlers now call `bound_->process_inbound(payload)` instead of duplicating the bridge-vs-raw decision. | +5 ctest |
+| **D** — outbound invoke_js | `1488373` | `invoke_js(method, args...)` fire-and-forget. `json::writer::field_array` helper. Auto-incrementing outbound id stream separate from inbound ids. | +2 ctest |
+| **E** — invoke_js_cb + response router | `3f8a62e` | `invoke_js_cb<T>(method, on_result, args...)` registers a callback by envelope id; process_inbound's tri-state classifier routes responses with matching pending id to the callback. | +4 ctest |
+| **F** — invoke_js_async (task<T>) | `76035e7` | `invoke_js_async<T>(method, args...)` returns an awaiter so `co_await wv.invoke_js_async<int>("add",1,2)` works inside `mpapp::task<T>` / `ui_task<T>` coroutines. | +2 ctest |
+| **G** — JS shim ergonomics | `c160269` | Updated `window.mpapp` shim on all 3 platforms: `register(name, fn)` for typed JS-side methods + `call(name, args...)` for outbound. `_receive` now dispatches by method name + auto-posts result/error envelopes. | (JS code only) |
+
+**Net:** ADR-0018 v2 is feature-complete for synchronous bridge methods. Symmetric typed round-trips end-to-end on both sides: C++→JS via `invoke_js{_cb,_async}` + JS-side `register`; JS→C++ via `hybrid_bridge` + JS-side `call`. The C++ surface supports both callback and coroutine APIs. ctest grew from 248 → 287 across the seven commits.
+
+The only remaining gap is Phase F (the *other* Phase F — async bridge methods returning `task<T>` themselves, which requires refactoring `hybrid_bridge::dispatch` to a callback-style `dispatch_async`). Documented as a "Phase F" pickup item; not blocking since sync bridge methods cover the common case.
+
+## CollectionView typed_items
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `9b245d7` | **CollectionView typed_items** parallel surface on 3 platforms. Mirrors TableView's typed_sections pattern: `vector<view*>` of cell/view pointers; handler renders each via ADR-0013 dispatch. Win/Linux: append to the existing ListView/GridView/GtkListBox/GtkFlowBox inner widget. Android: swap inner to ScrollView+LinearLayout(VERTICAL) for typed mode since the AdapterView+ArrayAdapter recycler doesn't fit non-virtualizing typed children. v1 limitations: non-virtualizing in typed mode, selection doesn't apply, Android layout enum ignored in typed mode. | Win 287/287 + Linux + Android green |
+| `a8669a8` | Mock-level tests for typed_items — defaults, non-owning view* round-trip, coexist with items_source. | Win 290/290 |
+
+**Why this matters:** the cell tree + ADR-0013 dispatch composition is now usable inside ListView/CollectionView too, not just TableView. Apps with small lists of rich items can use CollectionView with `typed_items = {…cell pointers…}` instead of having to fall back to TableView for typed rows.
+
+## ADR-0018 / typed-bridge / Current Focus orientation
+
+| Commit | Scope |
+|---|---|
+| `1f72752` | Refresh Current Focus + Home.md after the ADR-0018 v1 wave |
+| `eb738a1` | Refresh Current Focus after the v2 wave (callbacks + coroutines + JS shim) |
+
 ## See also
 
 - [[40_Roadmap/M-04c-handler-heavy-port]] — canonical tracker.
