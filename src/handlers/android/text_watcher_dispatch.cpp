@@ -9,6 +9,7 @@
 #include <string>
 
 #include "mpapp/handlers/android/editor_handler.hpp"
+#include "mpapp/handlers/android/entry_cell_handler.hpp"
 #include "mpapp/handlers/android/entry_handler.hpp"
 
 extern "C" JNIEXPORT void JNICALL
@@ -28,6 +29,11 @@ Java_io_mpapp_MppTextWatcher_nativeDispatchTextChanged(
         case 2:  // editor_handler
             mpapp::android_editor_dispatch_text_changed(
                 reinterpret_cast<mpapp::editor_handler<mpapp::platform::android>*>(handler_ptr),
+                s);
+            return;
+        case 3:  // entry_cell_handler
+            mpapp::android_entry_cell_dispatch_text_changed(
+                reinterpret_cast<mpapp::entry_cell_handler<mpapp::platform::android>*>(handler_ptr),
                 s);
             return;
         default:

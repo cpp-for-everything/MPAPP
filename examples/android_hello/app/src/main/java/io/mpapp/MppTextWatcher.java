@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. Bridges android.text.TextWatcher → native mpapp text
-// handlers (entry / editor). `kind` discriminates which handler type
-// the long pointer refers to: 1 = entry, 2 = editor.
+// handlers (entry / editor / entry_cell). `kind` discriminates which
+// handler type the long pointer refers to: 1 = entry, 2 = editor,
+// 3 = entry_cell.
 
 package io.mpapp;
 

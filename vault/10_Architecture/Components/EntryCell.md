@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "EntryCell"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/cells"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # EntryCell
 
 > [!info] Status
-> **mock** — surface at `include/mpapp/entry_cell.hpp` per [[ADR-0021-tableview-cell-types]]. Mock handler tests cover `label` + `text` mappers. `keyboard_kind` enum mirrors MAUI (Default / Chat / Email / Numeric / Telephone / Text / Url).
+> **android-real** — Win `mux::Controls::Border` + 2-col Grid (TextBlock auto + TextBox star) — `InputScope` maps `keyboard_kind` → `Email/Number/TelephoneNumber/Url/Chat/Default`. `TextChanged` echoes user input via a suppress-echo guard; `KeyDown` on `VirtualKey::Enter` emits `completed`. Linux horizontal `GtkBox` (`GtkLabel` + `GtkEntry`) — `gtk_entry_set_input_purpose` maps keyboard. `"changed"` echoes text; `"activate"` (Enter key) emits `completed`. Android horizontal `LinearLayout` (`TextView` + `EditText` weight=1) — `setInputType` maps keyboard. Reuses `MppTextWatcher` with `kind=3` for echo; new `MppEditorActionListener` (`kind=1` for entry_cell) routes IME `IME_ACTION_{DONE,GO,NEXT,SEARCH,SEND}` to `completed`.
 
 ## Overview
 
