@@ -14,8 +14,10 @@
 #include <mpapp/detail/graphics/canvas.hpp>
 #include <mpapp/hybrid_bridge.hpp>
 #include <mpapp/label.hpp>
+#include <mpapp/list_view.hpp>
 #include <mpapp/page.hpp>
 #include <mpapp/route.hpp>
+#include <mpapp/shape_view.hpp>
 #include <mpapp/shell.hpp>
 
 #include <android/log.h>
@@ -529,6 +531,132 @@ extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_example_MainActivity_nativeRunItemTemplateSmokeTest(
     JNIEnv* /*env*/, jobject /*thiz*/) {
     t0019::run_smoke();
+}
+
+// T-0020 — ListView model smoke test. Exercises the model-level
+// surface: items_source / selected_index / item_tapped emit. No
+// Android render path because the smoke does not depend on the JVM
+// thread — the test infra greps logcat lines prefixed `T-0020:`.
+namespace t0020 {
+
+void log(const char* msg) {
+    __android_log_print(ANDROID_LOG_INFO, "MPAPP", "T-0020: %s", msg);
+}
+
+void run_smoke() {
+    mpapp::list_view lv;
+
+    int tap_count = 0;
+    int last_tap_index = -1;
+    int sel_changes = 0;
+
+    struct tap_cb_t {
+        int* count; int* last;
+        void operator()(int idx) const { ++*count; *last = idx; }
+    };
+    struct sel_cb_t {
+        int* count;
+        void operator()(int) const { ++*count; }
+    };
+    tap_cb_t tap_cb{&tap_count, &last_tap_index};
+    sel_cb_t sel_cb{&sel_changes};
+    mpapp::signal_slot<int> tap_slot{};
+    mpapp::signal_slot<const int&> sel_slot{};
+    lv.item_tapped.subscribe(tap_slot, tap_cb);
+    lv.selected_index.changed.subscribe(sel_slot, sel_cb);
+
+    // 1) Set items_source — 4 rows.
+    lv.items_source = std::vector<std::string>{"a", "b", "c", "d"};
+    log(("after items=4: count=" + std::to_string(lv.items_source.get().size())
+         + " sel_idx=" + std::to_string(lv.selected_index.get())
+         + " sel_changes=" + std::to_string(sel_changes)).c_str());
+
+    // 2) Select index 2.
+    lv.selected_index = 2;
+    log(("after select(2): sel_idx=" + std::to_string(lv.selected_index.get())
+         + " sel_changes=" + std::to_string(sel_changes)).c_str());
+
+    // 3) Emit item_tapped(1) — simulates a row tap.
+    lv.item_tapped.emit(1);
+    log(("after tap(1): tap_count=" + std::to_string(tap_count)
+         + " last_tap_index=" + std::to_string(last_tap_index)).c_str());
+
+    // 4) Rotate items_source — 2 rows.
+    lv.items_source = std::vector<std::string>{"x", "y"};
+    lv.selected_index = 0;
+    log(("after rotate-to-2: count=" + std::to_string(lv.items_source.get().size())
+         + " sel_idx=" + std::to_string(lv.selected_index.get())
+         + " sel_changes=" + std::to_string(sel_changes)).c_str());
+
+    // 5) Emit item_tapped(0) — second tap.
+    lv.item_tapped.emit(0);
+    log(("after tap(0): tap_count=" + std::to_string(tap_count)
+         + " last_tap_index=" + std::to_string(last_tap_index)).c_str());
+}
+
+} // namespace t0020
+
+extern "C" JNIEXPORT void JNICALL
+Java_io_mpapp_example_MainActivity_nativeRunListViewSmokeTest(
+    JNIEnv* /*env*/, jobject /*thiz*/) {
+    t0020::run_smoke();
+}
+
+// T-0021 — ShapeView model smoke test. Exercises the model-level
+// surface: kind / data / fill / stroke / stroke_thickness / opacity
+// Observables and their change signals. Output prefixed `T-0021:`.
+namespace t0021 {
+
+void log(const char* msg) {
+    __android_log_print(ANDROID_LOG_INFO, "MPAPP", "T-0021: %s", msg);
+}
+
+void run_smoke() {
+    mpapp::shape_view s;
+    int change_count = 0;
+
+    struct cb_t { int* c; void operator()(const mpapp::shape_kind&) const { ++*c; } };
+    struct sc_t { int* c; void operator()(const std::string&) const { ++*c; } };
+    struct dc_t { int* c; void operator()(const double&)      const { ++*c; } };
+    cb_t kind_cb{&change_count};
+    sc_t data_cb{&change_count}, fill_cb{&change_count}, stroke_cb{&change_count};
+    dc_t thick_cb{&change_count}, opac_cb{&change_count};
+    mpapp::signal_slot<const mpapp::shape_kind&> kind_slot{};
+    mpapp::signal_slot<const std::string&>       data_slot{};
+    mpapp::signal_slot<const std::string&>       fill_slot{};
+    mpapp::signal_slot<const std::string&>       stroke_slot{};
+    mpapp::signal_slot<const double&>            thick_slot{};
+    mpapp::signal_slot<const double&>            opac_slot{};
+    s.kind.changed.subscribe(kind_slot, kind_cb);
+    s.data.changed.subscribe(data_slot, data_cb);
+    s.fill.changed.subscribe(fill_slot, fill_cb);
+    s.stroke.changed.subscribe(stroke_slot, stroke_cb);
+    s.stroke_thickness.changed.subscribe(thick_slot, thick_cb);
+    s.opacity.changed.subscribe(opac_slot, opac_cb);
+
+    s.kind             = mpapp::shape_kind::ellipse;
+    s.data             = "M0 0 L10 0 L5 10 Z";
+    s.fill             = "#E63946";
+    s.stroke           = "#1D3557";
+    s.stroke_thickness = 2.5;
+    s.opacity          = 0.75;
+    log(("after 6 sets: changes=" + std::to_string(change_count)).c_str());
+
+    // No-change set should NOT fire (Observable.set short-circuits on ==).
+    s.fill = "#E63946";
+    log(("after no-change fill: changes=" + std::to_string(change_count)).c_str());
+
+    // kind read-back
+    log((std::string{"kind="} + (s.kind.get() == mpapp::shape_kind::ellipse ? "ellipse" : "other")).c_str());
+    log(("data=" + s.data.get()).c_str());
+}
+
+} // namespace t0021
+
+extern "C" JNIEXPORT void JNICALL
+Java_io_mpapp_example_MainActivity_nativeRunShapeViewSmokeTest(
+    JNIEnv* /*env*/, jobject /*thiz*/) {
+    t0021::run_smoke();
 }
 
 // T-0016 — Cairo render demo. Drives the canvas facade through a

@@ -70,6 +70,24 @@ public class MainActivity extends Activity {
             Log.w("MPAPP", "item_template smoke test skipped: " + t);
         }
 
+        // T-0020 Rule 11 catch-up: ListView model surface
+        // (items_source / selected_index / item_tapped). Output
+        // prefixed `T-0020:`.
+        try {
+            nativeRunListViewSmokeTest();
+        } catch (Throwable t) {
+            Log.w("MPAPP", "ListView smoke test skipped: " + t);
+        }
+
+        // T-0021 Rule 11 catch-up: ShapeView model surface
+        // (kind / data / fill / stroke / stroke_thickness / opacity).
+        // Output prefixed `T-0021:`.
+        try {
+            nativeRunShapeViewSmokeTest();
+        } catch (Throwable t) {
+            Log.w("MPAPP", "ShapeView smoke test skipped: " + t);
+        }
+
         nativeLaunch();
     }
 
@@ -81,4 +99,6 @@ public class MainActivity extends Activity {
     private native void nativeRunRoutesSmokeTest();
     private native void nativeRunBridgeSmokeTest();
     private native void nativeRunItemTemplateSmokeTest();
+    private native void nativeRunListViewSmokeTest();
+    private native void nativeRunShapeViewSmokeTest();
 }

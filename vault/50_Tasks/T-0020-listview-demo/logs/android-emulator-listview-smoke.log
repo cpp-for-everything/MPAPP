@@ -1,0 +1,5 @@
+﻿05-23 19:52:15.366  3590  3590 I MPAPP   : T-0020: after items=4: count=4 sel_idx=-1 sel_changes=0
+05-23 19:52:15.367  3590  3590 I MPAPP   : T-0020: after select(2): sel_idx=2 sel_changes=1
+05-23 19:52:15.367  3590  3590 I MPAPP   : T-0020: after tap(1): tap_count=1 last_tap_index=1
+05-23 19:52:15.367  3590  3590 I MPAPP   : T-0020: after rotate-to-2: count=2 sel_idx=0 sel_changes=2
+05-23 19:52:15.367  3590  3590 I MPAPP   : T-0020: after tap(0): tap_count=2 last_tap_index=0
