@@ -15,6 +15,7 @@ if(WIN32)
     add_subdirectory(windows_item_template_demo)
     add_subdirectory(windows_listview_demo)
     add_subdirectory(windows_shapeview_demo)
+    add_subdirectory(windows_graphicsview_demo)
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -25,6 +26,7 @@ if(UNIX AND NOT APPLE)
     add_subdirectory(gtk4_item_template_demo)
     add_subdirectory(gtk4_listview_demo)
     add_subdirectory(gtk4_shapeview_demo)
+    add_subdirectory(gtk4_graphicsview_demo)
 endif()
 
 # Cross-platform CLI demo of the canvas facade (ADR-0015). Renders

@@ -12,6 +12,7 @@
 
 #include <mpapp/collection_view.hpp>
 #include <mpapp/detail/graphics/canvas.hpp>
+#include <mpapp/graphics_view.hpp>
 #include <mpapp/hybrid_bridge.hpp>
 #include <mpapp/label.hpp>
 #include <mpapp/list_view.hpp>
@@ -657,6 +658,55 @@ extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_example_MainActivity_nativeRunShapeViewSmokeTest(
     JNIEnv* /*env*/, jobject /*thiz*/) {
     t0021::run_smoke();
+}
+
+// T-0022 — GraphicsView model smoke test. Exercises the
+// width/height/draw_count Observables + draw_requested signal +
+// invalidate() trigger. Output prefixed `T-0022:`.
+namespace t0022 {
+
+void log(const char* msg) {
+    __android_log_print(ANDROID_LOG_INFO, "MPAPP", "T-0022: %s", msg);
+}
+
+void run_smoke() {
+    mpapp::graphics_view gv;
+    int req_fires = 0;
+    int count_changes = 0;
+
+    struct rc_t { int* c; void operator()() const { ++*c; } };
+    struct cc_t { int* c; void operator()(const std::size_t&) const { ++*c; } };
+    rc_t req_cb{&req_fires};
+    cc_t count_cb{&count_changes};
+    mpapp::signal_slot<> req_slot{};
+    mpapp::signal_slot<const std::size_t&> count_slot{};
+    gv.draw_requested.subscribe(req_slot, req_cb);
+    gv.draw_count.changed.subscribe(count_slot, count_cb);
+
+    gv.width  = 200;
+    gv.height = 80;
+    log(("after size: w=" + std::to_string(gv.width.get())
+         + " h=" + std::to_string(gv.height.get())).c_str());
+
+    // 3 invalidate pulses.
+    gv.invalidate();
+    gv.invalidate();
+    gv.invalidate();
+    log(("after 3 invalidates: draw_count=" + std::to_string(gv.draw_count.get())
+         + " req_fires=" + std::to_string(req_fires)
+         + " count_changes=" + std::to_string(count_changes)).c_str());
+
+    // Resize is a single change set.
+    gv.width = 400;
+    log(("after resize: w=" + std::to_string(gv.width.get())).c_str());
+}
+
+} // namespace t0022
+
+extern "C" JNIEXPORT void JNICALL
+Java_io_mpapp_example_MainActivity_nativeRunGraphicsViewSmokeTest(
+    JNIEnv* /*env*/, jobject /*thiz*/) {
+    t0022::run_smoke();
 }
 
 // T-0016 — Cairo render demo. Drives the canvas facade through a

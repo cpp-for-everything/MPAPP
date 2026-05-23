@@ -88,6 +88,15 @@ public class MainActivity extends Activity {
             Log.w("MPAPP", "ShapeView smoke test skipped: " + t);
         }
 
+        // T-0022 Rule 11 catch-up: GraphicsView model surface
+        // (width / height / draw_count / draw_requested / invalidate).
+        // Output prefixed `T-0022:`.
+        try {
+            nativeRunGraphicsViewSmokeTest();
+        } catch (Throwable t) {
+            Log.w("MPAPP", "GraphicsView smoke test skipped: " + t);
+        }
+
         nativeLaunch();
     }
 
@@ -101,4 +110,5 @@ public class MainActivity extends Activity {
     private native void nativeRunItemTemplateSmokeTest();
     private native void nativeRunListViewSmokeTest();
     private native void nativeRunShapeViewSmokeTest();
+    private native void nativeRunGraphicsViewSmokeTest();
 }
