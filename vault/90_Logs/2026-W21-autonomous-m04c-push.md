@@ -295,6 +295,14 @@ Per Rule 4, these are now immutable — future changes require a new ADR with `s
 
 **Still `proposed`:** ADR-0015 (graphics backend dual — v1 ships but v2 facade hasn't been built yet) and the just-opened ADR-0023 (route guards + lifecycle — implementation just landed but waiting on a separate decider beat to flip).
 
+## ADR-0015 v2 — canvas facade (stub backend)
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `91d1c43` | **canvas facade + stub backend** — abstract `mpapp::detail::graphics::canvas` interface with `color` / `point` / `size` / `rect` / `path` / `line_cap` / `line_join` value types; SVG-subset path parser (M/L/Q/C/Z); hex color parser (#RRGGBB + #RRGGBBAA, fail-quiet); paint state setters + draw ops (fill/stroke rect/ellipse/path + clip + clear) + state-stack + transforms. Stub backend records every call as a string for testing — also doubles as the default backend so the framework compiles everywhere with zero native dependency. `make_canvas(w, h)` factory. CMake option `MPAPP_GRAPHICS_BACKEND` (`stub` default; `cairo` / `skia` accepted but warn-and-fall-back-to-stub for now). 16 ctest cases + 68 assertions. ctest 324 → 340. | Win + Linux + Android green |
+
+**Net:** the v2 facade surface is locked. Apps and handlers can now paint through `canvas*` without coupling to any specific backend. The remaining v2 work — real Cairo + Skia backends + the ShapeView/GraphicsView migration — is decoupled from the facade design and ships incrementally. ADR-0015 stays `proposed` until the first real backend ships, but the implementation-notes section now documents the facade layout.
+
 ## CollectionView typed_items
 
 | Commit | Scope | Build state |

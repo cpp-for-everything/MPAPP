@@ -68,6 +68,23 @@ Apps opt into Skia at build time by passing `-DMPAPP_GRAPHICS_BACKEND=skia` to C
 - **Cairo only** — rejected per the user's request to support apps that need GPU acceleration.
 - **Per-platform native (Direct2D / GtkDrawingArea / Canvas / Quartz)** — rejected; multiplies divergence and code, no longer a "graphics backend" choice but a "no portable backend" choice.
 
+## Implementation Notes
+
+The facade landed in W21. Layout:
+
+- `include/mpapp/detail/graphics/canvas.hpp` — value types (`color`, `point`, `size`, `rect`, `path`, `line_cap`, `line_join`) + the abstract `canvas` base class + the `make_canvas(width, height)` factory. `color::from_hex` parses `#RRGGBB`/`#RRGGBBAA`; `path::from_svg` parses the M / L / Q / C / Z subset of SVG path syntax. Both parsers are fail-quiet (return defaults on error) — the paint hot-path doesn't throw.
+- `include/mpapp/detail/graphics/stub_canvas.hpp` — the default backend. Records every method call as a string for inspection. Doubles as the test fixture for code that uses the canvas surface without a real graphics dependency.
+- `src/detail/graphics/canvas.cpp` — backend-independent: implementations of the value-type parsers.
+- `src/detail/graphics/stub_backend.cpp` — the `make_canvas` factory for the stub backend.
+- CMake option `MPAPP_GRAPHICS_BACKEND` (`stub` default, `cairo` and `skia` accepted). When set to `cairo` or `skia`, the build currently warns and falls back to stub — the real backends are follow-up work tied to their respective dependency-vendoring + license-compliance stories. The selection happens at CMake-configure time; only one backend `.cpp` compiles per build.
+
+Tests live in `tests/mock_handlers/graphics_canvas_test.cpp` (16 cases, 68 assertions). Coverage spans value-type parsers + every `canvas` method + the factory.
+
+What's still to do for full v2:
+- **Real Cairo backend** — wrap the existing GTK4 Cairo dependency on Linux; ship a Cairo build for Windows + Android via vcpkg / NDK packaging. LGPL via dynamic linking per RFC-0001 §Linux.
+- **Real Skia backend** — vendor Skia (~30 MB) opt-in. BSD-3 license.
+- **ShapeView + GraphicsView migration** — those handlers currently draw with per-platform native primitives (v1). v2 routes them through `canvas` so a single code path renders on every backend.
+
 ## References
 
 - [[ADR-0006-interop-parity]] — backend choice does not change observable behavior across platforms.
