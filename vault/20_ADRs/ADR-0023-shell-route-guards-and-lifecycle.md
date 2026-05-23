@@ -2,22 +2,25 @@
 type: adr
 id: ADR-0023
 title: "Shell route guards + page lifecycle hooks"
-status: proposed
+status: accepted
 decisionDate: 2026-05-23
-deciders: []
+deciders:
+  - alex
 supersedes: ""
 supersededBy: ""
 area: handlers
 tags:
   - type/adr
-  - status/proposed
+  - status/accepted
   - area/handlers
 ---
 
 # ADR-0023 — Shell route guards + page lifecycle hooks
 
 > [!info] Status
-> **proposed** — composes on top of [[ADR-0016-shell-compile-time-routes]] (which deferred this to "a follow-up ADR") and [[ADR-0014-page-navigation-stack]] (which owns the navigation engine). Together they form the full Shell-navigation contract.
+> **accepted** (2026-05-23) — composes on top of [[ADR-0016-shell-compile-time-routes]] (which deferred this to "a follow-up ADR") and [[ADR-0014-page-navigation-stack]] (which owns the navigation engine). Together they form the full Shell-navigation contract.
+>
+> Implementation shipped and Rule-11-closed by [[_Archive/T-0017-typed-routing-demo|T-0017]]: `shell.can_activate` + `can_deactivate` + `navigation_blocked` signal + `page::navigated_to` / `navigated_from` lifecycle signals; live demos on Windows (WinUI 3) + Linux (GTK4) + Android NDK (JNI smoke), all three with screenshots / logcat artifacts in the archive. Tests in `tests/mock_handlers/shell_test.cpp` cover the full guard + lifecycle matrix.
 
 ## Context
 

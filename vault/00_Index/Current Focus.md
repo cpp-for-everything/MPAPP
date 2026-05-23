@@ -37,7 +37,7 @@ tags:
 
 ## Recently accepted ADRs
 
-The M-04c proposal wave (ADR-0014–0022) is now mostly **accepted** — 8 of 9 flipped per Rule 4 after the implementations shipped + tested across all 3 platforms. ADR-0015 stays `proposed` even though the Cairo backend just landed because the Skia backend + handler-migration work remain. ADR-0023 was opened to cover the shell-route-guards-and-lifecycle work (also `proposed`).
+The M-04c proposal wave (ADR-0014–0022) is now mostly **accepted** — 8 of 9 flipped per Rule 4 after the implementations shipped + tested across all 3 platforms. ADR-0015 stays `proposed` even though the Cairo backend just landed because the Skia backend + handler-migration work remain. ADR-0023 is now **accepted** (2026-05-23) — covering shell-route-guards-and-lifecycle, Rule-11-closed by [[_Archive/T-0017-typed-routing-demo|T-0017]].
 
 - [[ADR-0022-android-kind-discriminated-routers]] — Android listener kind dispatch family (just accepted)
 - [[ADR-0021-tableview-cell-types]] — full MAUI cell parity (just accepted)
@@ -88,5 +88,5 @@ What's left at code level:
 
 What's left at process / host level:
 
-- **ADR acceptance pass** for 0014–0022 (9 proposed ADRs). Code is implemented and shipping; review-gate per Rule 4.
+- **ADR acceptance pass** — done as of 2026-05-23. 9 of 10 M-04c-era ADRs are now `accepted` (0014, 0016–0022, 0023); only ADR-0015 stays `proposed` because the Skia backend + ShapeView/GraphicsView migration are still future work.
 - **macOS + iOS handler sweep** across the widget set. Existing Objective-C++ handlers on app-shell are the template.
