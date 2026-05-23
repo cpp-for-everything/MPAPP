@@ -16,6 +16,7 @@
 
 #if defined(_WIN32)
 
+#include <winrt/base.h>
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
@@ -42,6 +43,10 @@ private:
     void wire_bridge();
     void send_outbound(const std::string& payload);
     void apply_html(const std::string& html);
+    // Coroutine driving the full async init chain on Loaded:
+    // EnsureCoreWebView2Async → AddScript shim → WebMessageReceived
+    // subscription → NavigateToString(pending_html_).
+    ::winrt::fire_and_forget async_init();
 
     struct sent_cb_t {
         hybrid_web_view_handler<platform::windows>* self;
@@ -53,10 +58,17 @@ private:
     };
 
     winrt::Microsoft::UI::Xaml::Controls::WebView2 native_{nullptr};
-    winrt::event_token core_ready_token_{};
     winrt::event_token web_message_token_{};
-    hybrid_web_view*   bound_ = nullptr;
-    bool               wired_ = false;
+    hybrid_web_view*   bound_       = nullptr;
+    bool               wired_       = false;
+    // True once AddScriptToExecuteOnDocumentCreatedAsync has resolved.
+    // Until then any html_source assignment is buffered in pending_html_
+    // so NavigateToString can't race ahead of the JS shim install.
+    bool               shim_added_  = false;
+    // True once the async init coroutine has been kicked off (the
+    // WebView2 Loaded event is the trigger). Subsequent Loaded fires
+    // are no-ops.
+    bool               init_kicked_ = false;
     std::string        pending_html_{};
 
     sent_cb_t                       sent_cb_{this};

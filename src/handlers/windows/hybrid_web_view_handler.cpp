@@ -83,10 +83,6 @@ hybrid_web_view_handler<platform::windows>::hybrid_web_view_handler() {
 
 hybrid_web_view_handler<platform::windows>::~hybrid_web_view_handler() {
     if (native_ != nullptr) {
-        if (core_ready_token_.value != 0) {
-            try { native_.CoreWebView2Initialized(core_ready_token_); } catch (...) {}
-            core_ready_token_ = {};
-        }
         // The WebMessageReceived event lives on the CoreWebView2; the
         // CoreWebView2 may be gone by the time the destructor runs, so
         // best-effort detach.
@@ -101,15 +97,97 @@ hybrid_web_view_handler<platform::windows>::~hybrid_web_view_handler() {
     }
 }
 
+// Coroutine driving the full async init chain on Loaded:
+//   EnsureCoreWebView2Async → AddScriptToExecuteOnDocumentCreatedAsync
+//   → WebMessageReceived subscription → NavigateToString(pending_html_).
+//
+// Why co_await rather than chained Completed delegates: setting Completed
+// on an IAsyncOperation/IAsyncAction whose only strong ref is a local
+// `auto op = ...` is fragile — the runtime can drop the operation before
+// the delegate fires. co_await keeps each op alive via the coroutine
+// frame and naturally serializes the steps so the JS shim is in place
+// before navigation begins, eliminating the original async-init race.
+//
+// `this` outlives the coroutine: the handler is owned by the demo app
+// and lives for the app's lifetime, so suspended frames stay valid.
+::winrt::fire_and_forget
+hybrid_web_view_handler<platform::windows>::async_init() {
+    if (native_ == nullptr) co_return;
+
+    try {
+        co_await native_.EnsureCoreWebView2Async();
+    } catch (::winrt::hresult_error const&) {
+        // ERROR_MOD_NOT_FOUND (0x8007007E) means WebView2Loader.dll or
+        // Microsoft.Web.WebView2.Core.dll wasn't deployed next to the
+        // executable. mpapp_add_winappsdk_runtime() copies both — keep
+        // that wiring in place.
+        co_return;
+    }
+    auto core = native_.CoreWebView2();
+    if (core == nullptr) co_return;
+
+    // Install the JS shim BEFORE any navigation. co_await keeps the
+    // op alive via the coroutine frame, sidestepping the orphaned-
+    // Completed-delegate pitfall that was the original async-init race.
+    try {
+        co_await core.AddScriptToExecuteOnDocumentCreatedAsync(
+            detail::to_hstring_utf8(kBridgeShim));
+    } catch (::winrt::hresult_error const&) {
+        // Continue: the page will still load, just without the bridge.
+    }
+    shim_added_ = true;
+
+    // Subscribe WebMessageReceived once.
+    if (web_message_token_.value == 0) {
+        hybrid_web_view* target = bound_;
+        web_message_token_ = core.WebMessageReceived(
+            [target](wv2c::CoreWebView2 const&,
+                     wv2c::CoreWebView2WebMessageReceivedEventArgs const& args) {
+                if (target == nullptr) return;
+                try {
+                    const std::wstring wide{args.TryGetWebMessageAsString()};
+                    const std::string utf8 = detail::wstring_to_utf8(wide);
+                    target->process_inbound(utf8);
+                } catch (...) {}
+            });
+    }
+    wired_ = true;
+
+    // Flush any html that was buffered while we waited for init.
+    if (!pending_html_.empty()) {
+        std::string html = std::move(pending_html_);
+        pending_html_.clear();
+        try {
+            core.NavigateToString(detail::to_hstring_utf8(html));
+        } catch (...) {}
+    }
+}
+
 void hybrid_web_view_handler<platform::windows>::wire_bridge() {
+    // Synchronous fallback. Taken only when map_messages finds
+    // CoreWebView2 already initialized (rare; a second map_messages on
+    // a reused handler). The common cold-start path goes through
+    // async_init().
     if (wired_ || native_ == nullptr) return;
     auto core = native_.CoreWebView2();
     if (core == nullptr) return;
 
-    // Inject the JS shim once per document.
+    auto* self = this;
     try {
-        core.AddScriptToExecuteOnDocumentCreatedAsync(detail::to_hstring_utf8(kBridgeShim));
-    } catch (...) {}
+        auto op = core.AddScriptToExecuteOnDocumentCreatedAsync(
+            detail::to_hstring_utf8(kBridgeShim));
+        op.Completed([self](wf::IAsyncOperation<winrt::hstring> const&,
+                            wf::AsyncStatus) {
+            self->shim_added_ = true;
+            if (!self->pending_html_.empty()) {
+                std::string html = std::move(self->pending_html_);
+                self->pending_html_.clear();
+                self->apply_html(html);
+            }
+        });
+    } catch (...) {
+        shim_added_ = true;
+    }
 
     if (web_message_token_.value != 0) {
         try { core.WebMessageReceived(web_message_token_); } catch (...) {}
@@ -123,9 +201,6 @@ void hybrid_web_view_handler<platform::windows>::wire_bridge() {
             try {
                 const std::wstring wide{args.TryGetWebMessageAsString()};
                 const std::string utf8 = detail::wstring_to_utf8(wide);
-                // Single choke point — hybrid_web_view::process_inbound
-                // decides whether to route through an attached bridge
-                // or fall through to the raw message_received signal.
                 target->process_inbound(utf8);
             } catch (...) {}
         });
@@ -145,35 +220,44 @@ void hybrid_web_view_handler<platform::windows>::map_messages(hybrid_web_view& h
     bound_ = &h;
     h.message_sent.subscribe(sent_slot_, sent_cb_);
 
-    // The CoreWebView2 may not exist yet — wait for CoreWebView2Initialized.
     if (native_ == nullptr) return;
-    auto* self = this;
+    // Rare path: handler reused on a WebView2 whose CoreWebView2 is
+    // already initialized. Wire synchronously.
     if (native_.CoreWebView2() != nullptr) {
         wire_bridge();
-    } else {
-        if (core_ready_token_.value != 0) {
-            try { native_.CoreWebView2Initialized(core_ready_token_); } catch (...) {}
-            core_ready_token_ = {};
-        }
-        core_ready_token_ = native_.CoreWebView2Initialized(
-            [self](muxc::WebView2 const&, muxc::CoreWebView2InitializedEventArgs const&) {
-                self->wire_bridge();
-                // If html_source was set before CoreWebView2 was ready,
-                // flush it now.
-                if (!self->pending_html_.empty()) {
-                    self->apply_html(self->pending_html_);
-                    self->pending_html_.clear();
-                }
-            });
+        return;
     }
+    // Common path: defer the async init chain to the Loaded event so
+    // the WebView2 is in the visual tree before we touch CoreWebView2.
+    // EnsureCoreWebView2Async returns ERROR_MOD_NOT_FOUND when called
+    // before the control has been parented, and the CoreWebView2
+    // Initialized event simply never fires on its own — the WebView2
+    // sits idle until something explicitly drives init.
+    auto* self = this;
+    native_.Loaded(
+        [self](::winrt::Windows::Foundation::IInspectable const&,
+               ::winrt::Microsoft::UI::Xaml::RoutedEventArgs const&) {
+            if (self->init_kicked_) return;
+            self->init_kicked_ = true;
+            self->async_init();
+        });
 }
 
 void hybrid_web_view_handler<platform::windows>::apply_html(const std::string& html) {
     if (native_ == nullptr || html.empty()) return;
+    // Two cases trigger buffering:
+    //   * CoreWebView2 isn't ready yet — async_init() (kicked off by the
+    //     WebView2 Loaded event) will flush pending_html_ once init
+    //     completes.
+    //   * CoreWebView2 is ready but the JS-shim AddScriptToExecuteOn-
+    //     DocumentCreatedAsync hasn't resolved yet — same flush path
+    //     applies; buffering avoids racing the shim.
     auto core = native_.CoreWebView2();
     if (core == nullptr) {
-        // CoreWebView2 not initialized yet — buffer until the
-        // CoreWebView2Initialized handler fires (see map_messages).
+        pending_html_ = html;
+        return;
+    }
+    if (!shim_added_) {
         pending_html_ = html;
         return;
     }

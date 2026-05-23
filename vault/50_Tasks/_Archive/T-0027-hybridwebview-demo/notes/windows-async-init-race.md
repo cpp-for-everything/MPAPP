@@ -1,55 +1,71 @@
-# Windows WebView2 async-init race (T-0027 follow-up)
+# Windows WebView2 hybrid_web_view init race — RESOLVED
 
-`hybrid_web_view_handler<windows>::wire_bridge` registers the JS shim
-via `CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(...)`.
-The "Async" suffix matters: the method returns an `IAsyncOperation`
-that resolves later, on the CoreWebView2 dispatcher thread. The
-handler currently fires the call and discards the operation:
+Originally filed as an async-init race; investigation revealed two
+stacked bugs that together prevented the WinUI 3 `hybrid_web_view`
+from ever firing a JS→C++ bridge call. Both are now fixed.
 
-```cpp
-try {
-    core.AddScriptToExecuteOnDocumentCreatedAsync(
-        detail::to_hstring_utf8(kBridgeShim));
-} catch (...) {}
-```
+Verification screenshot: `screenshots/windows-hybridwebview-fix-verified-crop.png`
+shows `bridge_calls: 1   last_js_event: page loaded 2026-05-23T16:18:54.216Z`
+— matching the GTK4 baseline.
 
-Immediately after, when `map_html_source` was added in this task,
-the handler may call `CoreWebView2.NavigateToString(html)` to load
-the page. If the AddScript op hasn't resolved by the time the
-navigation reaches document-creation, the shim is not yet injected
-and the page loads without `window.mpapp` — the page's `init()`
-script's `setTimeout` polling never sees window.mpapp populated, so
-the auto-fired `window.mpapp.call('notify', ...)` never reaches C++.
+## Bug A — missing runtime DLLs (the dominant symptom)
 
-The visible symptom in the T-0027 Win screenshot:
-`bridge_calls: 0   last_js_event: (none)`. The Linux side of the
-same task shows `bridge_calls: 1   last_js_event: page loaded ...`
-because WebKitGTK's `webkit_user_content_manager_add_script` is
-synchronous and the shim is in place before `webkit_web_view_load_html`
-runs.
+`mpapp_add_winappsdk_runtime` copied `Microsoft.WindowsAppRuntime{,.Bootstrap}.dll`
+next to every WinUI 3 example but never the WebView2 runtime pair:
+`WebView2Loader.dll` and `Microsoft.Web.WebView2.Core.dll`. The implicit
+load happens at first `EnsureCoreWebView2Async` call. Without the DLLs,
+the call throws `winrt::hresult_error` with
+`hr=0x8007007E (ERROR_MOD_NOT_FOUND, "The specified module could not be found.")`.
 
-## Fix (follow-up bug)
+The simpler `web_view` examples (`url = "..."`) coincidentally never hit
+this code path because they were never launched on a clean build — they
+were verified in worktrees that still had stale copies of the DLLs from
+older runs. The hybrid demo, being newer, exposed the gap.
 
-Two options:
+Fix: extended `mpapp_add_winappsdk_runtime` in `cmake/WindowsAppSDK.cmake`
+to also copy both WebView2 DLLs from `${MPAPP_WEBVIEW2_DIR}/runtimes/win-x64/`.
+The post-build comment now reads "copying WindowsAppRuntime + WebView2
+DLLs". `web_view` demos benefit too.
 
-1. **Await the IAsyncOperation** before calling NavigateToString.
-   `winrt::Microsoft::Web::WebView2::Core::CoreWebView2` is a WinRT
-   API; the IAsyncOperation can be co_await'd from a coroutine, or
-   plumbed through a Completed handler.
-2. **Always pre-register the shim during CoreWebView2 initialization**,
-   then guarantee NavigateToString runs AFTER the script-added
-   completion handler fires. This requires reordering the flush of
-   `pending_html_`.
+## Bug B — orphaned IAsyncOperation completion
 
-Either fix is a straightforward 15-line patch to
-`src/handlers/windows/hybrid_web_view_handler.cpp`'s wire_bridge +
-the CoreWebView2Initialized callback. Deferred from T-0027 to keep
-the Rule 11 screenshot closure scope bounded; tracked here for the
-next session.
+The original wire path subscribed `CoreWebView2Initialized`, then inside
+that callback fired `AddScriptToExecuteOnDocumentCreatedAsync` and
+immediately `NavigateToString`. Even with Bug A fixed, two problems
+remained:
 
-## Workaround for users
+1. `CoreWebView2Initialized` does not fire on its own — the control sits
+   idle until something explicitly drives init. `web_view` drove it
+   implicitly by assigning `Source = uri`; the hybrid path never set
+   Source and never called `EnsureCoreWebView2Async`.
+2. Setting `.Completed(handler)` on an `IAsyncOperation` whose only
+   strong ref is `auto op = ...` is fragile — the operation can be
+   dropped before the handler fires, so the shim install may complete
+   without ever notifying us.
 
-Apps using `hybrid_web_view` on Windows that need the auto-call-on-load
-pattern can defer the `html_source = ...` assignment by ~250 ms using
-a `DispatcherQueue` post or a `Sleep + Activate` pattern in their
-on_launch. The Linux + Android paths don't need this workaround.
+Fix: replaced the chain with a `winrt::fire_and_forget` member coroutine
+`async_init()` in `src/handlers/windows/hybrid_web_view_handler.cpp`.
+The coroutine `co_await`s each step:
+
+1. `EnsureCoreWebView2Async` — kicks init explicitly (no longer waits
+   for an event that never fires).
+2. `AddScriptToExecuteOnDocumentCreatedAsync(kBridgeShim)` — install
+   shim BEFORE any navigation, so the page's auto-fired
+   `window.mpapp.call('notify', ...)` finds the bridge in place.
+3. Subscribe `WebMessageReceived`.
+4. Flush any buffered `pending_html_` via `NavigateToString`.
+
+The coroutine frame keeps each `IAsyncAction/IAsyncOperation` alive
+across awaits, naturally serializing the steps. The map_messages path
+now just registers a `Loaded` handler that kicks the coroutine once.
+
+## Files touched
+
+- `cmake/WindowsAppSDK.cmake` — added WebView2 DLL copy.
+- `include/mpapp/handlers/windows/hybrid_web_view_handler.hpp` —
+  added `async_init()` declaration, `shim_added_` / `init_kicked_`
+  flags, dropped `core_ready_token_`.
+- `src/handlers/windows/hybrid_web_view_handler.cpp` —
+  replaced wire-on-Initialized pattern with `async_init` coroutine;
+  kept `wire_bridge()` as a sync fallback for the rare reused-handler
+  case.

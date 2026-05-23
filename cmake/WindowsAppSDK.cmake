@@ -210,6 +210,15 @@ function(mpapp_add_winappsdk_runtime target)
     # WinUI activation context.
     set(_rt_foundation        "${MPAPP_WINAPPSDK_FOUNDATION_DIR}/runtimes/win-x64/native")
     set(_rt_foundation_fw     "${MPAPP_WINAPPSDK_FOUNDATION_DIR}/runtimes-framework/win-x64/native")
+    # WebView2 runtime loader + WinRT projection. The WinUI 3 WebView2
+    # control depends on these at first-use time (the implicit
+    # EnsureCoreWebView2Async issued by Source assignment or our
+    # async_init coroutine). Without them, init fails with
+    # HRESULT 0x8007007E (ERROR_MOD_NOT_FOUND). They're harmless to
+    # ship for targets that never instantiate a WebView2 — the OS only
+    # loads them on first use.
+    set(_rt_webview2_loader   "${MPAPP_WEBVIEW2_DIR}/runtimes/win-x64/native/WebView2Loader.dll")
+    set(_rt_webview2_core     "${MPAPP_WEBVIEW2_DIR}/runtimes/win-x64/native_uap/Microsoft.Web.WebView2.Core.dll")
     add_custom_command(TARGET ${target} POST_BUILD
         COMMAND "${CMAKE_COMMAND}" -E copy_if_different
                 "${_rt_foundation}/Microsoft.WindowsAppRuntime.Bootstrap.dll"
@@ -217,6 +226,12 @@ function(mpapp_add_winappsdk_runtime target)
         COMMAND "${CMAKE_COMMAND}" -E copy_if_different
                 "${_rt_foundation_fw}/Microsoft.WindowsAppRuntime.dll"
                 "$<TARGET_FILE_DIR:${target}>/Microsoft.WindowsAppRuntime.dll"
-        COMMENT "MPAPP: copying WindowsAppRuntime DLLs next to ${target}"
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                "${_rt_webview2_loader}"
+                "$<TARGET_FILE_DIR:${target}>/WebView2Loader.dll"
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                "${_rt_webview2_core}"
+                "$<TARGET_FILE_DIR:${target}>/Microsoft.Web.WebView2.Core.dll"
+        COMMENT "MPAPP: copying WindowsAppRuntime + WebView2 DLLs next to ${target}"
         VERBATIM)
 endfunction()
