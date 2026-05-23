@@ -81,9 +81,10 @@ The facade landed in W21. Layout:
 
 Tests live in `tests/mock_handlers/graphics_canvas_test.cpp` (16 backend-agnostic cases via stub_canvas) + `tests/mock_handlers/graphics_cairo_test.cpp` (7 cases gated on `#if defined(MPAPP_GRAPHICS_HAS_CAIRO)`). Cairo tests cover make_canvas → real-render, clear / fill_rect pixel readback via an independent image-surface mirror, save/restore state-stack balance, every path-op kind without crashing, ellipse + clip composition. Linux ctest runs at 23 graphics cases / 92 assertions; Windows + Android compile the cairo test file but `#if` it out, so they run 16 cases. ctest total: 340 (Win) → 347 (Linux, with extra Cairo cases).
 
+Cairo is now real on all three platforms — Linux via pkg-config + GTK4's libcairo, Windows via vcpkg's `cairo:x64-windows` port + the bundled mingw64 pkgconf (handles Windows drive-letter paths; the usr/bin variant splits at `C:`), Android via vcpkg's `cairo:x64-android` / `cairo:arm64-android` triplets wired into Gradle's externalNativeBuild block. Android `minSdk` had to bump 24 → 28 because fontconfig (default Cairo dep) needs bionic libiconv, which Android exposes starting at API 28; apps that don't need real Cairo can drop the CMake arg and re-target lower minSdk.
+
 What's still to do for full v2:
 - **Real Skia backend** — vendor Skia (~30 MB) opt-in. BSD-3 license. Same factory pattern as Cairo, different `make_canvas` body.
-- **Cairo on Windows + Android** — vcpkg pull on Windows, NDK prebuilt or build-from-source on Android. The cairo_backend.cpp itself is portable C++ + Cairo C ABI; the work is purely dependency-vendoring + license-compliance plumbing.
 - **ShapeView + GraphicsView migration** — those handlers currently draw with per-platform native primitives (v1). v2 routes them through `canvas` so a single code path renders on every backend. Opt-in initially (per-handler flag) so existing behavior stays intact.
 
 ## References

@@ -311,6 +311,14 @@ Per Rule 4, these are now immutable — future changes require a new ADR with `s
 
 **Net:** ADR-0015's primary backend is now real on Linux. Apps that build the Linux target with the default CMake config get hardware-quality 2D rendering through libcairo, while Windows + Android stay on the stub backend until each platform's Cairo bundling story lands. The same source compiles on every platform — the only platform-specific bit is the CMake-detection logic that gates compilation of `cairo_backend.cpp`. Skia backend + the ShapeView/GraphicsView migration are the remaining v2 work; both decoupled from the backend-selection design that just shipped.
 
+## ADR-0015 v2 — Cairo on Windows + Android via vcpkg
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `b6f7cac` | **Cairo on Windows + Android** — vcpkg cairo port supplies the lib + `.pc` metadata on every triplet. Windows uses `cairo:x64-windows` + vcpkg's bundled mingw64 pkgconf (the msys2/usr/bin pkgconf splits paths at `C:` drive-letter colons; mingw64's handles Windows paths correctly). Android uses `cairo:x64-android` or `cairo:arm64-android` — Gradle's externalNativeBuild block in `examples/android_hello/app/build.gradle.kts` resolves the vcpkg prefix from `VCPKG_ROOT` (defaulting to `$USERPROFILE/vcpkg`) and passes it as `MPAPP_CAIRO_PREFIX` into the per-app CMakeLists, which bridges it into `ENV{PKG_CONFIG_PATH}` for the same `pkg_check_modules` detection that works on Linux. Android `minSdk` bumped 24 → 28 because fontconfig (Cairo's default-feature dep) needs bionic libiconv, which Android exposes starting at API 28. CMakeLists fallback message documents the per-platform setup. | Win ctest 347/347 with real Cairo + Linux ctest 347 with real Cairo + Android APK builds w/ libcairo + pixman + fontconfig + freetype statically linked (libandroid_hello.so 9.1 MB → 24.7 MB; stripped APK 5.8 MB) |
+
+**Net:** ADR-0015 is now real-Cairo on every supported platform. The same `cairo_backend.cpp` code compiles unchanged via the platform-uniform pkg-config detection path. CMake auto-falls-back to stub when vcpkg isn't installed so contributor onboarding stays low-friction. Remaining v2 work: Skia backend (opt-in, ~30 MB, BSD-3) + the ShapeView/GraphicsView migration to route through the canvas facade instead of per-platform native primitives.
+
 ## CollectionView typed_items
 
 | Commit | Scope | Build state |
