@@ -65,6 +65,41 @@ set(MPAPP_CORE_SOURCES src/mpapp.cpp)
 # Event Loops.md.
 list(APPEND MPAPP_CORE_SOURCES src/executor/mock.cpp)
 
+# 2D graphics facade per ADR-0015. Backend-independent sources
+# (canvas value types, SVG path parser) compile always. One backend
+# .cpp is selected via the MPAPP_GRAPHICS_BACKEND option.
+#
+#   stub   — default; records calls without rendering. Useful for
+#            tests + headless builds; no native dependency.
+#   cairo  — LGPL via dynamic linking (per RFC-0001). Implementation
+#            still TBD; currently falls back to stub.
+#   skia   — BSD-3, ~30 MB add. Implementation still TBD.
+set(MPAPP_GRAPHICS_BACKEND "stub" CACHE STRING
+    "2D graphics backend: stub (default), cairo, or skia")
+set_property(CACHE MPAPP_GRAPHICS_BACKEND PROPERTY STRINGS stub cairo skia)
+
+list(APPEND MPAPP_CORE_SOURCES
+    src/detail/graphics/canvas.cpp)
+if(MPAPP_GRAPHICS_BACKEND STREQUAL "stub")
+    list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
+elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
+    # TBD — fall back to stub for now so the build doesn't break
+    # before the Cairo backend lands.
+    list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
+    message(WARNING
+        "MPAPP_GRAPHICS_BACKEND=cairo selected but Cairo backend not yet "
+        "implemented; falling back to stub.")
+elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")
+    list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
+    message(WARNING
+        "MPAPP_GRAPHICS_BACKEND=skia selected but Skia backend not yet "
+        "implemented; falling back to stub.")
+else()
+    message(FATAL_ERROR
+        "Unknown MPAPP_GRAPHICS_BACKEND='${MPAPP_GRAPHICS_BACKEND}'. "
+        "Expected stub / cairo / skia.")
+endif()
+
 if(WIN32)
     list(APPEND MPAPP_CORE_SOURCES src/hot_reload/windows.cpp)
 endif()

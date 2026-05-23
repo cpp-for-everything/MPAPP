@@ -19,9 +19,15 @@ file(GLOB MPAPP_ANDROID_HANDLERS CONFIGURE_DEPENDS
     ${MPAPP_ROOT}/src/handlers/android/*.cpp
 )
 
+# ADR-0015 graphics facade — backend-independent value types + the
+# stub backend factory. Mirrors the per-target backend selection from
+# the root CMakeLists.txt; Android uses `stub` for now (Cairo / Skia
+# backends are TBD).
 add_library(android_hello SHARED
     native_main.cpp
     ${MPAPP_ROOT}/src/mpapp.cpp
+    ${MPAPP_ROOT}/src/detail/graphics/canvas.cpp
+    ${MPAPP_ROOT}/src/detail/graphics/stub_backend.cpp
     ${MPAPP_ANDROID_HANDLERS}
 )
 
