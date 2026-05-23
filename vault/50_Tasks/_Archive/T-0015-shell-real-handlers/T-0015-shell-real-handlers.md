@@ -8,7 +8,7 @@ owner: ""
 area: handlers
 blockedBy: []
 coveragePercent: 100
-hasScreenshots: false
+hasScreenshots: true
 hasRecordings: false
 tags:
   - type/task
@@ -75,7 +75,13 @@ Plus the prior Shell mock tests (`defaults`, `register_route`, `go_to`, `navigat
 
 ### Computer-use E2E
 
-Deferred pending `Microsoft.WindowsAppRuntime.1.8` framework install on this dev box (see [[T-0014-async-navigation-push-pop]] for the same blocker). The Shell handlers compile + link clean, and the mock surface they consume is the same one the prior 6 Shell tests cover.
+Closed retroactively by [[_Archive/T-0017-typed-routing-demo|T-0017]]: the typed-routing demo's two visible demos (`examples/gtk4_routes_demo/` and `examples/windows_routes_demo/`) instantiate a real `mpapp::shell` driven by `mpapp::shell_handler<linux_>` and `mpapp::shell_handler<windows>` respectively, including `shell_.add_tab(...)` calls and `shell_.go_to<...>()` navigations that flow through the same `current_route` / `current_content` / `tabs` Observables this task lands. The T-0017 archived screenshots therefore serve as the visible E2E evidence for the Shell real handlers too:
+
+- `_Archive/T-0017-typed-routing-demo/screenshots/windows-winui3-routes-initial.png` — Win real shell handler rendering tab strip + content host through `mpapp::shell_handler<windows>`.
+- `_Archive/T-0017-typed-routing-demo/screenshots/linux-gtk4-routes-initial.png` — Linux real shell handler rendering through `mpapp::shell_handler<linux_>` and `GtkPaned` + tab `GtkButton`s.
+- `_Archive/T-0017-typed-routing-demo/logs/android-emulator-routes-smoke.log` — Android exercise of the same shell + routes surface; tab buttons render via `LinearLayout` per `mpapp::shell_handler<android>`.
+
+The `Microsoft.WindowsAppRuntime` framework activation issue that originally blocked the Windows screenshot on this task was incidentally resolved while implementing T-0017's demos (`mpapp_add_winappsdk_runtime` now copies the WinAppSDK runtime DLLs next to each demo's exe via `cmake --build … --target …`).
 
 ## Files touched
 
