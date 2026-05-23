@@ -10,8 +10,10 @@
 
 #include <jni.h>
 
+#include <mpapp/collection_view.hpp>
 #include <mpapp/detail/graphics/canvas.hpp>
 #include <mpapp/hybrid_bridge.hpp>
+#include <mpapp/label.hpp>
 #include <mpapp/page.hpp>
 #include <mpapp/route.hpp>
 #include <mpapp/shell.hpp>
@@ -454,6 +456,79 @@ extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_example_MainActivity_nativeRunBridgeSmokeTest(
     JNIEnv* /*env*/, jobject /*thiz*/) {
     t0018::run_smoke();
+}
+
+// T-0019 — CollectionView item_template smoke test. Exercises the
+// factory-based typed-cells surface: registers an item_template,
+// rotates items_source between three vectors, observes
+// materialized_count + materialized_changed + factory call indices.
+// Output is structured logcat, prefixed `T-0019:`.
+namespace t0019 {
+
+void log(const char* msg) {
+    __android_log_print(ANDROID_LOG_INFO, "MPAPP", "T-0019: %s", msg);
+}
+
+void run_smoke() {
+    mpapp::collection_view cv;
+
+    int factory_invocations  = 0;
+    int last_factory_index   = -1;
+    int materialized_changes = 0;
+
+    struct mat_cb_t { int* c; void operator()() const { ++*c; } };
+    mat_cb_t mat_cb{&materialized_changes};
+    mpapp::signal_slot<> mat_slot{};
+    cv.materialized_changed.subscribe(mat_slot, mat_cb);
+
+    // Factory: emits a fresh mpapp::label per row. No handler attached
+    // here — the smoke is concerned with the model-level materialize
+    // surface, not the native render path. The label is owned by the
+    // collection_view via the unique_ptr returned from the factory.
+    cv.item_template = [&](int i) -> std::unique_ptr<mpapp::view> {
+        ++factory_invocations;
+        last_factory_index = i;
+        auto l = std::make_unique<mpapp::label>();
+        l->text = "row " + std::to_string(i);
+        return l;
+    };
+
+    // 1) First items_source — 4 rows.
+    cv.items_source = std::vector<std::string>{"a", "b", "c", "d"};
+    log(("after items=4: mat_count=" + std::to_string(cv.materialized_count())
+         + " factory_invocations=" + std::to_string(factory_invocations)
+         + " last_index=" + std::to_string(last_factory_index)
+         + " mat_changes=" + std::to_string(materialized_changes)).c_str());
+
+    // 2) Rotate to 3 rows. Old materialized cells are dropped, factory
+    //    is called 3 more times.
+    cv.items_source = std::vector<std::string>{"x", "y", "z"};
+    log(("after items=3: mat_count=" + std::to_string(cv.materialized_count())
+         + " factory_invocations=" + std::to_string(factory_invocations)
+         + " last_index=" + std::to_string(last_factory_index)
+         + " mat_changes=" + std::to_string(materialized_changes)).c_str());
+
+    // 3) Rotate to 5 rows.
+    cv.items_source = std::vector<std::string>{"p", "q", "r", "s", "t"};
+    log(("after items=5: mat_count=" + std::to_string(cv.materialized_count())
+         + " factory_invocations=" + std::to_string(factory_invocations)
+         + " last_index=" + std::to_string(last_factory_index)
+         + " mat_changes=" + std::to_string(materialized_changes)).c_str());
+
+    // 4) Clear template — materialized_count drops to 0, factory not
+    //    called again.
+    cv.item_template = mpapp::collection_view::item_factory_t{};
+    log(("after clear-template: mat_count=" + std::to_string(cv.materialized_count())
+         + " factory_invocations=" + std::to_string(factory_invocations)
+         + " mat_changes=" + std::to_string(materialized_changes)).c_str());
+}
+
+} // namespace t0019
+
+extern "C" JNIEXPORT void JNICALL
+Java_io_mpapp_example_MainActivity_nativeRunItemTemplateSmokeTest(
+    JNIEnv* /*env*/, jobject /*thiz*/) {
+    t0019::run_smoke();
 }
 
 // T-0016 — Cairo render demo. Drives the canvas facade through a

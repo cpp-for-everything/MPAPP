@@ -1,0 +1,4 @@
+﻿05-23 18:29:13.199  6222  6222 I MPAPP   : T-0019: after items=4: mat_count=4 factory_invocations=4 last_index=3 mat_changes=2
+05-23 18:29:13.200  6222  6222 I MPAPP   : T-0019: after items=3: mat_count=3 factory_invocations=7 last_index=2 mat_changes=3
+05-23 18:29:13.202  6222  6222 I MPAPP   : T-0019: after items=5: mat_count=5 factory_invocations=12 last_index=4 mat_changes=4
+05-23 18:29:13.202  6222  6222 I MPAPP   : T-0019: after clear-template: mat_count=0 factory_invocations=12 mat_changes=5

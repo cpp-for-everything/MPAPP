@@ -60,6 +60,16 @@ public class MainActivity extends Activity {
             Log.w("MPAPP", "Bridge smoke test skipped: " + t);
         }
 
+        // T-0019 Rule 11 catch-up: exercise CollectionView
+        // item_template — factory-based typed cells, materialize on
+        // items_source change, materialized_changed signal. Output
+        // prefixed `T-0019:`.
+        try {
+            nativeRunItemTemplateSmokeTest();
+        } catch (Throwable t) {
+            Log.w("MPAPP", "item_template smoke test skipped: " + t);
+        }
+
         nativeLaunch();
     }
 
@@ -70,4 +80,5 @@ public class MainActivity extends Activity {
     private native int  nativeRenderCairoDemoPng(String outputPath);
     private native void nativeRunRoutesSmokeTest();
     private native void nativeRunBridgeSmokeTest();
+    private native void nativeRunItemTemplateSmokeTest();
 }

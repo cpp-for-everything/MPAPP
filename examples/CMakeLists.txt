@@ -12,6 +12,7 @@ if(WIN32)
     add_subdirectory(windows_tableview_demo)
     add_subdirectory(windows_routes_demo)
     add_subdirectory(windows_async_bridge_demo)
+    add_subdirectory(windows_item_template_demo)
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -19,6 +20,7 @@ if(UNIX AND NOT APPLE)
     add_subdirectory(gtk4_tableview_demo)
     add_subdirectory(gtk4_routes_demo)
     add_subdirectory(gtk4_async_bridge_demo)
+    add_subdirectory(gtk4_item_template_demo)
 endif()
 
 # Cross-platform CLI demo of the canvas facade (ADR-0015). Renders
