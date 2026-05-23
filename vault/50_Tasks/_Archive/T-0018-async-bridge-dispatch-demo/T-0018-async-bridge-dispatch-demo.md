@@ -74,9 +74,8 @@ void run_smoke();
 ## Screenshots
 
 - `screenshots/windows-winui3-async-bridge-initial.png` — Win11 + WinUI 3, cropped to the upper-left 700×320 region of the demo window. Shows the title bar (`MPAPP T-0018 - Async Bridge Demo (WinUI 3)`), all three status labels (`last_request: (none)`, `last_response: (none)`, `pending_count: 0`), and all four typed buttons in their initial state.
+- `screenshots/linux-gtk4-async-bridge-initial.png` — Ubuntu 24.04 / WSLg / GTK4 4.14.x, full demo window captured via Win32 `PrintWindow(hwnd, hdc, PW_RENDERFULLCONTENT=2)` against the `msrdc.exe` proxy. Mirrors the WinUI 3 screenshot — title bar, three status labels (`last_request: (none)`, `last_response: (none)`, `pending_count: 0`), four envelope-labeled buttons. Captured retroactively after the user cleared other foreground apps so the `msrdc` proxy was the only WSLg window — the same `PrintWindow` call against multiple stacked proxies returns stale frames (see `notes/linux-wslg-screenshot-quirk.md`).
 - `screenshots/android-emulator-app-running.png` — emulator x86_64 (AVD `coroute_test`, API 28) post-smoke. The visible UI is the existing T-0011 `android_hello` demo; the relevant evidence is that the process is alive after `nativeRunBridgeSmokeTest` ran in `onCreate`. The actual bridge dispatch evidence is the logcat artifact below.
-
-The Linux GTK4 demo screenshot is missing for the WSLg compositor-cache reason documented in `notes/linux-wslg-screenshot-quirk.md` — same quirk as T-0017's `gtk4_routes_demo`. The `msrdc` window shows up in the Windows process list with the correct title and a non-zero rectangle, but the X11 surface inside it does not write to the framebuffer area Windows-side screen capture reads from. `wsl --shutdown` + cold-launch did not clear the cache because `msrdc.exe` survives the WSL VM shutdown.
 
 ## Logs
 

@@ -73,9 +73,8 @@ This is the same coverage as the Win/Linux demos — just headless. The accompan
 ## Screenshots
 
 - `screenshots/windows-winui3-routes-initial.png` — Win11 + WinUI 3, window shows `current_route: //`, `navigation_blocked: (none)`, `lifecycle: (no events yet)`, both guard switches off, all six `go_to<...>(args)` buttons labeled with their literal path. Cropped to the foreground window region.
+- `screenshots/linux-gtk4-routes-initial.png` — Ubuntu 24.04 / WSLg / GTK4 4.14.x, full demo window captured via Win32 `PrintWindow(hwnd, hdc, PW_RENDERFULLCONTENT=2)` against the `msrdc.exe` proxy. Same UI shape as the Windows screenshot — title bar, three status labels, two guard switches, six `go_to<>()` buttons. Captured retroactively after the user cleared their other foreground apps; the proxy-stale-cache problem documented in `notes/linux-wslg-screenshot-quirk.md` only bites when multiple WSLg windows accumulate in one session — a single fresh msrdc proxy responds correctly to `PrintWindow`.
 - `screenshots/android-emulator-app-running.png` — emulator x86_64 (AVD `coroute_test`, API 28) post-smoke. The visible UI is the existing T-0011 `android_hello` demo (button / entry / switch / slider / `NavigationPage` stubs); the relevant evidence is that the process is alive after `nativeRunRoutesSmokeTest` ran in `onCreate`. The route-table evidence is the logcat artifact below.
-
-The Linux GTK4 demo screenshot is missing for the WSLg compositor-cache reason documented in `notes/linux-wslg-screenshot-quirk.md`. Mitigations attempted (PowerShell `Graphics.CopyFromScreen` against both monitors, ImageMagick `import`, Wayland `grim`, two computer-use captures) all returned empty pixels for re-launches in the same WSL session. The first launch in a fresh `wsl --shutdown` cycle IS capturable, but for this catch-up batch the Linux artifact relies on the source + the ctest pass (see Tests below) rather than a live screenshot.
 
 ## Logs
 
