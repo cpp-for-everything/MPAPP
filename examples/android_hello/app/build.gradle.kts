@@ -12,17 +12,38 @@ android {
 
     defaultConfig {
         applicationId = "io.mpapp.example"
-        minSdk = 24
+        // minSdk = 28 because the Cairo backend (ADR-0015) depends on
+        // fontconfig, which uses iconv — Android's bionic libiconv
+        // landed in API 28. Apps that don't need real Cairo rendering
+        // can drop the MPAPP_GRAPHICS_BACKEND=cairo CMake arg (in the
+        // externalNativeBuild block below) to get the stub backend
+        // and re-target minSdk 24.
+        minSdk = 28
         targetSdk = 34
         versionCode = 1
         versionName = "0.1.0"
 
         externalNativeBuild {
             cmake {
+                // Resolve vcpkg paths up front so the cmake arguments below
+                // can reference them without inline interpolation. Both env
+                // vars are optional: if VCPKG_ROOT is unset the Cairo
+                // backend simply falls back to stub (see
+                // src/main/cpp/CMakeLists.txt detection logic).
+                val vcpkgRoot = System.getenv("VCPKG_ROOT")
+                    ?: "${System.getProperty("user.home").replace('\\', '/')}/vcpkg"
+                val cairoTriplet = "x64-android"  // matches abiFilter below
+                val cairoPrefix  = "$vcpkgRoot/installed/$cairoTriplet"
+                val pkgconfBin   = "$vcpkgRoot/downloads/tools/msys2/3e71d1f8e22ab23f/mingw64/bin/pkgconf.exe"
+
                 arguments += listOf(
                     "-DANDROID_STL=c++_shared",
                     "-DCMAKE_CXX_STANDARD=23",
-                    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF"
+                    "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
+                    "-DMPAPP_GRAPHICS_BACKEND=cairo",
+                    "-DMPAPP_CAIRO_PREFIX=$cairoPrefix",
+                    "-DCMAKE_PREFIX_PATH=$cairoPrefix",
+                    "-DPKG_CONFIG_EXECUTABLE=$pkgconfBin"
                 )
                 cppFlags += listOf("-std=c++23")
             }

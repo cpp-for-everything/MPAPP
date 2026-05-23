@@ -70,23 +70,23 @@ list(APPEND MPAPP_CORE_SOURCES src/executor/mock.cpp)
 # .cpp is selected via the MPAPP_GRAPHICS_BACKEND option.
 #
 #   cairo  — LGPL via dynamic linking (per RFC-0001). Default where
-#            available (Linux via GTK4's existing libcairo). On
-#            platforms where Cairo isn't detected, falls back to stub
-#            with a CMake warning so the build stays green.
+#            available — Linux via GTK4's libcairo + pkg-config,
+#            Windows via vcpkg cairo (pkg-config bridge through
+#            vcpkg's bundled mingw64 pkgconf), Android via vcpkg
+#            arm64-android / x64-android triplets (wired through
+#            Gradle's externalNativeBuild — see
+#            examples/android_hello/app/build.gradle.kts). On
+#            platforms where Cairo isn't detected, falls back to
+#            stub with a CMake warning so the build stays green.
 #   stub   — records calls without rendering. Useful for tests +
 #            headless builds; no native dependency.
 #   skia   — BSD-3, ~30 MB add. Implementation still TBD.
 #
-# Default per platform — Cairo where pkg-config finds it (typical
-# Linux), stub everywhere else until each platform bundles its own
-# Cairo (Win via vcpkg, Android via prebuilt AAR — both future work).
-if(UNIX AND NOT APPLE AND NOT ANDROID)
-    set(MPAPP_GRAPHICS_BACKEND_DEFAULT "cairo")
-else()
-    set(MPAPP_GRAPHICS_BACKEND_DEFAULT "stub")
-endif()
-set(MPAPP_GRAPHICS_BACKEND "${MPAPP_GRAPHICS_BACKEND_DEFAULT}" CACHE STRING
-    "2D graphics backend: cairo (Linux default), stub (fallback), or skia (TBD)")
+# Default is `cairo` on every platform — the detection logic below
+# falls back to stub when Cairo isn't actually installed, so the
+# practical behavior matches what each developer has set up.
+set(MPAPP_GRAPHICS_BACKEND "cairo" CACHE STRING
+    "2D graphics backend: cairo (default; auto-falls-back to stub if not found), stub, or skia (TBD)")
 set_property(CACHE MPAPP_GRAPHICS_BACKEND PROPERTY STRINGS stub cairo skia)
 
 list(APPEND MPAPP_CORE_SOURCES
@@ -94,6 +94,11 @@ list(APPEND MPAPP_CORE_SOURCES
 
 set(MPAPP_GRAPHICS_HAS_CAIRO OFF)
 if(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
+    # pkg-config is the detection path on all three platforms. vcpkg
+    # ships cairo with .pc files and bundles mingw64 pkgconf in
+    # downloads/tools/msys2; the build script (_build_full.bat) wires
+    # `PKG_CONFIG_EXECUTABLE` to that pkgconf so this same find logic
+    # works regardless of host.
     find_package(PkgConfig QUIET)
     if(PkgConfig_FOUND)
         pkg_check_modules(MPAPP_CAIRO QUIET cairo)
@@ -101,12 +106,18 @@ if(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
     if(MPAPP_CAIRO_FOUND)
         list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/cairo_backend.cpp)
         set(MPAPP_GRAPHICS_HAS_CAIRO ON)
-        message(STATUS "MPAPP graphics backend: cairo ${MPAPP_CAIRO_VERSION}")
+        message(STATUS "MPAPP graphics backend: cairo (${MPAPP_CAIRO_VERSION})")
     else()
         list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
         message(WARNING
             "MPAPP_GRAPHICS_BACKEND=cairo selected but libcairo not found via "
-            "pkg-config; falling back to stub backend.")
+            "pkg-config. Falling back to stub backend.\n"
+            "  Linux:   apt install libcairo2-dev pkg-config\n"
+            "  Windows: vcpkg install cairo:x64-windows, then pass\n"
+            "             -DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake\n"
+            "             -DPKG_CONFIG_EXECUTABLE=<vcpkg>/downloads/tools/msys2/.../mingw64/bin/pkgconf.exe\n"
+            "  Android: vcpkg install cairo:x64-android (or arm64-android), then see\n"
+            "             examples/android_hello/app/build.gradle.kts for the Gradle wiring.")
     endif()
 elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "stub")
     list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
