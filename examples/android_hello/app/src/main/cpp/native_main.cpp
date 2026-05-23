@@ -11,6 +11,11 @@
 #include <jni.h>
 
 #include <mpapp/detail/graphics/canvas.hpp>
+#include <mpapp/page.hpp>
+#include <mpapp/route.hpp>
+#include <mpapp/shell.hpp>
+
+#include <android/log.h>
 
 #if defined(MPAPP_GRAPHICS_HAS_CAIRO)
     #include <cairo/cairo.h>
@@ -253,6 +258,96 @@ extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_example_MainActivity_nativeLaunch(JNIEnv* /*env*/, jobject /*thiz*/) {
     char* argv[] = {const_cast<char*>("mpapp")};
     mpapp::run<spike_app>(1, argv);
+}
+
+// T-0017 — typed-routing smoke test. Exercises ADR-0016
+// `route_table` + `shell::go_to<Path, &Table>(args...)` + ADR-0023
+// `can_activate` / `can_deactivate` guards + page `navigated_to` /
+// `navigated_from` lifecycle on the Android NDK toolchain. Output
+// is a structured trace via logcat, prefixed `T-0017:` so test
+// infra can grep it. No GUI dependency — proves the routing
+// surface compiles + executes on Android the same as Win/Linux.
+namespace t0017 {
+
+struct home_page    : mpapp::page {};
+struct details_page : mpapp::page {};
+struct settings_page: mpapp::page {};
+
+inline constexpr auto routes = mpapp::route_table{
+    mpapp::route<"home",         home_page>{},
+    mpapp::route<"home/details", details_page, mpapp::param<"id", int>>{},
+    mpapp::route<"settings",     settings_page>{},
+};
+
+void log(const char* msg) {
+    __android_log_print(ANDROID_LOG_INFO, "MPAPP", "T-0017: %s", msg);
+}
+
+void run_smoke() {
+    mpapp::shell s;
+    mpapp::page  current;
+    s.current_content = &current;
+
+    // Lifecycle counters
+    int to_count = 0, from_count = 0, blocked_count = 0;
+    bool block_activate   = false;
+    bool block_deactivate = false;
+
+    struct to_cb_t   { int* c; void operator()(const std::string&) const { ++*c; } };
+    struct from_cb_t { int* c; void operator()(const std::string&) const { ++*c; } };
+    struct blk_cb_t  { int* c; void operator()(const std::string&) const { ++*c; } };
+    to_cb_t   to_cb{&to_count};
+    from_cb_t from_cb{&from_count};
+    blk_cb_t  blk_cb{&blocked_count};
+    mpapp::signal_slot<const std::string&> to_slot{};
+    mpapp::signal_slot<const std::string&> from_slot{};
+    mpapp::signal_slot<const std::string&> blk_slot{};
+    current.navigated_to.subscribe(to_slot, to_cb);
+    current.navigated_from.subscribe(from_slot, from_cb);
+    s.navigation_blocked.subscribe(blk_slot, blk_cb);
+
+    s.can_activate = [&](std::string_view) { return !block_activate; };
+    s.can_deactivate = [&](std::string_view, std::string_view) { return !block_deactivate; };
+
+    // 1) Plain typed navigation, no guards.
+    s.go_to<"home", &routes>();
+    log(("after home: route=" + s.current_route.get()).c_str());
+
+    s.go_to<"home/details", &routes>(42);
+    log(("after details(42): route=" + s.current_route.get()).c_str());
+
+    // 2) can_activate blocks.
+    block_activate = true;
+    s.go_to<"settings", &routes>();
+    log(("after blocked settings: route=" + s.current_route.get()
+         + " blocked_count=" + std::to_string(blocked_count)).c_str());
+    block_activate = false;
+
+    // 3) can_deactivate blocks.
+    block_deactivate = true;
+    s.go_to<"settings", &routes>();
+    log(("after dirty-block: route=" + s.current_route.get()
+         + " blocked_count=" + std::to_string(blocked_count)).c_str());
+    block_deactivate = false;
+
+    // 4) Successful navigation after unblocking.
+    s.go_to<"settings", &routes>();
+    log(("after settings: route=" + s.current_route.get()).c_str());
+
+    // 5) Lifecycle totals — to=4 (home, details, settings, settings)
+    //    from=3 (home, details, settings since the first go_to
+    //    skips because current_route is "//" — no previous page event)
+    log(("totals: to=" + std::to_string(to_count)
+         + " from=" + std::to_string(from_count)
+         + " blocked=" + std::to_string(blocked_count)).c_str());
+}
+
+} // namespace t0017
+
+extern "C" JNIEXPORT void JNICALL
+Java_io_mpapp_example_MainActivity_nativeRunRoutesSmokeTest(
+    JNIEnv* /*env*/, jobject /*thiz*/) {
+    t0017::run_smoke();
 }
 
 // T-0016 — Cairo render demo. Drives the canvas facade through a

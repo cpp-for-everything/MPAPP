@@ -41,6 +41,16 @@ public class MainActivity extends Activity {
             Log.w("MPAPP", "Cairo render skipped: " + t);
         }
 
+        // T-0017 Rule 11 catch-up: exercise the typed route_table +
+        // can_activate / can_deactivate guards + page lifecycle
+        // signals and emit a structured trace to logcat. Each line
+        // is prefixed `T-0017:` so the test infra can grep them out.
+        try {
+            nativeRunRoutesSmokeTest();
+        } catch (Throwable t) {
+            Log.w("MPAPP", "Routes smoke test skipped: " + t);
+        }
+
         nativeLaunch();
     }
 
@@ -49,4 +59,5 @@ public class MainActivity extends Activity {
     private native void nativeRegisterActivity(Activity activity);
     private native void nativeLaunch();
     private native int  nativeRenderCairoDemoPng(String outputPath);
+    private native void nativeRunRoutesSmokeTest();
 }
