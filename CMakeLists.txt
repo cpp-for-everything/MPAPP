@@ -86,13 +86,14 @@ list(APPEND MPAPP_CORE_SOURCES src/executor/mock.cpp)
 # falls back to stub when Cairo isn't actually installed, so the
 # practical behavior matches what each developer has set up.
 set(MPAPP_GRAPHICS_BACKEND "cairo" CACHE STRING
-    "2D graphics backend: cairo (default; auto-falls-back to stub if not found), stub, or skia (TBD)")
+    "2D graphics backend: cairo (default; auto-falls-back to stub if not found), stub, or skia (opt-in via vcpkg)")
 set_property(CACHE MPAPP_GRAPHICS_BACKEND PROPERTY STRINGS stub cairo skia)
 
 list(APPEND MPAPP_CORE_SOURCES
     src/detail/graphics/canvas.cpp)
 
 set(MPAPP_GRAPHICS_HAS_CAIRO OFF)
+set(MPAPP_GRAPHICS_HAS_SKIA  OFF)
 if(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
     # pkg-config is the detection path on all three platforms. vcpkg
     # ships cairo with .pc files and bundles mingw64 pkgconf in
@@ -123,10 +124,30 @@ elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "stub")
     list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
     message(STATUS "MPAPP graphics backend: stub")
 elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")
-    list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
-    message(WARNING
-        "MPAPP_GRAPHICS_BACKEND=skia selected but Skia backend not yet "
-        "implemented; falling back to stub.")
+    # vcpkg ships Skia as the `unofficial-skia` CMake config package
+    # (target: unofficial::skia::skia). Skia is heavyweight (BSD-3,
+    # ~30 MB linked) and builds from source on first install, so it's
+    # opt-in only. If the user selected `skia` but the package isn't
+    # installed, we fall back to stub so the rest of the build keeps
+    # working — same graceful-fallback pattern Cairo uses.
+    find_package(unofficial-skia CONFIG QUIET)
+    if(unofficial-skia_FOUND OR TARGET unofficial::skia::skia)
+        list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/skia_backend.cpp)
+        set(MPAPP_GRAPHICS_HAS_SKIA ON)
+        message(STATUS "MPAPP graphics backend: skia")
+    else()
+        list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
+        message(WARNING
+            "MPAPP_GRAPHICS_BACKEND=skia selected but Skia not found via "
+            "find_package(unofficial-skia). Falling back to stub backend.\n"
+            "  Install (vcpkg):\n"
+            "    Windows:  vcpkg install skia:x64-windows\n"
+            "    Linux:    vcpkg install skia:x64-linux\n"
+            "    Android:  vcpkg install skia:arm64-android (or x64-android)\n"
+            "  Then pass -DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake.\n"
+            "  Skia builds from source the first time (~30 min). After that vcpkg's\n"
+            "  binary cache makes subsequent configures fast.")
+    endif()
 else()
     message(FATAL_ERROR
         "Unknown MPAPP_GRAPHICS_BACKEND='${MPAPP_GRAPHICS_BACKEND}'. "
@@ -155,6 +176,16 @@ if(MPAPP_GRAPHICS_HAS_CAIRO)
     target_link_libraries(mpapp-core PUBLIC ${MPAPP_CAIRO_LIBRARIES})
     target_link_directories(mpapp-core PUBLIC ${MPAPP_CAIRO_LIBRARY_DIRS})
     target_compile_definitions(mpapp-core PUBLIC MPAPP_GRAPHICS_HAS_CAIRO=1)
+endif()
+
+# Skia backend wiring — the vcpkg CMake config exposes a single
+# imported target `unofficial::skia::skia` that carries include
+# directories, lib paths, and the (long) list of transitive deps
+# (libpng, freetype, harfbuzz, expat, ...). Linking just the target
+# is enough; vcpkg pulls everything else through.
+if(MPAPP_GRAPHICS_HAS_SKIA)
+    target_link_libraries(mpapp-core PUBLIC unofficial::skia::skia)
+    target_compile_definitions(mpapp-core PUBLIC MPAPP_GRAPHICS_HAS_SKIA=1)
 endif()
 
 target_compile_features(mpapp-core PUBLIC cxx_std_23)
