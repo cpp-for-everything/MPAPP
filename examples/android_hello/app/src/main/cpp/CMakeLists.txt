@@ -25,6 +25,7 @@ file(GLOB MPAPP_ANDROID_HANDLERS CONFIGURE_DEPENDS
 # the android_hello library below.
 set(MPAPP_GRAPHICS_SOURCES
     ${MPAPP_ROOT}/src/detail/graphics/canvas.cpp
+    ${MPAPP_ROOT}/src/detail/graphics/shape_renderer.cpp
 )
 
 # MPAPP_GRAPHICS_BACKEND is set by Gradle's externalNativeBuild

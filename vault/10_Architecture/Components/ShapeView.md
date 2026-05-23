@@ -16,7 +16,13 @@ tags:
 # ShapeView
 
 > [!info] Status
-> **android-real (v1)** — Per-platform native shape primitives. Win `muxc::Border` wrapping `muxc::Shapes::Rectangle/Ellipse/Line`. Linux `GtkDrawingArea` with a cairo draw callback. Android custom `MppShapeView` (extends `android.view.View`) overriding `onDraw`. `fill` / `stroke` parse hex color strings (`#RGB`, `#RRGGBB`, `#AARRGGBB`); `data` parses "M x1 y1 L x2 y2" for line endpoints. `polygon` and `path` render as the bounding rectangle in v1 — full SVG-path parsing + unified canvas facade are gated on [[ADR-0015-graphics-backend-dual]].
+> **android-real (v2 in flight — Linux landed via [[T-0031]])** — Migration to the ADR-0015 canvas facade is in progress.
+>
+> - **Linux** (`GtkDrawingArea` + Cairo) — renders via the shared `detail::graphics::render_shape_view` helper into an off-screen facade canvas, then blits BGRA32 pixels through GTK's `cairo_t*` (same pattern `graphics_view` uses). One source of truth for fill/stroke/kind dispatch. `path::from_svg` parses real SVG path data (M/L/Q/C/Z), falling back to the bounding rectangle if the data string is empty or invalid — strict improvement over the legacy bounding-rect-always behavior for polygon/path kinds.
+> - **Windows** — still uses `muxc::Border` wrapping `muxc::Shapes::Rectangle/Ellipse/Line`. Migration to `Image` + `WriteableBitmap` + shared renderer is T-0031 phase 2.
+> - **Android** — still uses the custom `MppShapeView` Java class. Migration to `ImageView` + `Bitmap.ARGB_8888` + shared renderer is T-0031 phase 2 (the existing per-pixel B↔R swap from `graphics_view` applies).
+>
+> Once Win + Android migrate, all three platforms render byte-for-byte identically (subject to the chosen canvas backend: default Cairo, opt-in Skia via `-DMPAPP_GRAPHICS_BACKEND=skia`).
 
 ## Overview
 

@@ -90,7 +90,8 @@ set(MPAPP_GRAPHICS_BACKEND "cairo" CACHE STRING
 set_property(CACHE MPAPP_GRAPHICS_BACKEND PROPERTY STRINGS stub cairo skia)
 
 list(APPEND MPAPP_CORE_SOURCES
-    src/detail/graphics/canvas.cpp)
+    src/detail/graphics/canvas.cpp
+    src/detail/graphics/shape_renderer.cpp)
 
 set(MPAPP_GRAPHICS_HAS_CAIRO OFF)
 set(MPAPP_GRAPHICS_HAS_SKIA  OFF)
