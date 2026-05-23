@@ -267,6 +267,34 @@ The only remaining gap is Phase F (the *other* Phase F — async bridge methods 
 
 **Net:** closes ADR-0016's "route guards deferred to follow-up ADR" item for the simpler activate case. `can_deactivate` (current-route-aware) and route-lifecycle hooks (`OnNavigatedTo`/`OnNavigatedFrom`) remain future work tied to ADR-0019's executor.
 
+## Shell can_deactivate + page lifecycle hooks (ADR-0023)
+
+| Commit | Scope | Build state |
+|---|---|---|
+| `db70b07` | **shell::can_deactivate** + **page::navigated_to / navigated_from** — two-phase guard (deactivate first, activate second), then page-level lifecycle signals fired on each successful go_to. `navigated_from` fires on the outgoing page with the PREVIOUS URI before current_route updates; `navigated_to` fires on whoever is current_content after the update with the new URI. Both guards short-circuit on false → emit `navigation_blocked` → no state change, no lifecycle. 7 new ctest cases. ctest 317 → 324. | Win + Linux + Android green |
+| `c0fa777` | **ADR-0023** (proposed) — captures the full guards + lifecycle design that ADR-0016 deferred. Documents: two-phase chain, ordering invariants, sync-only rationale, no first-class param dict (deferred). | docs |
+
+**Net:** the full Shell-navigation contract from ADR-0014 + ADR-0016 + ADR-0023 is now live and tested. The remaining route_table follow-ups (positional path params, `parse_args<Path>(uri)`) are independent additive work.
+
+## ADR acceptance pass — flip 8 of the 9 proposed (ec0997e)
+
+After the W21 push closed out the implementation work for the proposal wave, the user (deciders: alex) signed off on the eight ADRs whose code is fully shipped + tested across all three platforms:
+
+| ADR | Title | Implementation evidence |
+|---|---|---|
+| **ADR-0014** | Page navigation stack semantics | page_stack engine + async push/pop wrappers shipped earlier in W21 |
+| **ADR-0016** | Shell URI routing — compile-time route table | fixed_string NTTP + route_table just landed this session |
+| **ADR-0017** | Grid track definitions — value type + parser | track_def + 3-platform handlers shipped earlier |
+| **ADR-0018** | HybridWebView JS bridge — typed async method calls | Phases A-F + JS shim, full v2 round-trips end-to-end |
+| **ADR-0019** | Async executor — native UI dispatcher + task<T> | task<T> / ui_task<T> + test_dispatcher shipped earlier |
+| **ADR-0020** | Virtualized item host — wrap platform recyclers | ListView + CollectionView + TableView shipped + typed_items + item_template |
+| **ADR-0021** | TableView cell type tree — full MAUI parity | All 5 cells (text/view/switch/image/entry) real on 3 platforms |
+| **ADR-0022** | Android event routing — kind-discriminated listener family | Pattern codification of work already shipped across the cell + view handlers |
+
+Per Rule 4, these are now immutable — future changes require a new ADR with `supersedes:`.
+
+**Still `proposed`:** ADR-0015 (graphics backend dual — v1 ships but v2 facade hasn't been built yet) and the just-opened ADR-0023 (route guards + lifecycle — implementation just landed but waiting on a separate decider beat to flip).
+
 ## CollectionView typed_items
 
 | Commit | Scope | Build state |

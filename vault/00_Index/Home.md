@@ -89,7 +89,7 @@ See [[CLAUDE]] for the full text.
 
 ## Quick navigation
 
-- **13 accepted + 9 proposed ADRs** (proposed are M-04c gating: ADR-0014–0022): see [[Decisions MOC]] or [[_Bases/ADRs.base]]
+- **21 accepted + 2 proposed ADRs** (proposed are ADR-0015 graphics dual + ADR-0023 shell route guards): see [[Decisions MOC]] or [[_Bases/ADRs.base]]
 - 0 open RFCs (RFC-0001 and RFC-0002 both accepted): see [[_Bases/RFCs.base]]
 - **12 milestones** (M-04c `active`): [[Roadmap MOC]] or [[_Canvases/Phase-Roadmap.canvas|Phase Roadmap canvas]]
 - **64 components, 61 at `android-real` on Win + Linux + Android**: [[Components MOC]] or [[Controls Inventory]]

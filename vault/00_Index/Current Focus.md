@@ -27,10 +27,9 @@ tags:
 
 ## What's still open (in priority order)
 
-1. **ADR acceptance pass** for proposed ADRs 0014–0022 (9 ADRs). Code is implemented and shipping; review-gate is the missing step per Rule 4. Once deciders fill in, each ADR's frontmatter flips `proposed → accepted`.
+1. **ADR-0015 v2 unified canvas facade** — Cairo (default) / Skia (opt-in) compile-time selectable backend. v1 already ships per-platform native primitives so apps that need basic shapes don't block on this. Only proposed ADR remaining.
 2. **macOS + iOS sweep** across the entire widget set. Requires an Apple host. Existing Objective-C++ handlers on app-shell are the template; the rest need to follow.
-3. **ADR-0015 v2 unified canvas facade** — Cairo (default) / Skia (opt-in) compile-time selectable backend. v1 already ships per-platform native primitives so apps that need basic shapes don't block on this.
-4. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
+3. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
 
 ## Active milestone
 
@@ -38,13 +37,18 @@ tags:
 
 ## Recently accepted ADRs
 
-(Newer ADRs 0014–0021 are still `proposed`; the code that they describe is implemented.)
+The M-04c proposal wave (ADR-0014–0022) is now mostly **accepted** — 8 of 9 flipped per Rule 4 after the implementations shipped + tested across all 3 platforms. ADR-0015 stays `proposed` because the v2 canvas facade hasn't shipped yet. ADR-0023 was just opened to cover the shell-route-guards-and-lifecycle work (also `proposed`).
 
+- [[ADR-0022-android-kind-discriminated-routers]] — Android listener kind dispatch family (just accepted)
+- [[ADR-0021-tableview-cell-types]] — full MAUI cell parity (just accepted)
+- [[ADR-0020-virtualized-item-host-wrap-platform]] — wrap-the-recycler pattern (just accepted)
+- [[ADR-0019-async-executor-native-dispatcher]] — `task<T>` + UI dispatcher (just accepted)
+- [[ADR-0018-hybrid-webview-typed-bridge]] — full v2 JS bridge stack (just accepted)
+- [[ADR-0017-grid-track-definitions]] — Grid track-def value type + parser (just accepted)
+- [[ADR-0016-shell-compile-time-routes]] — NTTP route_table (just accepted)
+- [[ADR-0014-page-navigation-stack]] — page_stack engine (just accepted)
 - [[ADR-0013-data-driven-widget-dispatch]] (M-04b foundation — per-platform dispatch registry)
 - [[ADR-0012-application-window-handler-abstraction]] — app-shell handler template; proved by T-0011
-- [[ADR-0011-cross-compilation-toolchain]] — Zig (`zig cc`)
-- [[ADR-0010-licensing-and-patent-strategy]] — Apache 2.0 + commercial dual
-- [[ADR-0009-public-api-template-wrappers-only]] — template wrappers only
 
 (See [[Decision Log]] for the full chain.)
 
