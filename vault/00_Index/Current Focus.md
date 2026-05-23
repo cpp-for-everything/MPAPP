@@ -27,7 +27,7 @@ tags:
 
 ## What's still open (in priority order)
 
-1. **ADR-0015 real Cairo + Skia backends.** The canvas facade just landed (stub backend ships everywhere). What's left: a Cairo backend wired through GTK4's already-present Cairo dependency on Linux + vcpkg/NDK Cairo on Win/Android; a Skia backend behind `MPAPP_GRAPHICS_BACKEND=skia`. Then migrate `shape_view` + `graphics_view` handlers off per-platform native primitives onto the canvas. Real-backend work is tied to license + dependency vendoring stories per RFC-0001.
+1. **ADR-0015 follow-ups: Skia + Cairo on Windows/Android + handler migration.** Linux Cairo backend just landed (default when libcairo is present via pkg-config). What's left: bundle Cairo on Windows (vcpkg) + Android (NDK prebuilt) — the portable `cairo_backend.cpp` is done, only dependency-vendoring + license-compliance plumbing remains. Skia backend (BSD-3, ~30 MB) still TBD. Then migrate `shape_view` + `graphics_view` handlers off per-platform native primitives onto the canvas facade.
 2. **macOS + iOS sweep** across the entire widget set. Requires an Apple host. Existing Objective-C++ handlers on app-shell are the template; the rest need to follow.
 3. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
 
@@ -37,7 +37,7 @@ tags:
 
 ## Recently accepted ADRs
 
-The M-04c proposal wave (ADR-0014–0022) is now mostly **accepted** — 8 of 9 flipped per Rule 4 after the implementations shipped + tested across all 3 platforms. ADR-0015 stays `proposed` because the v2 canvas facade hasn't shipped yet. ADR-0023 was just opened to cover the shell-route-guards-and-lifecycle work (also `proposed`).
+The M-04c proposal wave (ADR-0014–0022) is now mostly **accepted** — 8 of 9 flipped per Rule 4 after the implementations shipped + tested across all 3 platforms. ADR-0015 stays `proposed` even though the Cairo backend just landed because the Skia backend + handler-migration work remain. ADR-0023 was opened to cover the shell-route-guards-and-lifecycle work (also `proposed`).
 
 - [[ADR-0022-android-kind-discriminated-routers]] — Android listener kind dispatch family (just accepted)
 - [[ADR-0021-tableview-cell-types]] — full MAUI cell parity (just accepted)
@@ -75,7 +75,8 @@ The Current-Focus "pickup list" caught up to itself across the W21 close push. T
 - ✅ **CollectionView item_template** — `Observable<function<unique_ptr<view>(int)>> item_template`. When set, the collection_view auto-materializes one cell per items_source row, owns the lifetime, and emits `materialized_changed` so handlers know to rebuild. Composes with the existing typed render pipeline on all 3 platforms — `rebuild_active()` precedence is now typed_items → materialized_views → flat items_source, and each handler's map_typed_items subscribes to `materialized_changed` to pick up template re-fires.
 - ✅ **Shell route guard — can_activate** — `Observable<function<bool(string_view target)>> can_activate` consulted before each `go_to(uri)` and the typed `go_to<Path, &Table>()`. False aborts navigation and emits `navigation_blocked`. Closes ADR-0016's "route guards deferred to follow-up" item for the simpler activate case; can_deactivate (current-route-aware) + route-lifecycle hooks (`OnNavigatedTo`/`OnNavigatedFrom`) remain future work tied to the ADR-0019 executor.
 - ✅ **Shell can_deactivate + page navigated_to/from lifecycle** — second route guard (`Observable<function<bool(current,target)>> can_deactivate`) + per-page lifecycle signals (`navigated_to(uri)` / `navigated_from(previous_uri)`) fired by shell on each successful go_to. Guard chain is deactivate-then-activate; either's false aborts and emits `navigation_blocked`. New ADR-0023 (proposed) captures the full design.
-- ✅ **ADR-0015 v2 canvas facade (stub backend)** — `mpapp::detail::graphics::canvas` abstract interface + `color`/`path`/`rect` value types + SVG path subset parser + `make_canvas(w, h)` factory. `MPAPP_GRAPHICS_BACKEND` CMake option selects backend at compile time (default `stub`; `cairo` / `skia` accepted but warn-and-fall-back-to-stub for now). Real Cairo + Skia backends + the ShapeView/GraphicsView migration are the remaining v2 work.
+- ✅ **ADR-0015 v2 canvas facade (stub backend)** — `mpapp::detail::graphics::canvas` abstract interface + `color`/`path`/`rect` value types + SVG path subset parser + `make_canvas(w, h)` factory. `MPAPP_GRAPHICS_BACKEND` CMake option selects backend at compile time. Cairo backend now real on Linux (default via libcairo + pkg-config); Windows + Android fall back to stub until each bundles its own Cairo (vcpkg + NDK prebuilt). Skia backend + the ShapeView/GraphicsView migration are the remaining v2 work.
+- ✅ **ADR-0015 v2 Cairo backend** — `src/detail/graphics/cairo_backend.cpp` implements the full `canvas` interface against `cairo_image_surface_t`. Quad Bezier ops upconvert to Cairo's cubic form; ellipse rendering uses translate-scale-arc; save/restore maps to Cairo's state stack. LGPL-2.1 via dynamic-link against system libcairo (RFC-0001 §Linux pattern). 7 ctest cases gated on `MPAPP_GRAPHICS_HAS_CAIRO`; Linux ctest grew to 347 total when Cairo is selected.
 
 What's left at code level:
 

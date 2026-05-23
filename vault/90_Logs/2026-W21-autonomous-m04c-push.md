@@ -303,6 +303,14 @@ Per Rule 4, these are now immutable — future changes require a new ADR with `s
 
 **Net:** the v2 facade surface is locked. Apps and handlers can now paint through `canvas*` without coupling to any specific backend. The remaining v2 work — real Cairo + Skia backends + the ShapeView/GraphicsView migration — is decoupled from the facade design and ships incrementally. ADR-0015 stays `proposed` until the first real backend ships, but the implementation-notes section now documents the facade layout.
 
+## ADR-0015 v2 — Cairo backend lands (Linux default)
+
+| Commit | Scope | Build state |
+|---|---|---|
+| _(pending)_ | **Real Cairo backend** — `src/detail/graphics/cairo_backend.cpp` implements the full `canvas` interface against `cairo_image_surface_t`. Every method maps to its Cairo equivalent: state stack → `cairo_save`/`cairo_restore`, transforms → `cairo_translate`/`scale`/`rotate`, fill/stroke colors capture the latest `set_*` value and apply via `cairo_set_source_rgba` immediately before each draw op (Cairo's source-pattern model differs from the facade's separate-fill-and-stroke split), `quad_to` upconverts to Cairo's cubic form via the standard 2/3 control-point lift, ellipse uses translate-scale-arc. CMake: `pkg_check_modules(MPAPP_CAIRO QUIET cairo)`; backend default flips to `cairo` on Linux when libcairo found; otherwise falls back to stub with a CMake warning so the build stays green on platforms that don't yet bundle Cairo. Include + link wired PUBLIC on mpapp-core so test code can include `<cairo/cairo.h>` for pixel-readback verification. LGPL-2.1 via dynamic link per RFC-0001 §Linux pattern. 7 new ctest cases gated on `MPAPP_GRAPHICS_HAS_CAIRO`; covers make_canvas → real-render, clear/fill_rect pixel readback against an independent image-surface mirror, save/restore state-stack balance, all path-op kinds without crashing, ellipse + clip composition. Linux ctest with Cairo backend: 23 graphics cases / 92 assertions (vs 16 / 68 with stub). | Linux 347/347 with Cairo + Win 340/340 with stub fallback + Android APK builds clean with stub fallback |
+
+**Net:** ADR-0015's primary backend is now real on Linux. Apps that build the Linux target with the default CMake config get hardware-quality 2D rendering through libcairo, while Windows + Android stay on the stub backend until each platform's Cairo bundling story lands. The same source compiles on every platform — the only platform-specific bit is the CMake-detection logic that gates compilation of `cairo_backend.cpp`. Skia backend + the ShapeView/GraphicsView migration are the remaining v2 work; both decoupled from the backend-selection design that just shipped.
+
 ## CollectionView typed_items
 
 | Commit | Scope | Build state |

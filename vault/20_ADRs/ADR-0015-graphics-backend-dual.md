@@ -76,14 +76,15 @@ The facade landed in W21. Layout:
 - `include/mpapp/detail/graphics/stub_canvas.hpp` — the default backend. Records every method call as a string for inspection. Doubles as the test fixture for code that uses the canvas surface without a real graphics dependency.
 - `src/detail/graphics/canvas.cpp` — backend-independent: implementations of the value-type parsers.
 - `src/detail/graphics/stub_backend.cpp` — the `make_canvas` factory for the stub backend.
-- CMake option `MPAPP_GRAPHICS_BACKEND` (`stub` default, `cairo` and `skia` accepted). When set to `cairo` or `skia`, the build currently warns and falls back to stub — the real backends are follow-up work tied to their respective dependency-vendoring + license-compliance stories. The selection happens at CMake-configure time; only one backend `.cpp` compiles per build.
+- `src/detail/graphics/cairo_backend.cpp` — real Cairo implementation (in-memory `cairo_image_surface_t`). Wires every `canvas` op to its Cairo equivalent: state stack maps to `cairo_save`/`cairo_restore`, fill/stroke colors capture the latest `set_*` value and apply through `cairo_set_source_rgba` immediately before each draw, ellipse rendering uses the translate-scale-arc trick, quad Bezier ops are upconverted to Cairo's cubic form. LGPL-2.1 via dynamic link against system libcairo per RFC-0001 §Linux.
+- CMake option `MPAPP_GRAPHICS_BACKEND` defaults to `cairo` on Linux (where pkg-config finds libcairo via GTK4's existing dependency) and `stub` on Windows + Android (until each bundles its own Cairo). Explicit override via `-DMPAPP_GRAPHICS_BACKEND={cairo,stub,skia}`. When set to `cairo` but Cairo isn't found, falls back to stub with a CMake warning so the build stays green. When set to `skia`, falls back to stub with a warning — Skia backend is still TBD.
 
-Tests live in `tests/mock_handlers/graphics_canvas_test.cpp` (16 cases, 68 assertions). Coverage spans value-type parsers + every `canvas` method + the factory.
+Tests live in `tests/mock_handlers/graphics_canvas_test.cpp` (16 backend-agnostic cases via stub_canvas) + `tests/mock_handlers/graphics_cairo_test.cpp` (7 cases gated on `#if defined(MPAPP_GRAPHICS_HAS_CAIRO)`). Cairo tests cover make_canvas → real-render, clear / fill_rect pixel readback via an independent image-surface mirror, save/restore state-stack balance, every path-op kind without crashing, ellipse + clip composition. Linux ctest runs at 23 graphics cases / 92 assertions; Windows + Android compile the cairo test file but `#if` it out, so they run 16 cases. ctest total: 340 (Win) → 347 (Linux, with extra Cairo cases).
 
 What's still to do for full v2:
-- **Real Cairo backend** — wrap the existing GTK4 Cairo dependency on Linux; ship a Cairo build for Windows + Android via vcpkg / NDK packaging. LGPL via dynamic linking per RFC-0001 §Linux.
-- **Real Skia backend** — vendor Skia (~30 MB) opt-in. BSD-3 license.
-- **ShapeView + GraphicsView migration** — those handlers currently draw with per-platform native primitives (v1). v2 routes them through `canvas` so a single code path renders on every backend.
+- **Real Skia backend** — vendor Skia (~30 MB) opt-in. BSD-3 license. Same factory pattern as Cairo, different `make_canvas` body.
+- **Cairo on Windows + Android** — vcpkg pull on Windows, NDK prebuilt or build-from-source on Android. The cairo_backend.cpp itself is portable C++ + Cairo C ABI; the work is purely dependency-vendoring + license-compliance plumbing.
+- **ShapeView + GraphicsView migration** — those handlers currently draw with per-platform native primitives (v1). v2 routes them through `canvas` so a single code path renders on every backend. Opt-in initially (per-handler flag) so existing behavior stays intact.
 
 ## References
 
