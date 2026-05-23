@@ -69,26 +69,48 @@ list(APPEND MPAPP_CORE_SOURCES src/executor/mock.cpp)
 # (canvas value types, SVG path parser) compile always. One backend
 # .cpp is selected via the MPAPP_GRAPHICS_BACKEND option.
 #
-#   stub   — default; records calls without rendering. Useful for
-#            tests + headless builds; no native dependency.
-#   cairo  — LGPL via dynamic linking (per RFC-0001). Implementation
-#            still TBD; currently falls back to stub.
+#   cairo  — LGPL via dynamic linking (per RFC-0001). Default where
+#            available (Linux via GTK4's existing libcairo). On
+#            platforms where Cairo isn't detected, falls back to stub
+#            with a CMake warning so the build stays green.
+#   stub   — records calls without rendering. Useful for tests +
+#            headless builds; no native dependency.
 #   skia   — BSD-3, ~30 MB add. Implementation still TBD.
-set(MPAPP_GRAPHICS_BACKEND "stub" CACHE STRING
-    "2D graphics backend: stub (default), cairo, or skia")
+#
+# Default per platform — Cairo where pkg-config finds it (typical
+# Linux), stub everywhere else until each platform bundles its own
+# Cairo (Win via vcpkg, Android via prebuilt AAR — both future work).
+if(UNIX AND NOT APPLE AND NOT ANDROID)
+    set(MPAPP_GRAPHICS_BACKEND_DEFAULT "cairo")
+else()
+    set(MPAPP_GRAPHICS_BACKEND_DEFAULT "stub")
+endif()
+set(MPAPP_GRAPHICS_BACKEND "${MPAPP_GRAPHICS_BACKEND_DEFAULT}" CACHE STRING
+    "2D graphics backend: cairo (Linux default), stub (fallback), or skia (TBD)")
 set_property(CACHE MPAPP_GRAPHICS_BACKEND PROPERTY STRINGS stub cairo skia)
 
 list(APPEND MPAPP_CORE_SOURCES
     src/detail/graphics/canvas.cpp)
-if(MPAPP_GRAPHICS_BACKEND STREQUAL "stub")
+
+set(MPAPP_GRAPHICS_HAS_CAIRO OFF)
+if(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+        pkg_check_modules(MPAPP_CAIRO QUIET cairo)
+    endif()
+    if(MPAPP_CAIRO_FOUND)
+        list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/cairo_backend.cpp)
+        set(MPAPP_GRAPHICS_HAS_CAIRO ON)
+        message(STATUS "MPAPP graphics backend: cairo ${MPAPP_CAIRO_VERSION}")
+    else()
+        list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
+        message(WARNING
+            "MPAPP_GRAPHICS_BACKEND=cairo selected but libcairo not found via "
+            "pkg-config; falling back to stub backend.")
+    endif()
+elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "stub")
     list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
-elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
-    # TBD — fall back to stub for now so the build doesn't break
-    # before the Cairo backend lands.
-    list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
-    message(WARNING
-        "MPAPP_GRAPHICS_BACKEND=cairo selected but Cairo backend not yet "
-        "implemented; falling back to stub.")
+    message(STATUS "MPAPP graphics backend: stub")
 elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")
     list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
     message(WARNING
@@ -110,6 +132,19 @@ target_include_directories(mpapp-core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+
+# Cairo backend wiring — include paths + link flags from pkg-config.
+# Include path is PUBLIC because tests in this repo include
+# `<cairo/cairo.h>` directly for backend-specific pixel-readback
+# verification. End-user code outside this repo should only use the
+# abstract `mpapp::detail::graphics::canvas` interface and stay
+# backend-agnostic.
+if(MPAPP_GRAPHICS_HAS_CAIRO)
+    target_include_directories(mpapp-core PUBLIC ${MPAPP_CAIRO_INCLUDE_DIRS})
+    target_link_libraries(mpapp-core PUBLIC ${MPAPP_CAIRO_LIBRARIES})
+    target_link_directories(mpapp-core PUBLIC ${MPAPP_CAIRO_LIBRARY_DIRS})
+    target_compile_definitions(mpapp-core PUBLIC MPAPP_GRAPHICS_HAS_CAIRO=1)
+endif()
 
 target_compile_features(mpapp-core PUBLIC cxx_std_23)
 
