@@ -24,8 +24,11 @@ namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
 content_page_handler<platform::windows>::content_page_handler() {
-    // Build a Page wrapping a Grid with two rows: title + content host.
-    native_       = muxc::Page{};
+    // `native_` is a Border (which has Padding) wrapping a 2-row Grid:
+    // row 0 (Auto) = title TextBlock, row 1 (*) = content ContentControl.
+    // See header comment for the Page-nesting bug that drove the switch
+    // away from `muxc::Page` here.
+    native_       = muxc::Border{};
     grid_         = muxc::Grid{};
     title_text_   = muxc::TextBlock{};
     content_host_ = muxc::ContentControl{};
@@ -48,7 +51,7 @@ content_page_handler<platform::windows>::content_page_handler() {
     grid_.Children().Append(title_text_);
     grid_.Children().Append(content_host_);
 
-    native_.Content(grid_);
+    native_.Child(grid_);
 }
 
 content_page_handler<platform::windows>::~content_page_handler() = default;
