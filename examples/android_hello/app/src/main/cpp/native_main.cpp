@@ -11,6 +11,7 @@
 #include <jni.h>
 
 #include <mpapp/detail/graphics/canvas.hpp>
+#include <mpapp/hybrid_bridge.hpp>
 #include <mpapp/page.hpp>
 #include <mpapp/route.hpp>
 #include <mpapp/shell.hpp>
@@ -348,6 +349,111 @@ extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_example_MainActivity_nativeRunRoutesSmokeTest(
     JNIEnv* /*env*/, jobject /*thiz*/) {
     t0017::run_smoke();
+}
+
+// T-0018 — async bridge dispatch smoke test. Exercises ADR-0018
+// Phase F: `hybrid_bridge::dispatch_async` over a sync method
+// (`add_sync`), an inline-responding async method
+// (`add_async_inline`), and a deferred-respond async method
+// (`defer_add` — the bridge captures `respond`, the smoke fires it
+// later). Output is a structured trace via logcat, prefixed
+// `T-0018:` so test infra can grep it.
+namespace t0018 {
+
+class demo_bridge : public mpapp::hybrid_bridge {
+public:
+    demo_bridge() {
+        register_method("add_sync",        &demo_bridge::add_sync);
+        register_async_method<int>("add_async_inline",
+                                   &demo_bridge::add_async_inline);
+        register_async_method<int>("defer_add",
+                                   &demo_bridge::defer_add);
+    }
+
+    int add_sync(int a, int b) { return a + b; }
+
+    void add_async_inline(int a, int b, std::function<void(int)> respond) {
+        respond(a + b);
+    }
+
+    void defer_add(int a, int b, std::function<void(int)> respond) {
+        pending_a_       = a;
+        pending_b_       = b;
+        pending_respond_ = std::move(respond);
+    }
+
+    void resolve_pending() {
+        if (!pending_respond_) return;
+        auto cb = std::move(pending_respond_);
+        pending_respond_ = nullptr;
+        cb(pending_a_ + pending_b_);
+    }
+
+    bool has_pending() const { return static_cast<bool>(pending_respond_); }
+
+private:
+    int                      pending_a_ = 0;
+    int                      pending_b_ = 0;
+    std::function<void(int)> pending_respond_;
+};
+
+void log(const char* msg) {
+    __android_log_print(ANDROID_LOG_INFO, "MPAPP", "T-0018: %s", msg);
+}
+
+void run_smoke() {
+    demo_bridge b;
+
+    // 1) Sync dispatch — fires inline. Result in `out`.
+    {
+        std::string out;
+        b.dispatch(R"({"id":1,"method":"add_sync","args":[2,3]})", out);
+        log(("sync add_sync(2,3) -> " + out).c_str());
+    }
+
+    // 2) Async-inline dispatch — fires inline through dispatch_async.
+    {
+        std::string captured;
+        bool        fired = false;
+        b.dispatch_async(R"({"id":2,"method":"add_async_inline","args":[10,20]})",
+                         [&](std::string r) { captured = std::move(r); fired = true; });
+        log((std::string{"inline add_async_inline(10,20) fired_before_return="}
+             + (fired ? "true" : "false")
+             + " -> " + captured).c_str());
+    }
+
+    // 3) Async-deferred dispatch — bridge captures `respond`, smoke
+    //    fires it later via resolve_pending.
+    {
+        std::string captured;
+        bool        fired = false;
+        b.dispatch_async(R"({"id":3,"method":"defer_add","args":[7,8]})",
+                         [&](std::string r) { captured = std::move(r); fired = true; });
+        log((std::string{"deferred defer_add(7,8) fired_before_resolve="}
+             + (fired ? "true" : "false")
+             + " has_pending="
+             + (b.has_pending() ? "true" : "false")).c_str());
+        b.resolve_pending();
+        log((std::string{"deferred defer_add(7,8) fired_after_resolve="}
+             + (fired ? "true" : "false")
+             + " -> " + captured).c_str());
+    }
+
+    // 4) Unknown-method dispatch — error envelope.
+    {
+        std::string captured;
+        b.dispatch_async(R"({"id":4,"method":"missing","args":[]})",
+                         [&](std::string r) { captured = std::move(r); });
+        log(("unknown-method -> " + captured).c_str());
+    }
+}
+
+} // namespace t0018
+
+extern "C" JNIEXPORT void JNICALL
+Java_io_mpapp_example_MainActivity_nativeRunBridgeSmokeTest(
+    JNIEnv* /*env*/, jobject /*thiz*/) {
+    t0018::run_smoke();
 }
 
 // T-0016 — Cairo render demo. Drives the canvas facade through a

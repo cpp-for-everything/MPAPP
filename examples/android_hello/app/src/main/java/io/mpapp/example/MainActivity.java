@@ -51,6 +51,15 @@ public class MainActivity extends Activity {
             Log.w("MPAPP", "Routes smoke test skipped: " + t);
         }
 
+        // T-0018 Rule 11 catch-up: exercise ADR-0018 Phase F's
+        // `hybrid_bridge::dispatch_async` across sync, inline-async,
+        // and deferred-async method shapes. Output prefixed `T-0018:`.
+        try {
+            nativeRunBridgeSmokeTest();
+        } catch (Throwable t) {
+            Log.w("MPAPP", "Bridge smoke test skipped: " + t);
+        }
+
         nativeLaunch();
     }
 
@@ -60,4 +69,5 @@ public class MainActivity extends Activity {
     private native void nativeLaunch();
     private native int  nativeRenderCairoDemoPng(String outputPath);
     private native void nativeRunRoutesSmokeTest();
+    private native void nativeRunBridgeSmokeTest();
 }

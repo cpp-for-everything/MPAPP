@@ -1,0 +1,5 @@
+﻿05-23 18:17:31.820  6103  6103 I MPAPP   : T-0018: sync add_sync(2,3) -> {"id":1,"result":5}
+05-23 18:17:31.822  6103  6103 I MPAPP   : T-0018: inline add_async_inline(10,20) fired_before_return=true -> {"id":2,"result":30}
+05-23 18:17:31.822  6103  6103 I MPAPP   : T-0018: deferred defer_add(7,8) fired_before_resolve=false has_pending=true
+05-23 18:17:31.822  6103  6103 I MPAPP   : T-0018: deferred defer_add(7,8) fired_after_resolve=true -> {"id":3,"result":15}
+05-23 18:17:31.822  6103  6103 I MPAPP   : T-0018: unknown-method -> {"id":4,"error":"unknown method: missing"}
