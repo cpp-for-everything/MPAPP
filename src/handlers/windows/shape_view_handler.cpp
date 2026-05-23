@@ -96,6 +96,13 @@ bool parse_line(const std::string& data, double& x1, double& y1, double& x2, dou
 
 shape_view_handler<platform::windows>::shape_view_handler() {
     native_ = muxc::Border{};
+    // FrameworkElement has no intrinsic size; give the hosting Border a
+    // sensible default so a shape_view inside a stack_layout (or any
+    // container that respects child measure) gets a non-zero allocation.
+    // Apps can override by setting the view's width/height once the
+    // handler honors those.
+    native_.Width(200.0);
+    native_.Height(80.0);
     rebuild_shape(shape_kind::rectangle);
 }
 

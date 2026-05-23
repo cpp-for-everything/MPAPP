@@ -143,6 +143,12 @@ shape_view_handler<platform::linux_>::shape_view_handler() {
         draw_callback,
         this,
         nullptr);
+    // GtkDrawingArea has no intrinsic size; give it a sensible default so
+    // a shape_view inside a stack_layout (or any container that respects
+    // child measure) gets a non-zero allocation. Apps can override by
+    // setting the view's width/height once the handlers honor those.
+    gtk_drawing_area_set_content_width (GTK_DRAWING_AREA(static_cast<GtkWidget*>(native_)), 200);
+    gtk_drawing_area_set_content_height(GTK_DRAWING_AREA(static_cast<GtkWidget*>(native_)), 80);
 }
 
 shape_view_handler<platform::linux_>::~shape_view_handler() = default;
