@@ -70,16 +70,30 @@ renderer so all three platforms share one source of truth.
 
 ## Acceptance criteria (phase 2 — Win + Android migrations)
 
-- [ ] **Windows migration.** Swap `muxc::Border` + `muxs::Shape`
-  for `muxc::Image` + `WriteableBitmap`, render through
-  `render_shape_view`, blit (same pattern as
-  `graphics_view_handler<platform::windows>::repaint`). Removes
-  ~80 lines of per-kind XAML primitive setup.
-- [ ] **Android migration.** Swap the custom `MppShapeView` Java
-  class for an `ImageView` + `Bitmap.ARGB_8888`, render through
-  `render_shape_view`, blit with the B↔R per-pixel swap (same
-  pattern as `graphics_view_handler<platform::android>::repaint`).
-  Delete `MppShapeView.java` once C++ stops referencing it.
+- [x] **Windows migration.** `native_` swapped from `muxc::Border` +
+  `muxs::Shape` to `muxc::Image` + `WriteableBitmap`. Per-paint
+  cycle: build a facade canvas at the Image's current ActualWidth /
+  ActualHeight (DIPs, 1:1 — high-DPI scaling is a follow-up), call
+  `render_shape_view`, memcpy BGRA32 → WriteableBitmap's PixelBuffer
+  (same format, no channel swap), `Invalidate()` to commit.
+  Subscribes to `SizeChanged` so the canvas reallocates + repaints
+  on every layout pass — matches the auto-stretch behavior the
+  previous XAML Shape host provided. One `invalidate_cb_t` fans out
+  from every observable (kind / data / fill / stroke / thickness /
+  opacity), removing the per-kind XAML primitive dispatch (~80 lines
+  deleted from the .cpp; the parse_color / parse_line / brush
+  helpers are also gone since the shared renderer handles those).
+- [x] **Android migration.** `native_` swapped from the custom
+  `MppShapeView` Java class to `android.widget.ImageView` with a
+  backing `Bitmap.ARGB_8888`. Per-paint cycle: facade canvas →
+  BGRA32 → per-pixel B↔R swap inside `AndroidBitmap_lockPixels` /
+  `unlockPixels` (matching ANDROID_BITMAP_FORMAT_RGBA_8888 byte
+  order) → `setImageBitmap`. Layout-change tracking via a new
+  `MppShapeViewLayoutListener.java` (5-line
+  `View.OnLayoutChangeListener` + a `nativeOnLayoutChanged(jlong,
+  jint, jint)` JNI trampoline) so the canvas reallocates when the
+  layout assigns a new size. `MppShapeView.java` deleted — C++ no
+  longer references it; the ImageView is plain stock Android.
 - [x] **Rule 11 closure — shape-renderer evidence.** Five PNGs in
   `screenshots/` (one per shape_kind: rectangle / ellipse / line /
   polygon / path) produced by the new `examples/headless_canvas_demo`

@@ -1,13 +1,22 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android shape_view handler — wraps a custom `MppShapeView` (extends
-// android.view.View) whose onDraw renders the configured shape kind
-// against the Canvas with the configured paint properties. The native
-// handler pushes property updates through JNI setters and the Java
-// side re-invalidates on each change.
+// Android shape_view handler. T-0031 phase 2: rendering goes through
+// the shared detail::graphics::render_shape_view helper into an
+// off-screen canvas; pixels are then byte-swapped (BGRA → RGBA byte
+// order, matching ANDROID_BITMAP_FORMAT_RGBA_8888 in memory) and
+// copied into an android.graphics.Bitmap that backs an
+// android.widget.ImageView. The previous MppShapeView custom-Java-View
+// path is gone — all three platforms now render through the same
+// shared helper.
+//
+// The ImageView subscribes to View.OnLayoutChangeListener so the
+// canvas reallocates + repaints whenever the layout assigns the
+// shape_view a new size, matching the auto-stretch behavior the
+// previous custom View provided through its onMeasure / onDraw.
 
 #ifndef MPAPP_HANDLERS_ANDROID_SHAPE_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_SHAPE_VIEW_HANDLER_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
 
@@ -41,45 +50,28 @@ public:
 
     jobject native() const noexcept { return native_; }
 
+    // Called from the OnLayoutChangeListener trampoline (in the .cpp).
+    // Public so the trampoline can reach it without becoming a friend.
+    void on_layout_changed(int w, int h);
+
 private:
-    void apply_kind(shape_kind v);
-    void apply_data(const std::string& v);
-    void apply_fill(const std::string& v);
-    void apply_stroke(const std::string& v);
-    void apply_stroke_thickness(double v);
-    void apply_opacity(double v);
+    void ensure_bitmap(int w, int h);
+    void repaint();
 
-    struct kind_cb_t {
+    struct invalidate_cb_t {
         shape_view_handler<platform::android>* self;
-        void operator()(shape_kind v) const { self->apply_kind(v); }
-    };
-    struct str_cb_t {
-        shape_view_handler<platform::android>* self;
-        enum which_t { fill_, stroke_, data_ } which;
-        void operator()(const std::string& v) const {
-            if (which == fill_)   self->apply_fill(v);
-            else if (which == stroke_) self->apply_stroke(v);
-            else self->apply_data(v);
-        }
-    };
-    struct dbl_cb_t {
-        shape_view_handler<platform::android>* self;
-        enum which_t { thickness_, opacity_ } which;
-        void operator()(double v) const {
-            if (which == thickness_) self->apply_stroke_thickness(v);
-            else self->apply_opacity(v);
-        }
+        template <class T> void operator()(T const& /*v*/) const { self->repaint(); }
     };
 
-    jobject     native_ = nullptr;  // MppShapeView (global ref)
-    shape_view* bound_  = nullptr;
+    jobject     native_   = nullptr;   // android.widget.ImageView (global ref)
+    jobject     bitmap_   = nullptr;   // android.graphics.Bitmap (global ref)
+    int         bitmap_w_ = 0;
+    int         bitmap_h_ = 0;
+    int         layout_w_ = 0;
+    int         layout_h_ = 0;
+    shape_view* bound_    = nullptr;
 
-    kind_cb_t                       kind_cb_{this};
-    str_cb_t                        data_cb_{this, str_cb_t::data_};
-    str_cb_t                        fill_cb_{this, str_cb_t::fill_};
-    str_cb_t                        stroke_cb_{this, str_cb_t::stroke_};
-    dbl_cb_t                        stroke_thick_cb_{this, dbl_cb_t::thickness_};
-    dbl_cb_t                        opacity_cb_{this, dbl_cb_t::opacity_};
+    invalidate_cb_t                 cb_{this};
     signal_slot<const shape_kind&>  kind_slot_{};
     signal_slot<const std::string&> data_slot_{};
     signal_slot<const std::string&> fill_slot_{};

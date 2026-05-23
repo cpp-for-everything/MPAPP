@@ -1,14 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 shape_view handler — wraps a muxc::Border whose Child is one
-// of muxc::Shapes::Rectangle / Ellipse / Line, chosen by `kind`. Hex
-// color strings (`#RRGGBB` / `#AARRGGBB`) become SolidColorBrushes for
-// fill / stroke. For v1, kinds `polygon` and `path` render as the
-// outer bounding rectangle (full SVG path parsing is gated on the
-// future graphics-backend ADR).
+// WinUI 3 shape_view handler. T-0031 phase 2: rendering goes through
+// the shared detail::graphics::render_shape_view helper into an
+// off-screen canvas; the resulting BGRA32 pixels are memcpy'd into a
+// WriteableBitmap that backs an muxc::Image. The previous XAML
+// muxs::Shape primitive approach (Rectangle / Ellipse / Line with a
+// bounding-rect fallback for polygon + path) is gone — all platforms
+// now render through the same helper, so output is identical.
+//
+// The Image subscribes to SizeChanged so the canvas reallocates +
+// repaints whenever the layout assigns the shape_view a new size —
+// matching the auto-stretch behavior the previous XAML Shape host
+// provided.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_SHAPE_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_SHAPE_VIEW_HANDLER_HPP
 
+#include <cstddef>
 #include <string>
 
 #include "../../platform.hpp"
@@ -19,7 +26,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
-#include <winrt/Microsoft.UI.Xaml.Shapes.h>
+#include <winrt/Microsoft.UI.Xaml.Media.Imaging.h>
 
 namespace mpapp {
 
@@ -41,49 +48,30 @@ public:
     void map_stroke_thickness(shape_view& s);
     void map_opacity(shape_view& s);
 
-    winrt::Microsoft::UI::Xaml::Controls::Border&       native() noexcept       { return native_; }
-    const winrt::Microsoft::UI::Xaml::Controls::Border& native() const noexcept { return native_; }
+    winrt::Microsoft::UI::Xaml::Controls::Image&       native() noexcept       { return native_; }
+    const winrt::Microsoft::UI::Xaml::Controls::Image& native() const noexcept { return native_; }
 
 private:
-    void rebuild_shape(shape_kind k);
-    void apply_paint();
-    void apply_data(const std::string& v);
+    void ensure_bitmap(int w, int h);
+    void repaint();
 
-    struct kind_cb_t {
+    struct invalidate_cb_t {
         shape_view_handler<platform::windows>* self;
-        void operator()(shape_kind v) const { self->rebuild_shape(v); }
-    };
-    struct data_cb_t {
-        shape_view_handler<platform::windows>* self;
-        void operator()(const std::string& v) const { self->apply_data(v); }
-    };
-    struct fill_cb_t {
-        shape_view_handler<platform::windows>* self;
-        void operator()(const std::string&) const { self->apply_paint(); }
-    };
-    struct stroke_cb_t {
-        shape_view_handler<platform::windows>* self;
-        void operator()(const std::string&) const { self->apply_paint(); }
-    };
-    struct stroke_thick_cb_t {
-        shape_view_handler<platform::windows>* self;
-        void operator()(double) const { self->apply_paint(); }
-    };
-    struct opacity_cb_t {
-        shape_view_handler<platform::windows>* self;
-        void operator()(double v) const;
+        // The same callback handles every observable — each just
+        // triggers a full repaint. Inexpensive: render targets a
+        // small (typically <500px) canvas; one paint per change is
+        // fine.
+        template <class T> void operator()(T const& /*v*/) const { self->repaint(); }
     };
 
-    winrt::Microsoft::UI::Xaml::Controls::Border native_{nullptr};
-    winrt::Microsoft::UI::Xaml::Shapes::Shape    shape_{nullptr};
-    shape_view*                                  bound_ = nullptr;
+    winrt::Microsoft::UI::Xaml::Controls::Image                 native_{nullptr};
+    winrt::Microsoft::UI::Xaml::Media::Imaging::WriteableBitmap bitmap_{nullptr};
+    int             bitmap_w_ = 0;
+    int             bitmap_h_ = 0;
+    winrt::event_token size_changed_token_{};
+    shape_view*     bound_ = nullptr;
 
-    kind_cb_t                       kind_cb_{this};
-    data_cb_t                       data_cb_{this};
-    fill_cb_t                       fill_cb_{this};
-    stroke_cb_t                     stroke_cb_{this};
-    stroke_thick_cb_t               stroke_thick_cb_{this};
-    opacity_cb_t                    opacity_cb_{this};
+    invalidate_cb_t                 cb_{this};
     signal_slot<const shape_kind&>  kind_slot_{};
     signal_slot<const std::string&> data_slot_{};
     signal_slot<const std::string&> fill_slot_{};

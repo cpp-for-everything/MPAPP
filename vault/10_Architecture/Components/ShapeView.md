@@ -16,13 +16,15 @@ tags:
 # ShapeView
 
 > [!info] Status
-> **android-real (v2 in flight — Linux landed via [[T-0031]])** — Migration to the ADR-0015 canvas facade is in progress.
+> **android-real (v2 — all 3 platforms migrated via [[T-0031]] phases 1+2)** — Every platform now renders through the shared `detail::graphics::render_shape_view` helper feeding the ADR-0015 canvas facade.
 >
-> - **Linux** (`GtkDrawingArea` + Cairo) — renders via the shared `detail::graphics::render_shape_view` helper into an off-screen facade canvas, then blits BGRA32 pixels through GTK's `cairo_t*` (same pattern `graphics_view` uses). One source of truth for fill/stroke/kind dispatch. `path::from_svg` parses real SVG path data (M/L/Q/C/Z), falling back to the bounding rectangle if the data string is empty or invalid — strict improvement over the legacy bounding-rect-always behavior for polygon/path kinds.
-> - **Windows** — still uses `muxc::Border` wrapping `muxc::Shapes::Rectangle/Ellipse/Line`. Migration to `Image` + `WriteableBitmap` + shared renderer is T-0031 phase 2.
-> - **Android** — still uses the custom `MppShapeView` Java class. Migration to `ImageView` + `Bitmap.ARGB_8888` + shared renderer is T-0031 phase 2 (the existing per-pixel B↔R swap from `graphics_view` applies).
+> - **Linux** (`GtkDrawingArea`) — GTK draw callback wraps the facade's BGRA32 pixels via `cairo_image_surface_create_for_data` and blits through GTK's `cairo_t*`. No channel swap.
+> - **Windows** (`muxc::Image` + `WriteableBitmap`) — facade pixels copied into the WriteableBitmap's `PixelBuffer` (BGRA8 premultiplied, same byte order). `SizeChanged` triggers re-render at the new layout-assigned dimensions.
+> - **Android** (`android.widget.ImageView` + `android.graphics.Bitmap` ARGB_8888) — facade pixels copied with a per-pixel B↔R swap inside `AndroidBitmap_lockPixels` / `unlockPixels`. Layout changes tracked via `MppShapeViewLayoutListener` (a 5-line `View.OnLayoutChangeListener` that fires a JNI callback into the C++ handler).
 >
-> Once Win + Android migrate, all three platforms render byte-for-byte identically (subject to the chosen canvas backend: default Cairo, opt-in Skia via `-DMPAPP_GRAPHICS_BACKEND=skia`).
+> `path::from_svg` parses real SVG path data (M/L/Q/C/Z), falling back to the bounding rectangle if the data string is empty or invalid — strict improvement over the legacy bounding-rect-always behavior the per-platform v1 handlers had for polygon/path kinds.
+>
+> The previous per-platform implementations (`muxs::Shape` primitives on Windows, direct cairo calls on Linux, `MppShapeView` custom Java view on Android) are gone — `MppShapeView.java` deleted, ~300 LOC of per-platform paint dispatch removed. Output is now byte-for-byte identical across platforms (modulo per-platform pixel-blit conversions), and swapping the canvas backend (Cairo today, Skia once installed via `-DMPAPP_GRAPHICS_BACKEND=skia`) swaps the rendering on every platform at once.
 
 ## Overview
 
