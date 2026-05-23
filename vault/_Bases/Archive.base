@@ -24,6 +24,3 @@ views:
       - note.coveragePercent
     groupBy:
       property: note.milestone
-    sort:
-      - property: file.mtime
-        direction: DESC

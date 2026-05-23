@@ -20,8 +20,5 @@ views:
       - note.status
       - note.area
       - note.created
-    sort:
-      - property: note.created
-        direction: DESC
     groupBy:
       property: note.status

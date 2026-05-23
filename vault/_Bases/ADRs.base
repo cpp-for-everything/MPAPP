@@ -20,9 +20,6 @@ views:
       - note.status
       - note.area
       - note.decisionDate
-    sort:
-      - property: note.decisionDate
-        direction: DESC
     groupBy:
       property: note.status
   - type: cards
