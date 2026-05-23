@@ -19,11 +19,18 @@ CMakeUserPresets.json
 _build*.bat
 _run_*.bat
 _run_*.sh
-_logs_recovery_*.log
+_tmp_*.bat
+_tmp_*.ps1
+_tmp_*.log
+_logs_*.log
 _gtk_smoke.c
 _run_gtk_bg.sh
 _mpapp_spike.log
 _add_registrars.py
+
+# Stray path-mangled log file that occasionally lands in the worktree
+# when a WSL `>` redirect interprets a Windows path literally.
+D:GitHubMPAPP_logs_*.log
 
 # OS
 Thumbs.db

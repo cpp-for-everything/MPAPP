@@ -27,9 +27,10 @@ tags:
 
 ## What's still open (in priority order)
 
-1. **ADR-0015 follow-ups: Skia backend + ShapeView/GraphicsView migration.** Cairo backend is now real on Linux, Windows (via vcpkg), and Android (via vcpkg + NDK; minSdk bumped to 28 for bionic libiconv). What's left: Skia backend (BSD-3, ~30 MB) — opt-in via `-DMPAPP_GRAPHICS_BACKEND=skia`. Then migrate `shape_view` + `graphics_view` handlers off per-platform native primitives onto the canvas facade.
+1. **ADR-0015 follow-ups: Skia backend + ShapeView/GraphicsView migration.** Cairo backend is now real on Linux, Windows (via vcpkg), and Android (via vcpkg + NDK; minSdk bumped to 28 for bionic libiconv). What's left: Skia backend (BSD-3, ~30 MB) — opt-in via `-DMPAPP_GRAPHICS_BACKEND=skia`. Then migrate `shape_view` + `graphics_view` handlers off per-platform native primitives onto the canvas facade — this needs two design moves first (pixel extraction added to the abstract canvas API, plus a `drawable` callback Observable on `graphics_view`).
 2. **macOS + iOS sweep** across the entire widget set. Requires an Apple host. Existing Objective-C++ handlers on app-shell are the template; the rest need to follow.
 3. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
+4. **[[_Archive/T-0028-collectionview-orientation|T-0028]] closure.** Code-complete on all three platforms (Win 343/343, Linux 348/348, Android APK clean). Pending Rule 11 closure: per-platform screenshots (4 layouts × 3 platforms) + optional layout-toggle demo apps. `status: in-progress` until then.
 
 ## Active milestone
 
