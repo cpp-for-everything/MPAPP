@@ -72,7 +72,11 @@ add_library(android_hello SHARED
 )
 
 target_include_directories(android_hello PRIVATE "${MPAPP_ROOT}/include")
-target_link_libraries(android_hello PRIVATE log android)
+# T-0029 phase 2: graphics_view real handler uses AndroidBitmap_*
+# from <android/bitmap.h> to lock + memcpy pixels into a managed
+# Bitmap. That API ships as a separate stub library (jnigraphics) in
+# the NDK.
+target_link_libraries(android_hello PRIVATE log android jnigraphics)
 
 if(MPAPP_GRAPHICS_HAS_CAIRO)
     target_include_directories(android_hello PRIVATE

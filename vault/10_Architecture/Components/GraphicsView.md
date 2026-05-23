@@ -16,11 +16,13 @@ tags:
 # GraphicsView
 
 > [!info] Status
-> **android-real (v2 in flight — Linux landed via [[T-0029]])** — Native drawing host wired on all 3 platforms: Win `muxc::Canvas`, Linux `GtkDrawingArea`, Android plain `android.view.View`. `width` / `height` propagate to the native widget (`Width/Height` / `gtk_drawing_area_set_content_*` / `setMinimumWidth/Height`).
+> **android-real (v2 — all 3 platforms landed via [[T-0029]] phases 1+2)** — Native drawing host wired on all 3 platforms with real canvas-facade integration:
 >
-> The surface now carries a `drawable` Observable holding a `std::function<void(canvas&)>` from the ADR-0015 facade. The **Linux** real handler pumps that callback through the facade on every GTK paint: render into the backend-owned off-screen surface, read back BGRA32 pixels via the new abstract `pixel_data()` + `pixel_stride_bytes()` API, blit through `cairo_image_surface_create_for_data` into GtkDrawingArea's `cairo_t*`. `map_draw_count` + `map_drawable` subscribe to changes and `gtk_widget_queue_draw` so consumer-driven `invalidate()` and callback swaps repaint correctly.
+> - **Linux** (`GtkDrawingArea`) — the GTK draw callback wraps the facade's BGRA32 pixels via `cairo_image_surface_create_for_data` and blits through GTK's `cairo_t*`. No channel swap.
+> - **Windows** (`muxc::Image` + `WriteableBitmap`) — facade pixels copied into the WriteableBitmap's `PixelBuffer` (BGRA8 premultiplied, same byte order — single memcpy per row). `WriteableBitmap.Invalidate()` flips the surface.
+> - **Android** (`android.widget.ImageView` + `android.graphics.Bitmap` ARGB_8888) — facade pixels copied with a per-pixel B↔R swap (`ANDROID_BITMAP_FORMAT_RGBA_8888` is RGBA byte order in memory) inside an `AndroidBitmap_lockPixels`/`unlockPixels` pair, then `setImageBitmap` re-renders.
 >
-> **Windows + Android `map_drawable`** are stubbed for cross-platform interface uniformity. Their real blit paths (`SoftwareBitmapSource` on WinUI 3 / `Bitmap.copyPixelsFromBuffer` on Android) are T-0029 phase 2.
+> Surface API is uniform across platforms: user installs a `drawable` Observable holding `std::function<void(canvas&)>` from the ADR-0015 facade; `width` / `height` propagate to the native widget; `invalidate()` (or replacing the `drawable` callback) triggers a repaint. `map_draw_count` + `map_drawable` subscribe to the relevant Observable on every platform and trigger the per-platform repaint path.
 
 ## Overview
 

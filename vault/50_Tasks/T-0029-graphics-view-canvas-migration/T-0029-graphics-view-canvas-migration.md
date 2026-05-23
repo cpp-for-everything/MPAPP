@@ -73,28 +73,42 @@ touching the API.
 - [x] **Windows ctest 346/346 + Linux ctest 351/351** (both up +3
   cases from the new drawable tests).
 
-## Acceptance criteria (phase 2 — follow-ups)
+## Acceptance criteria (phase 2 — Win + Android blit paths)
 
-- [ ] **Windows real handler.** `map_drawable` currently stubbed.
-  Real blit needs a `SoftwareBitmapSource` (or `ID2D1Bitmap` via
-  composition interop) wrapping the canvas's `pixel_data()`, hosted
-  inside a WinUI 3 `Image` control. BGRA32 premultiplied maps cleanly
-  to `BitmapPixelFormat::Bgra8` + premultiplied alpha mode.
-- [ ] **Android real handler.** `map_drawable` currently stubbed.
-  Real blit needs an `android.graphics.Bitmap` (ARGB_8888) populated
-  via `Bitmap.copyPixelsFromBuffer` over the canvas's `pixel_data()`;
-  then `setImageBitmap` on an `ImageView` that replaces the current
-  empty `android.view.View`. Note BGRA→ARGB byte order may need a
-  swap depending on Bitmap.Config endianness; verify experimentally.
+- [x] **Windows real handler.** `native_` is now `muxc::Image` (was
+  the v1-placeholder `muxc::Canvas`). `WriteableBitmap` of
+  (width, height) is the Image's Source; `WriteableBitmap.PixelBuffer`
+  is BGRA8 premultiplied — matches the abstract `pixel_data()` format
+  exactly, so the blit is a single memcpy per row (no channel swap).
+  `IBufferByteAccess::Buffer` (via `<robuffer.h>`) hands us the raw
+  pointer; `WriteableBitmap.Invalidate()` flips the rendered surface.
+- [x] **Android real handler.** `native_` is now
+  `android.widget.ImageView` (was a placeholder `android.view.View`).
+  Backing pixels live in an `android.graphics.Bitmap` allocated via
+  `Bitmap.createBitmap(w, h, Config.ARGB_8888)`. The NDK-level format
+  is `ANDROID_BITMAP_FORMAT_RGBA_8888` (R, G, B, A byte order in
+  memory) — so the blit performs a per-pixel byte swap (B ↔ R)
+  between the facade's BGRA bytes and the bitmap's RGBA bytes inside
+  an `AndroidBitmap_lockPixels` / `unlockPixels` pair. `jnigraphics`
+  added to the Android example's `target_link_libraries`.
+- [x] **Three-platform verification.** Windows ctest 346/346,
+  Linux ctest 351/351, Android APK assembles clean. The behavior
+  difference between Win + Android (real blit) and Linux (already
+  real from phase 1) is now zero — each platform paints whatever the
+  user's `drawable` callback wrote into the facade canvas.
+
+## Acceptance criteria (phase 3 — follow-ups still open)
+
 - [ ] **ShapeView migration.** Replaces the existing per-platform
   shape primitives (WinUI XAML `Shape`, GTK4 direct Cairo, Android
   custom view) with canvas-facade calls so all three platforms render
   identically. Different scope from this task — ShapeView shipped
   real handlers under M-04c, so the migration is a rewrite rather
   than a fresh wiring.
-- [ ] **Rule 11 closure.** Linux screenshot showing a non-trivial
-  canvas drawing rendered into a `GtkDrawingArea` via the new
-  pipeline. Deferred to the next user-idle window.
+- [ ] **Rule 11 closure.** Per-platform screenshots showing a
+  non-trivial canvas drawing rendered through the new pipeline on
+  each of Win + Linux + Android. Deferred to the next user-idle
+  window.
 
 ## Notes
 
