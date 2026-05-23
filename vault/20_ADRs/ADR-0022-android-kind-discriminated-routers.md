@@ -2,15 +2,16 @@
 type: adr
 id: ADR-0022
 title: "Android event routing — kind-discriminated listener family"
-status: proposed
+status: accepted
 decisionDate: 2026-05-22
-deciders: []
+deciders:
+  - alex
 supersedes: ""
 supersededBy: ""
 area: handlers
 tags:
   - type/adr
-  - status/proposed
+  - status/accepted
   - area/handlers
   - platform/android
 ---

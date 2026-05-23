@@ -2,15 +2,16 @@
 type: adr
 id: ADR-0020
 title: "Virtualized item host — wrap platform recyclers"
-status: proposed
+status: accepted
 decisionDate: 2026-05-21
-deciders: []
+deciders:
+  - alex
 supersedes: ""
 supersededBy: ""
 area: handlers
 tags:
   - type/adr
-  - status/proposed
+  - status/accepted
   - area/handlers
 ---
 

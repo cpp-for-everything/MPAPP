@@ -2,15 +2,16 @@
 type: adr
 id: ADR-0019
 title: "Async executor — native UI dispatcher + task<T> adapter"
-status: proposed
+status: accepted
 decisionDate: 2026-05-21
-deciders: []
+deciders:
+  - alex
 supersedes: ""
 supersededBy: ""
 area: threading
 tags:
   - type/adr
-  - status/proposed
+  - status/accepted
   - area/threading
 ---
 
