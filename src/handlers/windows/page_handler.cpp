@@ -24,39 +24,38 @@ namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
 page_handler<platform::windows>::page_handler() {
-    // Build a Page wrapping a Grid with two rows: title + content host.
-    native_       = muxc::Page{};
-    grid_         = muxc::Grid{};
+    // `native_` IS the Grid (title in row 0, content host in row 1).
+    // Earlier versions wrapped this in a `muxc::Page`; nesting a Page
+    // inside another container (e.g. the navigation_page_handler's
+    // ContentControl) triggers a late layout-pass exception that crashes
+    // the WinUI 3 message loop a few hundred ms after Window.Activate().
+    native_       = muxc::Grid{};
     title_text_   = muxc::TextBlock{};
     content_host_ = muxc::ContentControl{};
-    busy_ring_    = muxc::ProgressRing{};
+    // busy_ring_ is lazily created inside apply_is_busy on first true.
+    // ProgressRing depends on the WinUI 3 theme resources, and
+    // pre-emptively instantiating one — even with IsActive=false — has
+    // been seen to crash the layout pass in unpackaged WinUI 3 apps
+    // when the host page is nested inside another container's
+    // ContentControl (see T-0014 follow-up).
 
     // Row definitions: row 0 Auto (title), row 1 * (content fills).
     {
         muxc::RowDefinition r0{};
         r0.Height(mux::GridLength{0.0, mux::GridUnitType::Auto});
-        grid_.RowDefinitions().Append(r0);
+        native_.RowDefinitions().Append(r0);
 
         muxc::RowDefinition r1{};
         r1.Height(mux::GridLength{1.0, mux::GridUnitType::Star});
-        grid_.RowDefinitions().Append(r1);
+        native_.RowDefinitions().Append(r1);
     }
 
-    // Place title in row 0, content host + busy ring share row 1
-    // (the ring overlays the content host when IsActive=true).
+    // Place title in row 0, content host in row 1.
     muxc::Grid::SetRow(title_text_,   0);
     muxc::Grid::SetRow(content_host_, 1);
-    muxc::Grid::SetRow(busy_ring_,    1);
 
-    busy_ring_.IsActive(false);
-    busy_ring_.HorizontalAlignment(mux::HorizontalAlignment::Center);
-    busy_ring_.VerticalAlignment  (mux::VerticalAlignment::Center);
-
-    grid_.Children().Append(title_text_);
-    grid_.Children().Append(content_host_);
-    grid_.Children().Append(busy_ring_);
-
-    native_.Content(grid_);
+    native_.Children().Append(title_text_);
+    native_.Children().Append(content_host_);
 }
 
 page_handler<platform::windows>::~page_handler() = default;
@@ -78,8 +77,19 @@ void page_handler<platform::windows>::apply_content(view* v) {
 }
 
 void page_handler<platform::windows>::apply_is_busy(bool v) {
-    if (busy_ring_ == nullptr) return;
-    busy_ring_.IsActive(v);
+    if (!v) {
+        if (busy_ring_ != nullptr) busy_ring_.IsActive(false);
+        return;
+    }
+    if (busy_ring_ == nullptr) {
+        // Lazy-create on first request. See ctor comment.
+        busy_ring_ = muxc::ProgressRing{};
+        busy_ring_.HorizontalAlignment(mux::HorizontalAlignment::Center);
+        busy_ring_.VerticalAlignment  (mux::VerticalAlignment::Center);
+        muxc::Grid::SetRow(busy_ring_, 1);
+        native_.Children().Append(busy_ring_);
+    }
+    busy_ring_.IsActive(true);
 }
 
 void page_handler<platform::windows>::map_title(page& p) {

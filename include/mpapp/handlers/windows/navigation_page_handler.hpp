@@ -44,8 +44,8 @@ public:
     void map_stack(navigation_page& np);
 
     // Native accessor (returned to dispatch registry as a UIElement).
-    winrt::Microsoft::UI::Xaml::Controls::Page&       native() noexcept       { return native_; }
-    const winrt::Microsoft::UI::Xaml::Controls::Page& native() const noexcept { return native_; }
+    winrt::Microsoft::UI::Xaml::Controls::Grid&       native() noexcept       { return native_; }
+    const winrt::Microsoft::UI::Xaml::Controls::Grid& native() const noexcept { return native_; }
 
 private:
     void apply_top(view* new_top);
@@ -61,8 +61,10 @@ private:
         void operator()(std::size_t d) const { self->apply_back_visibility(d); }
     };
 
-    winrt::Microsoft::UI::Xaml::Controls::Page           native_{nullptr};
-    winrt::Microsoft::UI::Xaml::Controls::Grid           grid_{nullptr};
+    // `native_` is a Grid (bar in row 0, content host in row 1) — NOT a
+    // `muxc::Page`, for the same nesting reason documented in
+    // `page_handler<platform::windows>`.
+    winrt::Microsoft::UI::Xaml::Controls::Grid           native_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::StackPanel     bar_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::Button         back_button_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::TextBlock      title_text_{nullptr};

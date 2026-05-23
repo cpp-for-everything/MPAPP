@@ -113,7 +113,21 @@ Cross-referenced screenshots in `_Archive/T-0017-typed-routing-demo/screenshots/
 
 - Mock-build async tasks resume synchronously inside the eager-start. Real platform-native dispatchers (DispatcherQueue / GMainLoop / Looper) integrating with the host UI thread are a follow-up under ADR-0019 §Decision.
 - macOS / iOS real navigation_page handlers + async wrappers pending Apple host (per [[ADR-0005-ios-macos-separate-interop]]).
-- **Windows nav-spike rendering crash (separate from this task).** `windows_nav_spike.exe` opens its WinUI 3 window for ~1.5 s, then exits before the content tree finishes composing. The crash sits inside `navigation_page_handler<windows>` content-swap path, not the `task<T>` wrappers (the mock-handler ctest cases that exercise the same `push_async` / `pop_async` calls all pass, and the corresponding GTK4 / Android demos run to completion). Follow-up task spawned to diagnose the WinUI 3 content-tree issue.
+
+## Windows rendering-crash follow-up — fixed
+
+The earlier note about `windows_nav_spike.exe` crashing ~1.5 s after launch was tracked down to two distinct WinUI 3 issues in the page/navigation_page Windows handlers (NOT in the async wrappers this task ships):
+
+1. **`muxc::Page` wrapping.** `page_handler<windows>` and `navigation_page_handler<windows>` each built a `muxc::Page` whose `Content` was a `muxc::Grid` carrying the page chrome. `Page` is designed as the content of a `Frame` (for `NavigateToType<>` navigation) and misbehaves when nested inside another container's `ContentControl`. Replaced both `native_` members with their inner `Grid` so the dispatch registry returns a plain `Grid` UIElement.
+2. **Pre-emptive `muxc::ProgressRing` instantiation.** `page_handler<windows>`'s constructor unconditionally created a `ProgressRing` (for the `is_busy` overlay) and appended it as a child of the page's Grid, even with `IsActive=false`. In an unpackaged WinUI 3 host this triggered a `0xC000027B` (`STATUS_APPLICATION_INTERNAL_EXCEPTION`) inside `Microsoft.UI.Xaml.dll` 3.1.8.0 at offset `0x3A7515` on the first deferred layout pass — confirmed via Windows Error Reporting's APPCRASH event. Moved the `ProgressRing` to lazy-creation inside `apply_is_busy(true)` so a page with `is_busy=false` (the default) never touches the ProgressRing theme code path.
+
+Diagnostic infrastructure used to find this:
+
+- `application_handler.cpp` gained an `MPAPP_LOG_LAUNCH=<path>` env-var-gated diagnostic log that records each step of bootstrap → `Application::Start` callback → `OnLaunched` enter → app construct → `on_launch` return + any caught `winrt::hresult_error` / `std::exception`. Off by default; harmless in production.
+- An `Application::UnhandledException` handler was added that records the WinUI 3-deferred exception text + HRESULT via the same logger. This is what we hoped would catch the ProgressRing crash, but the crash actually bypassed both C++ try/catch blocks and `Application::UnhandledException`, exiting the process via the native `STATUS_*` path; we had to read Windows Event Viewer to see it.
+- The Windows nav-spike demo now stays open indefinitely and renders the home page (`Home` title / `You are on the root page.` body / `Go to details →` button). The screenshot in `screenshots/windows-winui3-nav-spike-home.png` is the home page on the fixed binary, cropped to a 360×200 region.
+
+The C++ test coverage for `task<T>` + `push_async` / `pop_async` was unchanged by this fix — the model-level mock-handler tests had been green throughout.
 
 ## See also
 

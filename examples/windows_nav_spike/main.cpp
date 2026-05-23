@@ -79,7 +79,7 @@ struct screen {
 class nav_app : public mpapp::application {
 public:
     void on_launch() override {
-        home_.build("Home", "You are on the root page.", "Go to details →");
+        home_.build("Home", "You are on the root page.", "Go to details \xE2\x86\x92");
         details_.build("Details", "Pushed onto the navigation stack.", "Back");
 
         // Wire navigation: home button pushes details, details button pops.
@@ -93,6 +93,8 @@ public:
 
         // Window with the NavigationPage as content.
         window_.title = "MPAPP NavigationPage spike (ADR-0014 + ADR-0019)";
+        window_.width  = 720;
+        window_.height = 480;
         window_.set_handler(window_handler_);
         window_handler_.bind(window_);
         window_.content = &nav_;

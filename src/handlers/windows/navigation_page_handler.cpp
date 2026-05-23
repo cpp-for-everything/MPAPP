@@ -27,8 +27,12 @@ namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
 navigation_page_handler<platform::windows>::navigation_page_handler() {
-    native_       = muxc::Page{};
-    grid_         = muxc::Grid{};
+    // `native_` IS the Grid. Earlier versions wrapped this in a
+    // `muxc::Page` but nesting Page inside another container (e.g. a
+    // `mux::Window`'s Content slot OR another Page's ContentControl)
+    // triggers a late layout-pass exception that crashes the WinUI 3
+    // message loop a few hundred ms after Window.Activate().
+    native_       = muxc::Grid{};
     bar_          = muxc::StackPanel{};
     back_button_  = muxc::Button{};
     title_text_   = muxc::TextBlock{};
@@ -38,11 +42,11 @@ navigation_page_handler<platform::windows>::navigation_page_handler() {
     {
         muxc::RowDefinition r0{};
         r0.Height(mux::GridLength{0.0, mux::GridUnitType::Auto});
-        grid_.RowDefinitions().Append(r0);
+        native_.RowDefinitions().Append(r0);
 
         muxc::RowDefinition r1{};
         r1.Height(mux::GridLength{1.0, mux::GridUnitType::Star});
-        grid_.RowDefinitions().Append(r1);
+        native_.RowDefinitions().Append(r1);
     }
 
     // Bar: horizontal stack of [back button, title]
@@ -55,10 +59,8 @@ navigation_page_handler<platform::windows>::navigation_page_handler() {
     muxc::Grid::SetRow(bar_,          0);
     muxc::Grid::SetRow(content_host_, 1);
 
-    grid_.Children().Append(bar_);
-    grid_.Children().Append(content_host_);
-
-    native_.Content(grid_);
+    native_.Children().Append(bar_);
+    native_.Children().Append(content_host_);
 }
 
 navigation_page_handler<platform::windows>::~navigation_page_handler() = default;

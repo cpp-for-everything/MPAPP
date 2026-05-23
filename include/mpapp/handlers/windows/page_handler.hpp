@@ -43,8 +43,8 @@ public:
     // Convenience for tests / spike: assign a non-owning child.
     void bind_content(page& p, view& child);
 
-    winrt::Microsoft::UI::Xaml::Controls::Page&       native() noexcept       { return native_; }
-    const winrt::Microsoft::UI::Xaml::Controls::Page& native() const noexcept { return native_; }
+    winrt::Microsoft::UI::Xaml::Controls::Grid&       native() noexcept       { return native_; }
+    const winrt::Microsoft::UI::Xaml::Controls::Grid& native() const noexcept { return native_; }
 
 private:
     void apply_title(const std::string& v);
@@ -55,8 +55,13 @@ private:
     struct content_cb_t { page_handler<platform::windows>* self; void operator()(view* v) const { self->apply_content(v); } };
     struct busy_cb_t    { page_handler<platform::windows>* self; void operator()(bool v) const { self->apply_is_busy(v); } };
 
-    winrt::Microsoft::UI::Xaml::Controls::Page           native_{nullptr};
-    winrt::Microsoft::UI::Xaml::Controls::Grid           grid_{nullptr};
+    // `native_` is a Grid (title in row 0, content host in row 1) — NOT a
+    // `muxc::Page`. Page is designed for Frame navigation; nesting Page
+    // inside another container (e.g. the navigation_page_handler's
+    // ContentControl, or the shell_handler's content host) triggers a
+    // late layout-pass exception. The page's chrome (title + content
+    // host + busy ring) lives inside this Grid directly.
+    winrt::Microsoft::UI::Xaml::Controls::Grid           native_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::TextBlock      title_text_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::ContentControl content_host_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::ProgressRing   busy_ring_{nullptr};
