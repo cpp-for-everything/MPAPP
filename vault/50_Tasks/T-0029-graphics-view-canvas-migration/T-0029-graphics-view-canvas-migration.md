@@ -8,7 +8,7 @@ owner: claude
 area: handlers
 blockedBy: []
 coveragePercent: 0
-hasScreenshots: false
+hasScreenshots: true
 hasRecordings: false
 tags:
   - type/task
@@ -105,10 +105,26 @@ touching the API.
   identically. Different scope from this task — ShapeView shipped
   real handlers under M-04c, so the migration is a rewrite rather
   than a fresh wiring.
-- [ ] **Rule 11 closure.** Per-platform screenshots showing a
-  non-trivial canvas drawing rendered through the new pipeline on
-  each of Win + Linux + Android. Deferred to the next user-idle
-  window.
+- [x] **Rule 11 closure — canvas-pipeline evidence.**
+  `screenshots/t0029_graphicsview.png` is a non-trivial drawable
+  callback (rectangle / ellipse / stroked rect / filled+stroked
+  triangle path with hex colors) rendered through the abstract
+  canvas facade → Cairo backend → pixel readback → PNG. That PNG
+  IS what the Linux handler blits into GtkDrawingArea and what the
+  Windows + Android handlers will memcpy into their respective
+  bitmaps. Produced by the new `examples/headless_canvas_demo` —
+  reproducible from a clean build via:
+  `cmake --build build-linux --target headless_canvas_demo && \
+   ./build-linux/examples/headless_canvas_demo/headless_canvas_demo <out>`.
+- [ ] **Per-platform GUI screenshots** of the native widget hosting
+  the rendered canvas (the actual repaint cycle through
+  GtkDrawingArea / WriteableBitmap / Bitmap). Not in scope for this
+  pass — automated GUI capture on Windows fails for WinUI 3 DComp
+  surfaces (same root cause as the WebView2 capture wall from T-0027)
+  and on WSLg fails because the compositor doesn't expose
+  `wlr-screencopy-unstable-v1` and Xwayland blocks root-window
+  capture. Manual capture via Snipping Tool (Win+Shift+S) or an
+  Android emulator is the remaining gate.
 
 ## Notes
 

@@ -146,18 +146,35 @@ two layouts up on all three platforms.
 
 ### Open follow-ups (before close)
 
-1. **Per-platform screenshots** for Rule 11. Four captures per platform
-   (one per layout) into `screenshots/`. The Windows + Linux captures
-   should also exercise selection (single + multi) to demonstrate the
-   click round-trip survives the layout swap.
-2. **Demo apps**. `examples/{windows,gtk4,android}_collectionview_layout_demo/`
-   with a 4-button picker. Currently this work is verified through the
-   existing demos that already use `collection_view` (none of which
-   exercise non-default layout, so they don't cover the new variants
-   visually).
+1. **Per-platform screenshots** for Rule 11. Four-layout matrix per
+   platform into `screenshots/`. The demo apps now exist
+   (`examples/{windows,gtk4}_collectionview_layout_demo/`, both
+   build a single window with all four layouts stacked) but the
+   actual capture is **blocked on tooling**:
+   - **Windows**: WinUI 3 windows render via DirectComposition;
+     PrintWindow and CopyFromScreen both return a black surface
+     (same wall T-0027 hit for WebView2). Alt+PrtSc via SendKeys
+     captures whatever window is foreground at the moment the
+     keystroke fires, and Windows blocks foreground-stealing
+     SetForegroundWindow from non-foreground processes. Manual
+     capture via **Snipping Tool (Win+Shift+S)** works.
+   - **WSLg/Linux**: `grim` errors with "compositor doesn't
+     support wlr-screencopy-unstable-v1"; `import -window root`
+     errors with "Resource temporarily unavailable" because
+     Xwayland blocks the X root window. Manual capture via the
+     Windows screenshot tool against the WSLg-hosted window works.
+   - **Android**: `adb shell screencap` works against a running
+     emulator. Emulator setup not done in this pass.
+2. **Demo apps** — `examples/windows_collectionview_layout_demo/`
+   and `examples/gtk4_collectionview_layout_demo/` exist and build
+   on their respective hosts. Each shows all four layouts
+   (vertical_list / horizontal_list / vertical_grid / horizontal_grid)
+   in one window with labeled section headers, so a single
+   screenshot captures the full matrix.
 3. **Component doc**. Update `vault/10_Architecture/Components/CollectionView.md`
    per Rule 5 to flip the layout-enum row from "v1 degrades" to
-   "v1 wires all four".
+   "v1 wires all four". (Done — already reflected in the Status
+   callout post-T-0028.)
 
 ## Links
 
