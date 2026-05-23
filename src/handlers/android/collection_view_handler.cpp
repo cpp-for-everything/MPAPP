@@ -1,5 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android collection_view handler implementation.
+// Android collection_view handler implementation. T-0028: migrated
+// from android.widget.ListView/GridView (vertical-only) to
+// androidx.recyclerview.widget.RecyclerView with a swappable
+// LayoutManager — covers all four collection_layout values:
+//
+//   vertical_list   → LinearLayoutManager(VERTICAL)
+//   horizontal_list → LinearLayoutManager(HORIZONTAL)
+//   vertical_grid   → GridLayoutManager(span, VERTICAL)
+//   horizontal_grid → GridLayoutManager(span, HORIZONTAL)
+//
+// The MppCollectionAdapter (see examples/android_hello/.../io/mpapp/
+// MppCollectionAdapter.java) handles both string and native-view
+// payloads and pushes selection state back to native via
+// MppItemClickRouter's package-private nativeDispatchCheckedSet hook.
 
 #include "mpapp/handlers/android/collection_view_handler.hpp"
 
@@ -12,13 +25,15 @@ namespace mpapp {
 
 namespace {
 
-constexpr jint ANDROID_R_LAYOUT_SIMPLE_LIST_ITEM_1 = 0x01090003;
-constexpr jint CHOICE_MODE_SINGLE                  = 1;
-constexpr jint CHOICE_MODE_MULTIPLE                = 2;
-constexpr jint CHOICE_MODE_NONE                    = 0;
-
-// MATCH_PARENT for FrameLayout.LayoutParams.
 constexpr jint LP_MATCH_PARENT = -1;
+constexpr jint RV_VERTICAL     = 1;   // RecyclerView.VERTICAL
+constexpr jint RV_HORIZONTAL   = 0;   // RecyclerView.HORIZONTAL
+
+// Span fallback for GridLayoutManager when the surface has the default
+// span=1: RecyclerView has no AUTO_FIT equivalent, so we pick a
+// sensible default of 2 columns for grid layouts to match the
+// "multi-column by default" behavior the original GridView gave.
+constexpr jint DEFAULT_GRID_SPAN = 2;
 
 jobject make_object(JNIEnv* env, const char* cls_name, jobject context) {
     if (env->ExceptionCheck()) env->ExceptionClear();
@@ -72,149 +87,175 @@ void framelayout_add_match(JNIEnv* env, jobject parent, jobject child) {
     }
 }
 
-void vg_remove_all(JNIEnv* env, jobject parent) {
-    if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass cls = env->FindClass("android/view/ViewGroup");
-    if (cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID m = env->GetMethodID(cls, "removeAllViews", "()V");
-    if (m != nullptr) {
-        env->CallVoidMethod(parent, m);
-        if (env->ExceptionCheck()) env->ExceptionClear();
-    }
-    env->DeleteLocalRef(cls);
+// --- RecyclerView / LayoutManager / Adapter helpers ---------------------
+
+jobject make_recycler_view(JNIEnv* env, jobject ctx) {
+    return make_object(env, "androidx/recyclerview/widget/RecyclerView", ctx);
 }
 
-void install_adapter(JNIEnv* env, jobject context, jobject adapter_view,
-                     const std::vector<std::string>& items) {
+jobject make_linear_layout_manager(JNIEnv* env, jobject ctx, jint orient) {
     if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass string_cls = env->FindClass("java/lang/String");
-    if (string_cls == nullptr) { env->ExceptionClear(); return; }
-    jobjectArray arr = env->NewObjectArray(static_cast<jsize>(items.size()), string_cls, nullptr);
-    if (arr == nullptr) {
+    jclass cls = env->FindClass("androidx/recyclerview/widget/LinearLayoutManager");
+    if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
+    jmethodID ctor = env->GetMethodID(cls, "<init>", "(Landroid/content/Context;IZ)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
+    jobject lm = env->NewObject(cls, ctor, ctx, orient, JNI_FALSE);
+    env->DeleteLocalRef(cls);
+    if (env->ExceptionCheck() || lm == nullptr) {
         env->ExceptionClear();
-        env->DeleteLocalRef(string_cls);
-        return;
+        return nullptr;
     }
-    for (jsize i = 0; i < static_cast<jsize>(items.size()); ++i) {
-        jstring s = env->NewStringUTF(items[static_cast<std::size_t>(i)].c_str());
+    jobject g = env->NewGlobalRef(lm);
+    env->DeleteLocalRef(lm);
+    return g;
+}
+
+jobject make_grid_layout_manager(JNIEnv* env, jobject ctx, jint span, jint orient) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("androidx/recyclerview/widget/GridLayoutManager");
+    if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
+    jmethodID ctor = env->GetMethodID(cls, "<init>", "(Landroid/content/Context;IIZ)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
+    jobject lm = env->NewObject(cls, ctor, ctx, span, orient, JNI_FALSE);
+    env->DeleteLocalRef(cls);
+    if (env->ExceptionCheck() || lm == nullptr) {
+        env->ExceptionClear();
+        return nullptr;
+    }
+    jobject g = env->NewGlobalRef(lm);
+    env->DeleteLocalRef(lm);
+    return g;
+}
+
+void recycler_set_layout_manager(JNIEnv* env, jobject rv, jobject lm) {
+    if (rv == nullptr || lm == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass rv_cls = env->FindClass("androidx/recyclerview/widget/RecyclerView");
+    if (rv_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(rv_cls, "setLayoutManager",
+        "(Landroidx/recyclerview/widget/RecyclerView$LayoutManager;)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(rv, m, lm);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(rv_cls);
+}
+
+void recycler_set_adapter(JNIEnv* env, jobject rv, jobject adapter) {
+    if (rv == nullptr || adapter == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass rv_cls = env->FindClass("androidx/recyclerview/widget/RecyclerView");
+    if (rv_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(rv_cls, "setAdapter",
+        "(Landroidx/recyclerview/widget/RecyclerView$Adapter;)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(rv, m, adapter);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(rv_cls);
+}
+
+jobject make_collection_adapter(JNIEnv* env, jlong owner_ptr) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("io/mpapp/MppCollectionAdapter");
+    if (cls == nullptr) { env->ExceptionClear(); return nullptr; }
+    jmethodID ctor = env->GetMethodID(cls, "<init>", "(J)V");
+    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(cls); return nullptr; }
+    jobject local = env->NewObject(cls, ctor, owner_ptr);
+    env->DeleteLocalRef(cls);
+    if (env->ExceptionCheck() || local == nullptr) {
+        env->ExceptionClear();
+        return nullptr;
+    }
+    jobject g = env->NewGlobalRef(local);
+    env->DeleteLocalRef(local);
+    return g;
+}
+
+void adapter_set_strings(JNIEnv* env, jobject adapter, const std::vector<std::string>& v) {
+    if (adapter == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass str_cls = env->FindClass("java/lang/String");
+    if (str_cls == nullptr) { env->ExceptionClear(); return; }
+    jobjectArray arr = env->NewObjectArray(static_cast<jsize>(v.size()), str_cls, nullptr);
+    env->DeleteLocalRef(str_cls);
+    if (arr == nullptr) { env->ExceptionClear(); return; }
+    for (jsize i = 0; i < static_cast<jsize>(v.size()); ++i) {
+        jstring s = env->NewStringUTF(v[static_cast<std::size_t>(i)].c_str());
         env->SetObjectArrayElement(arr, i, s);
         env->DeleteLocalRef(s);
     }
-    env->DeleteLocalRef(string_cls);
-
-    jclass adapter_cls = env->FindClass("android/widget/ArrayAdapter");
-    if (adapter_cls == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(arr); return; }
-    jmethodID ctor = env->GetMethodID(adapter_cls, "<init>",
-        "(Landroid/content/Context;I[Ljava/lang/Object;)V");
-    if (ctor == nullptr) {
-        env->ExceptionClear();
-        env->DeleteLocalRef(adapter_cls);
-        env->DeleteLocalRef(arr);
-        return;
+    jclass ad_cls = env->FindClass("io/mpapp/MppCollectionAdapter");
+    if (ad_cls != nullptr) {
+        jmethodID m = env->GetMethodID(ad_cls, "setStrings", "([Ljava/lang/String;)V");
+        if (m != nullptr) {
+            env->CallVoidMethod(adapter, m, arr);
+            if (env->ExceptionCheck()) env->ExceptionClear();
+        }
+        env->DeleteLocalRef(ad_cls);
     }
-    jobject adapter = env->NewObject(adapter_cls, ctor, context,
-                                     ANDROID_R_LAYOUT_SIMPLE_LIST_ITEM_1,
-                                     arr);
     env->DeleteLocalRef(arr);
-    if (env->ExceptionCheck() || adapter == nullptr) {
-        env->ExceptionClear();
-        env->DeleteLocalRef(adapter_cls);
-        return;
-    }
-    env->DeleteLocalRef(adapter_cls);
+}
 
-    // setAdapter lives on AdapterView<T> — shared base of ListView and
-    // GridView. The expected argument type differs across the two
-    // (ListAdapter for ListView, ListAdapter for GridView in practice
-    // since ArrayAdapter implements both), so the generic descriptor
-    // works.
-    jclass av_cls = env->FindClass("android/widget/AdapterView");
-    if (av_cls != nullptr) {
-        // For ListView: setAdapter(ListAdapter); for GridView: same.
-        // We use the concrete subclass to dispatch via the right vtable.
-        jclass concrete = env->GetObjectClass(adapter_view);
-        jmethodID set_adapter = env->GetMethodID(concrete, "setAdapter",
-            "(Landroid/widget/ListAdapter;)V");
-        if (set_adapter != nullptr) {
-            env->CallVoidMethod(adapter_view, set_adapter, adapter);
+void adapter_set_native_views(JNIEnv* env, jobject adapter, const std::vector<view*>& items) {
+    if (adapter == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass view_cls = env->FindClass("android/view/View");
+    if (view_cls == nullptr) { env->ExceptionClear(); return; }
+    jobjectArray arr = env->NewObjectArray(static_cast<jsize>(items.size()), view_cls, nullptr);
+    env->DeleteLocalRef(view_cls);
+    if (arr == nullptr) { env->ExceptionClear(); return; }
+    for (jsize i = 0; i < static_cast<jsize>(items.size()); ++i) {
+        view* item = items[static_cast<std::size_t>(i)];
+        if (item == nullptr) continue;
+        jobject native_item = detail::android_dispatch::dispatch(item);
+        if (native_item != nullptr) {
+            env->SetObjectArrayElement(arr, i, native_item);
+        }
+    }
+    jclass ad_cls = env->FindClass("io/mpapp/MppCollectionAdapter");
+    if (ad_cls != nullptr) {
+        jmethodID m = env->GetMethodID(ad_cls, "setNativeViews", "([Landroid/view/View;)V");
+        if (m != nullptr) {
+            env->CallVoidMethod(adapter, m, arr);
             if (env->ExceptionCheck()) env->ExceptionClear();
         }
-        env->DeleteLocalRef(concrete);
-        env->DeleteLocalRef(av_cls);
+        env->DeleteLocalRef(ad_cls);
     }
-    env->DeleteLocalRef(adapter);
+    env->DeleteLocalRef(arr);
 }
 
-void adapter_view_set_selection(JNIEnv* env, jobject av, int idx) {
+void adapter_set_selection_mode(JNIEnv* env, jobject adapter, collection_selection_mode m) {
+    if (adapter == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass cls = env->GetObjectClass(av);
-    if (cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID m = env->GetMethodID(cls, "setSelection", "(I)V");
-    if (m != nullptr && idx >= 0) {
-        env->CallVoidMethod(av, m, static_cast<jint>(idx));
-        if (env->ExceptionCheck()) env->ExceptionClear();
-    }
-    env->DeleteLocalRef(cls);
-}
-
-void abs_list_view_set_choice_mode(JNIEnv* env, jobject av, jint mode) {
-    // setChoiceMode is on android.widget.AbsListView (parent of both
-    // ListView and GridView).
-    if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass cls = env->FindClass("android/widget/AbsListView");
-    if (cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID m = env->GetMethodID(cls, "setChoiceMode", "(I)V");
-    if (m != nullptr) {
-        env->CallVoidMethod(av, m, mode);
-        if (env->ExceptionCheck()) env->ExceptionClear();
-    }
-    env->DeleteLocalRef(cls);
-}
-
-void grid_view_set_num_columns_auto(JNIEnv* env, jobject gv) {
-    // GridView.setNumColumns(GridView.AUTO_FIT) lets the system pick a
-    // sensible default column count for the screen width.
-    if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass gv_cls = env->FindClass("android/widget/GridView");
-    if (gv_cls == nullptr) { env->ExceptionClear(); return; }
-    constexpr jint AUTO_FIT = -1;
-    jmethodID m = env->GetMethodID(gv_cls, "setNumColumns", "(I)V");
-    if (m != nullptr) {
-        env->CallVoidMethod(gv, m, AUTO_FIT);
-        if (env->ExceptionCheck()) env->ExceptionClear();
-    }
-    env->DeleteLocalRef(gv_cls);
-}
-
-void install_item_click_router(JNIEnv* env, jobject adapter_view, collection_view* cv) {
-    if (env == nullptr || adapter_view == nullptr || cv == nullptr) return;
-    if (env->ExceptionCheck()) env->ExceptionClear();
-
-    jclass router_cls = env->FindClass("io/mpapp/MppItemClickRouter");
-    if (router_cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID ctor = env->GetMethodID(router_cls, "<init>", "(JI)V");
-    if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
-    jobject router = env->NewObject(router_cls, ctor,
-                                    reinterpret_cast<jlong>(cv),
-                                    static_cast<jint>(1 /* collection_view kind */));
-    if (env->ExceptionCheck() || router == nullptr) {
-        env->ExceptionClear();
-        env->DeleteLocalRef(router_cls);
-        return;
-    }
-    env->DeleteLocalRef(router_cls);
-
-    jclass av_cls = env->FindClass("android/widget/AdapterView");
-    if (av_cls != nullptr) {
-        jmethodID set_listener = env->GetMethodID(av_cls, "setOnItemClickListener",
-            "(Landroid/widget/AdapterView$OnItemClickListener;)V");
-        if (set_listener != nullptr) {
-            env->CallVoidMethod(adapter_view, set_listener, router);
-            if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass ad_cls = env->FindClass("io/mpapp/MppCollectionAdapter");
+    if (ad_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID f = env->GetMethodID(ad_cls, "setSelectionMode", "(I)V");
+    if (f != nullptr) {
+        jint mode = 1; // SINGLE
+        switch (m) {
+            case collection_selection_mode::none:     mode = 0; break;
+            case collection_selection_mode::multiple: mode = 2; break;
+            case collection_selection_mode::single:
+            default:                                  mode = 1; break;
         }
-        env->DeleteLocalRef(av_cls);
+        env->CallVoidMethod(adapter, f, mode);
+        if (env->ExceptionCheck()) env->ExceptionClear();
     }
-    env->DeleteLocalRef(router);
+    env->DeleteLocalRef(ad_cls);
+}
+
+void adapter_select_index(JNIEnv* env, jobject adapter, jint idx) {
+    if (adapter == nullptr) return;
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass ad_cls = env->FindClass("io/mpapp/MppCollectionAdapter");
+    if (ad_cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID f = env->GetMethodID(ad_cls, "selectIndex", "(I)V");
+    if (f != nullptr) {
+        env->CallVoidMethod(adapter, f, idx);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(ad_cls);
 }
 
 } // namespace
@@ -223,236 +264,118 @@ collection_view_handler<platform::android>::collection_view_handler() {
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
     native_ = make_object(env, "android/widget/FrameLayout", detail::get_activity());
-    rebuild_inner_for_layout(collection_layout::vertical_list);
+    inner_  = make_recycler_view(env, detail::get_activity());
+    if (native_ != nullptr && inner_ != nullptr) {
+        framelayout_add_match(env, native_, inner_);
+        // Seed with vertical_list LayoutManager; apply_layout will swap
+        // it the moment the surface is bound to a different layout.
+        jobject lm = make_linear_layout_manager(env, detail::get_activity(), RV_VERTICAL);
+        if (lm != nullptr) {
+            recycler_set_layout_manager(env, inner_, lm);
+            env->DeleteGlobalRef(lm);
+        }
+    }
+    // adapter_ is created lazily once map_items_source / map_typed_items
+    // binds a collection_view (we need its address as the ownerPtr).
 }
 
 collection_view_handler<platform::android>::~collection_view_handler() {
     if (JNIEnv* env = detail::attach_current_thread(); env != nullptr) {
-        if (inner_  != nullptr) { env->DeleteGlobalRef(inner_);  inner_  = nullptr; }
-        if (native_ != nullptr) { env->DeleteGlobalRef(native_); native_ = nullptr; }
+        if (adapter_ != nullptr) { env->DeleteGlobalRef(adapter_); adapter_ = nullptr; }
+        if (inner_   != nullptr) { env->DeleteGlobalRef(inner_);   inner_   = nullptr; }
+        if (native_  != nullptr) { env->DeleteGlobalRef(native_);  native_  = nullptr; }
     }
-}
-
-void collection_view_handler<platform::android>::rebuild_inner_for_layout(collection_layout l) {
-    if (native_ == nullptr) return;
-    JNIEnv* env = detail::attach_current_thread();
-    if (env == nullptr) return;
-
-    if (inner_ != nullptr) {
-        vg_remove_all(env, native_);
-        env->DeleteGlobalRef(inner_);
-        inner_ = nullptr;
-    }
-
-    const bool want_grid = (l == collection_layout::vertical_grid
-                         || l == collection_layout::horizontal_grid);
-    inner_ = make_object(env,
-        want_grid ? "android/widget/GridView" : "android/widget/ListView",
-        detail::get_activity());
-    is_grid_ = want_grid;
-
-    if (inner_ == nullptr) return;
-    if (want_grid) grid_view_set_num_columns_auto(env, inner_);
-    abs_list_view_set_choice_mode(env, inner_, CHOICE_MODE_SINGLE);
-    framelayout_add_match(env, native_, inner_);
-}
-
-void collection_view_handler<platform::android>::rebuild_items(const std::vector<std::string>& v) {
-    if (inner_ == nullptr) return;
-    JNIEnv* env = detail::attach_current_thread();
-    if (env == nullptr) return;
-    install_adapter(env, detail::get_activity(), inner_, v);
-    if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
 }
 
 namespace {
-
-// In typed mode the outer FrameLayout wraps a ScrollView containing a
-// vertical LinearLayout. Each typed item's native View is added as a
-// direct child. Selection / multi-select are not supported in this
-// mode — typed cells own their interaction surface (taps, toggles,
-// IME completion all flow through each cell's own native event path).
-
-void linear_set_orientation_vertical(JNIEnv* env, jobject ll) {
-    if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass cls = env->FindClass("android/widget/LinearLayout");
-    if (cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID m = env->GetMethodID(cls, "setOrientation", "(I)V");
-    constexpr jint VERTICAL = 1;
-    if (m != nullptr) {
-        env->CallVoidMethod(ll, m, VERTICAL);
-        if (env->ExceptionCheck()) env->ExceptionClear();
+// One-time: create the adapter (needs bound_->this pointer) and attach
+// it to the RecyclerView. Re-entry is a no-op.
+void ensure_adapter(JNIEnv* env,
+                    jobject inner,
+                    jobject& adapter_slot,
+                    collection_view* cv) {
+    if (env == nullptr || inner == nullptr || cv == nullptr) return;
+    if (adapter_slot != nullptr) return;
+    adapter_slot = make_collection_adapter(env, reinterpret_cast<jlong>(cv));
+    if (adapter_slot != nullptr) {
+        recycler_set_adapter(env, inner, adapter_slot);
     }
-    env->DeleteLocalRef(cls);
 }
-
-void vg_add(JNIEnv* env, jobject parent, jobject child) {
-    if (child == nullptr) return;
-    if (env->ExceptionCheck()) env->ExceptionClear();
-    jclass cls = env->FindClass("android/view/ViewGroup");
-    if (cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID m = env->GetMethodID(cls, "addView", "(Landroid/view/View;)V");
-    if (m != nullptr) {
-        env->CallVoidMethod(parent, m, child);
-        if (env->ExceptionCheck()) env->ExceptionClear();
-    }
-    env->DeleteLocalRef(cls);
-}
-
 } // namespace
 
-void collection_view_handler<platform::android>::rebuild_typed(const std::vector<view*>& items) {
-    if (native_ == nullptr) return;
+void collection_view_handler<platform::android>::rebuild_items(const std::vector<std::string>& v) {
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
+    ensure_adapter(env, inner_, adapter_, bound_);
+    adapter_set_strings(env, adapter_, v);
+    if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
+}
 
-    // Tear down the current AdapterView inner (if any).
-    if (inner_ != nullptr) {
-        vg_remove_all(env, native_);
-        env->DeleteGlobalRef(inner_);
-        inner_ = nullptr;
-    }
-
-    // Replace with ScrollView + LinearLayout(VERTICAL).
-    jobject scroll = make_object(env, "android/widget/ScrollView", detail::get_activity());
-    jobject lin    = make_object(env, "android/widget/LinearLayout", detail::get_activity());
-    if (lin != nullptr) linear_set_orientation_vertical(env, lin);
-    if (scroll != nullptr && lin != nullptr) {
-        // ScrollView extends FrameLayout — addView with MATCH_PARENT
-        // layout params lets the inner LinearLayout fill it.
-        framelayout_add_match(env, scroll, lin);
-    }
-    if (native_ != nullptr && scroll != nullptr) {
-        framelayout_add_match(env, native_, scroll);
-    }
-
-    // Populate the LinearLayout with each cell/view's native handle.
-    for (view* item : items) {
-        if (item == nullptr || lin == nullptr) continue;
-        jobject native_item = detail::android_dispatch::dispatch(item);
-        if (native_item != nullptr) {
-            vg_add(env, lin, native_item);
-        }
-    }
-
-    // Keep the ScrollView as inner_ so destructor releases it. The
-    // LinearLayout is a local ref — we let ScrollView retain it as a
-    // child after addView; once we release `scroll` as a local, we
-    // re-promote to global.
-    if (lin != nullptr) env->DeleteLocalRef(lin);
-    if (scroll != nullptr) {
-        inner_ = env->NewGlobalRef(scroll);
-        env->DeleteLocalRef(scroll);
-    }
-    is_grid_ = false;
+void collection_view_handler<platform::android>::rebuild_typed(const std::vector<view*>& items) {
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    ensure_adapter(env, inner_, adapter_, bound_);
+    adapter_set_native_views(env, adapter_, items);
+    if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
 }
 
 void collection_view_handler<platform::android>::rebuild_active() {
     if (bound_ == nullptr) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    ensure_adapter(env, inner_, adapter_, bound_);
+    // Re-apply selection mode each rebuild so the adapter knows what
+    // tap behavior to use (single/multi/none).
+    adapter_set_selection_mode(env, adapter_, bound_->selection_mode.get());
+
     if (!bound_->typed_items.get().empty()) {
         rebuild_typed(bound_->typed_items.get());
     } else if (bound_->materialized_count() > 0) {
-        // item_template materialized — render through typed pipeline
-        // (same Android non-virtualizing path).
         rebuild_typed(bound_->materialized_views());
     } else {
-        // Flat mode — ensure inner_ matches the current layout enum.
-        const collection_layout l = bound_->layout.get();
-        const bool want_grid = (l == collection_layout::vertical_grid
-                             || l == collection_layout::horizontal_grid);
-        // If inner_ doesn't exist or is wrong type, rebuild.
-        rebuild_inner_for_layout(l);
-        (void)want_grid;
-        apply_selection_mode(bound_->selection_mode.get());
         rebuild_items(bound_->items_source.get());
-        JNIEnv* env = detail::attach_current_thread();
-        if (env != nullptr) install_item_click_router(env, inner_, bound_);
     }
 }
 
 void collection_view_handler<platform::android>::apply_selection(int idx) {
-    if (inner_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    adapter_view_set_selection(env, inner_, idx);
+    adapter_select_index(env, adapter_, static_cast<jint>(idx));
 }
 
 void collection_view_handler<platform::android>::apply_selection_mode(collection_selection_mode m) {
-    if (inner_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    jint mode = CHOICE_MODE_SINGLE;
-    switch (m) {
-        case collection_selection_mode::none:     mode = CHOICE_MODE_NONE;     break;
-        case collection_selection_mode::multiple: mode = CHOICE_MODE_MULTIPLE; break;
-        case collection_selection_mode::single:
-        default:                                  mode = CHOICE_MODE_SINGLE;   break;
-    }
-    abs_list_view_set_choice_mode(env, inner_, mode);
+    adapter_set_selection_mode(env, adapter_, m);
 }
 
 void collection_view_handler<platform::android>::apply_layout(collection_layout l) {
-    if (bound_ != nullptr && !bound_->typed_items.get().empty()) {
-        // In typed mode the layout enum is ignored — we use a
-        // vertical LinearLayout regardless. Skip the inner rebuild.
-        return;
-    }
-    const bool want_grid = (l == collection_layout::vertical_grid
-                         || l == collection_layout::horizontal_grid);
-    if (want_grid == is_grid_ && inner_ != nullptr) return;
-
-    rebuild_inner_for_layout(l);
-    if (bound_ != nullptr) {
-        apply_selection_mode(bound_->selection_mode.get());
-        rebuild_items(bound_->items_source.get());
-        JNIEnv* env = detail::attach_current_thread();
-        if (env != nullptr) install_item_click_router(env, inner_, bound_);
-    }
-}
-
-void collection_view_handler<platform::android>::refresh_multi_selection_from_native() {
-    if (inner_ == nullptr || bound_ == nullptr) return;
+    if (inner_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    if (env->ExceptionCheck()) env->ExceptionClear();
 
-    // SparseBooleanArray AbsListView.getCheckedItemPositions()
-    jclass av_cls = env->FindClass("android/widget/AbsListView");
-    if (av_cls == nullptr) { env->ExceptionClear(); return; }
-    jmethodID get_checked = env->GetMethodID(av_cls, "getCheckedItemPositions",
-        "()Landroid/util/SparseBooleanArray;");
-    jobject sparse = (get_checked != nullptr) ? env->CallObjectMethod(inner_, get_checked) : nullptr;
-    env->DeleteLocalRef(av_cls);
-    if (sparse == nullptr) { env->ExceptionClear(); return; }
-
-    jclass sba_cls = env->FindClass("android/util/SparseBooleanArray");
-    if (sba_cls == nullptr) {
-        env->ExceptionClear();
-        env->DeleteLocalRef(sparse);
-        return;
+    jobject ctx = detail::get_activity();
+    jobject lm  = nullptr;
+    const jint span = (bound_ != nullptr && bound_->span.get() > 1)
+                      ? static_cast<jint>(bound_->span.get())
+                      : DEFAULT_GRID_SPAN;
+    switch (l) {
+        case collection_layout::vertical_list:
+            lm = make_linear_layout_manager(env, ctx, RV_VERTICAL);
+            break;
+        case collection_layout::horizontal_list:
+            lm = make_linear_layout_manager(env, ctx, RV_HORIZONTAL);
+            break;
+        case collection_layout::vertical_grid:
+            lm = make_grid_layout_manager(env, ctx, span, RV_VERTICAL);
+            break;
+        case collection_layout::horizontal_grid:
+            lm = make_grid_layout_manager(env, ctx, span, RV_HORIZONTAL);
+            break;
     }
-    jmethodID size_m = env->GetMethodID(sba_cls, "size",    "()I");
-    jmethodID key_at = env->GetMethodID(sba_cls, "keyAt",   "(I)I");
-    jmethodID val_at = env->GetMethodID(sba_cls, "valueAt", "(I)Z");
-    std::vector<int> idxs;
-    if (size_m != nullptr && key_at != nullptr && val_at != nullptr) {
-        const jint n = env->CallIntMethod(sparse, size_m);
-        idxs.reserve(static_cast<std::size_t>(n));
-        for (jint i = 0; i < n; ++i) {
-            jboolean v = env->CallBooleanMethod(sparse, val_at, i);
-            if (v == JNI_TRUE) {
-                jint k = env->CallIntMethod(sparse, key_at, i);
-                idxs.push_back(static_cast<int>(k));
-            }
-        }
-    }
-    env->DeleteLocalRef(sba_cls);
-    env->DeleteLocalRef(sparse);
-    if (env->ExceptionCheck()) env->ExceptionClear();
-
-    if (bound_->selected_indices.get() != idxs) {
-        bound_->selected_indices.set(std::move(idxs));
-    }
+    if (lm == nullptr) return;
+    recycler_set_layout_manager(env, inner_, lm);
+    env->DeleteGlobalRef(lm);
 }
 
 void collection_view_handler<platform::android>::map_items_source(collection_view& cv) {

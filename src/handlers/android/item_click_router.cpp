@@ -65,14 +65,10 @@ void dispatch_android_item_click(jlong owner_ptr, jint kind, jint position) {
                 cv->selected_index.set(static_cast<int>(position));
             }
             cv->item_tapped.emit(static_cast<int>(position));
-            // In multi-select mode, ListView has already toggled the
-            // checked state for the tapped row by the time we get here.
-            // Pull the full set out via getCheckedItemPositions() and
-            // mirror it into selected_indices.
-            if (cv->selection_mode.get() == collection_selection_mode::multiple
-                && cv->has_cv_handler()) {
-                cv->cv_handler().refresh_multi_selection_from_native();
-            }
+            // Multi-select set is pushed independently by
+            // MppCollectionAdapter via nativeDispatchCheckedSet (T-0028).
+            // The legacy AbsListView pull-via-getCheckedItemPositions
+            // path is gone with the RecyclerView migration.
             break;
         }
         case item_click_kind::table_view: {
@@ -103,6 +99,41 @@ Java_io_mpapp_MppItemClickRouter_nativeDispatchItemClick(
     jint    kind,
     jint    position) {
     mpapp::detail::dispatch_android_item_click(owner_ptr, kind, position);
+}
+
+// T-0028: multi-select push from MppCollectionAdapter (RecyclerView
+// path). RecyclerView has no getCheckedItemPositions() equivalent —
+// the adapter tracks the canonical set and forwards the full int[]
+// to native after each toggle. Today only collection_view kind=1 has
+// a real selected_indices vector; ListView falls back to single-shot
+// taps and table_view ignores the call.
+extern "C" JNIEXPORT void JNICALL
+Java_io_mpapp_MppItemClickRouter_nativeDispatchCheckedSet(
+    JNIEnv* env,
+    jclass  /*cls*/,
+    jlong   owner_ptr,
+    jint    kind,
+    jintArray positions) {
+    if (env == nullptr || positions == nullptr) return;
+    if (static_cast<mpapp::detail::item_click_kind>(kind)
+        != mpapp::detail::item_click_kind::collection_view) {
+        return;
+    }
+    auto* cv = reinterpret_cast<mpapp::collection_view*>(owner_ptr);
+    if (cv == nullptr) return;
+    const jsize n = env->GetArrayLength(positions);
+    std::vector<int> idxs;
+    idxs.reserve(static_cast<std::size_t>(n));
+    if (n > 0) {
+        jint* raw = env->GetIntArrayElements(positions, nullptr);
+        if (raw != nullptr) {
+            for (jsize i = 0; i < n; ++i) idxs.push_back(static_cast<int>(raw[i]));
+            env->ReleaseIntArrayElements(positions, raw, JNI_ABORT);
+        }
+    }
+    if (cv->selected_indices.get() != idxs) {
+        cv->selected_indices.set(std::move(idxs));
+    }
 }
 
 #endif // __ANDROID__

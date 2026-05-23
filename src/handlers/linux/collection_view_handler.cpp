@@ -100,52 +100,87 @@ GtkWidget* make_inner_listbox() {
     return w;
 }
 
-GtkWidget* make_inner_flowbox() {
+GtkWidget* make_inner_flowbox(GtkOrientation orient) {
     GtkWidget* w = gtk_flow_box_new();
     gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(w), GTK_SELECTION_SINGLE);
-    // Wrap to fill — items flow horizontally and wrap to a new row
-    // when they run out of width, like MAUI's vertical_grid.
+    // HORIZONTAL: items flow LTR then wrap down (MAUI vertical_grid).
+    // VERTICAL:   items flow TTB then wrap right (MAUI horizontal_grid).
+    gtk_orientable_set_orientation(GTK_ORIENTABLE(w), orient);
     gtk_flow_box_set_max_children_per_line(GTK_FLOW_BOX(w), 16);
     gtk_flow_box_set_homogeneous(GTK_FLOW_BOX(w), TRUE);
     return w;
 }
 
-void clear_inner(GtkWidget* inner, bool is_grid) {
-    if (is_grid) {
-        GtkFlowBox* box = GTK_FLOW_BOX(inner);
-        GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
-        while (child != nullptr) {
-            GtkWidget* next = gtk_widget_get_next_sibling(child);
-            gtk_flow_box_remove(box, child);
-            child = next;
-        }
-    } else {
-        GtkListBox* box = GTK_LIST_BOX(inner);
-        GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
-        while (child != nullptr) {
-            GtkWidget* next = gtk_widget_get_next_sibling(child);
-            gtk_list_box_remove(box, child);
-            child = next;
-        }
+GtkWidget* make_inner_hbox() {
+    // Single-row horizontal strip. GtkBox honors children's natural
+    // size along the main axis, and the outer GtkScrolledWindow
+    // provides horizontal scroll. No built-in selection — clicks on
+    // children fire item_tapped via per-child gesture controllers
+    // attached in append_item; selected_index tracks programmatically
+    // but doesn't visually highlight (v1 trade-off).
+    GtkWidget* w = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 4);
+    gtk_widget_set_valign(w, GTK_ALIGN_CENTER);
+    return w;
+}
+
+void clear_inner_listbox(GtkListBox* box) {
+    GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
+    while (child != nullptr) {
+        GtkWidget* next = gtk_widget_get_next_sibling(child);
+        gtk_list_box_remove(box, child);
+        child = next;
+    }
+}
+void clear_inner_flowbox(GtkFlowBox* box) {
+    GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
+    while (child != nullptr) {
+        GtkWidget* next = gtk_widget_get_next_sibling(child);
+        gtk_flow_box_remove(box, child);
+        child = next;
+    }
+}
+void clear_inner_box(GtkBox* box) {
+    GtkWidget* child = gtk_widget_get_first_child(GTK_WIDGET(box));
+    while (child != nullptr) {
+        GtkWidget* next = gtk_widget_get_next_sibling(child);
+        gtk_box_remove(box, child);
+        child = next;
     }
 }
 
-void append_item(GtkWidget* inner, bool is_grid, const char* text) {
-    GtkWidget* lbl = gtk_label_new(text);
-    gtk_widget_set_halign(lbl, GTK_ALIGN_START);
-    if (is_grid) {
-        gtk_flow_box_append(GTK_FLOW_BOX(inner), lbl);
-    } else {
-        gtk_list_box_append(GTK_LIST_BOX(inner), lbl);
-    }
+// hbox tap handler — fires on press on an hbox item child. The
+// per-item index lives on the widget as g_object_data("mpapp_idx").
+// hbox has no native selection so no suppression check is needed.
+void on_hbox_child_pressed(GtkGestureClick* gesture,
+                           gint /*n_press*/, gdouble /*x*/, gdouble /*y*/,
+                           gpointer user_data) {
+    auto* cv = static_cast<collection_view*>(user_data);
+    if (cv == nullptr) return;
+    GtkWidget* w = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
+    if (w == nullptr) return;
+    void* d = g_object_get_data(G_OBJECT(w), "mpapp_idx");
+    const int idx = GPOINTER_TO_INT(d);
+    if (cv->selected_index.get() != idx) cv->selected_index.set(idx);
+    cv->item_tapped.emit(idx);
+}
+
+// Append a widget into an hbox-mode container, stamping it with the
+// next item index and wiring a GtkGestureClick that routes taps back
+// to the bound collection_view.
+void append_hbox_child(GtkBox* box, GtkWidget* child, int idx, collection_view* cv) {
+    g_object_set_data(G_OBJECT(child), "mpapp_idx", GINT_TO_POINTER(idx));
+    GtkGesture* g = gtk_gesture_click_new();
+    gtk_widget_add_controller(child, GTK_EVENT_CONTROLLER(g));
+    g_signal_connect(g, "pressed", G_CALLBACK(on_hbox_child_pressed), cv);
+    gtk_box_append(box, child);
 }
 
 } // namespace
 
 collection_view_handler<platform::linux_>::collection_view_handler() {
-    native_  = gtk_scrolled_window_new();
-    inner_   = make_inner_listbox();
-    is_grid_ = false;
+    native_ = gtk_scrolled_window_new();
+    inner_  = make_inner_listbox();
+    kind_   = layout_kind::list;
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(static_cast<GtkWidget*>(native_)),
                                   static_cast<GtkWidget*>(inner_));
     gtk_widget_set_vexpand(static_cast<GtkWidget*>(native_), TRUE);
@@ -156,25 +191,65 @@ collection_view_handler<platform::linux_>::~collection_view_handler() = default;
 
 void collection_view_handler<platform::linux_>::wire_tap_signals() {
     if (inner_ == nullptr || bound_ == nullptr) return;
-    if (is_grid_) {
-        g_signal_connect(static_cast<GtkWidget*>(inner_), "child-activated",
-                         G_CALLBACK(on_child_activated), bound_);
-        g_signal_connect(static_cast<GtkWidget*>(inner_), "selected-children-changed",
-                         G_CALLBACK(on_selected_children_changed), bound_);
-    } else {
-        g_signal_connect(static_cast<GtkWidget*>(inner_), "row-selected",
-                         G_CALLBACK(on_row_selected), bound_);
-        g_signal_connect(static_cast<GtkWidget*>(inner_), "selected-rows-changed",
-                         G_CALLBACK(on_selected_rows_changed), bound_);
+    GtkWidget* w = static_cast<GtkWidget*>(inner_);
+    switch (kind_) {
+        case layout_kind::list:
+            g_signal_connect(w, "row-selected",
+                             G_CALLBACK(on_row_selected), bound_);
+            g_signal_connect(w, "selected-rows-changed",
+                             G_CALLBACK(on_selected_rows_changed), bound_);
+            break;
+        case layout_kind::flow_horiz:
+        case layout_kind::flow_vert:
+            g_signal_connect(w, "child-activated",
+                             G_CALLBACK(on_child_activated), bound_);
+            g_signal_connect(w, "selected-children-changed",
+                             G_CALLBACK(on_selected_children_changed), bound_);
+            break;
+        case layout_kind::hbox:
+            // hbox wires per-child gestures inside append_hbox_child
+            // during rebuild — nothing to do at the container level.
+            break;
+        case layout_kind::unset:
+            break;
     }
 }
 
 void collection_view_handler<platform::linux_>::rebuild_items(const std::vector<std::string>& v) {
     if (inner_ == nullptr) return;
     set_suppress(inner_, true);
-    clear_inner(static_cast<GtkWidget*>(inner_), is_grid_);
-    for (const auto& s : v) {
-        append_item(static_cast<GtkWidget*>(inner_), is_grid_, s.c_str());
+    GtkWidget* w = static_cast<GtkWidget*>(inner_);
+    switch (kind_) {
+        case layout_kind::list:
+            clear_inner_listbox(GTK_LIST_BOX(w));
+            for (const auto& s : v) {
+                GtkWidget* lbl = gtk_label_new(s.c_str());
+                gtk_widget_set_halign(lbl, GTK_ALIGN_START);
+                gtk_list_box_append(GTK_LIST_BOX(w), lbl);
+            }
+            break;
+        case layout_kind::flow_horiz:
+        case layout_kind::flow_vert:
+            clear_inner_flowbox(GTK_FLOW_BOX(w));
+            for (const auto& s : v) {
+                GtkWidget* lbl = gtk_label_new(s.c_str());
+                gtk_widget_set_halign(lbl, GTK_ALIGN_START);
+                gtk_flow_box_append(GTK_FLOW_BOX(w), lbl);
+            }
+            break;
+        case layout_kind::hbox: {
+            clear_inner_box(GTK_BOX(w));
+            int i = 0;
+            for (const auto& s : v) {
+                GtkWidget* lbl = gtk_label_new(s.c_str());
+                gtk_widget_set_margin_start(lbl, 6);
+                gtk_widget_set_margin_end(lbl, 6);
+                append_hbox_child(GTK_BOX(w), lbl, i++, bound_);
+            }
+            break;
+        }
+        case layout_kind::unset:
+            break;
     }
     if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
     set_suppress(inner_, false);
@@ -183,16 +258,37 @@ void collection_view_handler<platform::linux_>::rebuild_items(const std::vector<
 void collection_view_handler<platform::linux_>::rebuild_typed(const std::vector<view*>& v) {
     if (inner_ == nullptr) return;
     set_suppress(inner_, true);
-    clear_inner(static_cast<GtkWidget*>(inner_), is_grid_);
-    for (view* item : v) {
-        if (item == nullptr) continue;
-        GtkWidget* w = detail::linux_dispatch::dispatch(item);
-        if (w == nullptr) continue;
-        if (is_grid_) {
-            gtk_flow_box_append(GTK_FLOW_BOX(static_cast<GtkWidget*>(inner_)), w);
-        } else {
-            gtk_list_box_append(GTK_LIST_BOX(static_cast<GtkWidget*>(inner_)), w);
+    GtkWidget* container = static_cast<GtkWidget*>(inner_);
+    switch (kind_) {
+        case layout_kind::list:
+            clear_inner_listbox(GTK_LIST_BOX(container));
+            for (view* item : v) {
+                if (item == nullptr) continue;
+                GtkWidget* w = detail::linux_dispatch::dispatch(item);
+                if (w != nullptr) gtk_list_box_append(GTK_LIST_BOX(container), w);
+            }
+            break;
+        case layout_kind::flow_horiz:
+        case layout_kind::flow_vert:
+            clear_inner_flowbox(GTK_FLOW_BOX(container));
+            for (view* item : v) {
+                if (item == nullptr) continue;
+                GtkWidget* w = detail::linux_dispatch::dispatch(item);
+                if (w != nullptr) gtk_flow_box_append(GTK_FLOW_BOX(container), w);
+            }
+            break;
+        case layout_kind::hbox: {
+            clear_inner_box(GTK_BOX(container));
+            int i = 0;
+            for (view* item : v) {
+                if (item == nullptr) continue;
+                GtkWidget* w = detail::linux_dispatch::dispatch(item);
+                if (w != nullptr) append_hbox_child(GTK_BOX(container), w, i++, bound_);
+            }
+            break;
         }
+        case layout_kind::unset:
+            break;
     }
     if (bound_ != nullptr) apply_selection(bound_->selected_index.get());
     set_suppress(inner_, false);
@@ -213,48 +309,102 @@ void collection_view_handler<platform::linux_>::rebuild_active() {
 void collection_view_handler<platform::linux_>::apply_selection(int idx) {
     if (inner_ == nullptr) return;
     set_suppress(inner_, true);
-    if (is_grid_) {
-        GtkFlowBox* box = GTK_FLOW_BOX(static_cast<GtkWidget*>(inner_));
-        gtk_flow_box_unselect_all(box);
-        if (idx >= 0) {
-            GtkFlowBoxChild* child = gtk_flow_box_get_child_at_index(box, idx);
-            if (child != nullptr) gtk_flow_box_select_child(box, child);
+    GtkWidget* w = static_cast<GtkWidget*>(inner_);
+    switch (kind_) {
+        case layout_kind::list: {
+            GtkListBox* box = GTK_LIST_BOX(w);
+            if (idx < 0) {
+                gtk_list_box_unselect_all(box);
+            } else {
+                GtkListBoxRow* row = gtk_list_box_get_row_at_index(box, idx);
+                if (row != nullptr) gtk_list_box_select_row(box, row);
+            }
+            break;
         }
-    } else {
-        GtkListBox* box = GTK_LIST_BOX(static_cast<GtkWidget*>(inner_));
-        if (idx < 0) {
-            gtk_list_box_unselect_all(box);
-        } else {
-            GtkListBoxRow* row = gtk_list_box_get_row_at_index(box, idx);
-            if (row != nullptr) gtk_list_box_select_row(box, row);
+        case layout_kind::flow_horiz:
+        case layout_kind::flow_vert: {
+            GtkFlowBox* box = GTK_FLOW_BOX(w);
+            gtk_flow_box_unselect_all(box);
+            if (idx >= 0) {
+                GtkFlowBoxChild* child = gtk_flow_box_get_child_at_index(box, idx);
+                if (child != nullptr) gtk_flow_box_select_child(box, child);
+            }
+            break;
         }
+        case layout_kind::hbox:
+            // GtkBox has no native selection. selected_index is tracked
+            // in the C++ surface; visual highlight is a follow-up.
+            break;
+        case layout_kind::unset:
+            break;
     }
     set_suppress(inner_, false);
 }
 
 void collection_view_handler<platform::linux_>::apply_selection_mode(collection_selection_mode m) {
     if (inner_ == nullptr) return;
-    if (is_grid_) {
-        gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(static_cast<GtkWidget*>(inner_)),
-                                        to_native_mode(m));
-    } else {
-        gtk_list_box_set_selection_mode(GTK_LIST_BOX(static_cast<GtkWidget*>(inner_)),
-                                        to_native_mode(m));
+    GtkWidget* w = static_cast<GtkWidget*>(inner_);
+    switch (kind_) {
+        case layout_kind::list:
+            gtk_list_box_set_selection_mode(GTK_LIST_BOX(w), to_native_mode(m));
+            break;
+        case layout_kind::flow_horiz:
+        case layout_kind::flow_vert:
+            gtk_flow_box_set_selection_mode(GTK_FLOW_BOX(w), to_native_mode(m));
+            break;
+        case layout_kind::hbox:
+        case layout_kind::unset:
+            break;
     }
 }
 
 void collection_view_handler<platform::linux_>::apply_layout(collection_layout l) {
     if (native_ == nullptr) return;
-    const bool want_grid = (l == collection_layout::vertical_grid
-                         || l == collection_layout::horizontal_grid);
-    if (want_grid == is_grid_) return;   // already matches
+    layout_kind want = layout_kind::list;
+    switch (l) {
+        case collection_layout::vertical_list:   want = layout_kind::list;       break;
+        case collection_layout::horizontal_list: want = layout_kind::hbox;       break;
+        case collection_layout::vertical_grid:   want = layout_kind::flow_horiz; break;
+        case collection_layout::horizontal_grid: want = layout_kind::flow_vert;  break;
+    }
+    if (want == kind_) return;
 
     // Tear down old inner; the GtkScrolledWindow drops the previous
-    // child when we set a new one.
-    inner_   = want_grid ? make_inner_flowbox() : make_inner_listbox();
-    is_grid_ = want_grid;
+    // child when we set a new one. Build the right inner widget +
+    // adjust the scrollbar policy for the new layout's primary axis.
+    GtkWidget* new_inner = nullptr;
+    GtkPolicyType hpolicy = GTK_POLICY_NEVER;
+    GtkPolicyType vpolicy = GTK_POLICY_AUTOMATIC;
+    switch (want) {
+        case layout_kind::list:
+            new_inner = make_inner_listbox();
+            hpolicy = GTK_POLICY_NEVER;
+            vpolicy = GTK_POLICY_AUTOMATIC;
+            break;
+        case layout_kind::hbox:
+            new_inner = make_inner_hbox();
+            hpolicy = GTK_POLICY_AUTOMATIC;
+            vpolicy = GTK_POLICY_NEVER;
+            break;
+        case layout_kind::flow_horiz:
+            new_inner = make_inner_flowbox(GTK_ORIENTATION_HORIZONTAL);
+            hpolicy = GTK_POLICY_NEVER;
+            vpolicy = GTK_POLICY_AUTOMATIC;
+            break;
+        case layout_kind::flow_vert:
+            new_inner = make_inner_flowbox(GTK_ORIENTATION_VERTICAL);
+            hpolicy = GTK_POLICY_AUTOMATIC;
+            vpolicy = GTK_POLICY_NEVER;
+            break;
+        case layout_kind::unset:
+            return;
+    }
+    inner_ = new_inner;
+    kind_  = want;
     gtk_scrolled_window_set_child(GTK_SCROLLED_WINDOW(static_cast<GtkWidget*>(native_)),
                                   static_cast<GtkWidget*>(inner_));
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(static_cast<GtkWidget*>(native_)),
+                                   hpolicy, vpolicy);
     wire_tap_signals();
 
     if (bound_ != nullptr) {

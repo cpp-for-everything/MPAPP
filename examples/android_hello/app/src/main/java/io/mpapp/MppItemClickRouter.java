@@ -9,6 +9,11 @@
 // Kinds defined today (kept in sync with src/handlers/android/item_click_router.cpp):
 //   0 — ListView       (ownerPtr = list_view*, payload = row index)
 //   1 — CollectionView (ownerPtr = collection_view*, payload = row index)
+//
+// The native methods declared at the bottom are package-private so
+// sibling routers in the same package (MppCollectionAdapter for the
+// RecyclerView-backed collection_view path, T-0028) can reuse them
+// without each class having its own JNI binding pair.
 
 package io.mpapp;
 
@@ -29,5 +34,8 @@ public final class MppItemClickRouter implements AdapterView.OnItemClickListener
         nativeDispatchItemClick(ownerPtr, kind, position);
     }
 
-    private static native void nativeDispatchItemClick(long ownerPtr, int kind, int position);
+    // Native bindings — see src/handlers/android/item_click_router.cpp.
+    // Package-private so MppCollectionAdapter can call them directly.
+    static native void nativeDispatchItemClick(long ownerPtr, int kind, int position);
+    static native void nativeDispatchCheckedSet(long ownerPtr, int kind, int[] positions);
 }

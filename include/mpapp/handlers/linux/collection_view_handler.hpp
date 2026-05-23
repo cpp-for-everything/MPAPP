@@ -3,10 +3,19 @@
 // stable outer GtkScrolledWindow (native_) so the ADR-0013 dispatch
 // handle doesn't move when we swap layouts.
 //
-//   * vertical_list  → GtkListBox  (single-column list w/ selection)
-//   * vertical_grid  → GtkFlowBox  (wrapping multi-column grid w/ selection)
+//   * vertical_list   → GtkListBox  (single-column list, vertical scroll)
+//   * horizontal_list → GtkBox      (single-row strip, horizontal scroll)
+//   * vertical_grid   → GtkFlowBox  (orientation=HORIZONTAL, vertical scroll)
+//   * horizontal_grid → GtkFlowBox  (orientation=VERTICAL,   horizontal scroll)
 //
-// Horizontal modes degrade to their vertical counterpart in v1.
+// The GtkScrolledWindow's hscrollbar/vscrollbar policy flips to match.
+// The horizontal_list path uses GtkBox (not a 1-per-line GtkFlowBox)
+// because FlowBox always allocates its natural size and may wrap
+// regardless of max-children-per-line; GtkBox lays children along the
+// axis at their natural widths and defers scrolling to the parent.
+// Selection in horizontal_list is a v1 trade-off — GtkBox has no
+// built-in selection, so selected_index does not visually highlight an
+// item there; the property still tracks user clicks.
 
 #ifndef MPAPP_HANDLERS_LINUX_COLLECTION_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_COLLECTION_VIEW_HANDLER_HPP
@@ -76,9 +85,21 @@ private:
         void operator()() const { self->rebuild_active(); }
     };
 
-    void* native_   = nullptr;  // GtkScrolledWindow*
-    void* inner_    = nullptr;  // GtkListBox* (list) or GtkFlowBox* (grid)
-    bool  is_grid_  = false;    // true iff inner_ is a GtkFlowBox
+    // One value per collection_layout enum, plus an internal "unset"
+    // sentinel used to force the first apply_layout call to actually
+    // rebuild (the constructor seeds the inner widget but doesn't yet
+    // know the surface's chosen layout).
+    enum class layout_kind {
+        unset,      // ctor default — first apply_layout always rebuilds
+        list,       // vertical_list   — GtkListBox
+        hbox,       // horizontal_list — GtkBox(HORIZONTAL)
+        flow_horiz, // vertical_grid   — GtkFlowBox(HORIZONTAL)
+        flow_vert,  // horizontal_grid — GtkFlowBox(VERTICAL)
+    };
+
+    void*       native_ = nullptr;          // GtkScrolledWindow*
+    void*       inner_  = nullptr;          // active inner widget
+    layout_kind kind_   = layout_kind::unset;
 
     collection_view* bound_ = nullptr;
 

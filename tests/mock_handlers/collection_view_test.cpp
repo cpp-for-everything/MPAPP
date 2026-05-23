@@ -250,3 +250,54 @@ TEST_CASE("materialized_changed fires on rematerialize",
     cv.item_template = collection_view::item_factory_t{};
     CHECK(hits == 4);
 }
+
+TEST_CASE("layout default is vertical_list and map_layout records it",
+          "[mock][collection_view][layout]") {
+    collection_view cv;
+    collection_view_handler<platform::mock> h;
+    h.map_layout(cv);
+
+    CHECK(cv.layout.get() == collection_layout::vertical_list);
+    CHECK(h.last_layout    == collection_layout::vertical_list);
+}
+
+TEST_CASE("layout cycles through all four enum values",
+          "[mock][collection_view][layout]") {
+    collection_view cv;
+    collection_view_handler<platform::mock> h;
+    h.map_layout(cv);
+
+    cv.layout = collection_layout::horizontal_list;
+    CHECK(h.last_layout == collection_layout::horizontal_list);
+
+    cv.layout = collection_layout::vertical_grid;
+    CHECK(h.last_layout == collection_layout::vertical_grid);
+
+    cv.layout = collection_layout::horizontal_grid;
+    CHECK(h.last_layout == collection_layout::horizontal_grid);
+
+    cv.layout = collection_layout::vertical_list;
+    CHECK(h.last_layout == collection_layout::vertical_list);
+}
+
+TEST_CASE("layout change does not perturb items_source or selection",
+          "[mock][collection_view][layout]") {
+    collection_view cv;
+    cv.items_source   = std::vector<std::string>{"a", "b", "c"};
+    cv.selection_mode = collection_selection_mode::multiple;
+    cv.select(0);
+    cv.select(2);
+
+    // Cycle layout — items + selection survive untouched.
+    for (auto l : {collection_layout::horizontal_list,
+                   collection_layout::vertical_grid,
+                   collection_layout::horizontal_grid,
+                   collection_layout::vertical_list}) {
+        cv.layout = l;
+        REQUIRE(cv.items_source.get().size() == 3);
+        CHECK(cv.items_source.get()[1] == "b");
+        REQUIRE(cv.selected_indices.get().size() == 2);
+        CHECK(cv.selected_indices.get()[0] == 0);
+        CHECK(cv.selected_indices.get()[1] == 2);
+    }
+}

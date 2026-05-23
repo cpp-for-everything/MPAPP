@@ -74,3 +74,13 @@ android {
         }
     }
 }
+
+dependencies {
+    // T-0028: AndroidX RecyclerView powers the collection_view real
+    // handler's four-layout matrix (vertical/horizontal × list/grid).
+    // The legacy AbsListView-based widgets (ListView, GridView) are
+    // vertical-only; RecyclerView + LinearLayoutManager/GridLayoutManager
+    // honor an orientation arg so the same widget covers all four
+    // layouts via a setLayoutManager swap.
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+}

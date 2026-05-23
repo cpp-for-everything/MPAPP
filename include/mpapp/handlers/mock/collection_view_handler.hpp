@@ -40,6 +40,19 @@ public:
         cv.selected_indices.changed.subscribe(slot_seli_, seli_cb_);
     }
 
+    // Records the current layout enum as an integer so tests can assert
+    // the full vertical_list / horizontal_list / vertical_grid /
+    // horizontal_grid cycle reaches the handler.
+    void map_layout(collection_view& cv) {
+        record_change("layout",
+                      static_cast<int>(cv.layout.get()));
+        cv.layout.changed.subscribe(slot_layout_, layout_cb_);
+    }
+
+    // Most-recent layout the handler observed. Defaults to vertical_list
+    // (the surface default) until map_layout records the first value.
+    collection_layout last_layout = collection_layout::vertical_list;
+
 private:
     using self_t = collection_view_handler<platform::mock>;
 
@@ -59,14 +72,23 @@ private:
             self->record_change("selected_indices.count", v.size());
         }
     };
+    struct layout_recorder {
+        self_t* self = nullptr;
+        void operator()(collection_layout v) const {
+            self->last_layout = v;
+            self->record_change("layout", static_cast<int>(v));
+        }
+    };
 
-    items_recorder items_cb_{this};
-    sel_recorder   sel_cb_{this};
-    seli_recorder  seli_cb_{this};
+    items_recorder  items_cb_{this};
+    sel_recorder    sel_cb_{this};
+    seli_recorder   seli_cb_{this};
+    layout_recorder layout_cb_{this};
 
     signal_slot<const std::vector<std::string>&> slot_items_{};
     signal_slot<const int&>                      slot_sel_{};
     signal_slot<const std::vector<int>&>         slot_seli_{};
+    signal_slot<const collection_layout&>        slot_layout_{};
 };
 
 } // namespace mpapp

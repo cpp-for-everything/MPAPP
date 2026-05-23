@@ -1,13 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
 // Android collection_view handler. Outer FrameLayout (native_) is
-// stable so the ADR-0013 dispatch handle doesn't move; inner_ is the
-// active list-or-grid widget:
-//   * vertical_list → android.widget.ListView (single column)
-//   * vertical_grid → android.widget.GridView (auto-column wrap)
+// stable so the ADR-0013 dispatch handle doesn't move; inner_ is
+// a single androidx.recyclerview.widget.RecyclerView whose
+// LayoutManager swaps to cover all four collection_layout values:
 //
-// Both inherit from AdapterView so setChoiceMode + checked-position
-// query semantics are uniform — refresh_multi_selection_from_native()
-// works against either.
+//   * vertical_list   → LinearLayoutManager(VERTICAL)
+//   * horizontal_list → LinearLayoutManager(HORIZONTAL)
+//   * vertical_grid   → GridLayoutManager(span, VERTICAL)
+//   * horizontal_grid → GridLayoutManager(span, HORIZONTAL)
+//
+// adapter_ is a long-lived MppCollectionAdapter instance attached to
+// the RecyclerView once at construction; rebuild paths just call
+// setStrings(...) or setNativeViews(...) on it. Selection state is
+// owned by the adapter; multi-select pushes the full int[] back to
+// native via MppItemClickRouter.nativeDispatchCheckedSet.
 
 #ifndef MPAPP_HANDLERS_ANDROID_COLLECTION_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_COLLECTION_VIEW_HANDLER_HPP
@@ -44,13 +50,10 @@ public:
 
     jobject native() const noexcept { return native_; }
 
-    // Invoked by item_click_router after each multi-mode tap. Reads
-    // ListView/GridView.getCheckedItemPositions() and writes the
-    // indices vector into the bound collection_view.
-    void refresh_multi_selection_from_native();
-
-    // The list-or-grid inner widget; item_click_router uses this to
-    // resolve which AdapterView fired the event.
+    // The RecyclerView itself — item_click_router doesn't need this
+    // post-migration (MppCollectionAdapter calls native methods
+    // directly), but it's kept as a convenience accessor for any
+    // future router that wants to attach scroll listeners etc.
     jobject inner() const noexcept { return inner_; }
 
 private:
@@ -59,7 +62,6 @@ private:
     void apply_selection(int idx);
     void apply_selection_mode(collection_selection_mode m);
     void apply_layout(collection_layout l);
-    void rebuild_inner_for_layout(collection_layout l);
     void rebuild_active();
 
     struct items_cb_t {
@@ -88,8 +90,8 @@ private:
     };
 
     jobject native_  = nullptr;   // FrameLayout (outer)
-    jobject inner_   = nullptr;   // ListView or GridView (whichever matches layout)
-    bool    is_grid_ = false;
+    jobject inner_   = nullptr;   // androidx.recyclerview.widget.RecyclerView
+    jobject adapter_ = nullptr;   // MppCollectionAdapter
     collection_view* bound_ = nullptr;
 
     items_cb_t        items_cb_{this};

@@ -3,8 +3,17 @@
 //
 // native_ is a stable outer mux::Border so the ADR-0013 dispatch
 // handle doesn't move when we swap layouts at runtime. inner_ is the
-// active list-or-grid widget (mux::ListView for vertical_list,
-// mux::GridView for vertical_grid).
+// active list-or-grid widget. Per-layout mapping:
+//   vertical_list   → mux::ListView, ItemsStackPanel(Orientation=Vertical)
+//   horizontal_list → mux::ListView, ItemsStackPanel(Orientation=Horizontal) + h-scroll
+//   vertical_grid   → mux::GridView, ItemsWrapGrid(Orientation=Horizontal)
+//   horizontal_grid → mux::GridView, ItemsWrapGrid(Orientation=Vertical)   + h-scroll
+//
+// The ItemsPanel template is set via XamlReader::Load on construction —
+// WinUI 3 caches the panel root after the items pipeline starts, so we
+// always build a fresh widget when the layout enum changes (no early
+// returns) and apply the per-layout ScrollViewer.* attached properties
+// to it before parenting it under the Border.
 
 #include "mpapp/handlers/windows/collection_view_handler.hpp"
 
@@ -16,6 +25,7 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
+#include <winrt/Microsoft.UI.Xaml.Markup.h>
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
@@ -24,22 +34,88 @@
 namespace mpapp {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
+namespace muxm = ::winrt::Microsoft::UI::Xaml::Markup;
 
 namespace {
 
-// Build a fresh inner list-or-grid widget for the given layout.
-// vertical_list → mux::ListView; vertical_grid → mux::GridView.
-// Horizontal modes degrade to their vertical counterpart in v1.
-muxc::ListViewBase make_inner(collection_layout l) {
+constexpr const wchar_t* kPanelListVertical =
+    L"<ItemsPanelTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>"
+    L"  <ItemsStackPanel Orientation='Vertical'/>"
+    L"</ItemsPanelTemplate>";
+constexpr const wchar_t* kPanelListHorizontal =
+    L"<ItemsPanelTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>"
+    L"  <ItemsStackPanel Orientation='Horizontal'/>"
+    L"</ItemsPanelTemplate>";
+constexpr const wchar_t* kPanelGridVertical =
+    L"<ItemsPanelTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>"
+    L"  <ItemsWrapGrid Orientation='Horizontal'/>"
+    L"</ItemsPanelTemplate>";
+constexpr const wchar_t* kPanelGridHorizontal =
+    L"<ItemsPanelTemplate xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation'>"
+    L"  <ItemsWrapGrid Orientation='Vertical'/>"
+    L"</ItemsPanelTemplate>";
+
+// Picks the ItemsPanelTemplate XAML for a given layout. The first axis
+// (list vs grid) decides the panel class; the second axis (vertical vs
+// horizontal) decides the Orientation attribute.
+const wchar_t* panel_xaml_for(collection_layout l) {
     switch (l) {
-        case collection_layout::vertical_grid:
-        case collection_layout::horizontal_grid:
-            return muxc::GridView{};
-        case collection_layout::horizontal_list:
+        case collection_layout::horizontal_list: return kPanelListHorizontal;
+        case collection_layout::vertical_grid:   return kPanelGridVertical;
+        case collection_layout::horizontal_grid: return kPanelGridHorizontal;
         case collection_layout::vertical_list:
-        default:
-            return muxc::ListView{};
+        default:                                 return kPanelListVertical;
     }
+}
+
+// Horizontal-scrolling layouts need the ScrollViewer attached properties
+// flipped: horizontal scroll enabled + visible, vertical disabled. Reuses
+// the existing parameter slots via the attached-property setter API.
+void apply_scroll_for_layout(muxc::ListViewBase const& inner,
+                             collection_layout l) {
+    namespace mux = ::winrt::Microsoft::UI::Xaml;
+    const bool horiz = (l == collection_layout::horizontal_list
+                     || l == collection_layout::horizontal_grid);
+    if (horiz) {
+        muxc::ScrollViewer::SetHorizontalScrollMode(
+            inner, muxc::ScrollMode::Enabled);
+        muxc::ScrollViewer::SetHorizontalScrollBarVisibility(
+            inner, muxc::ScrollBarVisibility::Auto);
+        muxc::ScrollViewer::SetVerticalScrollMode(
+            inner, muxc::ScrollMode::Disabled);
+        muxc::ScrollViewer::SetVerticalScrollBarVisibility(
+            inner, muxc::ScrollBarVisibility::Disabled);
+    } else {
+        muxc::ScrollViewer::SetHorizontalScrollMode(
+            inner, muxc::ScrollMode::Disabled);
+        muxc::ScrollViewer::SetHorizontalScrollBarVisibility(
+            inner, muxc::ScrollBarVisibility::Disabled);
+        muxc::ScrollViewer::SetVerticalScrollMode(
+            inner, muxc::ScrollMode::Enabled);
+        muxc::ScrollViewer::SetVerticalScrollBarVisibility(
+            inner, muxc::ScrollBarVisibility::Auto);
+    }
+}
+
+// Build a fresh inner list-or-grid widget for the given layout: pick
+// ListView vs GridView, attach the per-layout ItemsPanelTemplate, and
+// flip the ScrollViewer.* attached properties for horizontal layouts.
+muxc::ListViewBase make_inner(collection_layout l) {
+    const bool grid = (l == collection_layout::vertical_grid
+                    || l == collection_layout::horizontal_grid);
+    muxc::ListViewBase v = grid ? muxc::ListViewBase{muxc::GridView{}}
+                                : muxc::ListViewBase{muxc::ListView{}};
+    try {
+        auto tmpl_any = muxm::XamlReader::Load(panel_xaml_for(l));
+        if (auto tmpl = tmpl_any.try_as<muxc::ItemsPanelTemplate>()) {
+            v.ItemsPanel(tmpl);
+        }
+    } catch (...) {
+        // XamlReader::Load failure is non-fatal — we fall back to the
+        // default panel for the widget class.
+    }
+    apply_scroll_for_layout(v, l);
+    return v;
 }
 
 muxc::ListViewSelectionMode to_native_mode(collection_selection_mode m) {
@@ -163,14 +239,11 @@ void collection_view_handler<platform::windows>::apply_selection_mode(collection
 void collection_view_handler<platform::windows>::apply_layout(collection_layout l) {
     if (native_ == nullptr) return;
 
-    // If the requested layout maps to the same native class as the current
-    // inner widget, skip the swap.
-    const bool want_grid = (l == collection_layout::vertical_grid
-                         || l == collection_layout::horizontal_grid);
-    const bool have_grid = (inner_ != nullptr) && inner_.try_as<muxc::GridView>();
-    if (inner_ != nullptr && want_grid == have_grid) return;
-
-    // Detach old listener, then swap the inner widget under the Border.
+    // Always rebuild on layout change. WinUI 3 caches the ItemsPanel
+    // root once the items pipeline starts, so we can't mutate the
+    // existing widget's orientation in place — we have to build a
+    // fresh one with the right ItemsPanelTemplate and parent it under
+    // the stable outer Border.
     if (inner_ != nullptr && selection_token_.value != 0) {
         try { inner_.SelectionChanged(selection_token_); } catch (...) {}
         selection_token_ = {};
