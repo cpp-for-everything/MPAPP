@@ -16,7 +16,11 @@ tags:
 # GraphicsView
 
 > [!info] Status
-> **android-real (v1)** — Native drawing host wired on all 3 platforms: Win `muxc::Canvas`, Linux `GtkDrawingArea`, Android plain `android.view.View`. `width` / `height` propagate to the native widget (`Width/Height` / `gtk_drawing_area_set_content_*` / `setMinimumWidth/Height`). The user-facing canvas-drawing API (Skia / Cairo facade) remains gated on [[ADR-0015-graphics-backend-dual]]; for v1, `invalidate()` still bumps `draw_count` and emits `draw_requested` for consumers to observe.
+> **android-real (v2 in flight — Linux landed via [[T-0029]])** — Native drawing host wired on all 3 platforms: Win `muxc::Canvas`, Linux `GtkDrawingArea`, Android plain `android.view.View`. `width` / `height` propagate to the native widget (`Width/Height` / `gtk_drawing_area_set_content_*` / `setMinimumWidth/Height`).
+>
+> The surface now carries a `drawable` Observable holding a `std::function<void(canvas&)>` from the ADR-0015 facade. The **Linux** real handler pumps that callback through the facade on every GTK paint: render into the backend-owned off-screen surface, read back BGRA32 pixels via the new abstract `pixel_data()` + `pixel_stride_bytes()` API, blit through `cairo_image_surface_create_for_data` into GtkDrawingArea's `cairo_t*`. `map_draw_count` + `map_drawable` subscribe to changes and `gtk_widget_queue_draw` so consumer-driven `invalidate()` and callback swaps repaint correctly.
+>
+> **Windows + Android `map_drawable`** are stubbed for cross-platform interface uniformity. Their real blit paths (`SoftwareBitmapSource` on WinUI 3 / `Bitmap.copyPixelsFromBuffer` on Android) are T-0029 phase 2.
 
 ## Overview
 

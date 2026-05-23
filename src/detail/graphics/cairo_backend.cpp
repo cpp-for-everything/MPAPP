@@ -168,9 +168,25 @@ public:
         cairo_clip(cr_);
     }
 
-    // Backend-specific extension: lets test code read back pixels to
-    // verify rendering. Not part of the abstract `canvas` interface —
-    // tests must downcast (or use the helper accessor below).
+    // Pixel readback for handler→native blit. Cairo's ARGB32 surface
+    // is BGRA in memory on little-endian (the only byte order MPAPP
+    // targets) and premultiplied — matching the format documented on
+    // the abstract canvas API. cairo_surface_flush ensures any queued
+    // ops have actually written to the surface before we hand the
+    // pointer to a caller.
+    [[nodiscard]] const std::uint8_t* pixel_data() const noexcept override {
+        if (surface_ == nullptr) return nullptr;
+        cairo_surface_flush(surface_);
+        return cairo_image_surface_get_data(surface_);
+    }
+    [[nodiscard]] int pixel_stride_bytes() const noexcept override {
+        if (surface_ == nullptr) return 0;
+        return cairo_image_surface_get_stride(surface_);
+    }
+
+    // Backend-specific extension: hand the raw Cairo surface to test
+    // code (e.g. to chain it into `cairo_surface_write_to_png`). Most
+    // callers should prefer the portable pixel_data() above.
     [[nodiscard]] cairo_surface_t* native_surface() noexcept { return surface_; }
 
 private:

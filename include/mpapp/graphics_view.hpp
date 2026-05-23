@@ -11,11 +11,19 @@
 #define MPAPP_GRAPHICS_VIEW_HPP
 
 #include <cstddef>
+#include <functional>
 
 #include "observable.hpp"
 #include "platform.hpp"
 #include "signal.hpp"
 #include "view.hpp"
+
+namespace mpapp::detail::graphics {
+// Forward-declared — the canvas surface is in the detail/graphics
+// header; user code that sets a drawable callback will include it
+// directly. Forward-declaring here keeps graphics_view.hpp light.
+class canvas;
+} // namespace mpapp::detail::graphics
 
 namespace mpapp {
 
@@ -36,6 +44,22 @@ public:
 
     Observable<int> width{0};
     Observable<int> height{0};
+
+    // User-supplied draw callback. The real handler invokes this each
+    // time it paints, passing a canvas sized to (width, height). Default
+    // is a null function — handlers treat a null `drawable` as a no-op
+    // paint (clear background only). Set via:
+    //
+    //     gv.drawable = [&](mpapp::detail::graphics::canvas& c) {
+    //         c.set_fill(...); c.fill_rect({...}); ...
+    //     };
+    //
+    // Include `<mpapp/detail/graphics/canvas.hpp>` for the full canvas
+    // API. The Observable is wired to `draw_count` indirectly — setting
+    // `drawable` re-triggers a paint on platforms whose handler watches
+    // the .changed signal.
+    using draw_callback_t = std::function<void(detail::graphics::canvas&)>;
+    Observable<draw_callback_t> drawable{draw_callback_t{}};
 
     // Read-only counter — bumped each time invalidate() is called.
     Observable<std::size_t> draw_count{0};

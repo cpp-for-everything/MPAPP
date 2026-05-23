@@ -35,6 +35,19 @@ public:
         gv.height.changed.subscribe(slot_h_, h_cb_);
     }
 
+    // Records whether the user has installed a non-null draw callback
+    // (1) or cleared it (0). Tests can assert that the mock observed
+    // the install + clear lifecycle.
+    void map_drawable(graphics_view& gv) {
+        record_change("drawable", gv.drawable.get() ? 1 : 0);
+        last_drawable_set = static_cast<bool>(gv.drawable.get());
+        gv.drawable.changed.subscribe(slot_drawable_, drawable_cb_);
+    }
+
+    // Most-recent install state of the drawable callback. False until
+    // map_drawable has run and a non-null function has been set.
+    bool last_drawable_set = false;
+
 private:
     using self_t = graphics_view_handler<platform::mock>;
 
@@ -50,14 +63,23 @@ private:
         self_t* self = nullptr;
         void operator()(int v) const { self->record_change("height", v); }
     };
+    struct drawable_recorder {
+        self_t* self = nullptr;
+        void operator()(const graphics_view::draw_callback_t& f) const {
+            self->last_drawable_set = static_cast<bool>(f);
+            self->record_change("drawable", f ? 1 : 0);
+        }
+    };
 
-    count_recorder count_cb_{this};
-    w_recorder     w_cb_{this};
-    h_recorder     h_cb_{this};
+    count_recorder    count_cb_{this};
+    w_recorder        w_cb_{this};
+    h_recorder        h_cb_{this};
+    drawable_recorder drawable_cb_{this};
 
-    signal_slot<const std::size_t&> slot_count_{};
-    signal_slot<const int&>         slot_w_{};
-    signal_slot<const int&>         slot_h_{};
+    signal_slot<const std::size_t&>                    slot_count_{};
+    signal_slot<const int&>                            slot_w_{};
+    signal_slot<const int&>                            slot_h_{};
+    signal_slot<const graphics_view::draw_callback_t&> slot_drawable_{};
 };
 
 } // namespace mpapp

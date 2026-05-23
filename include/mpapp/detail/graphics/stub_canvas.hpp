@@ -90,6 +90,14 @@ public:
         record_fmt("clip(ops=%zu)", p.size());
     }
 
+    // Stub backend has no real pixel buffer. Returning (nullptr, 0)
+    // signals to handlers that pixel-blit isn't available — the
+    // handler should fall back to skipping the paint or rendering a
+    // placeholder (the stub backend ships with `MPAPP_GRAPHICS_BACKEND=stub`
+    // which is the explicitly "no-rendering" choice).
+    [[nodiscard]] const std::uint8_t* pixel_data()         const noexcept override { return nullptr; }
+    [[nodiscard]] int                 pixel_stride_bytes() const noexcept override { return 0; }
+
     // Test inspection ---------------------------------------------------
 
     [[nodiscard]] const std::vector<std::string>& calls() const noexcept { return calls_; }

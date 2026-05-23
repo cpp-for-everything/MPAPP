@@ -81,6 +81,14 @@ void graphics_view_handler<platform::android>::map_draw_count(graphics_view& /*g
     // No-op for v1; see ADR-0015 follow-up.
 }
 
+void graphics_view_handler<platform::android>::map_drawable(graphics_view& /*gv*/) {
+    // Stub for v1 of the canvas-facade migration. Real Android blit
+    // path will allocate an android.graphics.Bitmap, copy
+    // canvas->pixel_data() into it (BGRA32→ARGB8888 byte swap),
+    // and host it inside an ImageView. Deferred to a follow-up so
+    // the Linux landing validates the abstract API first.
+}
+
 } // namespace mpapp
 
 // ---------- Self-registration --------------------------------------------

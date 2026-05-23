@@ -191,6 +191,25 @@ public:
     // scope the clip.
     virtual void clip(const path& p) = 0;
 
+    // ----- Readback (for handler→native blit) -----
+    //
+    // Returns a pointer to the raw pixel data of the rendered surface,
+    // valid until the next draw op or destruction of this canvas. The
+    // format is **premultiplied BGRA32 little-endian** (matching Cairo's
+    // `CAIRO_FORMAT_ARGB32` byte ordering on the platforms MPAPP
+    // supports). A non-Cairo backend that uses a different in-memory
+    // format must convert before returning here.
+    //
+    // `pixel_stride_bytes()` is the row stride in bytes, which can be
+    // larger than `width_px() * 4` if the backend pads rows for
+    // alignment.
+    //
+    // Backends without a backing CPU-readable surface (e.g. the stub
+    // backend, or a future GPU-only backend) return `nullptr` + `0`.
+    // Handlers that need pixels MUST check the pointer before reading.
+    [[nodiscard]] virtual const std::uint8_t* pixel_data()         const noexcept = 0;
+    [[nodiscard]] virtual int                 pixel_stride_bytes() const noexcept = 0;
+
 protected:
     canvas() = default;
 };

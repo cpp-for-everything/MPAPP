@@ -51,6 +51,15 @@ void graphics_view_handler<platform::windows>::map_draw_count(graphics_view& /*g
     // their own future work.
 }
 
+void graphics_view_handler<platform::windows>::map_drawable(graphics_view& /*gv*/) {
+    // Stub for v1 of the canvas-facade migration. The Linux handler
+    // wires this up against Cairo + GtkDrawingArea (off-screen render
+    // → BGRA32 pixel-blit). The Windows blit path needs a WinUI 3
+    // SoftwareBitmapSource (or D2D ID2D1Bitmap) wrapped over the
+    // canvas's pixel_data() pointer; deferred to a follow-up so the
+    // Linux migration can validate the abstract API first.
+}
+
 } // namespace mpapp
 
 // ---------- Self-registration --------------------------------------------

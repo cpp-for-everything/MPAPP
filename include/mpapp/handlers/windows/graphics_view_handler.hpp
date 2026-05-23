@@ -30,6 +30,12 @@ public:
 
     void map_size(graphics_view& gv);
     void map_draw_count(graphics_view& gv);
+    // Subscribes to gv.drawable.changed. Real WinUI 3 blit path
+    // (e.g. SoftwareBitmapSource backed by canvas pixel_data) is a
+    // follow-up to the Linux landing — v1 here just keeps the cross-
+    // platform handler interface uniform so user code compiles
+    // identically on all platforms.
+    void map_drawable(graphics_view& gv);
 
     winrt::Microsoft::UI::Xaml::Controls::Canvas&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Canvas& native() const noexcept { return native_; }

@@ -29,6 +29,12 @@ public:
 
     void map_size(graphics_view& gv);
     void map_draw_count(graphics_view& gv);
+    // Stub for v1 of the canvas-facade migration. Real Android blit
+    // path will write the facade's pixel_data() into an
+    // android.graphics.Bitmap and setImageBitmap on an ImageView host —
+    // deferred to a follow-up so the Linux migration validates the
+    // abstract API first.
+    void map_drawable(graphics_view& gv);
 
     jobject native() const noexcept { return native_; }
 

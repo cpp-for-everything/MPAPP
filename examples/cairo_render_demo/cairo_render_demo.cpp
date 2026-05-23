@@ -189,6 +189,19 @@ public:
         cairo_clip(cr_);
     }
 
+    // Mirror the abstract API's pixel readback. The demo doesn't blit
+    // into a native surface (it just writes a PNG), so this is mostly
+    // for compile-time conformance; tests could still introspect.
+    [[nodiscard]] const std::uint8_t* pixel_data() const noexcept override {
+        if (surface_ == nullptr) return nullptr;
+        cairo_surface_flush(surface_);
+        return cairo_image_surface_get_data(surface_);
+    }
+    [[nodiscard]] int pixel_stride_bytes() const noexcept override {
+        if (surface_ == nullptr) return 0;
+        return cairo_image_surface_get_stride(surface_);
+    }
+
     bool write_png(const char* path) {
         cairo_surface_flush(surface_);
         return cairo_surface_write_to_png(surface_, path) == CAIRO_STATUS_SUCCESS;
