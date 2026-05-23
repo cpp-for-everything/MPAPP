@@ -13,10 +13,12 @@
 #define MPAPP_PAGE_HPP
 
 #include <string>
+#include <string_view>
 
 #include "control.hpp"
 #include "observable.hpp"
 #include "platform.hpp"
+#include "signal.hpp"
 #include "view.hpp"
 
 namespace mpapp {
@@ -38,6 +40,20 @@ public:
     Observable<std::string> title{""};
     Observable<view*>       content{nullptr};
     Observable<bool>        is_busy{false};
+
+    // ----- Lifecycle signals ---------------------------------------------
+    //
+    // `shell` fires `navigated_to` on the page that becomes current_content
+    // after a successful `go_to(uri)` (or typed go_to). It fires
+    // `navigated_from` on the previously-current page just before swapping
+    // it out. Both carry the relevant URI (the new route for navigated_to;
+    // the previous route for navigated_from).
+    //
+    // Mirrors MAUI's `OnNavigatedTo` / `OnNavigatedFrom` overrides. Pages
+    // typically subscribe in their constructor and use the URI to refresh
+    // query-string-dependent state or persist data on leave.
+    signal<const std::string& /*uri*/> navigated_to{};
+    signal<const std::string& /*previous_uri*/> navigated_from{};
 
     // ----- Handler -------------------------------------------------------
     page_handler<platform::current>&       handler() noexcept       { return *page_handler_; }

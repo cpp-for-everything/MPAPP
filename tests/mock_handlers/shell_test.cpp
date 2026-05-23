@@ -212,3 +212,160 @@ TEST_CASE("can_activate guard applies to typed go_to too",
     // Blocked by guard.
     CHECK(s.current_route.get() == "//home");
 }
+
+TEST_CASE("can_deactivate guard receives current + target",
+          "[mock][shell][guard]") {
+    shell s;
+    s.add_tab("home");
+    s.add_tab("settings");
+    s.go_to("//home");
+
+    std::string seen_current;
+    std::string seen_target;
+    s.can_deactivate = [&](std::string_view current, std::string_view target) {
+        seen_current = std::string{current};
+        seen_target  = std::string{target};
+        return true;
+    };
+
+    s.go_to("//settings");
+    CHECK(seen_current           == "//home");
+    CHECK(seen_target            == "//settings");
+    CHECK(s.current_route.get()  == "//settings");
+}
+
+TEST_CASE("can_deactivate returning false blocks navigation",
+          "[mock][shell][guard]") {
+    shell s;
+    s.add_tab("home");
+    s.add_tab("settings");
+    s.go_to("//home");
+
+    int blocked_hits = 0;
+    struct cb_t {
+        int* hits;
+        void operator()(const std::string&) const { ++*hits; }
+    };
+    cb_t cb{&blocked_hits};
+    signal_slot<const std::string&> slot{};
+    s.navigation_blocked.subscribe(slot, cb);
+
+    s.can_deactivate = [](std::string_view, std::string_view) { return false; };
+    s.go_to("//settings");
+
+    CHECK(blocked_hits          == 1);
+    CHECK(s.current_route.get() == "//home");
+}
+
+TEST_CASE("deactivate fires before activate guard",
+          "[mock][shell][guard]") {
+    shell s;
+    s.add_tab("home");
+    s.add_tab("settings");
+    s.go_to("//home");
+
+    std::vector<std::string> order;
+    s.can_deactivate = [&](std::string_view, std::string_view) {
+        order.emplace_back("deactivate");
+        return true;
+    };
+    s.can_activate = [&](std::string_view) {
+        order.emplace_back("activate");
+        return true;
+    };
+
+    s.go_to("//settings");
+    REQUIRE(order.size() == 2);
+    CHECK(order[0] == "deactivate");
+    CHECK(order[1] == "activate");
+}
+
+TEST_CASE("activate is skipped if deactivate rejects",
+          "[mock][shell][guard]") {
+    shell s;
+    s.add_tab("home");
+    s.add_tab("settings");
+    s.go_to("//home");
+
+    bool activate_called = false;
+    s.can_deactivate = [](std::string_view, std::string_view) { return false; };
+    s.can_activate   = [&](std::string_view) {
+        activate_called = true;
+        return true;
+    };
+
+    s.go_to("//settings");
+    CHECK_FALSE(activate_called);
+    CHECK(s.current_route.get() == "//home");
+}
+
+TEST_CASE("navigated_to fires on the current page after go_to",
+          "[mock][shell][lifecycle]") {
+    page p;
+    shell s;
+    s.current_content = &p;
+
+    std::vector<std::string> seen;
+    struct cb_t {
+        std::vector<std::string>* dst;
+        void operator()(const std::string& v) const { dst->push_back(v); }
+    };
+    cb_t cb{&seen};
+    signal_slot<const std::string&> slot{};
+    p.navigated_to.subscribe(slot, cb);
+
+    s.go_to("//home");
+    s.go_to("//details/42");
+    REQUIRE(seen.size() == 2);
+    CHECK(seen[0] == "//home");
+    CHECK(seen[1] == "//details/42");
+}
+
+TEST_CASE("navigated_from fires on the outgoing page with previous URI",
+          "[mock][shell][lifecycle]") {
+    page p;
+    shell s;
+    s.current_content = &p;
+    s.go_to("//home");  // p is current; sees navigated_to("//home")
+
+    std::vector<std::string> from_seen;
+    struct cb_t {
+        std::vector<std::string>* dst;
+        void operator()(const std::string& v) const { dst->push_back(v); }
+    };
+    cb_t cb{&from_seen};
+    signal_slot<const std::string&> slot{};
+    p.navigated_from.subscribe(slot, cb);
+
+    s.go_to("//settings");
+    // navigated_from fires BEFORE current_route updates, so the URI
+    // is the previous one ("//home"), not "//settings".
+    REQUIRE(from_seen.size() == 1);
+    CHECK(from_seen[0] == "//home");
+}
+
+TEST_CASE("navigated_to/from do NOT fire when guards block",
+          "[mock][shell][lifecycle]") {
+    page p;
+    shell s;
+    s.current_content = &p;
+    s.go_to("//home");  // initial enter
+
+    int to_hits = 0, from_hits = 0;
+    struct cb_t {
+        int* hits;
+        void operator()(const std::string&) const { ++*hits; }
+    };
+    cb_t cb_to{&to_hits};
+    cb_t cb_from{&from_hits};
+    signal_slot<const std::string&> slot_to{};
+    signal_slot<const std::string&> slot_from{};
+    p.navigated_to.subscribe(slot_to, cb_to);
+    p.navigated_from.subscribe(slot_from, cb_from);
+
+    s.can_activate = [](std::string_view) { return false; };
+    s.go_to("//settings");
+
+    CHECK(to_hits   == 0);
+    CHECK(from_hits == 0);
+}

@@ -57,12 +57,17 @@ public:
     // Known route names registered via register_route().
     Observable<std::vector<std::string>> registered_routes{};
 
-    // Route guard. If set, called before each `go_to(uri)` with the
-    // target URI; returning false aborts the navigation (current_route
-    // stays where it was, navigated does NOT fire, navigation_blocked
-    // does). Apps use this for "you have unsaved changes" patterns:
+    // Route guards. Two-phase: `can_deactivate` checks "am I allowed
+    // to leave the current route?" (carries both current + target).
+    // `can_activate` checks "am I allowed to enter the target route?"
+    // (carries the target). Either returning false aborts the
+    // navigation (current_route stays where it was, navigated does
+    // NOT fire, navigation_blocked DOES with the rejected target).
     //
-    //   shell.can_activate = [&](std::string_view target) {
+    //   // "you have unsaved changes" pattern (deactivate guard):
+    //   shell.can_deactivate = [&](std::string_view current,
+    //                              std::string_view target) {
+    //       (void)current; (void)target;
     //       if (form.is_dirty()) {
     //           show_dirty_dialog();
     //           return false;
@@ -70,11 +75,19 @@ public:
     //       return true;
     //   };
     //
-    // The guard fires for both the string-based `go_to(uri)` and the
-    // typed `go_to<Path, &Table>(args...)` because the latter
-    // delegates to the former after URI building.
-    using nav_guard_t = std::function<bool(std::string_view /*target*/)>;
-    Observable<nav_guard_t>              can_activate{};
+    //   // "auth-required" pattern (activate guard):
+    //   shell.can_activate = [&](std::string_view target) {
+    //       return !target.contains("admin") || user.is_logged_in();
+    //   };
+    //
+    // Both guards fire for the string-based `go_to(uri)` and the
+    // typed `go_to<Path, &Table>(args...)`. The deactivate guard
+    // fires first; if it passes, the activate guard runs.
+    using nav_activate_guard_t   = std::function<bool(std::string_view /*target*/)>;
+    using nav_deactivate_guard_t = std::function<bool(std::string_view /*current*/,
+                                                      std::string_view /*target*/)>;
+    Observable<nav_activate_guard_t>     can_activate{};
+    Observable<nav_deactivate_guard_t>   can_deactivate{};
 
     // ----- Signals ------------------------------------------------------
 
@@ -110,10 +123,22 @@ public:
     // Unrecognized routes still set current_route so observers see the change;
     // the tab index doesn't move.
     void go_to(std::string_view uri) {
-        // Route-guard check (Observable may hold an empty function).
-        if (const auto& guard = can_activate.get(); guard && !guard(uri)) {
+        // Route-guard chain. Deactivate first (we're leaving the
+        // current route), then activate (we're entering the target).
+        const std::string current_uri = current_route.get();
+        if (const auto& dg = can_deactivate.get();
+            dg && !dg(std::string_view{current_uri}, uri)) {
             navigation_blocked.emit(std::string{uri});
             return;
+        }
+        if (const auto& ag = can_activate.get(); ag && !ag(uri)) {
+            navigation_blocked.emit(std::string{uri});
+            return;
+        }
+        // Fire navigated_from on the outgoing page BEFORE updating
+        // current_route, so the page sees the previous URI.
+        if (page* outgoing = current_content.get(); outgoing != nullptr) {
+            outgoing->navigated_from.emit(current_uri);
         }
         std::string u(uri);
         if (u.rfind("//", 0) == 0) {
@@ -137,6 +162,14 @@ public:
         }
         current_route.set(std::move(u));
         navigated.emit(current_route.get());
+        // Fire navigated_to on the incoming page AFTER current_route
+        // is updated, so the page sees the new URI. current_content
+        // may not have been swapped to the target page yet (the app
+        // typically does that in a `navigated` subscriber); whichever
+        // page is current at this instant gets the signal.
+        if (page* incoming = current_content.get(); incoming != nullptr) {
+            incoming->navigated_to.emit(current_route.get());
+        }
     }
 
     // Compile-time-checked navigation per
