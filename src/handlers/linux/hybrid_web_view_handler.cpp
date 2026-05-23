@@ -172,6 +172,19 @@ void hybrid_web_view_handler<platform::linux_>::map_messages(hybrid_web_view& h)
     wired_ = true;
 }
 
+void hybrid_web_view_handler<platform::linux_>::apply_html(const std::string& html) {
+    if (native_ == nullptr || html.empty()) return;
+    webkit_web_view_load_html(
+        WEBKIT_WEB_VIEW(static_cast<GObject*>(native_)),
+        html.c_str(),
+        nullptr /*base_uri*/);
+}
+
+void hybrid_web_view_handler<platform::linux_>::map_html_source(hybrid_web_view& h) {
+    apply_html(h.html_source.get());
+    h.html_source.changed.subscribe(html_slot_, html_cb_);
+}
+
 } // namespace mpapp
 
 // ---------- Self-registration --------------------------------------------

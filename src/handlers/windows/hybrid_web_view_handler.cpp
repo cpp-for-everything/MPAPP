@@ -158,8 +158,33 @@ void hybrid_web_view_handler<platform::windows>::map_messages(hybrid_web_view& h
         core_ready_token_ = native_.CoreWebView2Initialized(
             [self](muxc::WebView2 const&, muxc::CoreWebView2InitializedEventArgs const&) {
                 self->wire_bridge();
+                // If html_source was set before CoreWebView2 was ready,
+                // flush it now.
+                if (!self->pending_html_.empty()) {
+                    self->apply_html(self->pending_html_);
+                    self->pending_html_.clear();
+                }
             });
     }
+}
+
+void hybrid_web_view_handler<platform::windows>::apply_html(const std::string& html) {
+    if (native_ == nullptr || html.empty()) return;
+    auto core = native_.CoreWebView2();
+    if (core == nullptr) {
+        // CoreWebView2 not initialized yet — buffer until the
+        // CoreWebView2Initialized handler fires (see map_messages).
+        pending_html_ = html;
+        return;
+    }
+    try {
+        core.NavigateToString(detail::to_hstring_utf8(html));
+    } catch (...) {}
+}
+
+void hybrid_web_view_handler<platform::windows>::map_html_source(hybrid_web_view& h) {
+    apply_html(h.html_source.get());
+    h.html_source.changed.subscribe(html_slot_, html_cb_);
 }
 
 } // namespace mpapp

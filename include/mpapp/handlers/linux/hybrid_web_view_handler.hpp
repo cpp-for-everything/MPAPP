@@ -30,6 +30,7 @@ public:
     hybrid_web_view_handler& operator=(hybrid_web_view_handler&&)      = delete;
 
     void map_messages(hybrid_web_view& h);
+    void map_html_source(hybrid_web_view& h);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -39,10 +40,15 @@ public:
 
 private:
     void send_outbound(const std::string& payload);
+    void apply_html(const std::string& html);
 
     struct sent_cb_t {
         hybrid_web_view_handler<platform::linux_>* self;
         void operator()(const std::string& v) const { self->send_outbound(v); }
+    };
+    struct html_cb_t {
+        hybrid_web_view_handler<platform::linux_>* self;
+        void operator()(const std::string& v) const { self->apply_html(v); }
     };
 
     void*            native_      = nullptr;  // WebKitWebView*
@@ -52,7 +58,9 @@ private:
     bool             wired_ = false;
 
     sent_cb_t                       sent_cb_{this};
+    html_cb_t                       html_cb_{this};
     signal_slot<const std::string&> sent_slot_{};
+    signal_slot<const std::string&> html_slot_{};
 };
 
 } // namespace mpapp

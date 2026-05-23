@@ -62,6 +62,16 @@ public:
     // Bound JS namespace; the real handler exposes this as window[hybrid_namespace] on the JS side.
     Observable<std::string> hybrid_namespace{"mpapp"};
 
+    // HTML content for the embedded page. The real per-platform
+    // handlers wire this to webkit_web_view_load_html / WebView2
+    // NavigateToString / Android WebView.loadDataWithBaseURL. Setting
+    // an empty string clears the page; setting non-empty triggers a
+    // navigation to that HTML (typically reported as `about:blank`
+    // by the navigation-event side, depending on platform). Apps that
+    // need to load a remote URL instead can wrap a plain
+    // mpapp::web_view alongside this control.
+    Observable<std::string> html_source{""};
+
     // Most-recent inbound message (JS -> C++).
     Observable<std::string> last_message_in{""};
 
