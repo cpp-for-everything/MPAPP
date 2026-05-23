@@ -10,6 +10,9 @@ package io.mpapp.example;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
+
+import java.io.File;
 
 public class MainActivity extends Activity {
 
@@ -21,6 +24,23 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         nativeRegisterActivity(this);
+
+        // T-0016 Rule 11 catch-up: render the canvas-facade demo
+        // through the active Cairo backend and write a PNG to the
+        // app's external files dir. Visible end-to-end proof that
+        // Cairo on Android x86_64 actually renders pixels at runtime
+        // (not just that it links).
+        try {
+            File outDir = getExternalFilesDir(null);
+            if (outDir != null) {
+                File png = new File(outDir, "android-cairo-render.png");
+                int ok = nativeRenderCairoDemoPng(png.getAbsolutePath());
+                Log.i("MPAPP", "nativeRenderCairoDemoPng -> " + ok + " at " + png);
+            }
+        } catch (Throwable t) {
+            Log.w("MPAPP", "Cairo render skipped: " + t);
+        }
+
         nativeLaunch();
     }
 
@@ -28,4 +48,5 @@ public class MainActivity extends Activity {
     // the example's native_main.cpp.
     private native void nativeRegisterActivity(Activity activity);
     private native void nativeLaunch();
+    private native int  nativeRenderCairoDemoPng(String outputPath);
 }

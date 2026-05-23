@@ -16,3 +16,8 @@ if(UNIX AND NOT APPLE)
     add_subdirectory(gtk4_hello)
     add_subdirectory(gtk4_tableview_demo)
 endif()
+
+# Cross-platform CLI demo of the canvas facade (ADR-0015). Renders
+# shapes to a PNG via the active backend; visible end-to-end proof
+# that the Cairo backend wiring is correct on each host.
+add_subdirectory(cairo_render_demo)

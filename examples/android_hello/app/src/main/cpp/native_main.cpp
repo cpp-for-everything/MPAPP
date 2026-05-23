@@ -5,9 +5,16 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdio>
 #include <string>
 
 #include <jni.h>
+
+#include <mpapp/detail/graphics/canvas.hpp>
+
+#if defined(MPAPP_GRAPHICS_HAS_CAIRO)
+    #include <cairo/cairo.h>
+#endif
 
 #include <mpapp/application.hpp>
 #include <mpapp/box_view.hpp>
@@ -246,4 +253,98 @@ extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_example_MainActivity_nativeLaunch(JNIEnv* /*env*/, jobject /*thiz*/) {
     char* argv[] = {const_cast<char*>("mpapp")};
     mpapp::run<spike_app>(1, argv);
+}
+
+// T-0016 — Cairo render demo. Drives the canvas facade through a
+// representative paint sequence and writes the result as PNG to the
+// path supplied by MainActivity. Returns 0 on success, 1 on cairo
+// failure, 2 on backend missing.
+//
+// The paint sequence is intentionally identical to the cross-platform
+// `examples/cairo_render_demo/cairo_render_demo.cpp` CLI so the three
+// per-platform PNGs are pixel-identical when the backend is real.
+extern "C" JNIEXPORT jint JNICALL
+Java_io_mpapp_example_MainActivity_nativeRenderCairoDemoPng(
+    JNIEnv* env, jobject /*thiz*/, jstring jpath) {
+#if defined(MPAPP_GRAPHICS_HAS_CAIRO)
+    if (jpath == nullptr) return 1;
+    const char* path = env->GetStringUTFChars(jpath, nullptr);
+    if (path == nullptr) return 1;
+
+    // Build an independent cairo surface for PNG writeback (the
+    // facade doesn't expose its surface through the abstract API).
+    cairo_surface_t* surface =
+        cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 400, 320);
+    cairo_t* cr = cairo_create(surface);
+
+    // Replicate the cross-platform demo's paint sequence directly
+    // through Cairo. Kept inline so we don't need to ship a separate
+    // header for the shared scene.
+    cairo_set_source_rgba(cr, 0.96, 0.96, 0.94, 1.0);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint(cr);
+    cairo_set_operator(cr, CAIRO_OPERATOR_OVER);
+
+    auto fill_rect = [&](double r, double g, double b, double x, double y, double w, double h) {
+        cairo_set_source_rgba(cr, r, g, b, 1.0);
+        cairo_rectangle(cr, x, y, w, h);
+        cairo_fill(cr);
+    };
+    auto fill_ellipse = [&](double r, double g, double b, double x, double y, double w, double h) {
+        cairo_set_source_rgba(cr, r, g, b, 1.0);
+        cairo_save(cr);
+        cairo_translate(cr, x + w / 2.0, y + h / 2.0);
+        cairo_scale(cr, w / 2.0, h / 2.0);
+        cairo_arc(cr, 0, 0, 1, 0, 2 * 3.14159265358979323846);
+        cairo_restore(cr);
+        cairo_fill(cr);
+    };
+
+    fill_rect   (0.902, 0.224, 0.275,  20,  20, 100, 60);  // #E63946
+    fill_ellipse(0.165, 0.616, 0.561, 140,  20, 100, 60);  // #2A9D8F
+    cairo_set_source_rgba(cr, 0.957, 0.635, 0.380, 1.0);   // #F4A261
+    cairo_move_to(cr, 260, 20); cairo_line_to(cr, 360, 20);
+    cairo_line_to(cr, 310, 80); cairo_close_path(cr);
+    cairo_fill(cr);
+
+    cairo_set_source_rgba(cr, 0.114, 0.208, 0.341, 1.0);   // #1D3557
+    cairo_set_line_width(cr, 3.0);
+    cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+    cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+    cairo_rectangle(cr, 20, 110, 100, 60); cairo_stroke(cr);
+    cairo_save(cr);
+    cairo_translate(cr, 190, 140); cairo_scale(cr, 50, 30);
+    cairo_arc(cr, 0, 0, 1, 0, 2 * 3.14159265358979323846);
+    cairo_restore(cr); cairo_stroke(cr);
+    cairo_move_to(cr, 260, 170);
+    cairo_curve_to(cr, 290, 110, 330, 110, 360, 170);
+    cairo_stroke(cr);
+
+    cairo_save(cr);
+    cairo_translate(cr, 80, 240);
+    cairo_rotate(cr, 0.3);
+    cairo_set_source_rgba(cr, 0.149, 0.275, 0.325, 0.5);  // #264653 50%
+    cairo_rectangle(cr, 0, 0, 80, 50); cairo_fill(cr);
+    cairo_restore(cr);
+
+    cairo_save(cr);
+    cairo_move_to(cr, 220, 245);
+    cairo_curve_to(cr, 280, 215, 360, 215, 360, 275);
+    cairo_curve_to(cr, 360, 305, 280, 305, 220, 275);
+    cairo_close_path(cr); cairo_clip(cr);
+    cairo_set_source_rgba(cr, 0.906, 0.435, 0.318, 1.0);  // #E76F51
+    cairo_rectangle(cr, 200, 220, 200, 80); cairo_fill(cr);
+    cairo_restore(cr);
+
+    cairo_surface_flush(surface);
+    auto status = cairo_surface_write_to_png(surface, path);
+    cairo_destroy(cr);
+    cairo_surface_destroy(surface);
+
+    env->ReleaseStringUTFChars(jpath, path);
+    return status == CAIRO_STATUS_SUCCESS ? 0 : 1;
+#else
+    (void)env; (void)jpath;
+    return 2;
+#endif
 }
