@@ -119,17 +119,6 @@ tabs.children.value().push_back(mpapp::content_page{ .title = "Profile",  .conte
 tabs.children.value().push_back(mpapp::content_page{ .title = "Settings", .content = mpapp::label{ .text = "Settings" } });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/tabbedview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/tabbedview/windows_test.cpp` (planned)
-- Android handler: `tests/components/tabbedview/android_test.cpp` (planned)
-- Linux handler: `tests/components/tabbedview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/tabbedview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/tabbedview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -140,6 +129,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | iOS tab bar | Always `UITabBarController` | `UITabBar` when used as page; `UISegmentedControl` when embedded | Avoids nesting two `UITabBarController`s | n/a |
 | Tab reorder | Off by default on all platforms | Same | OS defaults | n/a |
 | `ItemsSource` template | `DataTemplate` | `data_template<T>` (compile-time typed) | [[ADR-0009-public-api-template-wrappers-only]] | n/a |
+
+## Implementation
+
+- Surface: [`include/mpapp/tabbed_view.hpp`](../../../include/mpapp/tabbed_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/tabbed_view_handler.hpp`](../../../include/mpapp/handlers/mock/tabbed_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/tabbed_view_handler.hpp`](../../../include/mpapp/handlers/windows/tabbed_view_handler.hpp) + [`src/handlers/windows/tabbed_view_handler.cpp`](../../../src/handlers/windows/tabbed_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/tabbed_view_handler.hpp`](../../../include/mpapp/handlers/linux/tabbed_view_handler.hpp) + [`src/handlers/linux/tabbed_view_handler.cpp`](../../../src/handlers/linux/tabbed_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/tabbed_view_handler.hpp`](../../../include/mpapp/handlers/android/tabbed_view_handler.hpp) + [`src/handlers/android/tabbed_view_handler.cpp`](../../../src/handlers/android/tabbed_view_handler.cpp)
+- Tests: [`tests/mock_handlers/tabbed_view_test.cpp`](../../../tests/mock_handlers/tabbed_view_test.cpp)
 
 ## See also
 

@@ -114,17 +114,6 @@ bar.add(std::move(file));
 page.menu_bar_items = std::move(bar);
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/menubar/mock_test.cpp` (planned)
-- Windows handler: `tests/components/menubar/windows_test.cpp` (planned)
-- Android handler: `tests/components/menubar/android_test.cpp` (planned)
-- Linux handler: `tests/components/menubar/linux_test.cpp` (planned)
-- macOS handler: `tests/components/menubar/macos_test.cpp` (planned)
-- iOS handler: `tests/components/menubar/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -134,6 +123,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Collection mutation events | C# `ObservableCollection` + handler `Invoke(string, args)` | Typed `observable_list<menu_bar_item>` change events | Removes string-keyed dispatch per [[ADR-0009-public-api-template-wrappers-only]] | n/a |
 | macOS menu identity | One `NSMenu` per `MenuBar` instance | App menu is process-wide; last-focused window wins | OS constraint | RFC TBD |
 | iPhone rendering | No menu bar | Same | OS constraint | n/a |
+
+## Implementation
+
+- Surface: [`include/mpapp/menu_bar.hpp`](../../../include/mpapp/menu_bar.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/menu_bar_handler.hpp`](../../../include/mpapp/handlers/mock/menu_bar_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/menu_bar_handler.hpp`](../../../include/mpapp/handlers/windows/menu_bar_handler.hpp) + [`src/handlers/windows/menu_bar_handler.cpp`](../../../src/handlers/windows/menu_bar_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/menu_bar_handler.hpp`](../../../include/mpapp/handlers/linux/menu_bar_handler.hpp) + [`src/handlers/linux/menu_bar_handler.cpp`](../../../src/handlers/linux/menu_bar_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/menu_bar_handler.hpp`](../../../include/mpapp/handlers/android/menu_bar_handler.hpp) + [`src/handlers/android/menu_bar_handler.cpp`](../../../src/handlers/android/menu_bar_handler.cpp)
+- Tests: [`tests/mock_handlers/menu_bar_test.cpp`](../../../tests/mock_handlers/menu_bar_test.cpp)
 
 ## See also
 

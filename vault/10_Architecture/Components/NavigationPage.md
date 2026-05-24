@@ -132,17 +132,6 @@ task<void> home_page::on_details() {
 }
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/navigationpage/mock_test.cpp` (planned)
-- Windows handler: `tests/components/navigationpage/windows_test.cpp` (planned)
-- Android handler: `tests/components/navigationpage/android_test.cpp` (planned)
-- Linux handler: `tests/components/navigationpage/linux_test.cpp` (planned)
-- macOS handler: `tests/components/navigationpage/macos_test.cpp` (planned)
-- iOS handler: `tests/components/navigationpage/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -153,6 +142,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | iOS legacy renderer | Mixed Maui/Legacy iOS handler (`UseMauiHandler = false` on iOS/MacCatalyst). | Single handler per platform. | New codebase; no legacy debt. | n/a |
 | `LayoutChildren` (obsolete) | Still present; returns early. | Not implemented (replaced by `arrange_override`). | Deprecated upstream. | n/a |
 | Swipe-back | iOS only (native); other platforms toolbar-only. | Same — iOS native; others toolbar-only. | Platform conventions. | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/navigation_page.hpp`](../../../include/mpapp/navigation_page.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/navigation_page_handler.hpp`](../../../include/mpapp/handlers/mock/navigation_page_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/navigation_page_handler.hpp`](../../../include/mpapp/handlers/windows/navigation_page_handler.hpp) + [`src/handlers/windows/navigation_page_handler.cpp`](../../../src/handlers/windows/navigation_page_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/navigation_page_handler.hpp`](../../../include/mpapp/handlers/linux/navigation_page_handler.hpp) + [`src/handlers/linux/navigation_page_handler.cpp`](../../../src/handlers/linux/navigation_page_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/navigation_page_handler.hpp`](../../../include/mpapp/handlers/android/navigation_page_handler.hpp) + [`src/handlers/android/navigation_page_handler.cpp`](../../../src/handlers/android/navigation_page_handler.cpp)
+- Tests: [`tests/mock_handlers/navigation_page_test.cpp`](../../../tests/mock_handlers/navigation_page_test.cpp)
 
 ## See also
 

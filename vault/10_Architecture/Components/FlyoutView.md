@@ -137,17 +137,6 @@ fv->detail = body;
 fv->is_presented = true;
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/flyoutview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/flyoutview/windows_test.cpp` (planned)
-- Android handler: `tests/components/flyoutview/android_test.cpp` (planned)
-- Linux handler: `tests/components/flyoutview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/flyoutview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/flyoutview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
@@ -155,6 +144,16 @@ Links to per-platform handler test files. Tracked in [[Test Harness]].
 | `Flyout`/`Detail` mapping on iOS/macOS | Mapped through the page-level handler (`FlyoutPage`), not the view-level one | Mapped at the view level for symmetry | Lets `flyout_view` be used directly without a `Page` wrapper | TBD |
 | `FlyoutWidth` < 0 sentinel | Same | Same | Matches MAUI defaults | N/A |
 | `IsGestureEnabled` on desktop | Effectively no-op | Same — explicitly documented as no-op | Aligns with [[Interop Parity]] | TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/flyout_view.hpp`](../../../include/mpapp/flyout_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/flyout_view_handler.hpp`](../../../include/mpapp/handlers/mock/flyout_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/flyout_view_handler.hpp`](../../../include/mpapp/handlers/windows/flyout_view_handler.hpp) + [`src/handlers/windows/flyout_view_handler.cpp`](../../../src/handlers/windows/flyout_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/flyout_view_handler.hpp`](../../../include/mpapp/handlers/linux/flyout_view_handler.hpp) + [`src/handlers/linux/flyout_view_handler.cpp`](../../../src/handlers/linux/flyout_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/flyout_view_handler.hpp`](../../../include/mpapp/handlers/android/flyout_view_handler.hpp) + [`src/handlers/android/flyout_view_handler.cpp`](../../../src/handlers/android/flyout_view_handler.cpp)
+- Tests: [`tests/mock_handlers/flyout_view_test.cpp`](../../../tests/mock_handlers/flyout_view_test.cpp)
 
 ## See also
 

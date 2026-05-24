@@ -135,17 +135,6 @@ fp->detail                = detail;
 fp->flyout_layout_behavior = flyout_layout_behavior::split_on_landscape;
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/flyoutpage/mock_test.cpp` (planned)
-- Windows handler: `tests/components/flyoutpage/windows_test.cpp` (planned)
-- Android handler: `tests/components/flyoutpage/android_test.cpp` (planned)
-- Linux handler: `tests/components/flyoutpage/linux_test.cpp` (planned)
-- macOS handler: `tests/components/flyoutpage/macos_test.cpp` (planned)
-- iOS handler: `tests/components/flyoutpage/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -158,6 +147,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Default `IsPresented` | `true` on macOS, `false` elsewhere. | Same. | Matches platform conventions (sidebar visible). | n/a |
 | Phone idiom | Forces popover even if `Split` requested. | Same. | Real-estate. | n/a |
 | Linux | No native two-pane; uses Adwaita `OverlaySplitView`. | Same. | Best GTK4 analog. | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/flyout_page.hpp`](../../../include/mpapp/flyout_page.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/flyout_page_handler.hpp`](../../../include/mpapp/handlers/mock/flyout_page_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/flyout_page_handler.hpp`](../../../include/mpapp/handlers/windows/flyout_page_handler.hpp) + [`src/handlers/windows/flyout_page_handler.cpp`](../../../src/handlers/windows/flyout_page_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/flyout_page_handler.hpp`](../../../include/mpapp/handlers/linux/flyout_page_handler.hpp) + [`src/handlers/linux/flyout_page_handler.cpp`](../../../src/handlers/linux/flyout_page_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/flyout_page_handler.hpp`](../../../include/mpapp/handlers/android/flyout_page_handler.hpp) + [`src/handlers/android/flyout_page_handler.cpp`](../../../src/handlers/android/flyout_page_handler.cpp)
+- Tests: [`tests/mock_handlers/flyout_page_test.cpp`](../../../tests/mock_handlers/flyout_page_test.cpp)
 
 ## See also
 

@@ -139,17 +139,6 @@ public:
 };
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/page/mock_test.cpp` (planned)
-- Windows handler: `tests/components/page/windows_test.cpp` (planned)
-- Android handler: `tests/components/page/android_test.cpp` (planned)
-- Linux handler: `tests/components/page/linux_test.cpp` (planned)
-- macOS handler: `tests/components/page/macos_test.cpp` (planned)
-- iOS handler: `tests/components/page/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -160,6 +149,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | `IsBusy` | Bindable property (deprecated in .NET 11). | Omitted from public API. | Deprecated upstream; replaced with `ActivityIndicator`. | RFC TBD |
 | `ContainerArea` | Obsolete `Rect` property. | Not exposed. | Internal/obsolete in MAUI. | n/a |
 | Safe-area | `ISafeAreaView2.SafeAreaInsets` + iOS-only API. | Cross-platform `safe_area_edges` on every page. | Interop parity (Rule 2). | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/page.hpp`](../../../include/mpapp/page.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/page_handler.hpp`](../../../include/mpapp/handlers/mock/page_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/page_handler.hpp`](../../../include/mpapp/handlers/windows/page_handler.hpp) + [`src/handlers/windows/page_handler.cpp`](../../../src/handlers/windows/page_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/page_handler.hpp`](../../../include/mpapp/handlers/linux/page_handler.hpp) + [`src/handlers/linux/page_handler.cpp`](../../../src/handlers/linux/page_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/page_handler.hpp`](../../../include/mpapp/handlers/android/page_handler.hpp) + [`src/handlers/android/page_handler.cpp`](../../../src/handlers/android/page_handler.cpp)
+- Tests: [`tests/mock_handlers/page_test.cpp`](../../../tests/mock_handlers/page_test.cpp)
 
 ## See also
 

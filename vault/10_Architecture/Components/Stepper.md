@@ -105,23 +105,22 @@ st->value_changed.subscribe([](double v) { set_quantity(v); });
 
 `stepper_handler<platform::mock>` records changes to `value`, `minimum`, `maximum`, and `interval`. Tests cover initial value capture, increments, and the no-emit-on-same-value contract.
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/mock_handlers/stepper_test.cpp`
-- Windows handler: `tests/components/stepper/windows_test.cpp` (planned)
-- Android handler: `tests/components/stepper/android_test.cpp` (planned)
-- Linux handler: `tests/components/stepper/linux_test.cpp` (planned)
-- macOS handler: `tests/components/stepper/macos_test.cpp` (planned)
-- iOS handler: `tests/components/stepper/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Implementation
+
+- Surface: [`include/mpapp/stepper.hpp`](../../../include/mpapp/stepper.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/stepper_handler.hpp`](../../../include/mpapp/handlers/mock/stepper_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/stepper_handler.hpp`](../../../include/mpapp/handlers/windows/stepper_handler.hpp) + [`src/handlers/windows/stepper_handler.cpp`](../../../src/handlers/windows/stepper_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/stepper_handler.hpp`](../../../include/mpapp/handlers/linux/stepper_handler.hpp) + [`src/handlers/linux/stepper_handler.cpp`](../../../src/handlers/linux/stepper_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/stepper_handler.hpp`](../../../include/mpapp/handlers/android/stepper_handler.hpp) + [`src/handlers/android/stepper_handler.cpp`](../../../src/handlers/android/stepper_handler.cpp)
+- Tests: [`tests/mock_handlers/stepper_test.cpp`](../../../tests/mock_handlers/stepper_test.cpp)
 
 ## See also
 

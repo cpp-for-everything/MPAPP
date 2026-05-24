@@ -130,17 +130,6 @@ wv->navigated.connect([](auto& args) {
 auto title = wv->evaluate_javascript_async("document.title").get();
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/webview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/webview/windows_test.cpp` (planned)
-- Android handler: `tests/components/webview/android_test.cpp` (planned)
-- Linux handler: `tests/components/webview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/webview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/webview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -151,6 +140,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Cookie sync | `System.Net.CookieContainer` | `mpapp::cookie_container` value type with platform sync at apply-time | No .NET BCL dependency | — |
 | Linux engine | Not supported (no MAUI Linux head) | `WebKitGTK` | Closest engine match available on GTK | — |
 | `ProcessTerminated` | Default-implemented as no-op on netstandard2.0 | Always implemented; non-WebKit2-based hosts simulate by raising on crash | Cross-platform parity | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/web_view.hpp`](../../../include/mpapp/web_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/web_view_handler.hpp`](../../../include/mpapp/handlers/mock/web_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/web_view_handler.hpp`](../../../include/mpapp/handlers/windows/web_view_handler.hpp) + [`src/handlers/windows/web_view_handler.cpp`](../../../src/handlers/windows/web_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/web_view_handler.hpp`](../../../include/mpapp/handlers/linux/web_view_handler.hpp) + [`src/handlers/linux/web_view_handler.cpp`](../../../src/handlers/linux/web_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/web_view_handler.hpp`](../../../include/mpapp/handlers/android/web_view_handler.hpp) + [`src/handlers/android/web_view_handler.cpp`](../../../src/handlers/android/web_view_handler.cpp)
+- Tests: [`tests/mock_handlers/web_view_test.cpp`](../../../tests/mock_handlers/web_view_test.cpp)
 
 ## See also
 

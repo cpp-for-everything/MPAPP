@@ -131,17 +131,6 @@ root.sections.get().push_back(std::move(account));
 tv->root = std::move(root);
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/tableview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/tableview/windows_test.cpp` (planned)
-- Android handler: `tests/components/tableview/android_test.cpp` (planned)
-- Linux handler: `tests/components/tableview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/tableview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/tableview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -152,6 +141,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Section model | `TableRoot` + `TableSection` + `Cell` | Same shape, but section/cell collections use `observable_vector` | Compile-time observable contract per [[ADR-0009-public-api-template-wrappers-only]] | — |
 | Cell mutation | Cells reparented imperatively; raises `ChildAdded` | Reparenting handled by `observable_vector` move semantics | C++ value semantics | — |
 | macOS native control | `UITableView` (Catalyst) | `NSTableView` (AppKit) | [[ADR-0005-ios-macos-separate-interop]] | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/table_view.hpp`](../../../include/mpapp/table_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/table_view_handler.hpp`](../../../include/mpapp/handlers/mock/table_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/table_view_handler.hpp`](../../../include/mpapp/handlers/windows/table_view_handler.hpp) + [`src/handlers/windows/table_view_handler.cpp`](../../../src/handlers/windows/table_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/table_view_handler.hpp`](../../../include/mpapp/handlers/linux/table_view_handler.hpp) + [`src/handlers/linux/table_view_handler.cpp`](../../../src/handlers/linux/table_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/table_view_handler.hpp`](../../../include/mpapp/handlers/android/table_view_handler.hpp) + [`src/handlers/android/table_view_handler.cpp`](../../../src/handlers/android/table_view_handler.cpp)
+- Tests: [`tests/mock_handlers/table_view_test.cpp`](../../../tests/mock_handlers/table_view_test.cpp)
 
 ## See also
 

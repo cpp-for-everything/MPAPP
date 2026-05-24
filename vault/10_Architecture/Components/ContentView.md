@@ -100,17 +100,6 @@ label->text = "Hello";
 card->content = label;
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/contentview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/contentview/windows_test.cpp` (planned)
-- Android handler: `tests/components/contentview/android_test.cpp` (planned)
-- Linux handler: `tests/components/contentview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/contentview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/contentview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
@@ -118,6 +107,16 @@ Links to per-platform handler test files. Tracked in [[Test Harness]].
 | `ISafeAreaView2.SafeAreaInsets` | Public no-op setter on the interface | Internal — only the handler can drive it | Users should not be writing safe-area insets manually | TBD |
 | `SafeAreaEdges` default | `None` (edge-to-edge) | Same | Matches MAUI; mobile apps must opt in explicitly | N/A |
 | `Content`-as-`Element` parenthood | `Content` is wired as a logical child of the `ContentView` | Same | Required for binding-context inheritance | N/A |
+
+## Implementation
+
+- Surface: [`include/mpapp/content_view.hpp`](../../../include/mpapp/content_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/content_view_handler.hpp`](../../../include/mpapp/handlers/mock/content_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/content_view_handler.hpp`](../../../include/mpapp/handlers/windows/content_view_handler.hpp) + [`src/handlers/windows/content_view_handler.cpp`](../../../src/handlers/windows/content_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/content_view_handler.hpp`](../../../include/mpapp/handlers/linux/content_view_handler.hpp) + [`src/handlers/linux/content_view_handler.cpp`](../../../src/handlers/linux/content_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/content_view_handler.hpp`](../../../include/mpapp/handlers/android/content_view_handler.hpp) + [`src/handlers/android/content_view_handler.cpp`](../../../src/handlers/android/content_view_handler.cpp)
+- Tests: [`tests/mock_handlers/content_view_test.cpp`](../../../tests/mock_handlers/content_view_test.cpp)
 
 ## See also
 

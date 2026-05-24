@@ -112,17 +112,6 @@ iv->hide_single = true;
 carousel->position.subscribe([iv](int p) { iv->position = p; });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/indicatorview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/indicatorview/windows_test.cpp` (planned)
-- Android handler: `tests/components/indicatorview/android_test.cpp` (planned)
-- Linux handler: `tests/components/indicatorview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/indicatorview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/indicatorview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -133,6 +122,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | `IndicatorTemplate` | Switches to `ITemplatedIndicatorView` path with a separate layout | Single `indicator_template` property — handler picks the templated path when non-null | Simpler observable model | Possible RFC if behavior diverges |
 | Position binding | Two-way `BindableProperty` | Two-way `Observable<int>` — natural | Native to MPAPP | — |
 | macOS native control | Uses iOS-style `UIPageControl` via Catalyst | Uses `NSPageControl` where available, falls back to MPAPP drawing | [[ADR-0005-ios-macos-separate-interop]] | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/indicator_view.hpp`](../../../include/mpapp/indicator_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/indicator_view_handler.hpp`](../../../include/mpapp/handlers/mock/indicator_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/indicator_view_handler.hpp`](../../../include/mpapp/handlers/windows/indicator_view_handler.hpp) + [`src/handlers/windows/indicator_view_handler.cpp`](../../../src/handlers/windows/indicator_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/indicator_view_handler.hpp`](../../../include/mpapp/handlers/linux/indicator_view_handler.hpp) + [`src/handlers/linux/indicator_view_handler.cpp`](../../../src/handlers/linux/indicator_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/indicator_view_handler.hpp`](../../../include/mpapp/handlers/android/indicator_view_handler.hpp) + [`src/handlers/android/indicator_view_handler.cpp`](../../../src/handlers/android/indicator_view_handler.cpp)
+- Tests: [`tests/mock_handlers/indicator_view_test.cpp`](../../../tests/mock_handlers/indicator_view_test.cpp)
 
 ## See also
 

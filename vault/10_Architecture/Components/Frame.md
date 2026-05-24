@@ -108,17 +108,6 @@ b->stroke_shape     = mpapp::shapes::round_rectangle(10);
 b->content          = mpapp::make<mpapp::label>("Hello");
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/frame/mock_test.cpp` (planned)
-- Windows handler: `tests/components/frame/windows_test.cpp` (planned)
-- Android handler: `tests/components/frame/android_test.cpp` (planned)
-- Linux handler: `tests/components/frame/linux_test.cpp` (planned)
-- macOS handler: `tests/components/frame/macos_test.cpp` (planned)
-- iOS handler: `tests/components/frame/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -133,6 +122,16 @@ The P2 mock surface (ADR-0008) lands in this repository:
 - **Cross-platform header:** `include/mpapp/frame.hpp` — `mpapp::frame : view` with `[[deprecated("mpapp::frame is deprecated; use mpapp::border instead.")]]`. Properties match the vault spec (`border_color`, `has_shadow`, `corner_radius`, `padding`, `content`) with MAUI defaults (`has_shadow=true`, `corner_radius=-1`, `padding=thickness{20}`).
 - **Mock handler:** `include/mpapp/handlers/mock/frame_handler.hpp` — `frame_handler<platform::mock>` records every property mapper. Local pragmas suppress the deprecation diagnostic inside the handler since it IS the legacy path. The umbrella header `<mpapp/mpapp.hpp>` deliberately does NOT include `<frame.hpp>` — callers opt in explicitly.
 - **Mock tests:** `tests/mock_handlers/frame_test.cpp`.
+
+## Implementation
+
+- Surface: [`include/mpapp/frame.hpp`](../../../include/mpapp/frame.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/frame_handler.hpp`](../../../include/mpapp/handlers/mock/frame_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/frame_handler.hpp`](../../../include/mpapp/handlers/windows/frame_handler.hpp) + [`src/handlers/windows/frame_handler.cpp`](../../../src/handlers/windows/frame_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/frame_handler.hpp`](../../../include/mpapp/handlers/linux/frame_handler.hpp) + [`src/handlers/linux/frame_handler.cpp`](../../../src/handlers/linux/frame_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/frame_handler.hpp`](../../../include/mpapp/handlers/android/frame_handler.hpp) + [`src/handlers/android/frame_handler.cpp`](../../../src/handlers/android/frame_handler.cpp)
+- Tests: [`tests/mock_handlers/frame_test.cpp`](../../../tests/mock_handlers/frame_test.cpp)
 
 ## See also
 

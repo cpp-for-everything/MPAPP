@@ -98,17 +98,6 @@ s->toggled.subscribe([](bool v) { save_pref("notifications", v); });
 
 `switch_handler<platform::mock>` records `is_on=<bool>` into `calls()`; tests cover the toggle sequence and the no-emit-on-same-value contract.
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/mock_handlers/switch_test.cpp`
-- Windows handler: `tests/components/switch/windows_test.cpp` (planned)
-- Android handler: `tests/components/switch/android_test.cpp` (planned)
-- Linux handler: `tests/components/switch/linux_test.cpp` (planned)
-- macOS handler: `tests/components/switch/macos_test.cpp` (planned)
-- iOS handler: `tests/components/switch/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -116,6 +105,15 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
 | Class name | `Switch` | `mpapp::switch_` | `switch` is a C++ reserved keyword. | N/A — XAML element name is unchanged. |
+
+## Implementation
+
+- Mock handler: [`include/mpapp/handlers/mock/switch_handler.hpp`](../../../include/mpapp/handlers/mock/switch_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/switch_handler.hpp`](../../../include/mpapp/handlers/windows/switch_handler.hpp) + [`src/handlers/windows/switch_handler.cpp`](../../../src/handlers/windows/switch_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/switch_handler.hpp`](../../../include/mpapp/handlers/linux/switch_handler.hpp) + [`src/handlers/linux/switch_handler.cpp`](../../../src/handlers/linux/switch_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/switch_handler.hpp`](../../../include/mpapp/handlers/android/switch_handler.hpp) + [`src/handlers/android/switch_handler.cpp`](../../../src/handlers/android/switch_handler.cpp)
+- Tests: [`tests/mock_handlers/switch_test.cpp`](../../../tests/mock_handlers/switch_test.cpp)
 
 ## See also
 

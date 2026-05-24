@@ -103,23 +103,22 @@ l->horizontal_text_alignment = text_alignment::center;
 
 `label_handler<platform::mock>` records `text=<value>` into `calls()`; tests cover initial-value capture on map, sequential updates, and the no-op-on-same-value contract.
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/mock_handlers/label_test.cpp`
-- Windows handler: `tests/components/label/windows_test.cpp` (planned)
-- Android handler: `tests/components/label/android_test.cpp` (planned)
-- Linux handler: `tests/components/label/linux_test.cpp` (planned)
-- macOS handler: `tests/components/label/macos_test.cpp` (planned)
-- iOS handler: `tests/components/label/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Implementation
+
+- Surface: [`include/mpapp/label.hpp`](../../../include/mpapp/label.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/label_handler.hpp`](../../../include/mpapp/handlers/mock/label_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/label_handler.hpp`](../../../include/mpapp/handlers/windows/label_handler.hpp) + [`src/handlers/windows/label_handler.cpp`](../../../src/handlers/windows/label_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/label_handler.hpp`](../../../include/mpapp/handlers/linux/label_handler.hpp) + [`src/handlers/linux/label_handler.cpp`](../../../src/handlers/linux/label_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/label_handler.hpp`](../../../include/mpapp/handlers/android/label_handler.hpp) + [`src/handlers/android/label_handler.cpp`](../../../src/handlers/android/label_handler.cpp)
+- Tests: [`tests/mock_handlers/label_test.cpp`](../../../tests/mock_handlers/label_test.cpp)
 
 ## See also
 

@@ -157,17 +157,6 @@ protected:
 };
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/element/mock_test.cpp` (planned)
-- Windows handler: `tests/components/element/windows_test.cpp` (planned)
-- Android handler: `tests/components/element/android_test.cpp` (planned)
-- Linux handler: `tests/components/element/linux_test.cpp` (planned)
-- macOS handler: `tests/components/element/macos_test.cpp` (planned)
-- iOS handler: `tests/components/element/ios_test.cpp` (planned)
-
 The element-level test suite focuses on the *abstract* contract: parent/child propagation, binding-context inheritance, handler attach/detach ordering, and resource-merge lookup.
 
 ## Known Differences

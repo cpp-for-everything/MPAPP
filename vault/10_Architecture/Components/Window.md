@@ -113,17 +113,6 @@ w->height = 768;
 w->page   = std::make_shared<MainPage>();
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/window/mock_test.cpp` (planned)
-- Windows handler: `tests/components/window/windows_test.cpp` (planned)
-- Android handler: `tests/components/window/android_test.cpp` (planned)
-- Linux handler: `tests/components/window/linux_test.cpp` (planned)
-- macOS handler: `tests/components/window/macos_test.cpp` (planned)
-- iOS handler: `tests/components/window/ios_test.cpp` (planned)
-
 ## Known Differences
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
@@ -131,6 +120,16 @@ Links to per-platform handler test files. Tracked in [[Test Harness]].
 | `IsActivated` | Read-only bindable, internal setter | `Computed<bool>` driven by handler events | Cannot be assigned from user code — mirrors MAUI's intent more strictly | [[ADR-0009-public-api-template-wrappers-only]] |
 | Geometry on mobile | Silently ignored | Logged at debug level; values still settable | Eases shared XAML between desktop and mobile | [[Interop Parity]] |
 | `Page` cardinality | Single-page; modal stack lives on `Navigation` | Same | None | N/A |
+
+## Implementation
+
+- Surface: [`include/mpapp/window.hpp`](../../../include/mpapp/window.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/window_handler.hpp`](../../../include/mpapp/handlers/mock/window_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/window_handler.hpp`](../../../include/mpapp/handlers/windows/window_handler.hpp) + [`src/handlers/windows/window_handler.cpp`](../../../src/handlers/windows/window_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/window_handler.hpp`](../../../include/mpapp/handlers/linux/window_handler.hpp) + [`src/handlers/linux/window_handler.cpp`](../../../src/handlers/linux/window_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/window_handler.hpp`](../../../include/mpapp/handlers/android/window_handler.hpp) + [`src/handlers/android/window_handler.cpp`](../../../src/handlers/android/window_handler.cpp)
+- Tests: [`tests/mock_handlers/window_test.cpp`](../../../tests/mock_handlers/window_test.cpp)
 
 ## See also
 

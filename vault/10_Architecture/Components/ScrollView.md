@@ -124,17 +124,6 @@ sv->scrolled.subscribe([](const auto& args) {
 });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/scrollview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/scrollview/windows_test.cpp` (planned)
-- Android handler: `tests/components/scrollview/android_test.cpp` (planned)
-- Linux handler: `tests/components/scrollview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/scrollview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/scrollview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -149,6 +138,16 @@ The P2 mock surface (ADR-0008) lands in this repository:
 - **Cross-platform header:** `include/mpapp/scroll_view.hpp` — `mpapp::scroll_view : view` with `Observable<std::shared_ptr<view>> content`, the orientation / scrollbar-visibility enums, read-only `scroll_x`/`scroll_y` observables, and a `scroll_to(scroll_to_request, Command<scroll_to_request>)` method.
 - **Mock handler:** `include/mpapp/handlers/mock/scroll_view_handler.hpp` — `scroll_view_handler<platform::mock>` records property mappers and the scroll-to command (x, y, animated).
 - **Mock tests:** `tests/mock_handlers/scroll_view_test.cpp`.
+
+## Implementation
+
+- Surface: [`include/mpapp/scroll_view.hpp`](../../../include/mpapp/scroll_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/scroll_view_handler.hpp`](../../../include/mpapp/handlers/mock/scroll_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/scroll_view_handler.hpp`](../../../include/mpapp/handlers/windows/scroll_view_handler.hpp) + [`src/handlers/windows/scroll_view_handler.cpp`](../../../src/handlers/windows/scroll_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/scroll_view_handler.hpp`](../../../include/mpapp/handlers/linux/scroll_view_handler.hpp) + [`src/handlers/linux/scroll_view_handler.cpp`](../../../src/handlers/linux/scroll_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/scroll_view_handler.hpp`](../../../include/mpapp/handlers/android/scroll_view_handler.hpp) + [`src/handlers/android/scroll_view_handler.cpp`](../../../src/handlers/android/scroll_view_handler.cpp)
+- Tests: [`tests/mock_handlers/scroll_view_test.cpp`](../../../tests/mock_handlers/scroll_view_test.cpp)
 
 ## See also
 

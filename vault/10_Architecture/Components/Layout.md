@@ -114,17 +114,6 @@ root->children.add(mpapp::make<mpapp::label>("Title"));
 root->children.add(mpapp::make<mpapp::button>("OK"));
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/layout/mock_test.cpp` (planned)
-- Windows handler: `tests/components/layout/windows_test.cpp` (planned)
-- Android handler: `tests/components/layout/android_test.cpp` (planned)
-- Linux handler: `tests/components/layout/linux_test.cpp` (planned)
-- macOS handler: `tests/components/layout/macos_test.cpp` (planned)
-- iOS handler: `tests/components/layout/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -141,6 +130,12 @@ The P2 mock surface (ADR-0008) lands in this repository:
 - **Mock tests:** `tests/mock_handlers/layout_test.cpp`.
 
 The full `ObservableList<shared_ptr<view>>` from the vault spec lands with the M-03 collection-binding plumbing — until then the mutator-plus-command-mapper pair is the contract.
+
+## Implementation
+
+- Surface: [`include/mpapp/layout.hpp`](../../../include/mpapp/layout.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/layout_handler.hpp`](../../../include/mpapp/handlers/mock/layout_handler.hpp)
+- Tests: [`tests/mock_handlers/layout_test.cpp`](../../../tests/mock_handlers/layout_test.cpp)
 
 ## See also
 

@@ -95,23 +95,22 @@ cb->checked_changed.subscribe([](bool v) { set_accept_terms(v); });
 
 `check_box_handler<platform::mock>` records `is_checked=<bool>` into `calls()`; tests cover initial-value capture, toggling, and the no-emit-on-same-value contract.
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/mock_handlers/check_box_test.cpp`
-- Windows handler: `tests/components/check_box/windows_test.cpp` (planned)
-- Android handler: `tests/components/check_box/android_test.cpp` (planned)
-- Linux handler: `tests/components/check_box/linux_test.cpp` (planned)
-- macOS handler: `tests/components/check_box/macos_test.cpp` (planned)
-- iOS handler: `tests/components/check_box/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Implementation
+
+- Surface: [`include/mpapp/check_box.hpp`](../../../include/mpapp/check_box.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/check_box_handler.hpp`](../../../include/mpapp/handlers/mock/check_box_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/check_box_handler.hpp`](../../../include/mpapp/handlers/windows/check_box_handler.hpp) + [`src/handlers/windows/check_box_handler.cpp`](../../../src/handlers/windows/check_box_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/check_box_handler.hpp`](../../../include/mpapp/handlers/linux/check_box_handler.hpp) + [`src/handlers/linux/check_box_handler.cpp`](../../../src/handlers/linux/check_box_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/check_box_handler.hpp`](../../../include/mpapp/handlers/android/check_box_handler.hpp) + [`src/handlers/android/check_box_handler.cpp`](../../../src/handlers/android/check_box_handler.cpp)
+- Tests: [`tests/mock_handlers/check_box_test.cpp`](../../../tests/mock_handlers/check_box_test.cpp)
 
 ## See also
 

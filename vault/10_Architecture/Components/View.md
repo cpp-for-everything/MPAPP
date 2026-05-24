@@ -142,17 +142,6 @@ btn->rotation   = 0.0;
 btn->is_enabled = true;
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/view/mock_test.cpp` (planned)
-- Windows handler: `tests/components/view/windows_test.cpp` (planned)
-- Android handler: `tests/components/view/android_test.cpp` (planned)
-- Linux handler: `tests/components/view/linux_test.cpp` (planned)
-- macOS handler: `tests/components/view/macos_test.cpp` (planned)
-- iOS handler: `tests/components/view/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -169,6 +158,12 @@ The P2 mock surface (ADR-0008) lands in this repository:
 - **Mock tests:** `tests/mock_handlers/view_test.cpp` — Catch2 cases covering initial-bind recording, idempotent set short-circuiting, multi-property ordering, and symbolic enum repr.
 
 Rich types (`brush_ref`, `shadow_desc`) are lightweight stand-ins in the mock layer and are replaced by the real graphics types alongside the per-platform handlers in P3.
+
+## Implementation
+
+- Surface: [`include/mpapp/view.hpp`](../../../include/mpapp/view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/view_handler.hpp`](../../../include/mpapp/handlers/mock/view_handler.hpp)
+- Tests: [`tests/mock_handlers/view_test.cpp`](../../../tests/mock_handlers/view_test.cpp)
 
 ## See also
 

@@ -131,17 +131,6 @@ tv->control_template = mpapp::control_template::from_factory([] {
 });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/templatedview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/templatedview/windows_test.cpp` (planned)
-- Android handler: `tests/components/templatedview/android_test.cpp` (planned)
-- Linux handler: `tests/components/templatedview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/templatedview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/templatedview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
@@ -149,6 +138,16 @@ Links to per-platform handler test files. Tracked in [[Test Harness]].
 | Inherits from | `Compatibility.Layout` (legacy ILayout shim) | `view<templated_view>` directly | The compatibility layer is C# specific and adds no value | [[ADR-0009-public-api-template-wrappers-only]] |
 | Obsolete `LowerChild`/`RaiseChild`/`UpdateChildrenLayout` | Still present, marked `[Obsolete]` | Not implemented | Z-order is managed via the `z_index` property | N/A |
 | `OnMeasure` / `LayoutChildren` overrides | Both obsolete overloads remain | Only `measure_override` / `arrange_override` exposed | Single, modern layout protocol | N/A |
+
+## Implementation
+
+- Surface: [`include/mpapp/templated_view.hpp`](../../../include/mpapp/templated_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/templated_view_handler.hpp`](../../../include/mpapp/handlers/mock/templated_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/templated_view_handler.hpp`](../../../include/mpapp/handlers/windows/templated_view_handler.hpp) + [`src/handlers/windows/templated_view_handler.cpp`](../../../src/handlers/windows/templated_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/templated_view_handler.hpp`](../../../include/mpapp/handlers/linux/templated_view_handler.hpp) + [`src/handlers/linux/templated_view_handler.cpp`](../../../src/handlers/linux/templated_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/templated_view_handler.hpp`](../../../include/mpapp/handlers/android/templated_view_handler.hpp) + [`src/handlers/android/templated_view_handler.cpp`](../../../src/handlers/android/templated_view_handler.cpp)
+- Tests: [`tests/mock_handlers/templated_view_test.cpp`](../../../tests/mock_handlers/templated_view_test.cpp)
 
 ## See also
 

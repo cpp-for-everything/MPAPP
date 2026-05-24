@@ -121,17 +121,6 @@ card->stroke_shape     = mpapp::shapes::round_rectangle(8);
 card->content          = mpapp::make<mpapp::label>("Card");
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/border/mock_test.cpp` (planned)
-- Windows handler: `tests/components/border/windows_test.cpp` (planned)
-- Android handler: `tests/components/border/android_test.cpp` (planned)
-- Linux handler: `tests/components/border/linux_test.cpp` (planned)
-- macOS handler: `tests/components/border/macos_test.cpp` (planned)
-- iOS handler: `tests/components/border/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -148,6 +137,16 @@ The P2 mock surface (ADR-0008) lands in this repository:
 - **Mock tests:** `tests/mock_handlers/border_test.cpp`.
 
 The rich `shape` / `brush_ref` types are lightweight stand-ins in the mock layer (`stroke_shape_desc` is a textual descriptor); the full graphics types arrive in P3.
+
+## Implementation
+
+- Surface: [`include/mpapp/border.hpp`](../../../include/mpapp/border.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/border_handler.hpp`](../../../include/mpapp/handlers/mock/border_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/border_handler.hpp`](../../../include/mpapp/handlers/windows/border_handler.hpp) + [`src/handlers/windows/border_handler.cpp`](../../../src/handlers/windows/border_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/border_handler.hpp`](../../../include/mpapp/handlers/linux/border_handler.hpp) + [`src/handlers/linux/border_handler.cpp`](../../../src/handlers/linux/border_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/border_handler.hpp`](../../../include/mpapp/handlers/android/border_handler.hpp) + [`src/handlers/android/border_handler.cpp`](../../../src/handlers/android/border_handler.cpp)
+- Tests: [`tests/mock_handlers/border_test.cpp`](../../../tests/mock_handlers/border_test.cpp)
 
 ## See also
 

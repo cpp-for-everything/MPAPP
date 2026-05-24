@@ -117,17 +117,6 @@ e->stroke = mpapp::solid_brush(mpapp::colors::navy);
 e->stroke_thickness = 3.0;
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/shapeview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/shapeview/windows_test.cpp` (planned)
-- Android handler: `tests/components/shapeview/android_test.cpp` (planned)
-- Linux handler: `tests/components/shapeview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/shapeview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/shapeview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -136,6 +125,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 |---|---|---|---|---|
 | `Brush` hierarchy | Polymorphic class tree | `brush` variant (`solid_brush`, `linear_gradient_brush`, ...) | Static dispatch per [[Type System]] | RFC TBD |
 | Geometry | Polymorphic `Geometry` | `geometry` interface with concrete types as `std::shared_ptr` | Closer to platform Skia/CoreGraphics surfaces | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/shape_view.hpp`](../../../include/mpapp/shape_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/shape_view_handler.hpp`](../../../include/mpapp/handlers/mock/shape_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/shape_view_handler.hpp`](../../../include/mpapp/handlers/windows/shape_view_handler.hpp) + [`src/handlers/windows/shape_view_handler.cpp`](../../../src/handlers/windows/shape_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/shape_view_handler.hpp`](../../../include/mpapp/handlers/linux/shape_view_handler.hpp) + [`src/handlers/linux/shape_view_handler.cpp`](../../../src/handlers/linux/shape_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/shape_view_handler.hpp`](../../../include/mpapp/handlers/android/shape_view_handler.hpp) + [`src/handlers/android/shape_view_handler.cpp`](../../../src/handlers/android/shape_view_handler.cpp)
+- Tests: [`tests/mock_handlers/shape_view_test.cpp`](../../../tests/mock_handlers/shape_view_test.cpp)
 
 ## See also
 

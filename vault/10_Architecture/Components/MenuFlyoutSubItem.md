@@ -104,17 +104,6 @@ open_with.add(mpapp::menu_flyout_item{ .text = "Notepad", .command = vm.open_not
 open_with.add(mpapp::menu_flyout_item{ .text = "VS Code", .command = vm.open_vs_code });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/menuflyoutsubitem/mock_test.cpp` (planned)
-- Windows handler: `tests/components/menuflyoutsubitem/windows_test.cpp` (planned)
-- Android handler: `tests/components/menuflyoutsubitem/android_test.cpp` (planned)
-- Linux handler: `tests/components/menuflyoutsubitem/linux_test.cpp` (planned)
-- macOS handler: `tests/components/menuflyoutsubitem/macos_test.cpp` (planned)
-- iOS handler: `tests/components/menuflyoutsubitem/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -124,6 +113,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Activation invokes `Command` | Inherited from `MenuFlyoutItem` but unused | `command` is *not* on the type | Removes an inherited dead surface | n/a |
 | Nesting depth on Android | Flattened to one level | Same; deeper levels rendered as text-prefixed entries (e.g. `"Recent > report.docx"`) | OS cap | RFC TBD |
 | Trailing chevron | Drawn automatically by host | Drawn by handler on each platform; matches platform style | Consistency | n/a |
+
+## Implementation
+
+- Surface: [`include/mpapp/menu_flyout_sub_item.hpp`](../../../include/mpapp/menu_flyout_sub_item.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/menu_flyout_sub_item_handler.hpp`](../../../include/mpapp/handlers/mock/menu_flyout_sub_item_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/menu_flyout_sub_item_handler.hpp`](../../../include/mpapp/handlers/windows/menu_flyout_sub_item_handler.hpp) + [`src/handlers/windows/menu_flyout_sub_item_handler.cpp`](../../../src/handlers/windows/menu_flyout_sub_item_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/menu_flyout_sub_item_handler.hpp`](../../../include/mpapp/handlers/linux/menu_flyout_sub_item_handler.hpp) + [`src/handlers/linux/menu_flyout_sub_item_handler.cpp`](../../../src/handlers/linux/menu_flyout_sub_item_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/menu_flyout_sub_item_handler.hpp`](../../../include/mpapp/handlers/android/menu_flyout_sub_item_handler.hpp) + [`src/handlers/android/menu_flyout_sub_item_handler.cpp`](../../../src/handlers/android/menu_flyout_sub_item_handler.cpp)
+- Tests: [`tests/mock_handlers/menu_flyout_sub_item_test.cpp`](../../../tests/mock_handlers/menu_flyout_sub_item_test.cpp)
 
 ## See also
 

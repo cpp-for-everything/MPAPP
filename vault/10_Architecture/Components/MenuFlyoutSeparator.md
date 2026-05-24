@@ -96,17 +96,6 @@ flyout.add(mpapp::menu_flyout_separator{});
 flyout.add(mpapp::menu_flyout_item{ .text = "Paste" });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/menuflyoutseparator/mock_test.cpp` (planned)
-- Windows handler: `tests/components/menuflyoutseparator/windows_test.cpp` (planned)
-- Android handler: `tests/components/menuflyoutseparator/android_test.cpp` (planned)
-- Linux handler: `tests/components/menuflyoutseparator/linux_test.cpp` (planned)
-- macOS handler: `tests/components/menuflyoutseparator/macos_test.cpp` (planned)
-- iOS handler: `tests/components/menuflyoutseparator/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -116,6 +105,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Inheritance | `MenuFlyoutSeparator : MenuFlyoutItem` (inherits unused props) | Independent type with no properties | Tighter API ([[ADR-0009-public-api-template-wrappers-only]]) | n/a |
 | iOS rendering | Implicit between inline sub-`UIMenu`s | Same; consecutive separators collapse to a single visual divider | UIKit behavior | n/a |
 | Android rendering | None (separators dropped) | Handler injects a 1-px divider view to match desktop | Visual parity per [[ADR-0006-interop-parity]] | n/a |
+
+## Implementation
+
+- Surface: [`include/mpapp/menu_flyout_separator.hpp`](../../../include/mpapp/menu_flyout_separator.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/menu_flyout_separator_handler.hpp`](../../../include/mpapp/handlers/mock/menu_flyout_separator_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/menu_flyout_separator_handler.hpp`](../../../include/mpapp/handlers/windows/menu_flyout_separator_handler.hpp) + [`src/handlers/windows/menu_flyout_separator_handler.cpp`](../../../src/handlers/windows/menu_flyout_separator_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/menu_flyout_separator_handler.hpp`](../../../include/mpapp/handlers/linux/menu_flyout_separator_handler.hpp) + [`src/handlers/linux/menu_flyout_separator_handler.cpp`](../../../src/handlers/linux/menu_flyout_separator_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/menu_flyout_separator_handler.hpp`](../../../include/mpapp/handlers/android/menu_flyout_separator_handler.hpp) + [`src/handlers/android/menu_flyout_separator_handler.cpp`](../../../src/handlers/android/menu_flyout_separator_handler.cpp)
+- Tests: [`tests/mock_handlers/menu_flyout_separator_test.cpp`](../../../tests/mock_handlers/menu_flyout_separator_test.cpp)
 
 ## See also
 

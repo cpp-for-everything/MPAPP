@@ -98,23 +98,22 @@ bar->progress_color = mpapp::color::from_hex("#1E90FF");
 co_await bar->progress_to(1.0, 1500, mpapp::easing::linear);
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/progressbar/mock_test.cpp` (planned)
-- Windows handler: `tests/components/progressbar/windows_test.cpp` (planned)
-- Android handler: `tests/components/progressbar/android_test.cpp` (planned)
-- Linux handler: `tests/components/progressbar/linux_test.cpp` (planned)
-- macOS handler: `tests/components/progressbar/macos_test.cpp` (planned)
-- iOS handler: `tests/components/progressbar/ios_test.cpp` (planned)
-
 ## Known Differences
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
 | Out-of-range values | Silently clamped via `coerceValue` | Clamped, plus a debug-build warning | Out-of-range almost always indicates a bug | TBD |
 | `ProgressTo` return type | `Task<bool>` (true = completed) | `std::future<bool>` plus coroutine awaitable | Idiomatic C++; no managed `Task` to model | [[ADR-0009-public-api-template-wrappers-only]] |
+
+## Implementation
+
+- Surface: [`include/mpapp/progress_bar.hpp`](../../../include/mpapp/progress_bar.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/progress_bar_handler.hpp`](../../../include/mpapp/handlers/mock/progress_bar_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/progress_bar_handler.hpp`](../../../include/mpapp/handlers/windows/progress_bar_handler.hpp) + [`src/handlers/windows/progress_bar_handler.cpp`](../../../src/handlers/windows/progress_bar_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/progress_bar_handler.hpp`](../../../include/mpapp/handlers/linux/progress_bar_handler.hpp) + [`src/handlers/linux/progress_bar_handler.cpp`](../../../src/handlers/linux/progress_bar_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/progress_bar_handler.hpp`](../../../include/mpapp/handlers/android/progress_bar_handler.hpp) + [`src/handlers/android/progress_bar_handler.cpp`](../../../src/handlers/android/progress_bar_handler.cpp)
+- Tests: [`tests/mock_handlers/progress_bar_test.cpp`](../../../tests/mock_handlers/progress_bar_test.cpp)
 
 ## See also
 

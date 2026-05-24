@@ -170,23 +170,16 @@ b->background = brush{colors::dodger_blue};
 b->clicked.subscribe([] { save(); });
 ```
 
-## Mock implementation
+## Implementation
 
-- Handler: [`include/mpapp/handlers/mock/button_handler.hpp`](../../../include/mpapp/handlers/mock/button_handler.hpp)
-- Tests: [`tests/mock_handlers/button_test.cpp`](../../../tests/mock_handlers/button_test.cpp)
-
-`button_handler<platform::mock>` records `text=<value>` and `clicked` events into `calls()`; tests verify mapper-on-attach behavior, the no-emit-on-same-value contract, and click forwarding.
-
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/mock_handlers/button_test.cpp`
-- Windows handler: `tests/components/button/windows_test.cpp` (planned)
-- Android handler: `tests/components/button/android_test.cpp` (planned)
-- Linux handler: `tests/components/button/linux_test.cpp` (planned)
-- macOS handler: `tests/components/button/macos_test.cpp` (planned)
-- iOS handler: `tests/components/button/ios_test.cpp` (planned)
+- Surface: [`include/mpapp/button.hpp`](../../../include/mpapp/button.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/button_handler.hpp`](../../../include/mpapp/handlers/mock/button_handler.hpp) — `button_handler<platform::mock>` records `text=<value>` and `clicked` events into `calls()`; tests verify mapper-on-attach behavior, the no-emit-on-same-value contract, and click forwarding.
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/button_handler.hpp`](../../../include/mpapp/handlers/windows/button_handler.hpp) + [`src/handlers/windows/button_handler.cpp`](../../../src/handlers/windows/button_handler.cpp) — wraps `muxc::Button` and registers `Click` as the trigger for `IButton::Clicked`.
+  - Linux: [`src/handlers/linux/button_handler.cpp`](../../../src/handlers/linux/button_handler.cpp) — wraps `GtkButton`.
+  - Android: [`src/handlers/android/button_handler.cpp`](../../../src/handlers/android/button_handler.cpp) — JNI to `android.widget.Button`; click routing through `MppClickRouter`.
+- Tests: [`tests/mock_handlers/button_test.cpp`](../../../tests/mock_handlers/button_test.cpp).
+- Usage: [`examples/windows_button_spike/main.cpp`](../../../examples/windows_button_spike/main.cpp) — canonical app-shell-abstraction demo (T-0011); the same surface code compiles on Linux + Android with handler template-arg swapped.
 
 ## Known Differences
 

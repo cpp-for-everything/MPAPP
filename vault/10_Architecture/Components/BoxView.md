@@ -98,17 +98,6 @@ divider->color          = mpapp::colors::red;
 divider->height_request = 2.0;
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/boxview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/boxview/windows_test.cpp` (planned)
-- Android handler: `tests/components/boxview/android_test.cpp` (planned)
-- Linux handler: `tests/components/boxview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/boxview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/boxview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -123,6 +112,16 @@ The P2 mock surface (ADR-0008) lands in this repository:
 - **Cross-platform header:** `include/mpapp/box_view.hpp` — `mpapp::box_view : view` with `Observable<color> fill` and `Observable<corner_radius> corners`. The lightweight `color` (rgba) and `corner_radius` (per-corner) types are defined in this header.
 - **Mock handler:** `include/mpapp/handlers/mock/box_view_handler.hpp` — `box_view_handler<platform::mock>` records both mappers.
 - **Mock tests:** `tests/mock_handlers/box_view_test.cpp`.
+
+## Implementation
+
+- Surface: [`include/mpapp/box_view.hpp`](../../../include/mpapp/box_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/box_view_handler.hpp`](../../../include/mpapp/handlers/mock/box_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/box_view_handler.hpp`](../../../include/mpapp/handlers/windows/box_view_handler.hpp) + [`src/handlers/windows/box_view_handler.cpp`](../../../src/handlers/windows/box_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/box_view_handler.hpp`](../../../include/mpapp/handlers/linux/box_view_handler.hpp) + [`src/handlers/linux/box_view_handler.cpp`](../../../src/handlers/linux/box_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/box_view_handler.hpp`](../../../include/mpapp/handlers/android/box_view_handler.hpp) + [`src/handlers/android/box_view_handler.cpp`](../../../src/handlers/android/box_view_handler.cpp)
+- Tests: [`tests/mock_handlers/box_view_test.cpp`](../../../tests/mock_handlers/box_view_test.cpp)
 
 ## See also
 

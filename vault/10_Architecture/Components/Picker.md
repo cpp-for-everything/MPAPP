@@ -112,17 +112,6 @@ p->items_source = { "Red", "Green", "Blue" };
 p->selection_changed.subscribe([](int i){ std::cout << "picked " << i << "\n"; });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/picker/mock_test.cpp` (planned)
-- Windows handler: `tests/components/picker/windows_test.cpp` (planned)
-- Android handler: `tests/components/picker/android_test.cpp` (planned)
-- Linux handler: `tests/components/picker/linux_test.cpp` (planned)
-- macOS handler: `tests/components/picker/macos_test.cpp` (planned)
-- iOS handler: `tests/components/picker/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -130,6 +119,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
 | `ItemsSource` type | `IList` (any boxed type) | `std::vector<std::string>` for v1; templated overload planned | C++ type safety per [[Type System]] | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/picker.hpp`](../../../include/mpapp/picker.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/picker_handler.hpp`](../../../include/mpapp/handlers/mock/picker_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/picker_handler.hpp`](../../../include/mpapp/handlers/windows/picker_handler.hpp) + [`src/handlers/windows/picker_handler.cpp`](../../../src/handlers/windows/picker_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/picker_handler.hpp`](../../../include/mpapp/handlers/linux/picker_handler.hpp) + [`src/handlers/linux/picker_handler.cpp`](../../../src/handlers/linux/picker_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/picker_handler.hpp`](../../../include/mpapp/handlers/android/picker_handler.hpp) + [`src/handlers/android/picker_handler.cpp`](../../../src/handlers/android/picker_handler.cpp)
+- Tests: [`tests/mock_handlers/picker_test.cpp`](../../../tests/mock_handlers/picker_test.cpp)
 
 ## See also
 

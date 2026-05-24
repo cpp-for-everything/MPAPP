@@ -95,17 +95,6 @@ tp->time_selected.subscribe([](auto m){
 });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/timepicker/mock_test.cpp` (planned)
-- Windows handler: `tests/components/timepicker/windows_test.cpp` (planned)
-- Android handler: `tests/components/timepicker/android_test.cpp` (planned)
-- Linux handler: `tests/components/timepicker/linux_test.cpp` (planned)
-- macOS handler: `tests/components/timepicker/macos_test.cpp` (planned)
-- iOS handler: `tests/components/timepicker/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -114,6 +103,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 |---|---|---|---|---|
 | Time type | `TimeSpan?` (validated `< 24h`) | `std::chrono::minutes` initially; `std::chrono::hh_mm_ss` once exposed | Avoid representing impossible durations per [[Type System]] | RFC TBD |
 | Format syntax | .NET format specifiers (`"t"`, `"T"`) | `strftime`-style (`"%H:%M"`) | C++ standard library alignment | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/time_picker.hpp`](../../../include/mpapp/time_picker.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/time_picker_handler.hpp`](../../../include/mpapp/handlers/mock/time_picker_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/time_picker_handler.hpp`](../../../include/mpapp/handlers/windows/time_picker_handler.hpp) + [`src/handlers/windows/time_picker_handler.cpp`](../../../src/handlers/windows/time_picker_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/time_picker_handler.hpp`](../../../include/mpapp/handlers/linux/time_picker_handler.hpp) + [`src/handlers/linux/time_picker_handler.cpp`](../../../src/handlers/linux/time_picker_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/time_picker_handler.hpp`](../../../include/mpapp/handlers/android/time_picker_handler.hpp) + [`src/handlers/android/time_picker_handler.cpp`](../../../src/handlers/android/time_picker_handler.cpp)
+- Tests: [`tests/mock_handlers/time_picker_test.cpp`](../../../tests/mock_handlers/time_picker_test.cpp)
 
 ## See also
 

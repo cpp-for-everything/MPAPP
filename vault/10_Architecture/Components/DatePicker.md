@@ -102,17 +102,6 @@ dp->date_selected.subscribe([](auto d){
 });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/datepicker/mock_test.cpp` (planned)
-- Windows handler: `tests/components/datepicker/windows_test.cpp` (planned)
-- Android handler: `tests/components/datepicker/android_test.cpp` (planned)
-- Linux handler: `tests/components/datepicker/linux_test.cpp` (planned)
-- macOS handler: `tests/components/datepicker/macos_test.cpp` (planned)
-- iOS handler: `tests/components/datepicker/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -121,6 +110,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 |---|---|---|---|---|
 | Date type | `DateTime?` (with time component) | `std::chrono::year_month_day` (date only) | Stronger type per [[Type System]]; matches the control's domain | RFC TBD |
 | Format syntax | .NET format specifiers (`"d"`, `"D"`) | `std::format` / `strftime` style (`"%x"`, `"%Y-%m-%d"`) | C++ standard library alignment | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/date_picker.hpp`](../../../include/mpapp/date_picker.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/date_picker_handler.hpp`](../../../include/mpapp/handlers/mock/date_picker_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/date_picker_handler.hpp`](../../../include/mpapp/handlers/windows/date_picker_handler.hpp) + [`src/handlers/windows/date_picker_handler.cpp`](../../../src/handlers/windows/date_picker_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/date_picker_handler.hpp`](../../../include/mpapp/handlers/linux/date_picker_handler.hpp) + [`src/handlers/linux/date_picker_handler.cpp`](../../../src/handlers/linux/date_picker_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/date_picker_handler.hpp`](../../../include/mpapp/handlers/android/date_picker_handler.hpp) + [`src/handlers/android/date_picker_handler.cpp`](../../../src/handlers/android/date_picker_handler.cpp)
+- Tests: [`tests/mock_handlers/date_picker_test.cpp`](../../../tests/mock_handlers/date_picker_test.cpp)
 
 ## See also
 

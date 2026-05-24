@@ -155,17 +155,6 @@ lv->item_selected.connect([](auto& args) {
 });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/listview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/listview/windows_test.cpp` (planned)
-- Android handler: `tests/components/listview/android_test.cpp` (planned)
-- Linux handler: `tests/components/listview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/listview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/listview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -177,6 +166,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Items source type | `IEnumerable` (any sequence) | `observable_vector<T>` required for incremental updates | Compile-time observable contract per [[ADR-0009-public-api-template-wrappers-only]] | — |
 | `ListViewCachingStrategy` ctor parameter | Constructor takes `cachingStrategy` | Constructor takes no strategy | Strategy is implicit in `observable_vector` | — |
 | macOS native control | `UITableView` via Mac Catalyst | `NSTableView` via AppKit | [[ADR-0005-ios-macos-separate-interop]] | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/list_view.hpp`](../../../include/mpapp/list_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/list_view_handler.hpp`](../../../include/mpapp/handlers/mock/list_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/list_view_handler.hpp`](../../../include/mpapp/handlers/windows/list_view_handler.hpp) + [`src/handlers/windows/list_view_handler.cpp`](../../../src/handlers/windows/list_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/list_view_handler.hpp`](../../../include/mpapp/handlers/linux/list_view_handler.hpp) + [`src/handlers/linux/list_view_handler.cpp`](../../../src/handlers/linux/list_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/list_view_handler.hpp`](../../../include/mpapp/handlers/android/list_view_handler.hpp) + [`src/handlers/android/list_view_handler.cpp`](../../../src/handlers/android/list_view_handler.cpp)
+- Tests: [`tests/mock_handlers/list_view_test.cpp`](../../../tests/mock_handlers/list_view_test.cpp)
 
 ## See also
 

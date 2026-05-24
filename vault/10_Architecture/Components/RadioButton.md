@@ -110,23 +110,22 @@ medium->group_name = "size";
 
 `radio_button_handler<platform::mock>` records changes to `is_checked` and `group_name`. The mock surface drops the `content` (Observable<std::any>) slot for now — primitive Observables suffice to validate the mapper plumbing.
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/mock_handlers/radio_button_test.cpp`
-- Windows handler: `tests/components/radio_button/windows_test.cpp` (planned)
-- Android handler: `tests/components/radio_button/android_test.cpp` (planned)
-- Linux handler: `tests/components/radio_button/linux_test.cpp` (planned)
-- macOS handler: `tests/components/radio_button/macos_test.cpp` (planned)
-- iOS handler: `tests/components/radio_button/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Implementation
+
+- Surface: [`include/mpapp/radio_button.hpp`](../../../include/mpapp/radio_button.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/radio_button_handler.hpp`](../../../include/mpapp/handlers/mock/radio_button_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/radio_button_handler.hpp`](../../../include/mpapp/handlers/windows/radio_button_handler.hpp) + [`src/handlers/windows/radio_button_handler.cpp`](../../../src/handlers/windows/radio_button_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/radio_button_handler.hpp`](../../../include/mpapp/handlers/linux/radio_button_handler.hpp) + [`src/handlers/linux/radio_button_handler.cpp`](../../../src/handlers/linux/radio_button_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/radio_button_handler.hpp`](../../../include/mpapp/handlers/android/radio_button_handler.hpp) + [`src/handlers/android/radio_button_handler.cpp`](../../../src/handlers/android/radio_button_handler.cpp)
+- Tests: [`tests/mock_handlers/radio_button_test.cpp`](../../../tests/mock_handlers/radio_button_test.cpp)
 
 ## See also
 

@@ -109,23 +109,22 @@ ib->corner_radius = 8;
 ib->clicked.subscribe([]{ /* toggle favorite */ });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/imagebutton/mock_test.cpp` (planned)
-- Windows handler: `tests/components/imagebutton/windows_test.cpp` (planned)
-- Android handler: `tests/components/imagebutton/android_test.cpp` (planned)
-- Linux handler: `tests/components/imagebutton/linux_test.cpp` (planned)
-- macOS handler: `tests/components/imagebutton/macos_test.cpp` (planned)
-- iOS handler: `tests/components/imagebutton/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Implementation
+
+- Surface: [`include/mpapp/image_button.hpp`](../../../include/mpapp/image_button.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/image_button_handler.hpp`](../../../include/mpapp/handlers/mock/image_button_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/image_button_handler.hpp`](../../../include/mpapp/handlers/windows/image_button_handler.hpp) + [`src/handlers/windows/image_button_handler.cpp`](../../../src/handlers/windows/image_button_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/image_button_handler.hpp`](../../../include/mpapp/handlers/linux/image_button_handler.hpp) + [`src/handlers/linux/image_button_handler.cpp`](../../../src/handlers/linux/image_button_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/image_button_handler.hpp`](../../../include/mpapp/handlers/android/image_button_handler.hpp) + [`src/handlers/android/image_button_handler.cpp`](../../../src/handlers/android/image_button_handler.cpp)
+- Tests: [`tests/mock_handlers/image_button_test.cpp`](../../../tests/mock_handlers/image_button_test.cpp)
 
 ## See also
 

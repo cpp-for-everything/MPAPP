@@ -124,17 +124,6 @@ archive->command    = mpapp::Command<>([]{ archive_selected(); });
 archive->invoked.connect([] { mpapp::log::info("archived"); });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/swipeitemmenuitem/mock_test.cpp` (planned)
-- Windows handler: `tests/components/swipeitemmenuitem/windows_test.cpp` (planned)
-- Android handler: `tests/components/swipeitemmenuitem/android_test.cpp` (planned)
-- Linux handler: `tests/components/swipeitemmenuitem/linux_test.cpp` (planned)
-- macOS handler: `tests/components/swipeitemmenuitem/macos_test.cpp` (planned)
-- iOS handler: `tests/components/swipeitemmenuitem/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -145,6 +134,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | XAML element name | `<SwipeItem>` maps to `SwipeItemMenuItem` handler | Same XAML element, same handler name | Mirror MAUI naming asymmetry | — |
 | `Command` type | `ICommand` | `Command<>` template | [[ADR-0009-public-api-template-wrappers-only]] | — |
 | `IsDestructive` | Hints platforms to use destructive styling (red on iOS) | Same — iOS/macOS apply destructive role; other platforms ignore | Platform-native styling | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/swipe_item_menu_item.hpp`](../../../include/mpapp/swipe_item_menu_item.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/swipe_item_menu_item_handler.hpp`](../../../include/mpapp/handlers/mock/swipe_item_menu_item_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/swipe_item_menu_item_handler.hpp`](../../../include/mpapp/handlers/windows/swipe_item_menu_item_handler.hpp) + [`src/handlers/windows/swipe_item_menu_item_handler.cpp`](../../../src/handlers/windows/swipe_item_menu_item_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/swipe_item_menu_item_handler.hpp`](../../../include/mpapp/handlers/linux/swipe_item_menu_item_handler.hpp) + [`src/handlers/linux/swipe_item_menu_item_handler.cpp`](../../../src/handlers/linux/swipe_item_menu_item_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/swipe_item_menu_item_handler.hpp`](../../../include/mpapp/handlers/android/swipe_item_menu_item_handler.hpp) + [`src/handlers/android/swipe_item_menu_item_handler.cpp`](../../../src/handlers/android/swipe_item_menu_item_handler.cpp)
+- Tests: [`tests/mock_handlers/swipe_item_menu_item_test.cpp`](../../../tests/mock_handlers/swipe_item_menu_item_test.cpp)
 
 ## See also
 

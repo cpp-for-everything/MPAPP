@@ -87,23 +87,22 @@ spinner->is_running = true;
 spinner->color = mpapp::color::from_hex("#FFA500");
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/activityindicator/mock_test.cpp` (planned)
-- Windows handler: `tests/components/activityindicator/windows_test.cpp` (planned)
-- Android handler: `tests/components/activityindicator/android_test.cpp` (planned)
-- Linux handler: `tests/components/activityindicator/linux_test.cpp` (planned)
-- macOS handler: `tests/components/activityindicator/macos_test.cpp` (planned)
-- iOS handler: `tests/components/activityindicator/ios_test.cpp` (planned)
-
 ## Known Differences
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
 | Default color | Platform accent (varies) | `color::accent()` template, resolved at handler-attach time | Lets a single observable bind across themes without re-running XAML | RFC tracking theme tokens (not yet written) |
 | `IsRunning` ↔ `Visibility` coupling | Implicit on Android/iOS, explicit on Windows | Always explicit through the handler — collapsing is opt-in | Avoid the "why did my spinner disappear" footgun | TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/activity_indicator.hpp`](../../../include/mpapp/activity_indicator.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/activity_indicator_handler.hpp`](../../../include/mpapp/handlers/mock/activity_indicator_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/activity_indicator_handler.hpp`](../../../include/mpapp/handlers/windows/activity_indicator_handler.hpp) + [`src/handlers/windows/activity_indicator_handler.cpp`](../../../src/handlers/windows/activity_indicator_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/activity_indicator_handler.hpp`](../../../include/mpapp/handlers/linux/activity_indicator_handler.hpp) + [`src/handlers/linux/activity_indicator_handler.cpp`](../../../src/handlers/linux/activity_indicator_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/activity_indicator_handler.hpp`](../../../include/mpapp/handlers/android/activity_indicator_handler.hpp) + [`src/handlers/android/activity_indicator_handler.cpp`](../../../src/handlers/android/activity_indicator_handler.cpp)
+- Tests: [`tests/mock_handlers/activity_indicator_test.cpp`](../../../tests/mock_handlers/activity_indicator_test.cpp)
 
 ## See also
 

@@ -146,17 +146,6 @@ sv->left_items = std::move(left);
 sv->content    = make_label("Swipe me right");
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/swipeview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/swipeview/windows_test.cpp` (planned)
-- Android handler: `tests/components/swipeview/android_test.cpp` (planned)
-- Linux handler: `tests/components/swipeview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/swipeview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/swipeview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -166,6 +155,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Windows uses native widget; other platforms use a custom view | Same on iOS/Android | Same — explicitly documented per platform | Native parity where it exists | — |
 | `RequestOpen` / `RequestClose` | Takes a request struct with direction and animated flag | Same shape, but flattened into method args | C++ idiom | — |
 | Item collection types | `ISwipeItems : IList<ISwipeItem>` | `swipe_items` with `observable_vector<shared_ptr<swipe_item_base>>` | Compile-time observable contract | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/swipe_view.hpp`](../../../include/mpapp/swipe_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/swipe_view_handler.hpp`](../../../include/mpapp/handlers/mock/swipe_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/swipe_view_handler.hpp`](../../../include/mpapp/handlers/windows/swipe_view_handler.hpp) + [`src/handlers/windows/swipe_view_handler.cpp`](../../../src/handlers/windows/swipe_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/swipe_view_handler.hpp`](../../../include/mpapp/handlers/linux/swipe_view_handler.hpp) + [`src/handlers/linux/swipe_view_handler.cpp`](../../../src/handlers/linux/swipe_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/swipe_view_handler.hpp`](../../../include/mpapp/handlers/android/swipe_view_handler.hpp) + [`src/handlers/android/swipe_view_handler.cpp`](../../../src/handlers/android/swipe_view_handler.cpp)
+- Tests: [`tests/mock_handlers/swipe_view_test.cpp`](../../../tests/mock_handlers/swipe_view_test.cpp)
 
 ## See also
 

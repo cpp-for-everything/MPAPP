@@ -262,19 +262,6 @@ public:
 co_await shell::current().go_to_async(u8"//main/orders/details?id=42");
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/shell/mock_test.cpp` (planned)
-- Routing tests: `tests/components/shell/routing_test.cpp` (planned)
-- URI parser: `tests/components/shell/uri_handler_test.cpp` (planned)
-- Windows handler: `tests/components/shell/windows_test.cpp` (planned)
-- Android handler: `tests/components/shell/android_test.cpp` (planned)
-- Linux handler: `tests/components/shell/linux_test.cpp` (planned)
-- macOS handler: `tests/components/shell/macos_test.cpp` (planned)
-- iOS handler: `tests/components/shell/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -289,6 +276,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Deferred navigation | `ShellNavigatingDeferral` lets handlers await cancellation. | `shell_navigating_args::get_deferral()` returns an RAII object. | Parity. | n/a |
 | Compatibility renderers | iOS/Mac/Android use legacy renderers; Windows uses Maui handler. | Single handler per platform. | New codebase; no legacy debt. | n/a |
 | `FlyoutItem` / `Tab` XAML shorthand | XAML conveniences that desugar to `ShellItem`/`ShellSection`. | Same — preserved by XAML compiler. | XAML parity (ADR-0004). | n/a |
+
+## Implementation
+
+- Surface: [`include/mpapp/shell.hpp`](../../../include/mpapp/shell.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/shell_handler.hpp`](../../../include/mpapp/handlers/mock/shell_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/shell_handler.hpp`](../../../include/mpapp/handlers/windows/shell_handler.hpp) + [`src/handlers/windows/shell_handler.cpp`](../../../src/handlers/windows/shell_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/shell_handler.hpp`](../../../include/mpapp/handlers/linux/shell_handler.hpp) + [`src/handlers/linux/shell_handler.cpp`](../../../src/handlers/linux/shell_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/shell_handler.hpp`](../../../include/mpapp/handlers/android/shell_handler.hpp) + [`src/handlers/android/shell_handler.cpp`](../../../src/handlers/android/shell_handler.cpp)
+- Tests: [`tests/mock_handlers/shell_test.cpp`](../../../tests/mock_handlers/shell_test.cpp)
 
 ## See also
 

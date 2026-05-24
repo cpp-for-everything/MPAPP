@@ -116,17 +116,6 @@ grid->children.get().push_back(make_label("Archive", mpapp::colors::white));
 item->content = grid;
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/swipeitemview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/swipeitemview/windows_test.cpp` (planned)
-- Android handler: `tests/components/swipeitemview/android_test.cpp` (planned)
-- Linux handler: `tests/components/swipeitemview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/swipeitemview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/swipeitemview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -136,6 +125,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Inheritance | `ContentView, ISwipeItem` | `content_view<swipe_item_view>` implementing the swipe-item contract | C++ has no multiple-interface inheritance via attributes | — |
 | Windows hosting | WinUI `SwipeItem` only supports icon/text → MAUI hosts custom content under the hood | Same approach, documented explicitly | Matches MAUI runtime | — |
 | Command type | `ICommand` | `Command<>` template | [[ADR-0009-public-api-template-wrappers-only]] | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/swipe_item_view.hpp`](../../../include/mpapp/swipe_item_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/swipe_item_view_handler.hpp`](../../../include/mpapp/handlers/mock/swipe_item_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/swipe_item_view_handler.hpp`](../../../include/mpapp/handlers/windows/swipe_item_view_handler.hpp) + [`src/handlers/windows/swipe_item_view_handler.cpp`](../../../src/handlers/windows/swipe_item_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/swipe_item_view_handler.hpp`](../../../include/mpapp/handlers/linux/swipe_item_view_handler.hpp) + [`src/handlers/linux/swipe_item_view_handler.cpp`](../../../src/handlers/linux/swipe_item_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/swipe_item_view_handler.hpp`](../../../include/mpapp/handlers/android/swipe_item_view_handler.hpp) + [`src/handlers/android/swipe_item_view_handler.cpp`](../../../src/handlers/android/swipe_item_view_handler.cpp)
+- Tests: [`tests/mock_handlers/swipe_item_view_test.cpp`](../../../tests/mock_handlers/swipe_item_view_test.cpp)
 
 ## See also
 

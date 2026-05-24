@@ -106,17 +106,6 @@ rv->refresh_command = mpapp::Command<>([rv]() {
 });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/refreshview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/refreshview/windows_test.cpp` (planned)
-- Android handler: `tests/components/refreshview/android_test.cpp` (planned)
-- Linux handler: `tests/components/refreshview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/refreshview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/refreshview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -127,6 +116,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Linux native widget | Not supported (no MAUI Linux head) | Custom MPAPP overlay | GTK has no equivalent | — |
 | macOS gesture | Catalyst inherits `UIRefreshControl` | AppKit-native gesture + spinner | [[ADR-0005-ios-macos-separate-interop]] | — |
 | `IsRefreshEnabled` default | `true` (default-implemented) | `true` | — | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/refresh_view.hpp`](../../../include/mpapp/refresh_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/refresh_view_handler.hpp`](../../../include/mpapp/handlers/mock/refresh_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/refresh_view_handler.hpp`](../../../include/mpapp/handlers/windows/refresh_view_handler.hpp) + [`src/handlers/windows/refresh_view_handler.cpp`](../../../src/handlers/windows/refresh_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/refresh_view_handler.hpp`](../../../include/mpapp/handlers/linux/refresh_view_handler.hpp) + [`src/handlers/linux/refresh_view_handler.cpp`](../../../src/handlers/linux/refresh_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/refresh_view_handler.hpp`](../../../include/mpapp/handlers/android/refresh_view_handler.hpp) + [`src/handlers/android/refresh_view_handler.cpp`](../../../src/handlers/android/refresh_view_handler.cpp)
+- Tests: [`tests/mock_handlers/refresh_view_test.cpp`](../../../tests/mock_handlers/refresh_view_test.cpp)
 
 ## See also
 

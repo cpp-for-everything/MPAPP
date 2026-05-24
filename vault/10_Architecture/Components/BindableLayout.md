@@ -132,17 +132,6 @@ mpapp::bindable_layout::enable(
     }));
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/bindablelayout/mock_test.cpp` (planned)
-- Windows handler: `tests/components/bindablelayout/windows_test.cpp` (planned)
-- Android handler: `tests/components/bindablelayout/android_test.cpp` (planned)
-- Linux handler: `tests/components/bindablelayout/linux_test.cpp` (planned)
-- macOS handler: `tests/components/bindablelayout/macos_test.cpp` (planned)
-- iOS handler: `tests/components/bindablelayout/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -159,6 +148,16 @@ The P2 mock surface (ADR-0008) lands in this repository:
 - **Mock tests:** `tests/mock_handlers/bindable_layout_test.cpp`.
 
 The rich `items_source` / `data_template` / `data_template_selector` types are reduced to lightweight stand-ins for the mock; the full versions arrive with `CollectionView` in M-03.
+
+## Implementation
+
+- Surface: [`include/mpapp/bindable_layout.hpp`](../../../include/mpapp/bindable_layout.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/bindable_layout_handler.hpp`](../../../include/mpapp/handlers/mock/bindable_layout_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/bindable_layout_handler.hpp`](../../../include/mpapp/handlers/windows/bindable_layout_handler.hpp) + [`src/handlers/windows/bindable_layout_handler.cpp`](../../../src/handlers/windows/bindable_layout_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/bindable_layout_handler.hpp`](../../../include/mpapp/handlers/linux/bindable_layout_handler.hpp) + [`src/handlers/linux/bindable_layout_handler.cpp`](../../../src/handlers/linux/bindable_layout_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/bindable_layout_handler.hpp`](../../../include/mpapp/handlers/android/bindable_layout_handler.hpp) + [`src/handlers/android/bindable_layout_handler.cpp`](../../../src/handlers/android/bindable_layout_handler.cpp)
+- Tests: [`tests/mock_handlers/bindable_layout_test.cpp`](../../../tests/mock_handlers/bindable_layout_test.cpp)
 
 ## See also
 

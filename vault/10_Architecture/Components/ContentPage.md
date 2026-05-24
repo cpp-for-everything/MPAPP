@@ -116,17 +116,6 @@ public:
 };
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/contentpage/mock_test.cpp` (planned)
-- Windows handler: `tests/components/contentpage/windows_test.cpp` (planned)
-- Android handler: `tests/components/contentpage/android_test.cpp` (planned)
-- Linux handler: `tests/components/contentpage/linux_test.cpp` (planned)
-- macOS handler: `tests/components/contentpage/macos_test.cpp` (planned)
-- iOS handler: `tests/components/contentpage/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -136,6 +125,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | `Content` typing | `View` (runtime-typed bindable). | `view*` (compile-time-typed `Observable`). | Stricter type safety per project goals. | n/a |
 | Control template | `ControlTemplate` swap rebinds inherited binding context. | Same semantics; implemented in `mpapp::templated_page`. | Parity. | n/a |
 | Hot reload | `IHotReloadableView` interface. | Hot reload via the dev daemon; no user-facing interface. | Different reload pipeline. | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/content_page.hpp`](../../../include/mpapp/content_page.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/content_page_handler.hpp`](../../../include/mpapp/handlers/mock/content_page_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/content_page_handler.hpp`](../../../include/mpapp/handlers/windows/content_page_handler.hpp) + [`src/handlers/windows/content_page_handler.cpp`](../../../src/handlers/windows/content_page_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/content_page_handler.hpp`](../../../include/mpapp/handlers/linux/content_page_handler.hpp) + [`src/handlers/linux/content_page_handler.cpp`](../../../src/handlers/linux/content_page_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/content_page_handler.hpp`](../../../include/mpapp/handlers/android/content_page_handler.hpp) + [`src/handlers/android/content_page_handler.cpp`](../../../src/handlers/android/content_page_handler.cpp)
+- Tests: [`tests/mock_handlers/content_page_test.cpp`](../../../tests/mock_handlers/content_page_test.cpp)
 
 ## See also
 

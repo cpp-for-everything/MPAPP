@@ -145,17 +145,6 @@ bridge->raw_message_received.connect([](const std::string& msg) {
 auto name = bridge->invoke_javascript_async<std::string>("getName").get();
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/hybridwebview/mock_test.cpp` (planned)
-- Windows handler: `tests/components/hybridwebview/windows_test.cpp` (planned)
-- Android handler: `tests/components/hybridwebview/android_test.cpp` (planned)
-- Linux handler: `tests/components/hybridwebview/linux_test.cpp` (planned)
-- macOS handler: `tests/components/hybridwebview/macos_test.cpp` (planned)
-- iOS handler: `tests/components/hybridwebview/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -167,6 +156,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Default `HybridRoot` | `wwwroot` | Same | — | — |
 | Linux engine | Not supported | `WebKitGTK` | Closest engine match on GTK | — |
 | Async API shape | `Task<TReturn?>` (nullable boxed) | `std::future<TReturn>` (throws on JS exception) | Idiomatic C++ surface | — |
+
+## Implementation
+
+- Surface: [`include/mpapp/hybrid_web_view.hpp`](../../../include/mpapp/hybrid_web_view.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/hybrid_web_view_handler.hpp`](../../../include/mpapp/handlers/mock/hybrid_web_view_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/hybrid_web_view_handler.hpp`](../../../include/mpapp/handlers/windows/hybrid_web_view_handler.hpp) + [`src/handlers/windows/hybrid_web_view_handler.cpp`](../../../src/handlers/windows/hybrid_web_view_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/hybrid_web_view_handler.hpp`](../../../include/mpapp/handlers/linux/hybrid_web_view_handler.hpp) + [`src/handlers/linux/hybrid_web_view_handler.cpp`](../../../src/handlers/linux/hybrid_web_view_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/hybrid_web_view_handler.hpp`](../../../include/mpapp/handlers/android/hybrid_web_view_handler.hpp) + [`src/handlers/android/hybrid_web_view_handler.cpp`](../../../src/handlers/android/hybrid_web_view_handler.cpp)
+- Tests: [`tests/mock_handlers/hybrid_web_view_test.cpp`](../../../tests/mock_handlers/hybrid_web_view_test.cpp)
 
 ## See also
 

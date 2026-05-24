@@ -110,17 +110,6 @@ copy.keyboard_accelerators.value().push_back({
 });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/menuflyoutitem/mock_test.cpp` (planned)
-- Windows handler: `tests/components/menuflyoutitem/windows_test.cpp` (planned)
-- Android handler: `tests/components/menuflyoutitem/android_test.cpp` (planned)
-- Linux handler: `tests/components/menuflyoutitem/linux_test.cpp` (planned)
-- macOS handler: `tests/components/menuflyoutitem/macos_test.cpp` (planned)
-- iOS handler: `tests/components/menuflyoutitem/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -130,6 +119,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | `Command` / `Clicked` order | `Clicked` fires before `Command` executes | Same: `clicked` event first, then `command` | Parity | n/a |
 | Multiple accelerators | All registered on Windows; only first on Android/macOS/Linux/iOS | Same — surplus accelerators documented as Windows-only | OS limit | RFC TBD |
 | `CommandParameter` type | `object` (boxed) | `std::any` | C++ idiom — typed wrappers possible per-binding | n/a |
+
+## Implementation
+
+- Surface: [`include/mpapp/menu_flyout_item.hpp`](../../../include/mpapp/menu_flyout_item.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/menu_flyout_item_handler.hpp`](../../../include/mpapp/handlers/mock/menu_flyout_item_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/menu_flyout_item_handler.hpp`](../../../include/mpapp/handlers/windows/menu_flyout_item_handler.hpp) + [`src/handlers/windows/menu_flyout_item_handler.cpp`](../../../src/handlers/windows/menu_flyout_item_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/menu_flyout_item_handler.hpp`](../../../include/mpapp/handlers/linux/menu_flyout_item_handler.hpp) + [`src/handlers/linux/menu_flyout_item_handler.cpp`](../../../src/handlers/linux/menu_flyout_item_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/menu_flyout_item_handler.hpp`](../../../include/mpapp/handlers/android/menu_flyout_item_handler.hpp) + [`src/handlers/android/menu_flyout_item_handler.cpp`](../../../src/handlers/android/menu_flyout_item_handler.cpp)
+- Tests: [`tests/mock_handlers/menu_flyout_item_test.cpp`](../../../tests/mock_handlers/menu_flyout_item_test.cpp)
 
 ## See also
 

@@ -108,23 +108,22 @@ sl->drag_completed.subscribe([&] { commit_volume(sl->value.get()); });
 
 `slider_handler<platform::mock>` records changes to `value`, `minimum`, and `maximum`. Tests cover the initial-range capture, per-channel propagation, and the no-emit-on-same-value contract.
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/mock_handlers/slider_test.cpp`
-- Windows handler: `tests/components/slider/windows_test.cpp` (planned)
-- Android handler: `tests/components/slider/android_test.cpp` (planned)
-- Linux handler: `tests/components/slider/linux_test.cpp` (planned)
-- macOS handler: `tests/components/slider/macos_test.cpp` (planned)
-- iOS handler: `tests/components/slider/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Implementation
+
+- Surface: [`include/mpapp/slider.hpp`](../../../include/mpapp/slider.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/slider_handler.hpp`](../../../include/mpapp/handlers/mock/slider_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/slider_handler.hpp`](../../../include/mpapp/handlers/windows/slider_handler.hpp) + [`src/handlers/windows/slider_handler.cpp`](../../../src/handlers/windows/slider_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/slider_handler.hpp`](../../../include/mpapp/handlers/linux/slider_handler.hpp) + [`src/handlers/linux/slider_handler.cpp`](../../../src/handlers/linux/slider_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/slider_handler.hpp`](../../../include/mpapp/handlers/android/slider_handler.hpp) + [`src/handlers/android/slider_handler.cpp`](../../../src/handlers/android/slider_handler.cpp)
+- Tests: [`tests/mock_handlers/slider_test.cpp`](../../../tests/mock_handlers/slider_test.cpp)
 
 ## See also
 

@@ -140,17 +140,6 @@ int main(int argc, char** argv) {
 }
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/application/mock_test.cpp` (planned)
-- Windows handler: `tests/components/application/windows_test.cpp` (planned)
-- Android handler: `tests/components/application/android_test.cpp` (planned)
-- Linux handler: `tests/components/application/linux_test.cpp` (planned)
-- macOS handler: `tests/components/application/macos_test.cpp` (planned)
-- iOS handler: `tests/components/application/ios_test.cpp` (planned)
-
 ## Known Differences
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
@@ -159,6 +148,15 @@ Links to per-platform handler test files. Tracked in [[Test Harness]].
 | `Current` getter | Mutable static, can be reassigned | Read-only, assigned in constructor | Reassigning at runtime is almost always a bug | TBD |
 | Multi-window on mobile | Throws on platforms without scene support | Returns an error future from `open_window` | Aligns with [[Interop Parity]] — observable behavior on all platforms | TBD |
 | Theme model | `AppTheme` (`Unspecified`/`Light`/`Dark`) | Same enum, but `requested_theme` is a [[Observable-Property\|Computed]] property | Lets theme bind directly into XAML without an event handler | [[ADR-0009-public-api-template-wrappers-only]] |
+
+## Implementation
+
+- Surface: [`include/mpapp/application.hpp`](../../../include/mpapp/application.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/application_handler.hpp`](../../../include/mpapp/handlers/mock/application_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/application_handler.hpp`](../../../include/mpapp/handlers/windows/application_handler.hpp) + [`src/handlers/windows/application_handler.cpp`](../../../src/handlers/windows/application_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/application_handler.hpp`](../../../include/mpapp/handlers/linux/application_handler.hpp) + [`src/handlers/linux/application_handler.cpp`](../../../src/handlers/linux/application_handler.cpp)
+- Tests: [`tests/mock_handlers/application_test.cpp`](../../../tests/mock_handlers/application_test.cpp)
 
 ## See also
 

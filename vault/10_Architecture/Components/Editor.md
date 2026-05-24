@@ -114,23 +114,22 @@ ed->text_changed.subscribe([](auto const& s) { word_count(s); });
 
 `editor_handler<platform::mock>` records changes to the primitive Observable slots (`text`, `placeholder`, `is_read_only`, `max_length`). The mock surface omits password masking (per the Editor MAUI spec) and exercises multi-line text propagation.
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/mock_handlers/editor_test.cpp`
-- Windows handler: `tests/components/editor/windows_test.cpp` (planned)
-- Android handler: `tests/components/editor/android_test.cpp` (planned)
-- Linux handler: `tests/components/editor/linux_test.cpp` (planned)
-- macOS handler: `tests/components/editor/macos_test.cpp` (planned)
-- iOS handler: `tests/components/editor/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
 
 | Aspect | MAUI behavior | MPAPP behavior | Reason | Resolved by |
 |---|---|---|---|---|
+
+## Implementation
+
+- Surface: [`include/mpapp/editor.hpp`](../../../include/mpapp/editor.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/editor_handler.hpp`](../../../include/mpapp/handlers/mock/editor_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/editor_handler.hpp`](../../../include/mpapp/handlers/windows/editor_handler.hpp) + [`src/handlers/windows/editor_handler.cpp`](../../../src/handlers/windows/editor_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/editor_handler.hpp`](../../../include/mpapp/handlers/linux/editor_handler.hpp) + [`src/handlers/linux/editor_handler.cpp`](../../../src/handlers/linux/editor_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/editor_handler.hpp`](../../../include/mpapp/handlers/android/editor_handler.hpp) + [`src/handlers/android/editor_handler.cpp`](../../../src/handlers/android/editor_handler.cpp)
+- Tests: [`tests/mock_handlers/editor_test.cpp`](../../../tests/mock_handlers/editor_test.cpp)
 
 ## See also
 

@@ -112,17 +112,6 @@ tabs->unselected_tab_color = colors::gray;
 tabs->children.mutate([&](auto& v){ v.push_back(home); v.push_back(cart); });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/tabbedpage/mock_test.cpp` (planned)
-- Windows handler: `tests/components/tabbedpage/windows_test.cpp` (planned)
-- Android handler: `tests/components/tabbedpage/android_test.cpp` (planned)
-- Linux handler: `tests/components/tabbedpage/linux_test.cpp` (planned)
-- macOS handler: `tests/components/tabbedpage/macos_test.cpp` (planned)
-- iOS handler: `tests/components/tabbedpage/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -133,6 +122,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | "More" overflow | iOS only (5-tab limit). | Same — UIKit constraint. | Platform limit. | n/a |
 | `ItemsSource` data binding | Live binding to `IEnumerable` with `ItemTemplate`. | Same via `observable_list`. | Parity. | n/a |
 | Tab swipe gestures | Android only by default. | Same. | Platform conventions. | RFC TBD |
+
+## Implementation
+
+- Surface: [`include/mpapp/tabbed_page.hpp`](../../../include/mpapp/tabbed_page.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/tabbed_page_handler.hpp`](../../../include/mpapp/handlers/mock/tabbed_page_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/tabbed_page_handler.hpp`](../../../include/mpapp/handlers/windows/tabbed_page_handler.hpp) + [`src/handlers/windows/tabbed_page_handler.cpp`](../../../src/handlers/windows/tabbed_page_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/tabbed_page_handler.hpp`](../../../include/mpapp/handlers/linux/tabbed_page_handler.hpp) + [`src/handlers/linux/tabbed_page_handler.cpp`](../../../src/handlers/linux/tabbed_page_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/tabbed_page_handler.hpp`](../../../include/mpapp/handlers/android/tabbed_page_handler.hpp) + [`src/handlers/android/tabbed_page_handler.cpp`](../../../src/handlers/android/tabbed_page_handler.cpp)
+- Tests: [`tests/mock_handlers/tabbed_page_test.cpp`](../../../tests/mock_handlers/tabbed_page_test.cpp)
 
 ## See also
 

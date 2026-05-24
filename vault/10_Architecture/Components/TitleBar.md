@@ -127,17 +127,6 @@ tb.content = mpapp::search_bar{ .placeholder = "Search" };
 window.title_bar = std::move(tb);
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/titlebar/mock_test.cpp` (planned)
-- Windows handler: `tests/components/titlebar/windows_test.cpp` (planned)
-- Android handler: `tests/components/titlebar/android_test.cpp` (planned)
-- Linux handler: `tests/components/titlebar/linux_test.cpp` (planned)
-- macOS handler: `tests/components/titlebar/macos_test.cpp` (planned)
-- iOS handler: `tests/components/titlebar/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -148,6 +137,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | Default template | Built imperatively in `BuildDefaultTemplate()` | Built declaratively in a XAML template stub | Reuses MPAPP-XAML markup | n/a |
 | Android / iOS support | No-op (TBD upstream) | Same; documented as desktop-only | OS constraints | n/a |
 | System button margin | Hard-coded constants (150 px Win, 80–90 px macOS) | Same constants; exposed as compile-time platform traits | Faithful port | n/a |
+
+## Implementation
+
+- Surface: [`include/mpapp/title_bar.hpp`](../../../include/mpapp/title_bar.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/title_bar_handler.hpp`](../../../include/mpapp/handlers/mock/title_bar_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/title_bar_handler.hpp`](../../../include/mpapp/handlers/windows/title_bar_handler.hpp) + [`src/handlers/windows/title_bar_handler.cpp`](../../../src/handlers/windows/title_bar_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/title_bar_handler.hpp`](../../../include/mpapp/handlers/linux/title_bar_handler.hpp) + [`src/handlers/linux/title_bar_handler.cpp`](../../../src/handlers/linux/title_bar_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/title_bar_handler.hpp`](../../../include/mpapp/handlers/android/title_bar_handler.hpp) + [`src/handlers/android/title_bar_handler.cpp`](../../../src/handlers/android/title_bar_handler.cpp)
+- Tests: [`tests/mock_handlers/title_bar_test.cpp`](../../../tests/mock_handlers/title_bar_test.cpp)
 
 ## See also
 

@@ -136,17 +136,6 @@ page.toolbar_items.value().push_back(mpapp::toolbar_item{
 });
 ```
 
-## Tests
-
-Links to per-platform handler test files. Tracked in [[Test Harness]].
-
-- Mock tests: `tests/components/toolbar/mock_test.cpp` (planned)
-- Windows handler: `tests/components/toolbar/windows_test.cpp` (planned)
-- Android handler: `tests/components/toolbar/android_test.cpp` (planned)
-- Linux handler: `tests/components/toolbar/linux_test.cpp` (planned)
-- macOS handler: `tests/components/toolbar/macos_test.cpp` (planned)
-- iOS handler: `tests/components/toolbar/ios_test.cpp` (planned)
-
 ## Known Differences
 
 Documented divergences from MAUI behavior. Each row is a candidate for an RFC if elimination is feasible.
@@ -157,6 +146,16 @@ Documented divergences from MAUI behavior. Each row is a candidate for an RFC if
 | `BarHeight` | Nullable `double?`; null = platform default | `Observable<std::optional<double>>` | Faithful port | n/a |
 | iOS `Secondary` placement | Bottom toolbar (not navigation bar) | Same | OS convention | n/a |
 | Drawer toggle | Surfaced via `DrawerToggleVisible` | Same; ignored on non-drawer hosts | Parity | n/a |
+
+## Implementation
+
+- Surface: [`include/mpapp/toolbar.hpp`](../../../include/mpapp/toolbar.hpp)
+- Mock handler: [`include/mpapp/handlers/mock/toolbar_handler.hpp`](../../../include/mpapp/handlers/mock/toolbar_handler.hpp)
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/toolbar_handler.hpp`](../../../include/mpapp/handlers/windows/toolbar_handler.hpp) + [`src/handlers/windows/toolbar_handler.cpp`](../../../src/handlers/windows/toolbar_handler.cpp)
+  - Linux: [`include/mpapp/handlers/linux/toolbar_handler.hpp`](../../../include/mpapp/handlers/linux/toolbar_handler.hpp) + [`src/handlers/linux/toolbar_handler.cpp`](../../../src/handlers/linux/toolbar_handler.cpp)
+  - Android: [`include/mpapp/handlers/android/toolbar_handler.hpp`](../../../include/mpapp/handlers/android/toolbar_handler.hpp) + [`src/handlers/android/toolbar_handler.cpp`](../../../src/handlers/android/toolbar_handler.cpp)
+- Tests: [`tests/mock_handlers/toolbar_test.cpp`](../../../tests/mock_handlers/toolbar_test.cpp)
 
 ## See also
 
