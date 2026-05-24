@@ -30,19 +30,30 @@ android {
                 // vars are optional: if VCPKG_ROOT is unset the Cairo
                 // backend simply falls back to stub (see
                 // src/main/cpp/CMakeLists.txt detection logic).
+                //
+                // MPAPP_GRAPHICS_BACKEND can be overridden via
+                // -PmpappGraphicsBackend=skia at gradle invocation time
+                // (or by editing the default below). Default is cairo —
+                // matches the host build's default and the M-04c rollout
+                // baseline. Switching to skia requires
+                // `vcpkg install skia[core,png,jpeg]:<android-triplet>`
+                // first; see vault/50_Tasks/T-0030-skia-backend/.
                 val vcpkgRoot = System.getenv("VCPKG_ROOT")
                     ?: "${System.getProperty("user.home").replace('\\', '/')}/vcpkg"
-                val cairoTriplet = "x64-android"  // matches abiFilter below
-                val cairoPrefix  = "$vcpkgRoot/installed/$cairoTriplet"
-                val pkgconfBin   = "$vcpkgRoot/downloads/tools/msys2/3e71d1f8e22ab23f/mingw64/bin/pkgconf.exe"
+                val triplet     = "x64-android"  // matches abiFilter below
+                val vcpkgPrefix = "$vcpkgRoot/installed/$triplet"
+                val pkgconfBin  = "$vcpkgRoot/downloads/tools/msys2/3e71d1f8e22ab23f/mingw64/bin/pkgconf.exe"
+                val backend     = (project.findProperty("mpappGraphicsBackend") as String?)
+                                    ?: "cairo"
 
                 arguments += listOf(
                     "-DANDROID_STL=c++_shared",
                     "-DCMAKE_CXX_STANDARD=23",
                     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
-                    "-DMPAPP_GRAPHICS_BACKEND=cairo",
-                    "-DMPAPP_CAIRO_PREFIX=$cairoPrefix",
-                    "-DCMAKE_PREFIX_PATH=$cairoPrefix",
+                    "-DMPAPP_GRAPHICS_BACKEND=$backend",
+                    "-DMPAPP_CAIRO_PREFIX=$vcpkgPrefix",
+                    "-DMPAPP_SKIA_PREFIX=$vcpkgPrefix",
+                    "-DCMAKE_PREFIX_PATH=$vcpkgPrefix",
                     "-DPKG_CONFIG_EXECUTABLE=$pkgconfBin"
                 )
                 cppFlags += listOf("-std=c++23")

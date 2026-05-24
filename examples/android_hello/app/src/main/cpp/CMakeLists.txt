@@ -35,6 +35,7 @@ set(MPAPP_GRAPHICS_BACKEND "cairo" CACHE STRING
     "2D graphics backend: cairo (default), stub")
 
 set(MPAPP_GRAPHICS_HAS_CAIRO OFF)
+set(MPAPP_GRAPHICS_HAS_SKIA  OFF)
 if(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
     # Gradle passes MPAPP_CAIRO_PREFIX pointing at vcpkg's
     # installed/<triplet>-android directory. Bridge it into the
@@ -58,6 +59,27 @@ if(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
             ${MPAPP_ROOT}/src/detail/graphics/stub_backend.cpp)
         message(STATUS
             "android_hello graphics backend: stub (cairo not found via pkg-config)")
+    endif()
+elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")
+    # Gradle passes MPAPP_SKIA_PREFIX pointing at vcpkg's
+    # installed/<triplet>-android directory (where the Skia install
+    # for that android ABI lives). Add it to CMAKE_PREFIX_PATH so
+    # find_package(unofficial-skia CONFIG) picks up the
+    # unofficial::skia::skia imported target.
+    if(DEFINED MPAPP_SKIA_PREFIX)
+        list(APPEND CMAKE_PREFIX_PATH "${MPAPP_SKIA_PREFIX}")
+    endif()
+    find_package(unofficial-skia CONFIG QUIET)
+    if(unofficial-skia_FOUND OR TARGET unofficial::skia::skia)
+        list(APPEND MPAPP_GRAPHICS_SOURCES
+            ${MPAPP_ROOT}/src/detail/graphics/skia_backend.cpp)
+        set(MPAPP_GRAPHICS_HAS_SKIA ON)
+        message(STATUS "android_hello graphics backend: skia")
+    else()
+        list(APPEND MPAPP_GRAPHICS_SOURCES
+            ${MPAPP_ROOT}/src/detail/graphics/stub_backend.cpp)
+        message(STATUS
+            "android_hello graphics backend: stub (skia not found at MPAPP_SKIA_PREFIX)")
     endif()
 else()
     list(APPEND MPAPP_GRAPHICS_SOURCES
@@ -92,4 +114,14 @@ if(MPAPP_GRAPHICS_HAS_CAIRO)
     target_link_directories(android_hello PRIVATE
         ${MPAPP_CAIRO_LIBRARY_DIRS})
     target_compile_definitions(android_hello PRIVATE MPAPP_GRAPHICS_HAS_CAIRO=1)
+endif()
+
+if(MPAPP_GRAPHICS_HAS_SKIA)
+    # vcpkg's unofficial-skia config exports a single imported target
+    # that carries Skia + its transitive deps (libpng, libjpeg,
+    # plus the minimal feature set installed for android — typically
+    # no harfbuzz / ICU since text shaping isn't needed for ShapeView
+    # / GraphicsView rendering).
+    target_link_libraries(android_hello PRIVATE unofficial::skia::skia)
+    target_compile_definitions(android_hello PRIVATE MPAPP_GRAPHICS_HAS_SKIA=1)
 endif()

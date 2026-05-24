@@ -102,13 +102,31 @@ the existing `cairo_render_demo` is the closure step.
 - [x] **Third-party deps tracking** (Rule 9). Added rows for libcairo
   + Skia + the Skia transitive deps (harfbuzz, libpng, libjpeg-turbo,
   libwebp, expat) in [[70_References/Third-Party Dependencies]].
-- [ ] **Android Skia investigation.** vcpkg `skia:arm64-android` /
-  `x64-android` install failed on the Windows host — `buildtrees/`
-  shows the abi_info files were generated but no actual build logs
-  exist, suggesting vcpkg refused the install before any compile
-  work began (probably missing `ANDROID_NDK_HOME` or vcpkg's
-  android triplet configuration). Deferred — Android keeps Cairo
-  as its only real backend until this is resolved.
+- [x] **Android Skia investigation.** Root-caused two stacked
+  upstream tooling bugs when cross-compiling Skia → Android from a
+  Windows host:
+  1. **ICU autotools / msys2 path separator.** Default Skia install
+     pulls ICU, which generates `uconvmsg\uconvmsg_dat.S` in its
+     Makefile rules; the `\u` gets eaten as a bash escape under
+     msys2, breaking the build.
+  2. **Skia's GN ninja rules use POSIX backticks.** After dropping
+     ICU (via `skia[core,png,jpeg]`), Skia's own build runs
+     `cmd.exe /c "...llvm-ar.exe rcs libskcms.a \`cat libskcms.a.rsp\`"`
+     which cmd.exe can't parse — `cat` + backticks are POSIX.
+  See `notes/dual-vcpkg-roots.md` for the full investigation +
+  recommended workaround (install from a Linux host with the
+  Linux NDK; Linux's native POSIX shell + Unix paths sidestep
+  both issues).
+- [x] **Android-side Skia plumbing.** Even though the install
+  failed, the MPAPP gradle + CMake wiring is in place:
+  `examples/android_hello/app/build.gradle.kts` accepts
+  `-PmpappGraphicsBackend=skia` (default cairo); the resulting
+  CMake invocation passes `MPAPP_SKIA_PREFIX` to the
+  `src/main/cpp/CMakeLists.txt` which has a new
+  `elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")` branch that
+  finds the Skia package and falls back to stub when not present.
+  So once `skia:<android-triplet>` is installed (from any host)
+  the swap is one gradle property away.
 - [ ] **Per-backend ctest cases.** Add a small `graphics_skia_test.cpp`
   next to the existing `graphics_cairo_test.cpp`, gated on
   `#if MPAPP_GRAPHICS_HAS_SKIA`. Deferred — the headless_canvas_demo
