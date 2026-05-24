@@ -47,6 +47,14 @@ GTK4 handlers. WSLg is the primary dev surface on the user's Windows host; nativ
 
 Linked via [[_Bases/Tasks.base]] filtered by `milestone == "M-06"`.
 
+## See in code
+
+- Real GTK4 handlers: [`src/handlers/linux/`](../../src/handlers/linux/) — 62 `<component>_handler.cpp` files using GTK4's C ABI (`GtkButton`, `GtkLabel`, `GtkListBox`, `GtkDrawingArea`, etc.). LGPL dynamic linkage (Rule 9). Functionally shipped via M-04b's parallel-worker phase.
+- Sample apps: [`examples/gtk4_hello/`](../../examples/gtk4_hello/), [`examples/gtk4_collectionview_layout_demo/`](../../examples/gtk4_collectionview_layout_demo/), [`examples/gtk4_shapeview_demo/`](../../examples/gtk4_shapeview_demo/).
+- Cairo backend on Linux (the system libcairo bridges into [[ADR-0015-graphics-backend-dual]]'s canvas facade): [`src/detail/graphics/cairo_backend.cpp`](../../src/detail/graphics/cairo_backend.cpp).
+- Linux WebKitGTK 6.x WebView via LGPL dynamic link: [`src/handlers/linux/web_view_handler.cpp`](../../src/handlers/linux/web_view_handler.cpp).
+- Formal milestone closure pending (handler-status sweep + GTK4 UI smoke tests + Linux hot-reload).
+
 ## Related
 
 - [[Platform Interop]]

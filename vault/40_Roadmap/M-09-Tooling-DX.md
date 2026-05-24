@@ -46,6 +46,13 @@ Polish the developer experience now that all five platforms ship. VS Code first 
 
 Linked via [[_Bases/Tasks.base]].
 
+## See in code
+
+- Developer CLI (existing skeleton): [`tools/mpapp/`](../../tools/mpapp/) — extension surface for `new` / `build` / `run` / `xc` subcommands.
+- XAML compiler (existing skeleton): [`tools/mpapp-xc/`](../../tools/mpapp-xc/) — the polish target for IntelliSense / source-mapped diagnostics / hot-reload trigger.
+- Hot-reload daemon (existing seed): [`include/mpapp/hot_reload.hpp`](../../include/mpapp/hot_reload.hpp) + [`src/hot_reload/windows.cpp`](../../src/hot_reload/windows.cpp) (Windows-only today; Linux + macOS bodies are M-09 work).
+- VS Code extension + Visual Studio template do not exist yet — both are M-09 deliverables. Their eventual homes are `tools/vscode-extension/` and `tools/visual-studio-template/`.
+
 ## Related
 
 - [[Hot Reload]]

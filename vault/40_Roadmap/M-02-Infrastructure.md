@@ -57,6 +57,16 @@ Build the substrate everything else sits on: CMake configuration, the `mpapp` CL
 - [[T-0007-wslg-gtk4-hello]]
 - [[T-0009-cross-compilation-matrix]]
 
+## See in code
+
+- Root CMake project + `mpapp-core` target: [`CMakeLists.txt`](../../CMakeLists.txt).
+- Cross-compilation toolchain files (one per target): [`cmake/toolchains/`](../../cmake/toolchains/) — windows-x64 / linux-{x64,arm64} / android-arm64 / macos-arm64 / ios-arm64 / zig (the cross-compiler frontend per [[ADR-0011-cross-compilation-toolchain]]).
+- Developer CLI bootstrap: [`tools/mpapp/`](../../tools/mpapp/).
+- XAML compiler skeleton: [`tools/mpapp-xc/`](../../tools/mpapp-xc/).
+- Test harness: [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt) (Catch2 via FetchContent + `CONFIGURE_DEPENDS` glob for `tests/mock_handlers/*_test.cpp`) + [`tests/smoke_test.cpp`](../../tests/smoke_test.cpp) + [`tests/executor_test.cpp`](../../tests/executor_test.cpp).
+- CI workflows: [`.github/workflows/`](../../.github/workflows/) — `pr.yml` (per-PR matrix) + `release.yml` (tagged-release full matrix) + `build-skia-md-windows.yml` (Skia /MD prebuilt publisher).
+- T-0009 cross-compile matrix validation: [`vault/50_Tasks/T-0009-cross-compilation-matrix/`](../50_Tasks/T-0009-cross-compilation-matrix/) — still `in-progress` (Apple-host rows pending).
+
 ## Related
 
 - [[ADR-0007-cross-platform-tooling]]

@@ -105,6 +105,17 @@ For each candidate, document: state of the art, our novelty, business value, fre
 
 N/A — this is initial licensing, no prior state.
 
+## See in code
+
+- License-posture tracker: [`vault/70_References/Third-Party Dependencies.md`](../70_References/Third-Party%20Dependencies.md) — every third-party dep recorded with license / version / linking model / posture (Rule 9 enforcement artifact).
+- Permissive-via-static (Apache 2.0 / MIT / BSD / etc.) in the tree today:
+  - Skia (BSD-3) static-linked when `MPAPP_GRAPHICS_BACKEND=skia` — see [`cmake/MpappFindSkia.cmake`](../../cmake/MpappFindSkia.cmake).
+  - Catch2 (BSL-1.0) via `FetchContent_MakeAvailable` — see [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt).
+- Weak-copyleft via dynamic linking:
+  - GTK4 (LGPL-2.1+) on Linux — `pkg-config gtk4` at link time.
+  - libcairo (LGPL-2.1) on every platform — `pkg_check_modules(... cairo)` per [`CMakeLists.txt`](../../CMakeLists.txt).
+- Forbidden classes (GPL runtime, source-available commercial): zero in tree. Verified by inspection of the dependency tracker.
+
 ## References
 
 - [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0)

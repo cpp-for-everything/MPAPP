@@ -135,6 +135,17 @@ Each Phase 1 worker creates a branch `bulk/widget/<name>`. After local verificat
 7. Build all 3 platforms once at the end. Commit any glob-pickup fixups.
 8. Update the tracker.
 
+## See in code
+
+- The bulk-portable handler set landed across three platforms:
+  [`src/handlers/windows/`](../../src/handlers/windows/) (62 files)
+  · [`src/handlers/linux/`](../../src/handlers/linux/) (62 files)
+  · [`src/handlers/android/`](../../src/handlers/android/) (69 files).
+- The dispatch foundation that made parallel workers possible:
+  per-platform dispatch headers at [`include/mpapp/handlers/{windows,linux,android}/widget_dispatch.hpp`](../../include/mpapp/handlers/android/widget_dispatch.hpp) + the per-component `<name>_handler.cpp` self-registration pattern (static initializer that registers a `view*` → native-handle function in the per-platform registry) per [[ADR-0013-data-driven-widget-dispatch]].
+- Android kind-discriminated event routers (one shared listener class per event family, per [[ADR-0022-android-kind-discriminated-routers]]): [`src/handlers/android/item_click_router.cpp`](../../src/handlers/android/item_click_router.cpp), [`widget_dispatch.cpp`](../../src/handlers/android/widget_dispatch.cpp), [`text_watcher_dispatch.cpp`](../../src/handlers/android/text_watcher_dispatch.cpp), etc.
+- Java glue under [`examples/android_hello/app/src/main/java/io/mpapp/`](../../examples/android_hello/app/src/main/java/io/mpapp/) — `MppClickRouter.java`, `MppCheckedChangeListener.java`, `MppTextWatcher.java`, `MppItemClickRouter.java` (kind-discriminator routers).
+
 ## See also
 
 - [[ADR-0013-data-driven-widget-dispatch]] — the foundation that makes parallel workers possible.

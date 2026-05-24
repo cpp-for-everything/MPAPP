@@ -60,6 +60,13 @@ Make MPAPP installable, documentable, and commercially viable. This is also the 
 
 Linked via [[_Bases/Tasks.base]].
 
+## See in code
+
+- Third-party dependency tracker (the license-posture index per Rule 9 + [[ADR-0010-licensing-and-patent-strategy]]): [`vault/70_References/Third-Party Dependencies.md`](../70_References/Third-Party%20Dependencies.md).
+- The source tree being packaged: [`include/mpapp/`](../../include/mpapp/) (public headers) + [`src/`](../../src/) (impl + handlers) + [`tools/`](../../tools/) (developer CLI + XAML compiler).
+- vcpkg / Conan recipes don't exist yet — both are M-10 deliverables. Their eventual homes are `packaging/vcpkg-port/` and `packaging/conan-recipe/`.
+- Docs site + migration guide don't exist yet — eventual home is `docs/` (mirroring MAUI's docs site structure).
+
 ## Related
 
 - [[RFC-0001-licensing-and-patent-strategy]]

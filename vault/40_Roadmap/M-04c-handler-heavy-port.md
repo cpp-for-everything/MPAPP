@@ -86,6 +86,19 @@ For each gated widget:
 - ShapeView/GraphicsView v2 (Cairo+Skia compile-time selectable graphics facade) per ADR-0015.
 - macOS + iOS handlers across the entire widget set — gated on Apple host.
 
+## See in code
+
+The 12 heavy widgets this milestone shipped, all `android-real`:
+
+- **Page family** (per [[ADR-0014-page-navigation-stack]]) — engine [`include/mpapp/page.hpp`](../../include/mpapp/page.hpp) + [`detail/page_stack.hpp`](../../include/mpapp/detail/page_stack.hpp); widgets [`navigation_page.hpp`](../../include/mpapp/navigation_page.hpp) · [`tabbed_page.hpp`](../../include/mpapp/tabbed_page.hpp) · [`flyout_page.hpp`](../../include/mpapp/flyout_page.hpp) · [`shell.hpp`](../../include/mpapp/shell.hpp).
+- **List family** (per [[ADR-0020-virtualized-item-host-wrap-platform]]) — [`list_view.hpp`](../../include/mpapp/list_view.hpp) · [`collection_view.hpp`](../../include/mpapp/collection_view.hpp) · [`table_view.hpp`](../../include/mpapp/table_view.hpp).
+- **Cell tree** (per [[ADR-0021-tableview-cell-types]]) — [`cell.hpp`](../../include/mpapp/cell.hpp) + [`text_cell.hpp`](../../include/mpapp/text_cell.hpp) · [`entry_cell.hpp`](../../include/mpapp/entry_cell.hpp) · [`switch_cell.hpp`](../../include/mpapp/switch_cell.hpp) · [`view_cell.hpp`](../../include/mpapp/view_cell.hpp) · [`image_cell.hpp`](../../include/mpapp/image_cell.hpp).
+- **Web** — [`web_view.hpp`](../../include/mpapp/web_view.hpp) · [`hybrid_web_view.hpp`](../../include/mpapp/hybrid_web_view.hpp) + bridge [`hybrid_bridge.hpp`](../../include/mpapp/hybrid_bridge.hpp) + JSON layer [`detail/json.hpp`](../../include/mpapp/detail/json.hpp) (per [[ADR-0018-hybrid-webview-typed-bridge]]).
+- **Graphics** (per [[ADR-0015-graphics-backend-dual]]) — facade [`include/mpapp/detail/graphics/canvas.hpp`](../../include/mpapp/detail/graphics/canvas.hpp) + backends [`src/detail/graphics/cairo_backend.cpp`](../../src/detail/graphics/cairo_backend.cpp) + [`skia_backend.cpp`](../../src/detail/graphics/skia_backend.cpp); widgets [`shape_view.hpp`](../../include/mpapp/shape_view.hpp) · [`graphics_view.hpp`](../../include/mpapp/graphics_view.hpp).
+- **Grid as a real layout engine** (per [[ADR-0017-grid-track-definitions]]) — [`grid_layout.hpp`](../../include/mpapp/grid_layout.hpp).
+
+Per-platform handlers for each widget live at `src/handlers/{windows,linux,android}/<snake>_handler.cpp`. Closure tasks (archived per Rule 11) under [`vault/50_Tasks/_Archive/T-002{8,9}-*/`](../50_Tasks/_Archive/) + [`T-003{0,1}-*/`](../50_Tasks/_Archive/).
+
 ## See also
 
 - [[ADR-0013-data-driven-widget-dispatch]] — the dispatch foundation M-04b shipped on; everything in M-04c composes with it.

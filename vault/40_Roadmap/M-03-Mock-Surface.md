@@ -63,6 +63,14 @@ The user's key strategy (per [[ADR-0008-mock-first-implementation]]): stand up t
 
 Linked via [[_Bases/Tasks.base]] filtered by `milestone == "M-03"`. Tasks are created on a per-component or per-component-group basis as work begins.
 
+## See in code
+
+- Public surface headers (one per component): [`include/mpapp/`](../../include/mpapp/) — 79 headers covering every MAUI control listed in [[Controls Inventory]].
+- Mock handlers (the mock-first deliverable): [`include/mpapp/handlers/mock/`](../../include/mpapp/handlers/mock/) — 66 `<component>_handler<platform::mock>` files. Each records `map_<property>` calls into a `calls()` vector for assertion.
+- Tests for the mock surface: [`tests/mock_handlers/`](../../tests/mock_handlers/) — 66 `<component>_test.cpp` files, glob-included so adding a component's tests doesn't need a CMakeLists edit.
+- XAML compiler scaffolding (this milestone's representative-subset goal): [`tools/mpapp-xc/`](../../tools/mpapp-xc/).
+- Type-system primitives that the mock surface stands on: [`include/mpapp/observable.hpp`](../../include/mpapp/observable.hpp) + [`computed.hpp`](../../include/mpapp/computed.hpp) + [`command.hpp`](../../include/mpapp/command.hpp) + [`signal.hpp`](../../include/mpapp/signal.hpp).
+
 ## Related
 
 - [[ADR-0008-mock-first-implementation]]

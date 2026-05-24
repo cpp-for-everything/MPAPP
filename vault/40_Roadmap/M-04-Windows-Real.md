@@ -48,6 +48,13 @@ Convert every dummy `*_handler<platform::mock>` into a real `*_handler<platform:
 
 Linked via [[_Bases/Tasks.base]] filtered by `milestone == "M-04"`. Tasks include a per-component handler PR and a per-sample-app integration task.
 
+## See in code
+
+- Real WinUI 3 handlers: [`src/handlers/windows/`](../../src/handlers/windows/) — 62 `<component>_handler.cpp` files using C++/WinRT (`muxc::Button`, `muxc::TextBlock`, `muxc::ListView`, etc.). One per component partial-specialized on `platform::windows`.
+- WinUI 3 / WindowsAppSDK plumbing: [`cmake/WindowsAppSDK.cmake`](../../cmake/WindowsAppSDK.cmake) — `mpapp_install_windows_app_sdk()` NuGet restore + `mpapp_generate_winrt_projection()` cppwinrt code-gen + `mpapp_add_winappsdk_runtime()` runtime-DLL deploy.
+- Sample apps demonstrating end-to-end Win flows: [`examples/windows_button_spike/`](../../examples/windows_button_spike/) (T-0011 app-shell baseline) + [`examples/windows_collectionview_layout_demo/`](../../examples/windows_collectionview_layout_demo/) (T-0028 four-layout matrix) + [`examples/windows_shapeview_demo/`](../../examples/windows_shapeview_demo/) (T-0031 canvas migration).
+- Hot reload: [`include/mpapp/hot_reload.hpp`](../../include/mpapp/hot_reload.hpp) + [`src/hot_reload/windows.cpp`](../../src/hot_reload/windows.cpp) — Windows is the first platform on the M-09 hot-reload roadmap.
+
 ## Related
 
 - [[Platform Interop]]

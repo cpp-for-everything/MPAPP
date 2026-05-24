@@ -47,6 +47,14 @@ Convert mock handlers to real fbjni handlers. Mature the `mpapp-jni-gen` codegen
 
 Linked via [[_Bases/Tasks.base]] filtered by `milestone == "M-05"`.
 
+## See in code
+
+- Real Android handlers: [`src/handlers/android/`](../../src/handlers/android/) — 69 `<component>_handler.cpp` files. JNI to `android.widget.*` / `androidx.*`. Functionally shipped via M-04b's parallel-worker phase (Android landed alongside Win + Linux for every bulk-portable widget).
+- Java glue under [`examples/android_hello/app/src/main/java/io/mpapp/`](../../examples/android_hello/app/src/main/java/io/mpapp/) — `MppClickRouter.java`, `MppCheckedChangeListener.java`, `MppTextWatcher.java`, `MppItemClickRouter.java`, `MppCollectionAdapter.java`, `MppShapeViewLayoutListener.java`, `MppEditorActionListener.java`. Kind-discriminated routers per [[ADR-0022-android-kind-discriminated-routers]].
+- Sample app: [`examples/android_hello/`](../../examples/android_hello/) — built via Gradle's externalNativeBuild against [`src/main/cpp/CMakeLists.txt`](../../examples/android_hello/app/src/main/cpp/CMakeLists.txt).
+- `mpapp-jni-gen` codegen tool: not yet built; intended home is `tools/mpapp-jni-gen/` once the M-09 tooling milestone runs.
+- Formal milestone closure (handler-status sweep + Android emulator UI tests + hot-reload) is still pending — most of the implementation work already shipped via M-04b/M-04c.
+
 ## Related
 
 - [[Platform Interop]]

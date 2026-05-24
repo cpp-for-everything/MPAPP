@@ -128,6 +128,12 @@ Every PR runs the cross-build matrix from the host that runs the CI job:
 
 N/A — initial decision.
 
+## See in code
+
+- The toolchain files this RFC's recommendation produced: [`cmake/toolchains/`](../../cmake/toolchains/) — one `.cmake` per `host × target` cell (`windows-x64.cmake`, `linux-{x64,arm64}.cmake`, `android-arm64.cmake`, `macos-arm64.cmake`, `ios-arm64.cmake`, plus the Zig-as-cross-compiler frontend [`zig.cmake`](../../cmake/toolchains/zig.cmake)).
+- The `mpapp` CLI that dispatches to them: [`tools/mpapp/`](../../tools/mpapp/) — auto-installs the pinned Zig version + invokes CMake with the matching toolchain file based on `--target`.
+- Validation status: [`vault/50_Tasks/T-0009-cross-compilation-matrix/`](../50_Tasks/T-0009-cross-compilation-matrix/) — Windows-host rows verified (4 of 6 targets clean via Zig 0.13 alone); Linux + macOS host rows still pending machine availability.
+
 ## References
 
 - [Zig as a C compiler](https://ziglang.org/learn/overview/#zig-is-also-a-c-compiler)

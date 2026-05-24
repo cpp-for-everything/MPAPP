@@ -47,6 +47,14 @@ AppKit handlers per [[ADR-0005-ios-macos-separate-interop]] — no Mac Catalyst.
 
 Linked via [[_Bases/Tasks.base]] filtered by `milestone == "M-07"`.
 
+## See in code
+
+- Seed AppKit handlers (Objective-C++ `.mm`): [`src/handlers/macos/`](../../src/handlers/macos/) — `application_handler.mm`, `button_handler.mm`, `label_handler.mm`, `window_handler.mm`. App-shell-only today; per-component fill-in pending an Apple host.
+- Distinct from iOS per [[ADR-0005-ios-macos-separate-interop]]: macOS uses AppKit (`NSWindow`, `NSButton`), iOS uses UIKit (`UIWindow`, `UIButton`). No shared "Apple" handler tree.
+- Apple-target toolchain files: [`cmake/toolchains/macos-arm64.cmake`](../../cmake/toolchains/macos-arm64.cmake).
+- Apple-target cross-compile T-0009 row remains `in-progress` until an Apple host is online — see [`vault/50_Tasks/T-0009-cross-compilation-matrix/`](../50_Tasks/T-0009-cross-compilation-matrix/).
+- Test-harness scaffolding (human-free Apple UI tests per T-0008) lands as part of M-02 closure; references gathered in [[Test Harness]].
+
 ## Related
 
 - [[ADR-0005-ios-macos-separate-interop]]

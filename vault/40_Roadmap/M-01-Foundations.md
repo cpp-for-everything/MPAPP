@@ -57,6 +57,16 @@ Get the project to a state where we can start building real code with confidence
 
 Linked via [[_Bases/Tasks.base]] filtered by `milestone == "M-01"`.
 
+## See in code
+
+- All accepted ADRs in [`vault/20_ADRs/`](../20_ADRs/) (every one of ADR-0001 through ADR-0010 ships from this milestone).
+- Closed RFCs in [`vault/30_RFCs/`](../30_RFCs/) (RFC-0001 → ADR-0010; RFC-0002 → ADR-0011).
+- The three foundational spikes that closed this milestone, all archived:
+  - [`vault/50_Tasks/_Archive/T-0002-template-type-spike/`](../50_Tasks/_Archive/T-0002-template-type-spike/) + the prototype at [`tests/template_type_spike/`](../../tests/template_type_spike/).
+  - [`vault/50_Tasks/_Archive/T-0003-winui3-button-spike/`](../50_Tasks/_Archive/T-0003-winui3-button-spike/) + the example at [`examples/windows_button_spike/`](../../examples/windows_button_spike/).
+  - [`vault/50_Tasks/_Archive/T-0004-jni-codegen-spike/`](../50_Tasks/_Archive/T-0004-jni-codegen-spike/) (abandoned in favor of fbjni; see archive notes).
+- Component inventory: [[Controls Inventory]] populated from [`include/mpapp/`](../../include/mpapp/) headers in M-03.
+
 ## Related
 
 - All ADRs in `20_ADRs/`

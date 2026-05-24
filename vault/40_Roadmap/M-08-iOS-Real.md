@@ -50,6 +50,13 @@ UIKit handlers, separate from AppKit per [[ADR-0005-ios-macos-separate-interop]]
 
 Linked via [[_Bases/Tasks.base]] filtered by `milestone == "M-08"`.
 
+## See in code
+
+- Seed UIKit handlers (Objective-C++ `.mm`): [`src/handlers/ios/`](../../src/handlers/ios/) — `application_handler.mm`, `button_handler.mm`, `label_handler.mm`, `window_handler.mm`. App-shell-only today; per-component fill-in pending an Apple host.
+- Distinct from macOS per [[ADR-0005-ios-macos-separate-interop]]: iOS = UIKit (`UIWindow`, `UIButton`, `UICollectionView`), macOS = AppKit (`NSWindow`, `NSButton`, `NSTableView`). Separate `.mm` files, no Catalyst path anywhere.
+- Apple-target toolchain files: [`cmake/toolchains/ios-arm64.cmake`](../../cmake/toolchains/ios-arm64.cmake).
+- Apple-target cross-compile T-0009 row remains `in-progress` until an Apple host is online — see [`vault/50_Tasks/T-0009-cross-compilation-matrix/`](../50_Tasks/T-0009-cross-compilation-matrix/).
+
 ## Related
 
 - [[ADR-0005-ios-macos-separate-interop]]
