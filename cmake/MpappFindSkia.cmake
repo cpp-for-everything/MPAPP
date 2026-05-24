@@ -101,7 +101,7 @@ set(_MPAPP_SKIA_SHA256_macos-x64
 set(_MPAPP_SKIA_URL_windows-x64
     "https://github.com/cpp-for-everything/MPAPP/releases/download/skia-md-${MPAPP_SKIA_PREBUILT_VERSION}/Skia-mpapp-md-${MPAPP_SKIA_PREBUILT_VERSION}-windows-Release-x64.zip")
 set(_MPAPP_SKIA_SHA256_windows-x64
-    "TBD-after-workflow-runs")
+    "5313329d308b788fa081d1ff438af3d557bf477ccf65bdf1ea2f36cd97fd5b42")
 
 # Add windows-arm64 / linux-arm64 rows when those become MPAPP targets.
 
@@ -314,29 +314,13 @@ macro(mpapp_find_skia)
     endif()
 
     # Path 2: auto-download the pinned prebuilt for the current target.
-    # The Windows /MT-vs-/MD problem that broke earlier auto-fetch on
-    # Windows is handled at table-definition time now: the windows-x64
-    # row points at MPAPP's own `/MD` static-lib build (see the URL
-    # table at the top of this file and the workflow at
-    # `.github/workflows/build-skia-md-windows.yml`).
-    #
-    # Until the workflow has produced its first release the windows-x64
-    # SHA-256 is still the placeholder `TBD-after-workflow-runs`. In
-    # that interim state we'd rather skip the fetch (and tell the user
-    # exactly why) than have FetchContent download a tag-not-found 404
-    # page and emit a confusing hash-mismatch error.
-    if(NOT MPAPP_SKIA_FOUND
-        AND CMAKE_SYSTEM_NAME STREQUAL "Windows"
-        AND _MPAPP_SKIA_SHA256_windows-x64 STREQUAL "TBD-after-workflow-runs")
-        message(STATUS
-            "MPAPP Skia auto-fetch skipped on Windows: the MPAPP-hosted "
-            "/MD prebuilt has not been published yet (windows-x64 SHA-256 "
-            "is still the 'TBD' placeholder in cmake/MpappFindSkia.cmake). "
-            "To use Skia on Windows right now pass:\n"
-            "  -DMPAPP_SKIA_PREFIX=<vcpkg-installed-dir>  (e.g. C:/tools/vcpkg/installed/x64-windows-static-md)\n"
-            "Once the .github/workflows/build-skia-md-windows.yml workflow "
-            "has run + published its first release this fallback goes away.")
-    elseif(NOT MPAPP_SKIA_FOUND)
+    # The Windows /MT-vs-/MD problem that blocked earlier auto-fetch on
+    # Windows is handled at table-definition time: the windows-x64 row
+    # points at MPAPP's own `/MD` static-lib build (see the URL table
+    # at the top of this file and the workflow at
+    # `.github/workflows/build-skia-md-windows.yml`). So no CRT guard
+    # needed here.
+    if(NOT MPAPP_SKIA_FOUND)
         _mpapp_skia_select_release(_mpapp_skia_platform _mpapp_skia_arch
                                    _mpapp_skia_url _mpapp_skia_hash)
         if(DEFINED _mpapp_skia_url AND NOT _mpapp_skia_url STREQUAL "")

@@ -175,18 +175,48 @@ For Gradle / android_hello, the equivalent property is
 `-PmpappSkiaPrefix=...` — only forwarded to CMake when set;
 otherwise the auto-fetch runs.
 
+### Windows /MT vs /MD — why MPAPP hosts its own Windows prebuilt
+
+HumbleUI's Windows zip is compiled with `/MT` (static CRT) because
+Skia's `is_official_build=true` Windows default flips on
+`skia_enable_static_runtime`. MPAPP's Windows apps need `/MD`
+(dynamic CRT) — WinUI 3 / WindowsAppSDK / WebView2 all link against
+the dynamic CRT, and mixing /MT static libs into /MD consumers
+triggers MSVC LNK2038 ("RuntimeLibrary mismatch") at link time.
+
+Fix path the table uses now: the `_MPAPP_SKIA_URL_windows-x64` entry
+points at **MPAPP's own release** instead of HumbleUI's. Built by
+`.github/workflows/build-skia-md-windows.yml`, which installs
+`skia:x64-windows-static-md` via vcpkg (the triplet that combines
+static-lib linkage + dynamic CRT, exactly the combo we need) and
+packs the install tree into a zip. The zip ships a vcpkg-style
+`share/unofficial-skia/...` CMake config, so the helper's fetch
+path runs `find_package(unofficial-skia CONFIG)` after the
+FetchContent extract and reports layout `fetched-vcpkg`. No CRT
+mismatch.
+
+The MPAPP-hosted zip layout differs from HumbleUI's (vcpkg config
+package vs raw `out/<config>/skia.{a,lib}` + defines.cmake), but
+the helper handles both shapes after extraction.
+
 ### Bumping the pinned version
 
 Each platform/arch needs a SHA-256 in the table at the top of
 `cmake/MpappFindSkia.cmake`. To bump:
 
 1. Pick a new tag from https://github.com/HumbleUI/SkiaBuild/releases
+   for the Linux/macOS/Android rows.
 2. For each row in the table, download the corresponding zip and
    compute `sha256sum`. (Or `(Get-FileHash -A SHA256 file.zip).Hash`
    in PowerShell.)
 3. Update `MPAPP_SKIA_PREBUILT_VERSION` + the
    `_MPAPP_SKIA_SHA256_<plat>-<arch>` entries.
-4. Confirm the existing skia_backend.cpp compiles against the new
+4. For the windows-x64 row, also trigger
+   `.github/workflows/build-skia-md-windows.yml` with the same
+   version input — that workflow's first successful run publishes
+   the new MPAPP `/MD` zip; download it and update
+   `_MPAPP_SKIA_SHA256_windows-x64` with the resulting hash.
+5. Confirm the existing skia_backend.cpp compiles against the new
    milestone — Skia's public API is usually stable across milestones,
    but watch for renames in `SkPath` / `SkBitmap` / `SkCanvas`.
 

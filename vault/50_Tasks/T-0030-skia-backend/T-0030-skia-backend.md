@@ -214,6 +214,66 @@ the existing `cairo_render_demo` is the closure step.
   vcpkg path; `-PmpappSkiaPrefix=...` only forwards the override
   when explicitly set, otherwise the auto-fetch runs. Docs in
   `notes/dual-vcpkg-roots.md`.
+- [x] **Windows /MD auto-fetch via MPAPP-hosted prebuilt.** Earlier
+  closure of the Windows auto-fetch path was blocked by HumbleUI's
+  Windows Skia being compiled with `/MT` (static CRT) — Skia's
+  `is_official_build=true` Windows default — but MPAPP's Windows
+  apps need `/MD` because WinUI 3, WindowsAppSDK, and WebView2 all
+  require dynamic CRT. Mixing /MT static libs into /MD consumers
+  triggers MSVC LNK2038 ("RuntimeLibrary mismatch") and breaks the
+  build at link time.
+
+  Fix: host MPAPP's own /MD static-lib Skia for Windows. vcpkg
+  exposes exactly the right combination via the
+  `x64-windows-static-md` triplet
+  (`VCPKG_LIBRARY_LINKAGE=static` + `VCPKG_CRT_LINKAGE=dynamic`).
+  Added `.github/workflows/build-skia-md-windows.yml` which installs
+  that triplet, packs the resulting tree (headers + .lib files +
+  `share/unofficial-skia/...` CMake config) into a zip, and publishes
+  to the `skia-md-<version>` release tag on
+  `cpp-for-everything/MPAPP`. `mpapp_find_skia()` was refactored to
+  per-platform-key URL/hash table entries so the windows-x64 row
+  points at MPAPP's release instead of HumbleUI's; the fetch path
+  now also runs `find_package(unofficial-skia CONFIG)` after
+  `FetchContent` extracts, which the MPAPP zip's vcpkg-style config
+  satisfies directly (reported layout `fetched-vcpkg`).
+
+  Linux/Android/macOS rows still point at HumbleUI's release —
+  those platforms' /MT-or-/MD distinction is moot, and HumbleUI's
+  build matches what MPAPP needs.
+
+  End-to-end verified in three phases on Windows:
+  1. **Static-md install via vcpkg + MPAPP_SKIA_PREFIX override** —
+     installed `skia:x64-windows-static-md` locally
+     (`C:/tools/vcpkg/installed/x64-windows-static-md`, took ~30 min
+     cold cache), built `windows_shapeview_demo.exe` with
+     `MPAPP_SKIA_PREFIX=<that path>`; reported `skia (vcpkg)`; launched
+     + screenshotted via computer-use MCP, rectangle = red,
+     ellipse = teal, triangle = orange. No DLL deployment needed
+     (static linkage); no LNK2038 (/MD CRT match).
+  2. **Auto-fetch via local file:// URL** — temporarily set
+     `_MPAPP_SKIA_URL_windows-x64` to a `D:/tmp/...zip` path of a
+     locally-packed version of the vcpkg install, ran
+     `cmake -DMPAPP_GRAPHICS_BACKEND=skia` against a fresh build dir,
+     no MPAPP_SKIA_PREFIX. FetchContent downloaded, verified SHA-256,
+     extracted; the helper's `find_package(unofficial-skia CONFIG)`
+     branch picked up the vcpkg-style `share/unofficial-skia/...`
+     config from the extracted tree; demo built + ran + rendered
+     correctly. Reported layout: `fetched-vcpkg`.
+  3. **Auto-fetch from the published MPAPP github URL** — uploaded
+     the same zip (392 MB) to
+     `https://github.com/cpp-for-everything/MPAPP/releases/tag/skia-md-m143-da51f0d60e-4`
+     via `gh release upload`, reverted the helper's URL back to the
+     github form, repeated the fresh-build test. Same end-to-end
+     success: download (~7 min on this connection), extract, build,
+     run, screenshot — rectangle/ellipse/triangle colors all correct.
+
+  The `.github/workflows/build-skia-md-windows.yml` workflow exists
+  for future re-publishes (version bumps); the first release was
+  bootstrapped via manual `gh release create + upload` since the
+  workflow's cold-cache install step ran longer than the local
+  vcpkg install and was redundant. Subsequent CI runs hit the
+  vcpkg binary cache and complete in ~2 minutes.
 - [ ] **Per-backend ctest cases.** Add a small `graphics_skia_test.cpp`
   next to the existing `graphics_cairo_test.cpp`, gated on
   `#if MPAPP_GRAPHICS_HAS_SKIA`. Deferred — the headless_canvas_demo
