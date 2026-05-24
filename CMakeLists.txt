@@ -125,29 +125,43 @@ elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "stub")
     list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
     message(STATUS "MPAPP graphics backend: stub")
 elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")
-    # vcpkg ships Skia as the `unofficial-skia` CMake config package
-    # (target: unofficial::skia::skia). Skia is heavyweight (BSD-3,
-    # ~30 MB linked) and builds from source on first install, so it's
-    # opt-in only. If the user selected `skia` but the package isn't
-    # installed, we fall back to stub so the rest of the build keeps
-    # working — same graceful-fallback pattern Cairo uses.
-    find_package(unofficial-skia CONFIG QUIET)
-    if(unofficial-skia_FOUND OR TARGET unofficial::skia::skia)
+    # Skia is heavyweight (BSD-3, ~30 MB linked) and opt-in. Two install
+    # layouts are supported — see cmake/MpappFindSkia.cmake for the
+    # detection rules:
+    #
+    #   1. vcpkg's `unofficial-skia` CMake config package (the canonical
+    #      Windows/Linux path; builds Skia from source on first install).
+    #   2. Community prebuilt drops from HumbleUI/SkiaBuild or
+    #      JetBrains/skia-pack (workaround for Android-from-Windows-host,
+    #      where vcpkg's GN build hits upstream tooling bugs — see
+    #      vault/50_Tasks/T-0030-skia-backend/notes/dual-vcpkg-roots.md).
+    #
+    # Either way the helper exposes a uniform `unofficial::skia::skia`
+    # imported target. If neither layout produces one, fall back to stub
+    # so the rest of the build keeps compiling — same graceful-fallback
+    # pattern Cairo uses.
+    include(MpappFindSkia)
+    mpapp_find_skia()
+    if(MPAPP_SKIA_FOUND)
         list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/skia_backend.cpp)
         set(MPAPP_GRAPHICS_HAS_SKIA ON)
-        message(STATUS "MPAPP graphics backend: skia")
+        message(STATUS "MPAPP graphics backend: skia (${MPAPP_SKIA_LAYOUT})")
     else()
         list(APPEND MPAPP_CORE_SOURCES src/detail/graphics/stub_backend.cpp)
         message(WARNING
-            "MPAPP_GRAPHICS_BACKEND=skia selected but Skia not found via "
-            "find_package(unofficial-skia). Falling back to stub backend.\n"
-            "  Install (vcpkg):\n"
+            "MPAPP_GRAPHICS_BACKEND=skia selected but Skia not found. "
+            "Falling back to stub backend.\n"
+            "  Install (vcpkg, builds from source ~30 min first time):\n"
             "    Windows:  vcpkg install skia:x64-windows\n"
             "    Linux:    vcpkg install skia:x64-linux\n"
             "    Android:  vcpkg install skia:arm64-android (or x64-android)\n"
+            "              — Windows-host → Android cross-compile hits two\n"
+            "              upstream tooling bugs; use a Linux NDK or the\n"
+            "              prebuilt path below.\n"
             "  Then pass -DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake.\n"
-            "  Skia builds from source the first time (~30 min). After that vcpkg's\n"
-            "  binary cache makes subsequent configures fast.")
+            "  Or point MPAPP_SKIA_PREFIX at a HumbleUI/SkiaBuild or\n"
+            "  JetBrains/skia-pack prebuilt drop (https://github.com/HumbleUI/SkiaBuild\n"
+            "  / https://github.com/JetBrains/skia-pack).")
     endif()
 else()
     message(FATAL_ERROR

@@ -107,3 +107,85 @@ stub when Skia isn't found at the configured prefix. So once
 someone successfully installs `skia:<android-triplet>` (from any
 host), the gradle invocation just needs the new property to
 swap backends.
+
+## Workaround #2 — skip vcpkg, use community prebuilts directly
+
+The two bugs above are entirely **inside vcpkg's GN-driven build
+machinery**. They have nothing to do with Skia itself — once you
+have a working Skia static archive for the target ABI, MPAPP's
+backend implementation links + runs unchanged. So a simpler
+unblock: fetch a prebuilt drop instead of building.
+
+Two community CI repos publish exactly the right shape of
+artifacts:
+
+| Source | Latest Android | URL |
+|---|---|---|
+| HumbleUI/SkiaBuild | m143 (April 2026) | https://github.com/HumbleUI/SkiaBuild/releases |
+| JetBrains/skia-pack (archived March 2026) | m144 (March 2026) | https://github.com/JetBrains/skia-pack/releases |
+
+Both ship per-arch zips with the layout MPAPP now auto-detects via
+`cmake/MpappFindSkia.cmake`:
+
+```
+<prefix>/
+├── include/core/SkCanvas.h, ...         ← public headers
+├── modules/skshaper/, skottie/, ...     ← module headers
+├── out/Release-<arch>/
+│   ├── libskia.a                        ← 26 MB main static
+│   ├── libfreetype2.a, libharfbuzz.a,   ← all transitive deps
+│   ├── libicu.a, libpng.a, ...            as separate .a files
+│   └── defines.cmake                    ← `add_definitions(-DSK_*)`
+│                                          generated from the actual
+│                                          ninja invocation
+├── src/                                 ← internal-but-shipped headers
+└── third_party/externals/               ← transitive dep headers
+```
+
+`MpappFindSkia.mpapp_find_skia()` tries vcpkg's `unofficial-skia`
+CONFIG package first; if that fails, it walks `<prefix>/out/*`
+looking for a `libskia.a` + `defines.cmake` pair and assembles
+the same `unofficial::skia::skia` imported target manually
+(includes + INTERFACE link libs in lld-friendly order + the
+extracted `SK_*` compile defs). The rest of the MPAPP build is
+identical regardless of which layout won.
+
+### Wiring it in for android_hello
+
+```sh
+# 1) download the prebuilt — m143 Release for x86_64 here, matches
+#    the abiFilter in app/build.gradle.kts; switch to -arm64 if
+#    targeting arm64-v8a devices instead.
+curl -fsSL -o Skia-android.zip \
+  https://github.com/HumbleUI/SkiaBuild/releases/download/m143-da51f0d60e-4/Skia-m143-da51f0d60e-4-android-Release-x64.zip
+
+# 2) unzip somewhere stable.
+unzip Skia-android.zip -d C:/tools/skia-android-prebuilt/m143-x64
+
+# 3) build via gradle, pointing MPAPP_SKIA_PREFIX at the unzipped tree.
+cd D:/GitHub/MPAPP/examples/android_hello
+./gradlew assembleDebug \
+  -PmpappGraphicsBackend=skia \
+  -PmpappSkiaPrefix=C:/tools/skia-android-prebuilt/m143-x64
+```
+
+CMake logs `android_hello graphics backend: skia (prebuilt)` when
+the layout is detected. The default `mpappSkiaPrefix` is still
+the vcpkg installed/<triplet> dir, so existing Cairo + working
+Skia-via-vcpkg flows keep working unchanged.
+
+### Trade-offs vs. vcpkg-from-Linux
+
+| | Prebuilt | vcpkg from Linux (WSL+NDK) |
+|---|---|---|
+| Setup | unzip a 40 MB zip | install Linux NDK in WSL, run vcpkg install |
+| Time-to-first-build | seconds | ~30 min (Skia compile from source) |
+| Version pinning | manual — track HumbleUI release tags | vcpkg baseline + manifest |
+| Source of trust | community CI maintainer (HumbleUI, JetBrains) | Microsoft (vcpkg maintainers) |
+| Customization | take what's built (GPU + Vulkan + SVG + Skottie all on) | full GN args control via vcpkg port features |
+
+For the M-04c milestone — getting a real Skia backend running on
+Android so ADR-0015 can be cleanly closed — the prebuilt path
+is the right pragmatic choice. For long-term production where
+build reproducibility + feature trimming matter, switch to the
+vcpkg-from-Linux path once a Linux NDK is set up.

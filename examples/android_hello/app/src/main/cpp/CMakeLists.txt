@@ -61,20 +61,28 @@ if(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
             "android_hello graphics backend: stub (cairo not found via pkg-config)")
     endif()
 elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")
-    # Gradle passes MPAPP_SKIA_PREFIX pointing at vcpkg's
-    # installed/<triplet>-android directory (where the Skia install
-    # for that android ABI lives). Add it to CMAKE_PREFIX_PATH so
-    # find_package(unofficial-skia CONFIG) picks up the
-    # unofficial::skia::skia imported target.
-    if(DEFINED MPAPP_SKIA_PREFIX)
-        list(APPEND CMAKE_PREFIX_PATH "${MPAPP_SKIA_PREFIX}")
-    endif()
-    find_package(unofficial-skia CONFIG QUIET)
-    if(unofficial-skia_FOUND OR TARGET unofficial::skia::skia)
+    # Gradle passes MPAPP_SKIA_PREFIX pointing at one of two layouts:
+    #
+    #   1. vcpkg's installed/<triplet>-android directory (the canonical
+    #      path; needs `vcpkg install skia[core,png,jpeg]:<triplet>`).
+    #   2. A HumbleUI/SkiaBuild or JetBrains/skia-pack prebuilt drop
+    #      (unzipped into <prefix>/, contains `out/Release-<arch>/libskia.a`
+    #      plus headers under `include/` — see
+    #      cmake/MpappFindSkia.cmake for the layout detection).
+    #
+    # The prebuilt path exists specifically because vcpkg's GN build
+    # currently fails when cross-compiling Skia → Android from a
+    # Windows host (two stacked upstream tooling bugs, see
+    # vault/50_Tasks/T-0030-skia-backend/notes/dual-vcpkg-roots.md).
+    list(APPEND CMAKE_MODULE_PATH "${MPAPP_ROOT}/cmake")
+    include(MpappFindSkia)
+    mpapp_find_skia()
+    if(MPAPP_SKIA_FOUND)
         list(APPEND MPAPP_GRAPHICS_SOURCES
             ${MPAPP_ROOT}/src/detail/graphics/skia_backend.cpp)
         set(MPAPP_GRAPHICS_HAS_SKIA ON)
-        message(STATUS "android_hello graphics backend: skia")
+        message(STATUS
+            "android_hello graphics backend: skia (${MPAPP_SKIA_LAYOUT})")
     else()
         list(APPEND MPAPP_GRAPHICS_SOURCES
             ${MPAPP_ROOT}/src/detail/graphics/stub_backend.cpp)
