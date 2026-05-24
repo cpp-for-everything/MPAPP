@@ -74,12 +74,20 @@ public:
 | macOS | `NSGridView` (planned) | M-04. |
 | iOS | Nested `UIStackView`s with `UILayoutGuide` (planned) | M-04. |
 
-## Tests
+## Implementation
 
-- Mock tests: `tests/mock_handlers/grid_layout_test.cpp` (2 cases — bind / property changes)
+- Surface: [`include/mpapp/grid_layout.hpp`](../../../include/mpapp/grid_layout.hpp) — `track_def` value type (Auto / Star(w) / Fixed(px)), row/column definitions, attached-property helpers `set_row(view, r)` etc.
+- Mock handler: [`include/mpapp/handlers/mock/grid_layout_handler.hpp`](../../../include/mpapp/handlers/mock/grid_layout_handler.hpp).
+- Real handlers:
+  - Windows: [`src/handlers/windows/grid_layout_handler.cpp`](../../../src/handlers/windows/grid_layout_handler.cpp) — `mux::Controls::Grid` with `RowDefinitions` / `ColumnDefinitions` populated via `GridLength{value, GridUnitType::{Pixel,Star,Auto}}`.
+  - Linux: [`src/handlers/linux/grid_layout_handler.cpp`](../../../src/handlers/linux/grid_layout_handler.cpp) — `GtkGrid`; Star tracks bridged to `hexpand` / `vexpand` on the attached child (GtkGrid has no explicit Star sizing).
+  - Android: [`src/handlers/android/grid_layout_handler.cpp`](../../../src/handlers/android/grid_layout_handler.cpp) — `android.widget.GridLayout` with `LayoutParams{spec(row, rowSpan), spec(col, colSpan)}`.
+- Track-def parser: [`include/mpapp/detail/grid_track_parser.hpp`](../../../include/mpapp/detail/grid_track_parser.hpp) — parses `RowDefinitions="*,Auto,200"` form per [[ADR-0017-grid-track-definitions]].
+- Tests: [`tests/mock_handlers/grid_layout_test.cpp`](../../../tests/mock_handlers/grid_layout_test.cpp) (bind + property changes) + [`tests/mock_handlers/grid_track_parser_test.cpp`](../../../tests/mock_handlers/grid_track_parser_test.cpp) (parser unit tests).
 
 ## See also
 
 - [[Controls Inventory]]
 - [[StackLayout]] · [[Layout]]
+- [[ADR-0017-grid-track-definitions]] — track-def value type design.
 - [[ADR-0012-application-window-handler-abstraction]]

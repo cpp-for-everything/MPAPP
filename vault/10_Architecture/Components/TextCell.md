@@ -36,6 +36,16 @@ public:
 
 Inherits `is_enabled` + `tapped` from [[Components/Cell]].
 
+## Implementation
+
+- Surface: [`include/mpapp/text_cell.hpp`](../../../include/mpapp/text_cell.hpp) — text / detail / text_color / detail_color (all `Observable<std::string>`).
+- Mock handler: [`include/mpapp/handlers/mock/text_cell_handler.hpp`](../../../include/mpapp/handlers/mock/text_cell_handler.hpp).
+- Real handlers:
+  - Windows: [`src/handlers/windows/text_cell_handler.cpp`](../../../src/handlers/windows/text_cell_handler.cpp) — `mux::Controls::Border` + vertical `StackPanel` of two `TextBlock`s.
+  - Linux: [`src/handlers/linux/text_cell_handler.cpp`](../../../src/handlers/linux/text_cell_handler.cpp) — vertical `GtkBox` of two `GtkLabel`s.
+  - Android: [`src/handlers/android/text_cell_handler.cpp`](../../../src/handlers/android/text_cell_handler.cpp) — vertical `LinearLayout` of two `TextView`s.
+- Self-registers in the [[ADR-0013-data-driven-widget-dispatch]] registry so it can be nested anywhere a `view` fits.
+
 ## See also
 
 - [[ADR-0021-tableview-cell-types]] · [[TableView]] · [[EntryCell]] · [[ImageCell]]

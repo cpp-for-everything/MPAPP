@@ -33,6 +33,16 @@ public:
 
 Inherits `is_enabled` + `tapped` from [[Components/Cell]].
 
+## Implementation
+
+- Surface: [`include/mpapp/view_cell.hpp`](../../../include/mpapp/view_cell.hpp) — `Observable<view*> content{nullptr}` — non-owning.
+- Mock handler: [`include/mpapp/handlers/mock/view_cell_handler.hpp`](../../../include/mpapp/handlers/mock/view_cell_handler.hpp).
+- Real handlers:
+  - Windows: [`src/handlers/windows/view_cell_handler.cpp`](../../../src/handlers/windows/view_cell_handler.cpp) — `mux::Controls::Border` with `Child` swap.
+  - Linux: [`src/handlers/linux/view_cell_handler.cpp`](../../../src/handlers/linux/view_cell_handler.cpp) — single-slot `GtkBox`.
+  - Android: [`src/handlers/android/view_cell_handler.cpp`](../../../src/handlers/android/view_cell_handler.cpp) — `FrameLayout` with `removeAllViews` / `addView`.
+- Content resolved through [[ADR-0013-data-driven-widget-dispatch]] so any registered view type can nest.
+
 ## See also
 
 - [[ADR-0021-tableview-cell-types]] · [[TableView]] · [[ContentView]]

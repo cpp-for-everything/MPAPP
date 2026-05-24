@@ -28,6 +28,12 @@ public:
 };
 ```
 
+## Implementation
+
+- Surface: [`include/mpapp/cell.hpp`](../../../include/mpapp/cell.hpp) — abstract base, no handler set (typed subclasses own theirs).
+- No mock handler or per-platform handler at this level — every concrete cell (text / entry / switch / view / image) ships its own. See the per-subclass docs linked below.
+- Type hierarchy enforced by [[ADR-0021-tableview-cell-types]]; the table_view's `cell_at(...)` dispatch knows to look up the concrete handler via [[ADR-0013-data-driven-widget-dispatch]].
+
 ## See also
 
 - [[ADR-0021-tableview-cell-types]] — full type hierarchy.

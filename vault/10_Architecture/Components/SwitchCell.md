@@ -38,6 +38,15 @@ public:
 
 Inherits `is_enabled` + `tapped` from [[Components/Cell]].
 
+## Implementation
+
+- Surface: [`include/mpapp/switch_cell.hpp`](../../../include/mpapp/switch_cell.hpp) — `text` label + `on` bool with `on_changed` signal + `toggle()` helper.
+- Mock handler: [`include/mpapp/handlers/mock/switch_cell_handler.hpp`](../../../include/mpapp/handlers/mock/switch_cell_handler.hpp).
+- Real handlers:
+  - Windows: [`src/handlers/windows/switch_cell_handler.cpp`](../../../src/handlers/windows/switch_cell_handler.cpp) — `mux::Controls::Border` + 2-col Grid (`TextBlock` + `ToggleSwitch`).
+  - Linux: [`src/handlers/linux/switch_cell_handler.cpp`](../../../src/handlers/linux/switch_cell_handler.cpp) — horizontal `GtkBox` (`GtkLabel` + `GtkSwitch`).
+  - Android: [`src/handlers/android/switch_cell_handler.cpp`](../../../src/handlers/android/switch_cell_handler.cpp) — horizontal `LinearLayout` (`TextView` weight=1 + `Switch`); shares the `MppCheckedChangeListener` (kind=4) router per [[ADR-0022-android-kind-discriminated-routers]].
+
 ## See also
 
 - [[ADR-0021-tableview-cell-types]] · [[TableView]] · [[Switch]]

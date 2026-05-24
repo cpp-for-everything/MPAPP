@@ -97,10 +97,17 @@ sl.add(label_widget);
 sl.add(button_widget);
 ```
 
-## Tests
+## Implementation
 
-- Mock tests: `tests/mock_handlers/stack_layout_test.cpp` (3 cases — bind / property changes / child mutations)
-- Windows handler: covered by the `windows_button_spike` rewrite
+- Surface: [`include/mpapp/stack_layout.hpp`](../../../include/mpapp/stack_layout.hpp) — orientation / spacing / horizontal_alignment / vertical_alignment observables + the inherited child-list API.
+- Mock handler: [`include/mpapp/handlers/mock/stack_layout_handler.hpp`](../../../include/mpapp/handlers/mock/stack_layout_handler.hpp).
+- Real handlers:
+  - Windows: [`src/handlers/windows/stack_layout_handler.cpp`](../../../src/handlers/windows/stack_layout_handler.cpp) — `mux::Controls::StackPanel` with full property + child-list mapping.
+  - Linux: [`src/handlers/linux/stack_layout_handler.cpp`](../../../src/handlers/linux/stack_layout_handler.cpp) — `GtkBox` (orientation flipped per `stack_orientation`).
+  - Android: [`src/handlers/android/stack_layout_handler.cpp`](../../../src/handlers/android/stack_layout_handler.cpp) — `LinearLayout` via JNI.
+- Layout value types: [`include/mpapp/layout_types.hpp`](../../../include/mpapp/layout_types.hpp) — `orientation`, `h_align`, `v_align`, `thickness` (framework-owned; user code never names `muxc::Orientation` etc.).
+- Tests: [`tests/mock_handlers/stack_layout_test.cpp`](../../../tests/mock_handlers/stack_layout_test.cpp) — 3 cases (bind / property changes / child mutations).
+- Usage example: [`examples/windows_button_spike/main.cpp`](../../../examples/windows_button_spike/main.cpp) — exercises `stack_layout` as the root container.
 
 ## Known Differences
 

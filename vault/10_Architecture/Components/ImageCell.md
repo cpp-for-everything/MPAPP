@@ -33,6 +33,15 @@ public:
 
 Inherits `text`, `detail`, `text_color`, `detail_color` from [[TextCell]], plus `is_enabled` + `tapped` from [[Components/Cell]].
 
+## Implementation
+
+- Surface: [`include/mpapp/image_cell.hpp`](../../../include/mpapp/image_cell.hpp) — inherits text/detail/text_color/detail_color from text_cell + adds `image_uri`.
+- Mock handler: [`include/mpapp/handlers/mock/image_cell_handler.hpp`](../../../include/mpapp/handlers/mock/image_cell_handler.hpp).
+- Real handlers:
+  - Windows: [`src/handlers/windows/image_cell_handler.cpp`](../../../src/handlers/windows/image_cell_handler.cpp) — `mux::Controls::Border` + 2-col Grid; `BitmapImage` source handles `file://` / `http://` / `ms-appx://`.
+  - Linux: [`src/handlers/linux/image_cell_handler.cpp`](../../../src/handlers/linux/image_cell_handler.cpp) — horizontal `GtkBox` (`GtkImage` 40px + label pair); `icon:foo` prefix routes through `gtk_image_set_from_icon_name`, plain paths through `gtk_image_set_from_file`.
+  - Android: [`src/handlers/android/image_cell_handler.cpp`](../../../src/handlers/android/image_cell_handler.cpp) — horizontal `LinearLayout` (`ImageView` 80px + nested label pair); `BitmapFactory.decodeFile` for filesystem paths.
+
 ## See also
 
 - [[ADR-0021-tableview-cell-types]] · [[TableView]] · [[TextCell]] · [[Image]]

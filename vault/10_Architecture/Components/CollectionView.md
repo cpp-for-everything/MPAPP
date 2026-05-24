@@ -66,6 +66,17 @@ public:
 
 The real surface — `item_template`, grouping, header/footer, empty view, scroll-to, group expand/collapse — lands with the virtualized-item-host ADR and per-platform real handlers.
 
+## Implementation
+
+- Surface: [`include/mpapp/collection_view.hpp`](../../../include/mpapp/collection_view.hpp) — observable members + the `collection_layout` / `collection_selection_mode` enums.
+- Mock handler: [`include/mpapp/handlers/mock/collection_view_handler.hpp`](../../../include/mpapp/handlers/mock/collection_view_handler.hpp) — records `map_layout` / `map_items_source` / selection set changes for the unit-test surface.
+- Real handlers:
+  - Windows: [`include/mpapp/handlers/windows/collection_view_handler.hpp`](../../../include/mpapp/handlers/windows/collection_view_handler.hpp) + [`src/handlers/windows/collection_view_handler.cpp`](../../../src/handlers/windows/collection_view_handler.cpp) — outer `mux::Border` / inner `ListView`-or-`GridView` swap with `ItemsPanelTemplate` orientation flip.
+  - Linux: [`src/handlers/linux/collection_view_handler.cpp`](../../../src/handlers/linux/collection_view_handler.cpp) — outer `GtkScrolledWindow` / inner `GtkListBox` / `GtkBox(HORIZONTAL)` / `GtkFlowBox` swap.
+  - Android: [`src/handlers/android/collection_view_handler.cpp`](../../../src/handlers/android/collection_view_handler.cpp) + Java glue [`examples/android_hello/app/src/main/java/io/mpapp/MppCollectionAdapter.java`](../../../examples/android_hello/app/src/main/java/io/mpapp/MppCollectionAdapter.java) + [`MppItemClickRouter.java`](../../../examples/android_hello/app/src/main/java/io/mpapp/MppItemClickRouter.java) — `RecyclerView` + `LinearLayoutManager` / `GridLayoutManager` swap (post-T-0028 migration from the legacy `ListView`/`GridView`).
+- Tests: [`tests/mock_handlers/collection_view_test.cpp`](../../../tests/mock_handlers/collection_view_test.cpp) — layout-enum cycles, items_source + selection survival across layout changes.
+- Demo apps: [`examples/windows_collectionview_layout_demo/`](../../../examples/windows_collectionview_layout_demo/) + [`examples/gtk4_collectionview_layout_demo/`](../../../examples/gtk4_collectionview_layout_demo/) — four-layout matrix in one window (T-0028 closure evidence in [[_Archive/T-0028-collectionview-orientation]]).
+
 ## See also
 
 - [[ListView]] — predecessor; CollectionView supersedes it in modern MAUI code.

@@ -36,8 +36,11 @@ Body sections (in order):
 4. **XAML Usage** — XAML syntax (must match MAUI per [[ADR-0004-maui-xaml-superset-compat]]).
 5. **Platform Notes** — per-platform native widget mapping.
 6. **Side-by-side Examples** — MAUI XAML / MPAPP XAML / MPAPP C++.
-7. **Tests** — links to test files.
-8. **Known Differences** — documented divergences (any cell here is a candidate bug or RFC).
+7. **Implementation** — links to the actual source files: surface header (`include/mpapp/<snake>.hpp`), mock handler (`include/mpapp/handlers/mock/<snake>_handler.hpp`), real per-platform handlers (`src/handlers/<plat>/<snake>_handler.cpp`), and tests (`tests/mock_handlers/<snake>_test.cpp`). Cross-link from the prose status callout when the platform-specific narrative names a native widget that lives in a specific file.
+8. **Tests** — links to test files (often folded into Implementation).
+9. **Known Differences** — documented divergences (any cell here is a candidate bug or RFC).
+
+Component-name → snake-case rule: PascalCase header name with a separator inserted before each uppercase letter (`BoxView` → `box_view`, `CollectionView` → `collection_view`). Two exceptions today: `Grid` → `grid_layout` (avoids shadowing layout API), `Layout` → `layout` (abstract base — has surface + mock + tests but no per-platform handler).
 
 ## Status conventions
 
