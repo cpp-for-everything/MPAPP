@@ -19,10 +19,10 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/windows/button_handler.hpp>
-#include <mpapp/handlers/windows/label_handler.hpp>
-#include <mpapp/handlers/windows/stack_layout_handler.hpp>
-#include <mpapp/handlers/windows/window_handler.hpp>
+#include <mpapp/handlers/button_handler.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
@@ -109,7 +109,7 @@ public:
     }
 
 private:
-    using wp = mpapp::platform::windows;
+    using wp = mpapp::platform::current;
 
     void bind_label(mpapp::label& lbl, mpapp::label_handler<wp>& h,
                     const std::string& text) {

@@ -22,14 +22,14 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/windows/collection_view_handler.hpp>
-#include <mpapp/handlers/windows/label_handler.hpp>
-#include <mpapp/handlers/windows/stack_layout_handler.hpp>
-#include <mpapp/handlers/windows/window_handler.hpp>
+#include <mpapp/handlers/collection_view_handler.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
-using wp = mpapp::platform::windows;
+using wp = mpapp::platform::current;
 
 struct cv_section {
     mpapp::label                       header{};

@@ -23,12 +23,12 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/windows/button_handler.hpp>
-#include <mpapp/handlers/windows/label_handler.hpp>
-#include <mpapp/handlers/windows/navigation_page_handler.hpp>
-#include <mpapp/handlers/windows/page_handler.hpp>
-#include <mpapp/handlers/windows/stack_layout_handler.hpp>
-#include <mpapp/handlers/windows/window_handler.hpp>
+#include <mpapp/handlers/button_handler.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/navigation_page_handler.hpp>
+#include <mpapp/handlers/page_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
@@ -40,10 +40,10 @@ struct screen {
     mpapp::label                                             title_{};
     mpapp::button                                            action_{};
 
-    mpapp::page_handler<mpapp::platform::windows>            page_handler_{};
-    mpapp::stack_layout_handler<mpapp::platform::windows>    layout_handler_{};
-    mpapp::label_handler<mpapp::platform::windows>           title_handler_{};
-    mpapp::button_handler<mpapp::platform::windows>          action_handler_{};
+    mpapp::page_handler<mpapp::platform::current>            page_handler_{};
+    mpapp::stack_layout_handler<mpapp::platform::current>    layout_handler_{};
+    mpapp::label_handler<mpapp::platform::current>           title_handler_{};
+    mpapp::button_handler<mpapp::platform::current>          action_handler_{};
 
     void build(const std::string& page_title,
                const std::string& body,
@@ -124,10 +124,10 @@ private:
     screen                                                       details_{};
 
     mpapp::navigation_page                                       nav_{};
-    mpapp::navigation_page_handler<mpapp::platform::windows>     nav_handler_{};
+    mpapp::navigation_page_handler<mpapp::platform::current>     nav_handler_{};
 
     mpapp::window                                                window_{};
-    mpapp::window_handler<mpapp::platform::windows>              window_handler_{};
+    mpapp::window_handler<mpapp::platform::current>              window_handler_{};
 
     home_click_cb_t                                              home_click_cb_{this};
     details_click_cb_t                                           details_click_cb_{this};

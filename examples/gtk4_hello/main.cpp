@@ -24,12 +24,12 @@
 #include <mpapp/switch_.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/linux/button_handler.hpp>
-#include <mpapp/handlers/linux/entry_handler.hpp>
-#include <mpapp/handlers/linux/label_handler.hpp>
-#include <mpapp/handlers/linux/stack_layout_handler.hpp>
-#include <mpapp/handlers/linux/switch_handler.hpp>
-#include <mpapp/handlers/linux/window_handler.hpp>
+#include <mpapp/handlers/button_handler.hpp>
+#include <mpapp/handlers/entry_handler.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/switch_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
@@ -118,12 +118,12 @@ private:
     mpapp::stack_layout     layout_{};
     mpapp::window           window_{};
 
-    mpapp::button_handler<mpapp::platform::linux_>       btn_handler_{};
-    mpapp::label_handler<mpapp::platform::linux_>        lbl_handler_{};
-    mpapp::entry_handler<mpapp::platform::linux_>        name_handler_{};
-    mpapp::switch_handler<mpapp::platform::linux_>       shout_handler_{};
-    mpapp::stack_layout_handler<mpapp::platform::linux_> layout_handler_{};
-    mpapp::window_handler<mpapp::platform::linux_>       window_handler_{};
+    mpapp::button_handler<mpapp::platform::current>       btn_handler_{};
+    mpapp::label_handler<mpapp::platform::current>        lbl_handler_{};
+    mpapp::entry_handler<mpapp::platform::current>        name_handler_{};
+    mpapp::switch_handler<mpapp::platform::current>       shout_handler_{};
+    mpapp::stack_layout_handler<mpapp::platform::current> layout_handler_{};
+    mpapp::window_handler<mpapp::platform::current>       window_handler_{};
 
     click_cb_t                             click_cb_{this};
     count_cb_t                             count_cb_{this};

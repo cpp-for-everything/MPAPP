@@ -17,14 +17,14 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/linux/label_handler.hpp>
-#include <mpapp/handlers/linux/shape_view_handler.hpp>
-#include <mpapp/handlers/linux/stack_layout_handler.hpp>
-#include <mpapp/handlers/linux/window_handler.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/shape_view_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
-using lp = mpapp::platform::linux_;
+using lp = mpapp::platform::current;
 
 class shapeview_demo_app : public mpapp::application {
 public:

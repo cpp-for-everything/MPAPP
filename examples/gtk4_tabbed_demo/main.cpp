@@ -14,16 +14,16 @@
 #include <mpapp/tabbed_page.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/linux/button_handler.hpp>
-#include <mpapp/handlers/linux/label_handler.hpp>
-#include <mpapp/handlers/linux/page_handler.hpp>
-#include <mpapp/handlers/linux/stack_layout_handler.hpp>
-#include <mpapp/handlers/linux/tabbed_page_handler.hpp>
-#include <mpapp/handlers/linux/window_handler.hpp>
+#include <mpapp/handlers/button_handler.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/page_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/tabbed_page_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
-using lp = mpapp::platform::linux_;
+using lp = mpapp::platform::current;
 
 struct tab_page {
     mpapp::page                      page_{};

@@ -35,13 +35,13 @@
 #include <mpapp/text_cell.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/linux/entry_cell_handler.hpp>
-#include <mpapp/handlers/linux/label_handler.hpp>
-#include <mpapp/handlers/linux/stack_layout_handler.hpp>
-#include <mpapp/handlers/linux/switch_cell_handler.hpp>
-#include <mpapp/handlers/linux/table_view_handler.hpp>
-#include <mpapp/handlers/linux/text_cell_handler.hpp>
-#include <mpapp/handlers/linux/window_handler.hpp>
+#include <mpapp/handlers/entry_cell_handler.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/switch_cell_handler.hpp>
+#include <mpapp/handlers/table_view_handler.hpp>
+#include <mpapp/handlers/text_cell_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
@@ -146,13 +146,13 @@ private:
     mpapp::window        window_{};
 
     // Linux handlers
-    mpapp::table_view_handler<mpapp::platform::linux_>    tv_handler_{};
-    mpapp::text_cell_handler<mpapp::platform::linux_>     name_cell_handler_{};
-    mpapp::entry_cell_handler<mpapp::platform::linux_>    email_cell_handler_{};
-    mpapp::switch_cell_handler<mpapp::platform::linux_>   notifications_cell_handler_{};
-    mpapp::label_handler<mpapp::platform::linux_>         status_handler_{};
-    mpapp::stack_layout_handler<mpapp::platform::linux_>  layout_handler_{};
-    mpapp::window_handler<mpapp::platform::linux_>        window_handler_{};
+    mpapp::table_view_handler<mpapp::platform::current>    tv_handler_{};
+    mpapp::text_cell_handler<mpapp::platform::current>     name_cell_handler_{};
+    mpapp::entry_cell_handler<mpapp::platform::current>    email_cell_handler_{};
+    mpapp::switch_cell_handler<mpapp::platform::current>   notifications_cell_handler_{};
+    mpapp::label_handler<mpapp::platform::current>         status_handler_{};
+    mpapp::stack_layout_handler<mpapp::platform::current>  layout_handler_{};
+    mpapp::window_handler<mpapp::platform::current>        window_handler_{};
 
     // Callbacks
     email_cb_t                             email_cb_{this};

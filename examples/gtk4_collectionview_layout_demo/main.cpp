@@ -15,14 +15,14 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/linux/collection_view_handler.hpp>
-#include <mpapp/handlers/linux/label_handler.hpp>
-#include <mpapp/handlers/linux/stack_layout_handler.hpp>
-#include <mpapp/handlers/linux/window_handler.hpp>
+#include <mpapp/handlers/collection_view_handler.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
-using lp = mpapp::platform::linux_;
+using lp = mpapp::platform::current;
 
 struct cv_section {
     mpapp::label                       header{};

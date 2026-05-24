@@ -46,21 +46,21 @@
 #include <mpapp/text_cell.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/android/box_view_handler.hpp>
-#include <mpapp/handlers/android/shape_view_handler.hpp>
-#include <mpapp/handlers/android/button_handler.hpp>
-#include <mpapp/handlers/android/check_box_handler.hpp>
-#include <mpapp/handlers/android/entry_handler.hpp>
-#include <mpapp/handlers/android/jni_bridge.hpp>
-#include <mpapp/handlers/android/label_handler.hpp>
-#include <mpapp/handlers/android/scroll_view_handler.hpp>
-#include <mpapp/handlers/android/slider_handler.hpp>
-#include <mpapp/handlers/android/stack_layout_handler.hpp>
-#include <mpapp/handlers/android/switch_cell_handler.hpp>
-#include <mpapp/handlers/android/switch_handler.hpp>
-#include <mpapp/handlers/android/table_view_handler.hpp>
-#include <mpapp/handlers/android/text_cell_handler.hpp>
-#include <mpapp/handlers/android/window_handler.hpp>
+#include <mpapp/handlers/box_view_handler.hpp>
+#include <mpapp/handlers/shape_view_handler.hpp>
+#include <mpapp/handlers/button_handler.hpp>
+#include <mpapp/handlers/check_box_handler.hpp>
+#include <mpapp/handlers/entry_handler.hpp>
+#include <mpapp/handlers/jni_bridge.hpp>
+#include <mpapp/handlers/label_handler.hpp>
+#include <mpapp/handlers/scroll_view_handler.hpp>
+#include <mpapp/handlers/slider_handler.hpp>
+#include <mpapp/handlers/stack_layout_handler.hpp>
+#include <mpapp/handlers/switch_cell_handler.hpp>
+#include <mpapp/handlers/switch_handler.hpp>
+#include <mpapp/handlers/table_view_handler.hpp>
+#include <mpapp/handlers/text_cell_handler.hpp>
+#include <mpapp/handlers/window_handler.hpp>
 
 namespace {
 
@@ -246,20 +246,20 @@ private:
     mpapp::switch_cell      push_cell_{};
     mpapp::window           window_{};
 
-    mpapp::button_handler<mpapp::platform::android>       btn_handler_{};
-    mpapp::label_handler<mpapp::platform::android>        lbl_handler_{};
-    mpapp::entry_handler<mpapp::platform::android>        name_handler_{};
-    mpapp::switch_handler<mpapp::platform::android>       shout_handler_{};
-    mpapp::check_box_handler<mpapp::platform::android>    exclaim_handler_{};
-    mpapp::slider_handler<mpapp::platform::android>       repeat_handler_{};
-    mpapp::stack_layout_handler<mpapp::platform::android> layout_handler_{};
-    mpapp::scroll_view_handler<mpapp::platform::android>  scroll_handler_{};
-    mpapp::box_view_handler<mpapp::platform::android>     box_handler_{};
-    mpapp::shape_view_handler<mpapp::platform::android>   shape_handler_{};   // canvas-facade demo
-    mpapp::table_view_handler<mpapp::platform::android>   tv_handler_{};
-    mpapp::text_cell_handler<mpapp::platform::android>    profile_cell_handler_{};
-    mpapp::switch_cell_handler<mpapp::platform::android>  push_cell_handler_{};
-    mpapp::window_handler<mpapp::platform::android>       window_handler_{};
+    mpapp::button_handler<mpapp::platform::current>       btn_handler_{};
+    mpapp::label_handler<mpapp::platform::current>        lbl_handler_{};
+    mpapp::entry_handler<mpapp::platform::current>        name_handler_{};
+    mpapp::switch_handler<mpapp::platform::current>       shout_handler_{};
+    mpapp::check_box_handler<mpapp::platform::current>    exclaim_handler_{};
+    mpapp::slider_handler<mpapp::platform::current>       repeat_handler_{};
+    mpapp::stack_layout_handler<mpapp::platform::current> layout_handler_{};
+    mpapp::scroll_view_handler<mpapp::platform::current>  scroll_handler_{};
+    mpapp::box_view_handler<mpapp::platform::current>     box_handler_{};
+    mpapp::shape_view_handler<mpapp::platform::current>   shape_handler_{};   // canvas-facade demo
+    mpapp::table_view_handler<mpapp::platform::current>   tv_handler_{};
+    mpapp::text_cell_handler<mpapp::platform::current>    profile_cell_handler_{};
+    mpapp::switch_cell_handler<mpapp::platform::current>  push_cell_handler_{};
+    mpapp::window_handler<mpapp::platform::current>       window_handler_{};
 
     click_cb_t                             click_cb_{this};
     count_cb_t                             count_cb_{this};
