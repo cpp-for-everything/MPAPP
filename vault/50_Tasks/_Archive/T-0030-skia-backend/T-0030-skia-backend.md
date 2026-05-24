@@ -2,17 +2,17 @@
 type: task
 id: T-0030
 title: "ADR-0015 Skia backend (opt-in, scaffolding + impl)"
-status: in-progress
+status: done
 milestone: M-04c-handler-heavy-port
 owner: claude
 area: build
 blockedBy: []
-coveragePercent: 0
+coveragePercent: 100
 hasScreenshots: true
 hasRecordings: false
 tags:
   - type/task
-  - status/in-progress
+  - status/done
   - area/build
   - platform/windows
   - platform/linux
@@ -274,11 +274,41 @@ the existing `cairo_render_demo` is the closure step.
   workflow's cold-cache install step ran longer than the local
   vcpkg install and was redundant. Subsequent CI runs hit the
   vcpkg binary cache and complete in ~2 minutes.
-- [ ] **Per-backend ctest cases.** Add a small `graphics_skia_test.cpp`
-  next to the existing `graphics_cairo_test.cpp`, gated on
-  `#if MPAPP_GRAPHICS_HAS_SKIA`. Deferred — the headless_canvas_demo
-  PNG-comparison evidence already validates the backend's output
-  end-to-end; per-pixel ctest cases would be a nicer-to-have.
+- [x] **Per-backend ctest cases.** `tests/mock_handlers/graphics_skia_test.cpp`
+  — 7 cases gated on `MPAPP_GRAPHICS_HAS_SKIA`, mirroring the cairo
+  test's case set but reading pixels back via the public
+  `canvas::pixel_data()` / `pixel_stride_bytes()` API (no direct Skia
+  includes needed). 38 assertions, all green on Linux WSL with the
+  m143 auto-fetched prebuilt (322/322 ctest pass overall). Includes
+  a dedicated BGRA-byte-order test (paints `#E63946` and checks the
+  raw bytes appear as B=0x46, G=0x39, R=0xE6, A=0xFF) to guard the
+  ADR-0015 pixel-format contract against a future backend that
+  defaults to a different layout.
+
+## Tests
+
+The Skia backend + abstract canvas surface behavior are covered by:
+
+- [`tests/mock_handlers/graphics_skia_test.cpp`](../../../tests/mock_handlers/graphics_skia_test.cpp)
+  — 7 cases / 38 assertions gated on `MPAPP_GRAPHICS_HAS_SKIA`.
+  Compiled into `mock_handlers_test` automatically (the CMake glob in
+  `tests/CMakeLists.txt` picks it up; runs under any `cmake -DMPAPP_GRAPHICS_BACKEND=skia`
+  configuration).
+- `tests/mock_handlers/graphics_canvas_test.cpp` — backend-independent
+  unit tests over the abstract canvas surface (value types, path op
+  ordering, color conversions). Always compiled.
+- `tests/mock_handlers/graphics_cairo_test.cpp` — same shape for Cairo.
+  Either / both runs depending on which backend(s) the build
+  configures. Confirms the two backends share semantics where they
+  overlap.
+
+End-to-end visual regression is covered by this task's `screenshots/`
+PNGs (Cairo + Skia outputs across Linux + Windows; pixel-equal
+references). The Windows GUI screenshots from the `windows_shapeview_demo`
+ShapeView render were captured via computer-use MCP during the
+Windows /MD auto-fetch verification (rectangle/ellipse/triangle colors
+correct under both static-md-via-MPAPP_SKIA_PREFIX and full auto-fetch
+paths).
 
 ## Notes
 
