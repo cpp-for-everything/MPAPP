@@ -27,7 +27,7 @@ Per [[CLAUDE]] rule 9 and [[RFC-0001-licensing-and-patent-strategy]], every thir
 | Zig toolchain | TBD | MIT | external tool | ✅ permissive | cross-compilation (per RFC-0002) |
 | Android NDK | TBD | Apache 2.0 | external tool | ✅ permissive | Android targets |
 | libcairo | 1.18.x (system / vcpkg) | LGPL-2.1 | **dynamic only** | ⚠️ acceptable with rebuild path | Default canvas-facade backend ([[ADR-0015]]); Linux + Win + Android |
-| Skia | 148 (vcpkg `unofficial-skia`) or 143 (HumbleUI/SkiaBuild prebuilt drop) | BSD-3 | static | ✅ permissive | Opt-in canvas-facade backend ([[ADR-0015]]). Linux + Win via vcpkg; Android via either — prebuilt drop unblocks Windows-host cross-compile, see [[T-0030-skia-backend]] notes/dual-vcpkg-roots.md |
+| Skia | 143 (HumbleUI/SkiaBuild prebuilt, auto-fetched via FetchContent — pinned in `cmake/MpappFindSkia.cmake`); 148 (vcpkg `unofficial-skia`) as `MPAPP_SKIA_PREFIX` override | BSD-3 | static | ✅ permissive | Opt-in canvas-facade backend ([[ADR-0015]]). Default install path on every platform is the auto-downloaded HumbleUI prebuilt — see [[T-0030-skia-backend]] notes/dual-vcpkg-roots.md for full rationale (Windows-host vcpkg compile fails for Android target). |
 | HarfBuzz | 8.x system / 14.x via vcpkg-skia | MIT | dynamic (system) / static (vcpkg, transitive via skia) | ✅ permissive | Text shaping — transitive via Skia (vcpkg pulls 14.x) and via GTK4 (system 8.x) |
 | libpng | vcpkg (transitive via skia) | libpng | static | ✅ permissive | PNG decode — transitive via Skia |
 | libjpeg-turbo | vcpkg (transitive via skia) | BSD-3 / IJG | static | ✅ permissive | JPEG decode — transitive via Skia |

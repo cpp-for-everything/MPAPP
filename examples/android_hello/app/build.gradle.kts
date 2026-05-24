@@ -37,17 +37,13 @@ android {
                 // matches the host build's default and the M-04c rollout
                 // baseline.
                 //
-                // Skia path-of-install. By default this is the same
-                // vcpkg installed/<triplet> directory used for Cairo
-                // (works when `skia[core,png,jpeg]:<triplet>` succeeded
-                // there). On a Windows host vcpkg's GN-driven Skia
-                // build → Android currently fails on two upstream
-                // tooling bugs (see
-                // vault/50_Tasks/T-0030-skia-backend/notes/dual-vcpkg-roots.md);
-                // for that case override with `-PmpappSkiaPrefix=...`
-                // pointing at an unzipped HumbleUI/SkiaBuild or
-                // JetBrains/skia-pack drop. cmake/MpappFindSkia.cmake
-                // auto-detects which layout it is.
+                // Skia (when selected) defaults to the pinned HumbleUI
+                // prebuilt auto-downloaded by `cmake/MpappFindSkia.cmake`
+                // via FetchContent. No vcpkg required. To override with
+                // a vcpkg installed/<triplet>-android dir or a manually
+                // unzipped HumbleUI/JetBrains drop, pass
+                // `-PmpappSkiaPrefix=<dir>` — the property is forwarded
+                // to CMake as `-DMPAPP_SKIA_PREFIX=...` only when set.
                 val vcpkgRoot = System.getenv("VCPKG_ROOT")
                     ?: "${System.getProperty("user.home").replace('\\', '/')}/vcpkg"
                 val triplet     = "x64-android"  // matches abiFilter below
@@ -57,7 +53,6 @@ android {
                                     ?: "cairo"
                 val skiaPrefix  = (project.findProperty("mpappSkiaPrefix") as String?)
                                     ?.replace('\\', '/')
-                                    ?: vcpkgPrefix
 
                 arguments += listOf(
                     "-DANDROID_STL=c++_shared",
@@ -65,10 +60,12 @@ android {
                     "-DCMAKE_CXX_SCAN_FOR_MODULES=OFF",
                     "-DMPAPP_GRAPHICS_BACKEND=$backend",
                     "-DMPAPP_CAIRO_PREFIX=$vcpkgPrefix",
-                    "-DMPAPP_SKIA_PREFIX=$skiaPrefix",
                     "-DCMAKE_PREFIX_PATH=$vcpkgPrefix",
                     "-DPKG_CONFIG_EXECUTABLE=$pkgconfBin"
                 )
+                if (skiaPrefix != null) {
+                    arguments += "-DMPAPP_SKIA_PREFIX=$skiaPrefix"
+                }
                 cppFlags += listOf("-std=c++23")
             }
             ndk {

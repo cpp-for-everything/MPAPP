@@ -127,29 +127,45 @@ the existing `cairo_render_demo` is the closure step.
   finds the Skia package and falls back to stub when not present.
   So once `skia:<android-triplet>` is installed (from any host)
   the swap is one gradle property away.
-- [x] **Android Skia unblock via prebuilt drop.** Bypassed vcpkg
-  entirely for the Android-host case by accepting community
-  prebuilt drops (HumbleUI/SkiaBuild m143 verified;
-  JetBrains/skia-pack same layout). Added
-  `cmake/MpappFindSkia.cmake` — single `mpapp_find_skia()` macro
-  that tries vcpkg's `unofficial-skia` CONFIG first and falls back
-  to walking `<prefix>/out/*` for the prebuilt `libskia.a` +
-  `defines.cmake` pair. The detection exposes the same uniform
-  `unofficial::skia::skia` imported target either way, so the
-  rest of the build doesn't care which layout won.
-  `build.gradle.kts` accepts the new `-PmpappSkiaPrefix=...`
-  property (defaults to the vcpkg path). End-to-end verified:
-  unzipped `Skia-m143-da51f0d60e-4-android-Release-x64.zip` (40
-  MB) into `C:/tools/skia-android-prebuilt/m143-x64/`, ran
-  `cmake -DMPAPP_GRAPHICS_BACKEND=skia
-  -DMPAPP_SKIA_PREFIX=C:/tools/skia-android-prebuilt/m143-x64
-  --toolchain <ndk>/build/cmake/android.toolchain.cmake
-  -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-28` against
-  `examples/android_hello/app/src/main/cpp/` → produced a 16 MB
-  `libandroid_hello.so` with Skia symbols linked
-  (`_ZN8SkCanvas*`, `_ZN13SkPathBuilder*`, `_ZN8SkBitmap*`
-  visible in `llvm-nm`). Documentation in
-  `notes/dual-vcpkg-roots.md` "Workaround #2".
+- [x] **Skia prebuilt-drop now the default install path on every
+  platform.** Refactor of `cmake/MpappFindSkia.cmake` —
+  `mpapp_find_skia()` macro now:
+  1. If `MPAPP_SKIA_PREFIX` is set explicitly, probe that prefix in
+     either vcpkg's `unofficial-skia` CONFIG layout or the
+     HumbleUI/JetBrains prebuilt layout (`out/<config>/skia.{a,lib}` +
+     `defines.cmake`). Lets devs pin to a specific vcpkg revision or
+     ship the .zip via internal mirror.
+  2. Otherwise auto-download the **pinned HumbleUI/SkiaBuild
+     `m143-da51f0d60e-4`** prebuilt for the current target via
+     `FetchContent` — SHA-256 verified, cached under
+     `<build>/_deps/mpapp_skia_prebuilt-src/`, 40-70 MB once-per-build-dir.
+  Either way the same `unofficial::skia::skia` imported target lands
+  in scope; the rest of the build is layout-agnostic. The lib globbing
+  understands both `.a` (Linux/Android/macOS) and `.lib` (Windows
+  MSVC); `defines.cmake` SK_* tokens are extracted and attached as
+  `INTERFACE_COMPILE_DEFINITIONS` so consumers compile with the same
+  flags the prebuilt was built against. Per-target SHA-256 hashes
+  pinned for android-{arm64,x64}, linux-x64, macos-{arm64,x64},
+  windows-x64 (the active MPAPP matrix).
+
+  End-to-end verified:
+  - Linux x64 (WSL Ubuntu 24.04) — `cmake -DMPAPP_GRAPHICS_BACKEND=skia`
+    auto-fetched the linux-x64 zip, built `mpapp-core.a` cleanly.
+  - Android x64 (NDK clang via Windows host) — same pattern with
+    `--toolchain <ndk>/build/cmake/android.toolchain.cmake
+    -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-28` —
+    auto-fetched the android-x64 zip, built a 16 MB
+    `libandroid_hello.so` with `_ZN8SkCanvas*` / `_ZN13SkPathBuilder*`
+    / `_ZN8SkBitmap*` linked (`llvm-nm` verified).
+  - Windows MSVC — auto-fetch step succeeds; full MSVC build needs
+    the usual Developer Command Prompt env (INCLUDE/LIB).
+  - Override path: `-DMPAPP_SKIA_PREFIX=$HOME/vcpkg/installed/x64-linux`
+    reports `skia (vcpkg)` — backward-compat preserved.
+
+  `build.gradle.kts` no longer forces `MPAPP_SKIA_PREFIX` to the
+  vcpkg path; `-PmpappSkiaPrefix=...` only forwards the override
+  when explicitly set, otherwise the auto-fetch runs. Docs in
+  `notes/dual-vcpkg-roots.md`.
 - [ ] **Per-backend ctest cases.** Add a small `graphics_skia_test.cpp`
   next to the existing `graphics_cairo_test.cpp`, gated on
   `#if MPAPP_GRAPHICS_HAS_SKIA`. Deferred — the headless_canvas_demo

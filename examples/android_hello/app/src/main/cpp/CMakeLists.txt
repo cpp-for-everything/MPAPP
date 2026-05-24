@@ -61,19 +61,17 @@ if(MPAPP_GRAPHICS_BACKEND STREQUAL "cairo")
             "android_hello graphics backend: stub (cairo not found via pkg-config)")
     endif()
 elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")
-    # Gradle passes MPAPP_SKIA_PREFIX pointing at one of two layouts:
+    # Default flow: `cmake/MpappFindSkia.cmake` auto-downloads the pinned
+    # HumbleUI/SkiaBuild Android prebuilt for the current ABI
+    # (x86_64 → x64, arm64-v8a → arm64) via FetchContent and assembles
+    # the `unofficial::skia::skia` imported target from it. No vcpkg
+    # required — sidesteps the vcpkg Windows-host cross-compile bugs
+    # entirely (see vault/50_Tasks/T-0030-skia-backend/notes/dual-vcpkg-roots.md).
     #
-    #   1. vcpkg's installed/<triplet>-android directory (the canonical
-    #      path; needs `vcpkg install skia[core,png,jpeg]:<triplet>`).
-    #   2. A HumbleUI/SkiaBuild or JetBrains/skia-pack prebuilt drop
-    #      (unzipped into <prefix>/, contains `out/Release-<arch>/libskia.a`
-    #      plus headers under `include/` — see
-    #      cmake/MpappFindSkia.cmake for the layout detection).
-    #
-    # The prebuilt path exists specifically because vcpkg's GN build
-    # currently fails when cross-compiling Skia → Android from a
-    # Windows host (two stacked upstream tooling bugs, see
-    # vault/50_Tasks/T-0030-skia-backend/notes/dual-vcpkg-roots.md).
+    # Override path: pass `-PmpappSkiaPrefix=<dir>` to Gradle (or
+    # `-DMPAPP_SKIA_PREFIX=<dir>` directly to CMake) to point at a
+    # vcpkg installed/<triplet>-android dir or a manually unzipped
+    # HumbleUI / JetBrains drop. The helper detects either layout.
     list(APPEND CMAKE_MODULE_PATH "${MPAPP_ROOT}/cmake")
     include(MpappFindSkia)
     mpapp_find_skia()
@@ -87,7 +85,8 @@ elseif(MPAPP_GRAPHICS_BACKEND STREQUAL "skia")
         list(APPEND MPAPP_GRAPHICS_SOURCES
             ${MPAPP_ROOT}/src/detail/graphics/stub_backend.cpp)
         message(STATUS
-            "android_hello graphics backend: stub (skia not found at MPAPP_SKIA_PREFIX)")
+            "android_hello graphics backend: stub (no prebuilt for "
+            "ABI=${CMAKE_ANDROID_ARCH_ABI} and MPAPP_SKIA_PREFIX unset)")
     endif()
 else()
     list(APPEND MPAPP_GRAPHICS_SOURCES
