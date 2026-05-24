@@ -40,10 +40,10 @@ struct screen {
     mpapp::label                                             title_{};
     mpapp::button                                            action_{};
 
-    mpapp::page_handler<mpapp::platform::current>            page_handler_{};
-    mpapp::stack_layout_handler<mpapp::platform::current>    layout_handler_{};
-    mpapp::label_handler<mpapp::platform::current>           title_handler_{};
-    mpapp::button_handler<mpapp::platform::current>          action_handler_{};
+    mpapp::page_handler<>            page_handler_{};
+    mpapp::stack_layout_handler<>    layout_handler_{};
+    mpapp::label_handler<>           title_handler_{};
+    mpapp::button_handler<>          action_handler_{};
 
     void build(const std::string& page_title,
                const std::string& body,
@@ -124,10 +124,10 @@ private:
     screen                                                       details_{};
 
     mpapp::navigation_page                                       nav_{};
-    mpapp::navigation_page_handler<mpapp::platform::current>     nav_handler_{};
+    mpapp::navigation_page_handler<>     nav_handler_{};
 
     mpapp::window                                                window_{};
-    mpapp::window_handler<mpapp::platform::current>              window_handler_{};
+    mpapp::window_handler<>              window_handler_{};
 
     home_click_cb_t                                              home_click_cb_{this};
     details_click_cb_t                                           details_click_cb_{this};

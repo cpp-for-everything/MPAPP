@@ -23,7 +23,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class page_handler;
 
 class page : public view {

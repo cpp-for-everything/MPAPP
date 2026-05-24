@@ -27,7 +27,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class menu_bar_item_handler;
 
 class menu_bar_item : public view {

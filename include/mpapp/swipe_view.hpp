@@ -31,7 +31,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class swipe_view_handler;
 
 class swipe_view : public view {

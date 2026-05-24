@@ -26,7 +26,7 @@ namespace mpapp {
 
 // Primary template. Real specialisations live under
 // `mpapp/handlers/<platform>/application_handler.hpp`.
-template <class Platform>
+template <class Platform = platform::current>
 class application_handler;
 
 class application {

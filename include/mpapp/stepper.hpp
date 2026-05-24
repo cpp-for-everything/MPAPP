@@ -13,7 +13,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class stepper_handler;
 
 class stepper : public control<stepper> {

@@ -19,7 +19,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class title_bar_handler;
 
 class title_bar : public view {

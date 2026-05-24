@@ -22,7 +22,7 @@ enum class aspect_mode : std::uint8_t {
     center      = 3,   // no scale; center
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class image_handler;
 
 class image : public view {

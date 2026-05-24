@@ -146,13 +146,13 @@ private:
     mpapp::window        window_{};
 
     // Linux handlers
-    mpapp::table_view_handler<mpapp::platform::current>    tv_handler_{};
-    mpapp::text_cell_handler<mpapp::platform::current>     name_cell_handler_{};
-    mpapp::entry_cell_handler<mpapp::platform::current>    email_cell_handler_{};
-    mpapp::switch_cell_handler<mpapp::platform::current>   notifications_cell_handler_{};
-    mpapp::label_handler<mpapp::platform::current>         status_handler_{};
-    mpapp::stack_layout_handler<mpapp::platform::current>  layout_handler_{};
-    mpapp::window_handler<mpapp::platform::current>        window_handler_{};
+    mpapp::table_view_handler<>    tv_handler_{};
+    mpapp::text_cell_handler<>     name_cell_handler_{};
+    mpapp::entry_cell_handler<>    email_cell_handler_{};
+    mpapp::switch_cell_handler<>   notifications_cell_handler_{};
+    mpapp::label_handler<>         status_handler_{};
+    mpapp::stack_layout_handler<>  layout_handler_{};
+    mpapp::window_handler<>        window_handler_{};
 
     // Callbacks
     email_cb_t                             email_cb_{this};

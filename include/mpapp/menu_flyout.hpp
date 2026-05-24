@@ -29,7 +29,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class menu_flyout_handler;
 
 class menu_flyout : public view {

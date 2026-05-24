@@ -39,8 +39,6 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 constexpr const char* kIndexHtml = R"(<!doctype html>
 <html><body style="font-family:sans-serif;padding:24px;background:#264653;color:#F4A261">
 <h1>T-0027 HybridWebView demo</h1>
@@ -150,18 +148,18 @@ private:
     std::string last_event_ = "(none)";
 
     mpapp::hybrid_web_view                hwv_{};
-    mpapp::hybrid_web_view_handler<lp>    hwv_handler_{};
+    mpapp::hybrid_web_view_handler<>    hwv_handler_{};
 
     mpapp::button                         send_btn_{};
-    mpapp::button_handler<lp>             send_btn_handler_{};
+    mpapp::button_handler<>             send_btn_handler_{};
 
     mpapp::label                          status_label_{};
-    mpapp::label_handler<lp>              status_label_handler_{};
+    mpapp::label_handler<>              status_label_handler_{};
 
     mpapp::stack_layout                   layout_{};
-    mpapp::stack_layout_handler<lp>       layout_handler_{};
+    mpapp::stack_layout_handler<>       layout_handler_{};
     mpapp::window                         window_{};
-    mpapp::window_handler<lp>             window_handler_{};
+    mpapp::window_handler<>             window_handler_{};
 
     send_cb_t                              send_cb_{this};
     mpapp::signal_slot<>                   send_slot_{};

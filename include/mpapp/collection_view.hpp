@@ -69,7 +69,7 @@ enum class collection_layout : std::uint8_t {
     horizontal_grid = 3,
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class collection_view_handler;
 
 class collection_view : public view {

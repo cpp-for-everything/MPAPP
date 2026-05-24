@@ -13,7 +13,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class check_box_handler;
 
 class check_box : public control<check_box> {

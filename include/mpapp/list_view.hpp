@@ -20,7 +20,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class list_view_handler;
 
 class list_view : public view {

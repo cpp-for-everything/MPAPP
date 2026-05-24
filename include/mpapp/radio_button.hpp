@@ -18,7 +18,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class radio_button_handler;
 
 class radio_button : public control<radio_button> {

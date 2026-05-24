@@ -26,7 +26,7 @@ enum class shape_kind : std::uint8_t {
     path      = 4,
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class shape_view_handler;
 
 class shape_view : public view {

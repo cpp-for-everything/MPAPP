@@ -25,7 +25,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class refresh_view_handler;
 
 class refresh_view : public view {

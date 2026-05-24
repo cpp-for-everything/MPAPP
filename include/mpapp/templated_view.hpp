@@ -37,7 +37,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class templated_view_handler;
 
 class templated_view : public view {

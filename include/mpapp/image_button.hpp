@@ -17,7 +17,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class image_button_handler;
 
 class image_button : public view {

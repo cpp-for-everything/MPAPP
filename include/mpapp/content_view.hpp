@@ -14,7 +14,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class content_view_handler;
 
 class content_view : public view {

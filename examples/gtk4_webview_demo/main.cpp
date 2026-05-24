@@ -31,8 +31,6 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 constexpr const char* kPageOne =
     "<!doctype html><html><body style='font-family:sans-serif;padding:24px;background:#F4A261;color:#1D3557'>"
     "<h1>MPAPP T-0026 &mdash; WebView demo</h1>"
@@ -119,18 +117,18 @@ private:
     std::string last_nav_url_ = "(none)";
 
     mpapp::web_view                  wv_{};
-    mpapp::web_view_handler<lp>      wv_handler_{};
+    mpapp::web_view_handler<>      wv_handler_{};
 
     mpapp::button                    toggle_btn_{};
-    mpapp::button_handler<lp>        toggle_btn_handler_{};
+    mpapp::button_handler<>        toggle_btn_handler_{};
 
     mpapp::label                     status_label_{};
-    mpapp::label_handler<lp>         status_label_handler_{};
+    mpapp::label_handler<>         status_label_handler_{};
 
     mpapp::stack_layout              layout_{};
-    mpapp::stack_layout_handler<lp>  layout_handler_{};
+    mpapp::stack_layout_handler<>  layout_handler_{};
     mpapp::window                    window_{};
-    mpapp::window_handler<lp>        window_handler_{};
+    mpapp::window_handler<>        window_handler_{};
 
     toggle_cb_t                                       toggle_cb_{this};
     nav_cb_t                                          nav_cb_{this};

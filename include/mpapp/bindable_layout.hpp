@@ -46,7 +46,7 @@ struct data_template {
     bool empty() const noexcept { return !factory; }
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class bindable_layout_handler;
 
 // Attached-property carrier. Not instantiable as a control — all members

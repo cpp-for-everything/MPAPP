@@ -246,20 +246,20 @@ private:
     mpapp::switch_cell      push_cell_{};
     mpapp::window           window_{};
 
-    mpapp::button_handler<mpapp::platform::current>       btn_handler_{};
-    mpapp::label_handler<mpapp::platform::current>        lbl_handler_{};
-    mpapp::entry_handler<mpapp::platform::current>        name_handler_{};
-    mpapp::switch_handler<mpapp::platform::current>       shout_handler_{};
-    mpapp::check_box_handler<mpapp::platform::current>    exclaim_handler_{};
-    mpapp::slider_handler<mpapp::platform::current>       repeat_handler_{};
-    mpapp::stack_layout_handler<mpapp::platform::current> layout_handler_{};
-    mpapp::scroll_view_handler<mpapp::platform::current>  scroll_handler_{};
-    mpapp::box_view_handler<mpapp::platform::current>     box_handler_{};
-    mpapp::shape_view_handler<mpapp::platform::current>   shape_handler_{};   // canvas-facade demo
-    mpapp::table_view_handler<mpapp::platform::current>   tv_handler_{};
-    mpapp::text_cell_handler<mpapp::platform::current>    profile_cell_handler_{};
-    mpapp::switch_cell_handler<mpapp::platform::current>  push_cell_handler_{};
-    mpapp::window_handler<mpapp::platform::current>       window_handler_{};
+    mpapp::button_handler<>       btn_handler_{};
+    mpapp::label_handler<>        lbl_handler_{};
+    mpapp::entry_handler<>        name_handler_{};
+    mpapp::switch_handler<>       shout_handler_{};
+    mpapp::check_box_handler<>    exclaim_handler_{};
+    mpapp::slider_handler<>       repeat_handler_{};
+    mpapp::stack_layout_handler<> layout_handler_{};
+    mpapp::scroll_view_handler<>  scroll_handler_{};
+    mpapp::box_view_handler<>     box_handler_{};
+    mpapp::shape_view_handler<>   shape_handler_{};   // canvas-facade demo
+    mpapp::table_view_handler<>   tv_handler_{};
+    mpapp::text_cell_handler<>    profile_cell_handler_{};
+    mpapp::switch_cell_handler<>  push_cell_handler_{};
+    mpapp::window_handler<>       window_handler_{};
 
     click_cb_t                             click_cb_{this};
     count_cb_t                             count_cb_{this};

@@ -24,8 +24,6 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 class shapeview_demo_app : public mpapp::application {
 public:
     void on_launch() override {
@@ -63,7 +61,7 @@ public:
     }
 
 private:
-    void bind_shape(mpapp::shape_view& s, mpapp::shape_view_handler<lp>& h,
+    void bind_shape(mpapp::shape_view& s, mpapp::shape_view_handler<>& h,
                     mpapp::shape_kind k, const std::string& data,
                     const std::string& fill, const std::string& stroke,
                     double thickness) {
@@ -81,7 +79,7 @@ private:
         s.stroke_thickness = thickness;
         s.opacity          = 1.0;
     }
-    void bind_label(mpapp::label& lbl, mpapp::label_handler<lp>& h, const std::string& text) {
+    void bind_label(mpapp::label& lbl, mpapp::label_handler<>& h, const std::string& text) {
         lbl.set_handler(h);
         h.map_text(lbl);
         lbl.text = text;
@@ -90,21 +88,21 @@ private:
     mpapp::shape_view                rect_{};
     mpapp::shape_view                ellipse_{};
     mpapp::shape_view                path_{};
-    mpapp::shape_view_handler<lp>    rect_handler_{};
-    mpapp::shape_view_handler<lp>    ellipse_handler_{};
-    mpapp::shape_view_handler<lp>    path_handler_{};
+    mpapp::shape_view_handler<>    rect_handler_{};
+    mpapp::shape_view_handler<>    ellipse_handler_{};
+    mpapp::shape_view_handler<>    path_handler_{};
 
     mpapp::label                     label_rect_{};
     mpapp::label                     label_ellipse_{};
     mpapp::label                     label_path_{};
-    mpapp::label_handler<lp>         label_rect_handler_{};
-    mpapp::label_handler<lp>         label_ellipse_handler_{};
-    mpapp::label_handler<lp>         label_path_handler_{};
+    mpapp::label_handler<>         label_rect_handler_{};
+    mpapp::label_handler<>         label_ellipse_handler_{};
+    mpapp::label_handler<>         label_path_handler_{};
 
     mpapp::stack_layout              layout_{};
-    mpapp::stack_layout_handler<lp>  layout_handler_{};
+    mpapp::stack_layout_handler<>  layout_handler_{};
     mpapp::window                    window_{};
-    mpapp::window_handler<lp>        window_handler_{};
+    mpapp::window_handler<>        window_handler_{};
 };
 
 } // namespace

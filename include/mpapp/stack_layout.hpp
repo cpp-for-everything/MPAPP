@@ -22,7 +22,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class stack_layout_handler;
 
 class stack_layout : public layout {

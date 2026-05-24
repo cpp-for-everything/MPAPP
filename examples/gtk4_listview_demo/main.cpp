@@ -30,8 +30,6 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 class listview_demo_app : public mpapp::application {
 public:
     void on_launch() override {
@@ -129,18 +127,18 @@ private:
     int         last_tap_index_   = -1;
 
     mpapp::list_view                    lv_{};
-    mpapp::list_view_handler<lp>        lv_handler_{};
+    mpapp::list_view_handler<>        lv_handler_{};
 
     mpapp::button                       rotate_btn_{};
-    mpapp::button_handler<lp>           rotate_btn_handler_{};
+    mpapp::button_handler<>           rotate_btn_handler_{};
 
     mpapp::label                        status_label_{};
-    mpapp::label_handler<lp>            status_label_handler_{};
+    mpapp::label_handler<>            status_label_handler_{};
 
     mpapp::stack_layout                 layout_{};
-    mpapp::stack_layout_handler<lp>     layout_handler_{};
+    mpapp::stack_layout_handler<>     layout_handler_{};
     mpapp::window                       window_{};
-    mpapp::window_handler<lp>           window_handler_{};
+    mpapp::window_handler<>           window_handler_{};
 
     rotate_cb_t                         rotate_cb_{this};
     tap_cb_t                            tap_cb_{this};

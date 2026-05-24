@@ -15,7 +15,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class switch_handler;
 
 class switch_ : public control<switch_> {

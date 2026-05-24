@@ -31,7 +31,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class shell_handler;
 
 class shell : public page {

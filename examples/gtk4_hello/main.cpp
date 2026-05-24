@@ -118,12 +118,12 @@ private:
     mpapp::stack_layout     layout_{};
     mpapp::window           window_{};
 
-    mpapp::button_handler<mpapp::platform::current>       btn_handler_{};
-    mpapp::label_handler<mpapp::platform::current>        lbl_handler_{};
-    mpapp::entry_handler<mpapp::platform::current>        name_handler_{};
-    mpapp::switch_handler<mpapp::platform::current>       shout_handler_{};
-    mpapp::stack_layout_handler<mpapp::platform::current> layout_handler_{};
-    mpapp::window_handler<mpapp::platform::current>       window_handler_{};
+    mpapp::button_handler<>       btn_handler_{};
+    mpapp::label_handler<>        lbl_handler_{};
+    mpapp::entry_handler<>        name_handler_{};
+    mpapp::switch_handler<>       shout_handler_{};
+    mpapp::stack_layout_handler<> layout_handler_{};
+    mpapp::window_handler<>       window_handler_{};
 
     click_cb_t                             click_cb_{this};
     count_cb_t                             count_cb_{this};

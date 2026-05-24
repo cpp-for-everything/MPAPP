@@ -17,7 +17,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class label_handler;
 
 class label : public control<label> {

@@ -40,7 +40,7 @@ struct toolbar_item {
     bool operator==(const toolbar_item&) const = default;
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class toolbar_handler;
 
 class toolbar : public view {

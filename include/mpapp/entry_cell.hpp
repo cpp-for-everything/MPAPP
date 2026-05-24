@@ -28,7 +28,7 @@ enum class keyboard_kind : std::uint8_t {
     url       = 6,
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class entry_cell_handler;
 
 class entry_cell : public cell {

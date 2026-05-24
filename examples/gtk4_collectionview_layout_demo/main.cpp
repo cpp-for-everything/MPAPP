@@ -22,13 +22,11 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 struct cv_section {
     mpapp::label                       header{};
-    mpapp::label_handler<lp>           header_handler{};
+    mpapp::label_handler<>           header_handler{};
     mpapp::collection_view             cv{};
-    mpapp::collection_view_handler<lp> cv_handler{};
+    mpapp::collection_view_handler<> cv_handler{};
 };
 
 void wire_section(cv_section& s,
@@ -88,9 +86,9 @@ private:
     cv_section hgrid_{};
 
     mpapp::stack_layout             layout_{};
-    mpapp::stack_layout_handler<lp> layout_handler_{};
+    mpapp::stack_layout_handler<> layout_handler_{};
     mpapp::window                   window_{};
-    mpapp::window_handler<lp>       window_handler_{};
+    mpapp::window_handler<>       window_handler_{};
 };
 
 } // namespace

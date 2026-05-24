@@ -27,7 +27,7 @@ enum class flyout_layout_behavior : std::uint8_t {
     split_on_portrait  = 4,
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class flyout_page_handler;
 
 class flyout_page : public page {

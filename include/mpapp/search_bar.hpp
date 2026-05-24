@@ -20,7 +20,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class search_bar_handler;
 
 class search_bar : public view {

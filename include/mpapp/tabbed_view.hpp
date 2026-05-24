@@ -23,7 +23,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class tabbed_view_handler;
 
 class tabbed_view : public view {

@@ -18,7 +18,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class entry_handler;
 
 class entry : public control<entry> {

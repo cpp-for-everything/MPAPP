@@ -79,7 +79,7 @@ struct shadow_desc {
 // Forward-declared so the cross-platform header doesn't pull in the mock
 // (or any real) backend. Each platform specialises this template under
 // `mpapp/handlers/<platform>/view_handler.hpp`.
-template <class Platform>
+template <class Platform = platform::current>
 class view_handler;
 
 class view {

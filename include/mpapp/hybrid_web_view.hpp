@@ -44,7 +44,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class hybrid_web_view_handler;
 
 class hybrid_web_view : public web_view {

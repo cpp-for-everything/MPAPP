@@ -78,7 +78,7 @@ struct track_def {
     }
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class grid_layout_handler;
 
 class grid_layout : public layout {

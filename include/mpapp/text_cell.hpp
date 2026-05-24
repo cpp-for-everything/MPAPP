@@ -16,7 +16,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class text_cell_handler;
 
 class text_cell : public cell {

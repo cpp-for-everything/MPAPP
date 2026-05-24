@@ -24,7 +24,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class indicator_view_handler;
 
 class indicator_view : public view {

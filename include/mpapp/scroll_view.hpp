@@ -62,7 +62,7 @@ struct scrolled_args {
     double scroll_y = 0.0;
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class scroll_view_handler;
 
 class scroll_view : public view {

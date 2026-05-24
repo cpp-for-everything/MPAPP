@@ -57,7 +57,7 @@ struct table_section_typed {
     bool operator==(const table_section_typed&) const = default;
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class table_view_handler;
 
 class table_view : public view {

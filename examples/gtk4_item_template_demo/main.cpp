@@ -39,8 +39,6 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 // A label that owns its own handler so item_template's factory can
 // emit fully renderable cells via a single `unique_ptr<view>`. The
 // collection_view owns the unique_ptr; the unique_ptr owns the
@@ -52,7 +50,7 @@ public:
         handler_.map_text(*this);
     }
 private:
-    mpapp::label_handler<lp> handler_{};
+    mpapp::label_handler<> handler_{};
 };
 
 class item_template_demo_app : public mpapp::application {
@@ -164,18 +162,18 @@ private:
     int         factory_invocations_  = 0;
 
     mpapp::collection_view              cv_{};
-    mpapp::collection_view_handler<lp>  cv_handler_{};
+    mpapp::collection_view_handler<>  cv_handler_{};
 
     mpapp::button                       rotate_btn_{};
-    mpapp::button_handler<lp>           rotate_btn_handler_{};
+    mpapp::button_handler<>           rotate_btn_handler_{};
 
     mpapp::label                        status_label_{};
-    mpapp::label_handler<lp>            status_label_handler_{};
+    mpapp::label_handler<>            status_label_handler_{};
 
     mpapp::stack_layout                 layout_{};
-    mpapp::stack_layout_handler<lp>     layout_handler_{};
+    mpapp::stack_layout_handler<>     layout_handler_{};
     mpapp::window                       window_{};
-    mpapp::window_handler<lp>           window_handler_{};
+    mpapp::window_handler<>           window_handler_{};
 
     rotate_cb_t                         rotate_cb_{this};
     materialized_cb_t                   materialized_cb_{this};

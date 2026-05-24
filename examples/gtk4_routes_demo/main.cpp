@@ -150,10 +150,8 @@ public:
     }
 
 private:
-    using lp = mpapp::platform::current;
-
     void bind_label(mpapp::label& lbl,
-                    mpapp::label_handler<lp>& h,
+                    mpapp::label_handler<>& h,
                     const std::string& text) {
         lbl.set_handler(h);
         h.map_text(lbl);
@@ -161,7 +159,7 @@ private:
     }
     template <class Cb>
     void bind_button(mpapp::button& btn,
-                     mpapp::button_handler<lp>& h,
+                     mpapp::button_handler<>& h,
                      const std::string& text,
                      mpapp::signal_slot<>& slot,
                      Cb& cb) {
@@ -217,21 +215,21 @@ private:
     mpapp::stack_layout layout_{};
     mpapp::window       window_{};
 
-    mpapp::label_handler<lp>        route_label_handler_{};
-    mpapp::label_handler<lp>        blocked_label_handler_{};
-    mpapp::label_handler<lp>        log_label_handler_{};
-    mpapp::label_handler<lp>        block_activate_label_handler_{};
-    mpapp::label_handler<lp>        form_dirty_label_handler_{};
-    mpapp::switch_handler<lp>       block_activate_handler_{};
-    mpapp::switch_handler<lp>       form_dirty_handler_{};
-    mpapp::button_handler<lp>       btn_home_handler_{};
-    mpapp::button_handler<lp>       btn_home_details_handler_{};
-    mpapp::button_handler<lp>       btn_settings_handler_{};
-    mpapp::button_handler<lp>       btn_settings_profile_handler_{};
-    mpapp::button_handler<lp>       btn_help_handler_{};
-    mpapp::button_handler<lp>       btn_help_about_handler_{};
-    mpapp::stack_layout_handler<lp> layout_handler_{};
-    mpapp::window_handler<lp>       window_handler_{};
+    mpapp::label_handler<>        route_label_handler_{};
+    mpapp::label_handler<>        blocked_label_handler_{};
+    mpapp::label_handler<>        log_label_handler_{};
+    mpapp::label_handler<>        block_activate_label_handler_{};
+    mpapp::label_handler<>        form_dirty_label_handler_{};
+    mpapp::switch_handler<>       block_activate_handler_{};
+    mpapp::switch_handler<>       form_dirty_handler_{};
+    mpapp::button_handler<>       btn_home_handler_{};
+    mpapp::button_handler<>       btn_home_details_handler_{};
+    mpapp::button_handler<>       btn_settings_handler_{};
+    mpapp::button_handler<>       btn_settings_profile_handler_{};
+    mpapp::button_handler<>       btn_help_handler_{};
+    mpapp::button_handler<>       btn_help_about_handler_{};
+    mpapp::stack_layout_handler<> layout_handler_{};
+    mpapp::window_handler<>       window_handler_{};
 
     btn_home_cb_t              btn_home_cb_{this};
     btn_home_details_cb_t      btn_home_details_cb_{this};

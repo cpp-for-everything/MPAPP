@@ -31,7 +31,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class navigation_page_handler;
 
 class navigation_page : public page {

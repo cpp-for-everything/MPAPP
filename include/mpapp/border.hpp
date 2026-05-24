@@ -47,7 +47,7 @@ struct stroke_shape_desc {
     bool operator==(const stroke_shape_desc&) const = default;
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class border_handler;
 
 class border : public view {

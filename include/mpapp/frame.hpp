@@ -22,7 +22,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class frame_handler;
 
 // `[[deprecated]]` attribute is applied so any user code touching the

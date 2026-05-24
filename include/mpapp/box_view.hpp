@@ -41,7 +41,7 @@ struct color {
     bool operator==(const color&) const = default;
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class box_view_handler;
 
 class box_view : public view {

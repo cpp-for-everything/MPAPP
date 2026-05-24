@@ -16,7 +16,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class editor_handler;
 
 class editor : public control<editor> {

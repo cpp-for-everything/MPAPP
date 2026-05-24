@@ -13,7 +13,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class view_cell_handler;
 
 class view_cell : public cell {

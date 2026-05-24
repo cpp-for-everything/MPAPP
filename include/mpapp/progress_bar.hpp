@@ -15,7 +15,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class progress_bar_handler;
 
 class progress_bar : public view {

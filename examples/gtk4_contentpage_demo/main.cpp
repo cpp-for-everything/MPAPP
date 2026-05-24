@@ -26,8 +26,6 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 class contentpage_demo_app : public mpapp::application {
 public:
     void on_launch() override {
@@ -73,15 +71,15 @@ private:
     mpapp::button                      button_{};
     mpapp::stack_layout                layout_{};
 
-    mpapp::label_handler<lp>           label_handler_{};
-    mpapp::button_handler<lp>          button_handler_{};
-    mpapp::stack_layout_handler<lp>    layout_handler_{};
+    mpapp::label_handler<>           label_handler_{};
+    mpapp::button_handler<>          button_handler_{};
+    mpapp::stack_layout_handler<>    layout_handler_{};
 
     mpapp::content_page                cp_{};
-    mpapp::content_page_handler<lp>    cp_handler_{};
+    mpapp::content_page_handler<>    cp_handler_{};
 
     mpapp::window                      window_{};
-    mpapp::window_handler<lp>          window_handler_{};
+    mpapp::window_handler<>          window_handler_{};
 };
 
 } // namespace

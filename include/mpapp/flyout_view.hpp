@@ -25,7 +25,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class flyout_view_handler;
 
 class flyout_view : public view {

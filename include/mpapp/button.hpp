@@ -28,7 +28,7 @@ namespace mpapp {
 // Primary template — concrete specialisations live in
 // `mpapp/handlers/<platform>/button_handler.hpp`. Forward-declared here so
 // `button` can name it as a member without forcing a circular include.
-template <class Platform>
+template <class Platform = platform::current>
 class button_handler;
 
 class button : public control<button> {

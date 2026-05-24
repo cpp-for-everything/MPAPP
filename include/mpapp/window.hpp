@@ -26,7 +26,7 @@ namespace mpapp {
 
 class view;
 
-template <class Platform>
+template <class Platform = platform::current>
 class window_handler;
 
 class window : public control<window> {

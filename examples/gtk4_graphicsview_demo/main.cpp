@@ -29,8 +29,6 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 class graphicsview_demo_app : public mpapp::application {
 public:
     void on_launch() override {
@@ -98,18 +96,18 @@ private:
     int req_fires_ = 0;
 
     mpapp::graphics_view                 gv_{};
-    mpapp::graphics_view_handler<lp>     gv_handler_{};
+    mpapp::graphics_view_handler<>     gv_handler_{};
 
     mpapp::button                        invalidate_btn_{};
-    mpapp::button_handler<lp>            invalidate_btn_handler_{};
+    mpapp::button_handler<>            invalidate_btn_handler_{};
 
     mpapp::label                         status_label_{};
-    mpapp::label_handler<lp>             status_label_handler_{};
+    mpapp::label_handler<>             status_label_handler_{};
 
     mpapp::stack_layout                  layout_{};
-    mpapp::stack_layout_handler<lp>      layout_handler_{};
+    mpapp::stack_layout_handler<>      layout_handler_{};
     mpapp::window                        window_{};
-    mpapp::window_handler<lp>            window_handler_{};
+    mpapp::window_handler<>            window_handler_{};
 
     invalidate_cb_t                       invalidate_cb_{this};
     req_cb_t                              req_cb_{this};

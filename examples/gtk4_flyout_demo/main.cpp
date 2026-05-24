@@ -31,16 +31,14 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 struct simple_page {
     mpapp::page                      page_{};
     mpapp::stack_layout              layout_{};
     mpapp::label                     label_{};
 
-    mpapp::page_handler<lp>          page_handler_{};
-    mpapp::stack_layout_handler<lp>  layout_handler_{};
-    mpapp::label_handler<lp>         label_handler_{};
+    mpapp::page_handler<>          page_handler_{};
+    mpapp::stack_layout_handler<>  layout_handler_{};
+    mpapp::label_handler<>         label_handler_{};
 
     void build(const std::string& title, const std::string& body) {
         page_.title = title;
@@ -70,10 +68,10 @@ struct detail_page_with_button {
     mpapp::label                     label_{};
     mpapp::button                    toggle_btn_{};
 
-    mpapp::page_handler<lp>          page_handler_{};
-    mpapp::stack_layout_handler<lp>  layout_handler_{};
-    mpapp::label_handler<lp>         label_handler_{};
-    mpapp::button_handler<lp>        toggle_btn_handler_{};
+    mpapp::page_handler<>          page_handler_{};
+    mpapp::stack_layout_handler<>  layout_handler_{};
+    mpapp::label_handler<>         label_handler_{};
+    mpapp::button_handler<>        toggle_btn_handler_{};
 
     void build(const std::string& title, const std::string& body,
                const std::string& btn_text) {
@@ -139,10 +137,10 @@ private:
     detail_page_with_button      detail_{};
 
     mpapp::flyout_page                fp_{};
-    mpapp::flyout_page_handler<lp>    fp_handler_{};
+    mpapp::flyout_page_handler<>    fp_handler_{};
 
     mpapp::window                     window_{};
-    mpapp::window_handler<lp>         window_handler_{};
+    mpapp::window_handler<>         window_handler_{};
 
     toggle_cb_t                        toggle_cb_{this};
     mpapp::signal_slot<>              toggle_slot_{};

@@ -15,7 +15,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class slider_handler;
 
 class slider : public control<slider> {

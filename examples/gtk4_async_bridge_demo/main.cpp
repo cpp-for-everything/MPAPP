@@ -142,16 +142,14 @@ public:
     }
 
 private:
-    using lp = mpapp::platform::current;
-
-    void bind_label(mpapp::label& lbl, mpapp::label_handler<lp>& h,
+    void bind_label(mpapp::label& lbl, mpapp::label_handler<>& h,
                     const std::string& text) {
         lbl.set_handler(h);
         h.map_text(lbl);
         lbl.text = text;
     }
     template <class Cb>
-    void bind_button(mpapp::button& btn, mpapp::button_handler<lp>& h,
+    void bind_button(mpapp::button& btn, mpapp::button_handler<>& h,
                      const std::string& text,
                      mpapp::signal_slot<>& slot, Cb& cb) {
         btn.set_handler(h);
@@ -249,15 +247,15 @@ private:
     mpapp::stack_layout layout_{};
     mpapp::window       window_{};
 
-    mpapp::label_handler<lp>        last_request_label_handler_{};
-    mpapp::label_handler<lp>        last_response_label_handler_{};
-    mpapp::label_handler<lp>        pending_label_handler_{};
-    mpapp::button_handler<lp>       btn_sync_handler_{};
-    mpapp::button_handler<lp>       btn_async_inline_handler_{};
-    mpapp::button_handler<lp>       btn_async_defer_handler_{};
-    mpapp::button_handler<lp>       btn_resolve_handler_{};
-    mpapp::stack_layout_handler<lp> layout_handler_{};
-    mpapp::window_handler<lp>       window_handler_{};
+    mpapp::label_handler<>        last_request_label_handler_{};
+    mpapp::label_handler<>        last_response_label_handler_{};
+    mpapp::label_handler<>        pending_label_handler_{};
+    mpapp::button_handler<>       btn_sync_handler_{};
+    mpapp::button_handler<>       btn_async_inline_handler_{};
+    mpapp::button_handler<>       btn_async_defer_handler_{};
+    mpapp::button_handler<>       btn_resolve_handler_{};
+    mpapp::stack_layout_handler<> layout_handler_{};
+    mpapp::window_handler<>       window_handler_{};
 
     btn_sync_cb_t          btn_sync_cb_{this};
     btn_async_inline_cb_t  btn_async_inline_cb_{this};

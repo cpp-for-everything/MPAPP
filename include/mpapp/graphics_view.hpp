@@ -27,7 +27,7 @@ class canvas;
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class graphics_view_handler;
 
 class graphics_view : public view {

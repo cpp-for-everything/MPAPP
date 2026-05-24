@@ -42,7 +42,7 @@ struct thickness {
     bool operator==(const thickness&) const = default;
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class layout_handler;
 
 class layout : public view {

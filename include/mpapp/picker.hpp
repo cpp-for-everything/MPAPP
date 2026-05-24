@@ -19,7 +19,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class picker_handler;
 
 class picker : public view {

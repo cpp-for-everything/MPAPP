@@ -26,7 +26,7 @@
 
 namespace mpapp {
 
-template <class Platform>
+template <class Platform = platform::current>
 class tabbed_page_handler;
 
 class tabbed_page : public page {

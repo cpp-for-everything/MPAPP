@@ -23,18 +23,16 @@
 
 namespace {
 
-using lp = mpapp::platform::current;
-
 struct tab_page {
     mpapp::page                      page_{};
     mpapp::stack_layout              layout_{};
     mpapp::label                     label_{};
     mpapp::button                    button_{};
 
-    mpapp::page_handler<lp>          page_handler_{};
-    mpapp::stack_layout_handler<lp>  layout_handler_{};
-    mpapp::label_handler<lp>         label_handler_{};
-    mpapp::button_handler<lp>        button_handler_{};
+    mpapp::page_handler<>          page_handler_{};
+    mpapp::stack_layout_handler<>  layout_handler_{};
+    mpapp::label_handler<>         label_handler_{};
+    mpapp::button_handler<>        button_handler_{};
 
     void build(const std::string& title, const std::string& body,
                const std::string& btn_text) {
@@ -93,10 +91,10 @@ private:
     tab_page settings_{};
 
     mpapp::tabbed_page                tp_{};
-    mpapp::tabbed_page_handler<lp>    tp_handler_{};
+    mpapp::tabbed_page_handler<>    tp_handler_{};
 
     mpapp::window                     window_{};
-    mpapp::window_handler<lp>         window_handler_{};
+    mpapp::window_handler<>         window_handler_{};
 };
 
 } // namespace

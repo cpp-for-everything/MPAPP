@@ -30,7 +30,7 @@ struct date_value {
     bool operator==(const date_value&) const = default;
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class date_picker_handler;
 
 class date_picker : public view {

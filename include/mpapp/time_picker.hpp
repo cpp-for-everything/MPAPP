@@ -26,7 +26,7 @@ struct time_value {
     bool operator==(const time_value&) const = default;
 };
 
-template <class Platform>
+template <class Platform = platform::current>
 class time_picker_handler;
 
 class time_picker : public view {
