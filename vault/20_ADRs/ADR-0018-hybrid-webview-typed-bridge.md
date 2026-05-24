@@ -89,6 +89,17 @@ Internally:
 - **JSON-RPC envelope without codegen** — viable but loses C++/JS-side type checking. Stringly-typed method names.
 - **Defer to a later ADR** — rejected; HybridWebView is in M-04c scope and users need a protocol decision to use it.
 
+## Implementation Notes
+
+- Bridge surface: [`include/mpapp/hybrid_bridge.hpp`](../../include/mpapp/hybrid_bridge.hpp) — `hybrid_bridge` base + `register_method<T>(name, fn)` (sync) + `register_async_method<T>(name, fn)` (v2 async with deferred `respond(value)` callback) + outbound `invoke_js<T>(method, args...)` returning `task<T>`.
+- JSON serializer: [`include/mpapp/detail/json.hpp`](../../include/mpapp/detail/json.hpp) — in-house `tag_invoke` machinery (~520 LOC). Supports primitives + vector + optional + user-defined types via ADL.
+- Wire-protocol handler: [`include/mpapp/hybrid_web_view.hpp`](../../include/mpapp/hybrid_web_view.hpp) — `set_bridge<T>()` + `process_inbound(msg)` choke point + the JS shim injected per platform.
+- Real per-platform plumbing:
+  [`src/handlers/windows/hybrid_web_view_handler.cpp`](../../src/handlers/windows/hybrid_web_view_handler.cpp) — WebView2 `WebMessageReceived` + `AddScriptToExecuteOnDocumentCreatedAsync`.
+  [`src/handlers/linux/hybrid_web_view_handler.cpp`](../../src/handlers/linux/hybrid_web_view_handler.cpp) — WebKitGTK `UserContentManager.register_script_message_handler("mpapp_send")`.
+  [`src/handlers/android/hybrid_web_view_handler.cpp`](../../src/handlers/android/hybrid_web_view_handler.cpp) — `@JavascriptInterface MppJsBridge` via `addJavascriptInterface("mpapp_native")`.
+- Tests: [`tests/mock_handlers/hybrid_web_view_test.cpp`](../../tests/mock_handlers/hybrid_web_view_test.cpp) — inbound + outbound + async-bridge round-trips against the mock handler.
+
 ## References
 
 - [[ADR-0019-async-executor]] — the task<T> shape this bridge resolves into.

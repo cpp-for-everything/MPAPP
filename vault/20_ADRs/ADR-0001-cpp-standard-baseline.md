@@ -61,6 +61,12 @@ We will use **C++23 as the baseline standard**, with **C++26 static reflection t
 - **C++20 baseline** — rejected because deducing `this` and `std::expected` materially improve the framework's internal ergonomics.
 - **C++26 baseline** — rejected because production-quality P2996 support is on an uncertain schedule outside our control.
 
+## Implementation Notes
+
+- [`CMakeLists.txt`](../../CMakeLists.txt) — root project enforces the baseline via `set(CMAKE_CXX_STANDARD 23) / CMAKE_CXX_STANDARD_REQUIRED ON / CMAKE_CXX_EXTENSIONS OFF`. Disabled `CMAKE_CXX_SCAN_FOR_MODULES` because MPAPP does not use named modules yet and several toolchains ship clang/clang++ without a matching clang-scan-deps.
+- [`cmake/toolchains/`](../../cmake/toolchains/) — per-target toolchain files (`windows-x64.cmake`, `linux-{x64,arm64}.cmake`, `android-arm64.cmake`, `macos-arm64.cmake`, `ios-arm64.cmake`) all pin to the C++23 baseline.
+- C++23 features actively used: `auto&& self` deducing-this on handler CRTP bases, `std::expected` in error paths, structured-binding deduced-types in handler dispatchers, `std::format` (replacing `printf`-style formatting throughout). No `std::meta` / P2996 usage yet — opt-in remains future work.
+
 ## References
 
 - [[60_Research/dotnet-maui-deep-dive]]

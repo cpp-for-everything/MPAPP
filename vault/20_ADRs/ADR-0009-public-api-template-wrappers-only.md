@@ -87,6 +87,16 @@ We will use **Option A — template wrapper types — exclusively**. Option B is
 - **Macros.** Rejected by [[ADR-0002-no-macros-in-public-api]].
 - **Inheritance** (`class MyVM : observable<int, "count">, observable<std::string, "name">`). Rejected — string-name template parameters are awkward and the inheritance gets unwieldy fast.
 
+## Implementation Notes
+
+The three template wrappers, each in one file:
+
+- [`include/mpapp/observable.hpp`](../../include/mpapp/observable.hpp) — `Observable<T>` with `get()/set()/operator T()/operator=` + an embedded `signal<const T&> changed` handle. Short-circuits on `==` so a same-value set does not fire.
+- [`include/mpapp/computed.hpp`](../../include/mpapp/computed.hpp) — `Computed<&Member, ...>` zero-cost tag type; the framework picks the dependency pack out of a function's parameter list at template-instantiation time.
+- [`include/mpapp/command.hpp`](../../include/mpapp/command.hpp) — `Command<Args...>` zero-cost tag type marking a method as bindable from XAML `Command="..."` syntax.
+- Supporting infrastructure: [`include/mpapp/signal.hpp`](../../include/mpapp/signal.hpp) is the intrusive `signal<Args...>` + `signal_slot` pair backing `Observable::changed` (no heap allocation on subscribe/unsubscribe). Canonical usage in [`include/mpapp/button.hpp`](../../include/mpapp/button.hpp) — `Observable<std::string> text{}`.
+- [`tests/template_type_spike/test.cpp`](../../tests/template_type_spike/test.cpp) — exercises the compile-time invariants the wrappers depend on.
+
 ## References
 
 - [[ADR-0002-no-macros-in-public-api]]

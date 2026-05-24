@@ -85,6 +85,21 @@ These divergences are intentional: each platform's user expects their platform's
 - **Hybrid** — rejected; complexity penalty of two recycler paths exceeds the value.
 - **No virtualization** — rejected for prod; fine for the mock; documented as "real handlers wrap platform recyclers" so apps know what they're getting.
 
+## Implementation Notes
+
+The three list-family widgets, each wrapping its platform's recycler:
+
+- **CollectionView**
+  Surface: [`include/mpapp/collection_view.hpp`](../../include/mpapp/collection_view.hpp).
+  Real handlers wrap `mux::Controls::ListView`/`GridView` on Windows ([`src/handlers/windows/collection_view_handler.cpp`](../../src/handlers/windows/collection_view_handler.cpp)), `GtkListBox`/`GtkBox`/`GtkFlowBox` on Linux ([`src/handlers/linux/collection_view_handler.cpp`](../../src/handlers/linux/collection_view_handler.cpp)), `RecyclerView` + `LinearLayoutManager`/`GridLayoutManager` on Android ([`src/handlers/android/collection_view_handler.cpp`](../../src/handlers/android/collection_view_handler.cpp) — the T-0028 migration off the legacy `ListView`/`GridView`).
+- **ListView**
+  Surface: [`include/mpapp/list_view.hpp`](../../include/mpapp/list_view.hpp).
+  Real handlers: [`src/handlers/windows/list_view_handler.cpp`](../../src/handlers/windows/list_view_handler.cpp) (`mux::Controls::ListView`) + [`src/handlers/linux/list_view_handler.cpp`](../../src/handlers/linux/list_view_handler.cpp) (`GtkListBox` in `GtkScrolledWindow`) + [`src/handlers/android/list_view_handler.cpp`](../../src/handlers/android/list_view_handler.cpp) (`android.widget.ListView` + `ArrayAdapter`).
+- **TableView**
+  Surface: [`include/mpapp/table_view.hpp`](../../include/mpapp/table_view.hpp).
+  Real handlers + per-platform recyclers similar to ListView; flat and typed-cell-tree section surfaces both dispatch via [[ADR-0013-data-driven-widget-dispatch]] + [[ADR-0021-tableview-cell-types]].
+- Tests: [`tests/mock_handlers/collection_view_test.cpp`](../../tests/mock_handlers/collection_view_test.cpp), [`list_view_test.cpp`](../../tests/mock_handlers/list_view_test.cpp), [`table_view_test.cpp`](../../tests/mock_handlers/table_view_test.cpp) cover items-source binding + selection round-trip + layout-mode survival.
+
 ## References
 
 - [[ADR-0006-interop-parity]] — observable behavior must be uniform; native scroll/recycler nuances are documented divergences.

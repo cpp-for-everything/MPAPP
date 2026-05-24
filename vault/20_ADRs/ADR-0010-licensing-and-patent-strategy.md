@@ -74,6 +74,15 @@ We will operationalize the RFC-0001 recommendations as five concrete commitments
 - **GPL.** Maximally protective against proprietary forks, but immediately kills enterprise adoption — many corporate legal policies forbid GPL runtime dependencies entirely. **Rejected.**
 - **Closed source from day 1.** Eliminates community contributions, removes the OSS adoption ramp, and forfeits the indirect marketing value of public development. **Rejected.**
 
+## Implementation Notes
+
+- License posture tracker: [`vault/70_References/Third-Party Dependencies.md`](../70_References/Third-Party%20Dependencies.md) — every third-party dep gets a row with license / version / linking model / posture. This is the operational artifact CLAUDE rule 9 enforces.
+- Examples of the posture rules in shipped code:
+  - **LGPL via dynamic link**: GTK4 (`pkg-config gtk4` resolves at link time on Linux), libcairo (LGPL-2.1, dynamic via `pkg_check_modules` — see [`CMakeLists.txt`](../../CMakeLists.txt) graphics-backend section).
+  - **Permissive via static link**: Skia BSD-3 (static `.a` / `.lib` linked into mpapp-core when `MPAPP_GRAPHICS_BACKEND=skia` — see [`cmake/MpappFindSkia.cmake`](../../cmake/MpappFindSkia.cmake)).
+  - **Permissive build-time only**: Zig (cross-compile toolchain — see [`cmake/toolchains/zig.cmake`](../../cmake/toolchains/zig.cmake)).
+- No GPL / strong-copyleft runtime deps in the tree today. Verified by inspecting the dependency tracker; no port has been added without a matching row.
+
 ## References
 
 - [[RFC-0001-licensing-and-patent-strategy]] — source RFC closed by this ADR

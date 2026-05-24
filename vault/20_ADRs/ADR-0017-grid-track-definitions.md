@@ -89,6 +89,15 @@ The parser is a tiny constexpr-friendly tokenizer (comma split, trim whitespace,
 - **Value-type only** — rejected; XAML still needs a parser, so we'd ship one anyway.
 - **Builder fluent API only** — rejected; doesn't compose with collection mutation idioms (e.g. inserting a row at position 2 is awkward).
 
+## Implementation Notes
+
+- Surface + parser: [`include/mpapp/grid_layout.hpp`](../../include/mpapp/grid_layout.hpp) — the `track_def` value type (`kind::{fixed,auto_,star}` + `value`) + `track_def::parse(spec)` tokenizer + `grid_layout` itself with `Observable<std::vector<track_def>> row_definitions` / `column_definitions` and attached-property helpers `set_row(view, r)` / `set_column(...)`.
+- Real handlers consume the parsed vector via partial-specialization:
+  [`src/handlers/windows/grid_layout_handler.cpp`](../../src/handlers/windows/grid_layout_handler.cpp) — `RowDefinitions` / `ColumnDefinitions` populated with `GridLength{value, GridUnitType::{Pixel,Star,Auto}}`.
+  [`src/handlers/linux/grid_layout_handler.cpp`](../../src/handlers/linux/grid_layout_handler.cpp) — bridges Star tracks to `hexpand` / `vexpand` on the attached child (GtkGrid has no explicit Star sizing).
+  [`src/handlers/android/grid_layout_handler.cpp`](../../src/handlers/android/grid_layout_handler.cpp) — `android.widget.GridLayout` with `LayoutParams{spec(row, rowSpan), spec(col, colSpan)}`.
+- Parser tests: [`tests/mock_handlers/grid_track_parser_test.cpp`](../../tests/mock_handlers/grid_track_parser_test.cpp) — covers `Auto` / `*` / `N*` / numeric + comma/whitespace tolerance + malformed-input fallback.
+
 ## References
 
 - [[ADR-0004-maui-xaml-superset-compat]] — XAML attribute string parity.

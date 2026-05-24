@@ -62,6 +62,15 @@ This decision is mirrored as **CLAUDE rule 2** in [[CLAUDE]].
 - **Best-effort parity** (MAUI style). Rejected — leads to fragmented apps.
 - **Union of features** (any platform-specific API ships). Rejected — fails the "cross-platform code that just works" promise.
 
+## Implementation Notes
+
+- Canonical interop-parity-in-action: one cross-platform surface — [`include/mpapp/button.hpp`](../../include/mpapp/button.hpp) — backed by three real handlers that observe the same `text` / `clicked` contract:
+  [`src/handlers/windows/button_handler.cpp`](../../src/handlers/windows/button_handler.cpp) (WinUI 3 `muxc::Button`)
+  · [`src/handlers/linux/button_handler.cpp`](../../src/handlers/linux/button_handler.cpp) (GTK4 `GtkButton`)
+  · [`src/handlers/android/button_handler.cpp`](../../src/handlers/android/button_handler.cpp) (JNI to `android.widget.Button`).
+- Enforcement at compile time: handlers are partial-specializations of `<component>_handler<platform::tag>` — missing a specialization is a link error, not a runtime fallback to mock. Platform tags live in [`include/mpapp/platform.hpp`](../../include/mpapp/platform.hpp).
+- Platform-only divergences: `mpapp::platform::<name>::` namespaces (none implemented yet — pattern documented in [[10_Architecture/Platform-Specific Views]]).
+
 ## References
 
 - [[10_Architecture/Interop Parity]]

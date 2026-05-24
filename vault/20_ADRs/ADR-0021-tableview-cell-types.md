@@ -120,6 +120,19 @@ Each cell type gets its own handler — same widget-handler pattern as button/la
 - **Hybrid (text_cell + view_cell only)** — rejected; users still expect switch_cell / entry_cell for the common settings-screen pattern, and shipping a half-tree feels worse than committing.
 - **Skip cells entirely** — rejected; TableView is essentially useless without them.
 
+## Implementation Notes
+
+The full cell tree shipped — each subclass with mock + Win + Linux + Android handlers:
+
+- Abstract base: [`include/mpapp/cell.hpp`](../../include/mpapp/cell.hpp).
+- [`include/mpapp/text_cell.hpp`](../../include/mpapp/text_cell.hpp) — handlers under [`src/handlers/{windows,linux,android}/text_cell_handler.cpp`](../../src/handlers/android/text_cell_handler.cpp).
+- [`include/mpapp/entry_cell.hpp`](../../include/mpapp/entry_cell.hpp) — handlers + IME-action listener (`MppEditorActionListener` kind=1) for Android `completed` routing.
+- [`include/mpapp/switch_cell.hpp`](../../include/mpapp/switch_cell.hpp) — handlers + shared `MppCheckedChangeListener` (kind=4) on Android per [[ADR-0022-android-kind-discriminated-routers]].
+- [`include/mpapp/view_cell.hpp`](../../include/mpapp/view_cell.hpp) — content slot resolved through [[ADR-0013-data-driven-widget-dispatch]] so any registered view can nest.
+- [`include/mpapp/image_cell.hpp`](../../include/mpapp/image_cell.hpp) — inherits from text_cell + adds `image_uri`.
+- TableView surface that owns them: [`include/mpapp/table_view.hpp`](../../include/mpapp/table_view.hpp) — `typed_sections` parallel surface holds `vector<cell*>` per section; render path dispatches to the matching cell handler.
+- Tests: per-cell-type test files under [`tests/mock_handlers/`](../../tests/mock_handlers/) (`text_cell_test.cpp`, `entry_cell_test.cpp`, etc.).
+
 ## References
 
 - [[ADR-0020-virtualized-item-host-wrap-platform]] — table_view itself uses native recyclers; cells are the row factory.

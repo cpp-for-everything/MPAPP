@@ -130,6 +130,14 @@ private:
 - **Async guards returning `task<bool>`** — rejected as v1; sync covers the common cases and apps can fall back to "block, show dialog, re-invoke" for async. Reconsider if real users hit the gap.
 - **First-class route-param dict on page lifecycle** — deferred to a future ADR; covered by the still-unbuilt `parse_args<Path>(uri)` helper.
 
+## Implementation Notes
+
+- Shell surface (guards + navigation_blocked signal): [`include/mpapp/shell.hpp`](../../include/mpapp/shell.hpp) — `Observable<nav_activate_guard_t> can_activate{}`, `Observable<nav_deactivate_guard_t> can_deactivate{}`, `signal<std::string_view> navigation_blocked`. Run order documented in `go_to(uri)` comments.
+- Page lifecycle signals: [`include/mpapp/page.hpp`](../../include/mpapp/page.hpp) — `signal<const std::string&> navigated_to{}` / `navigated_from{}`. Fired by shell from its `go_to(uri)` chain after `current_content` swap completes.
+- Real handlers don't have to do anything special for guards — they're pure cross-platform behavior on the surface. The handlers' platform back-button hooks ([`src/handlers/android/shell_handler.cpp`](../../src/handlers/android/shell_handler.cpp) for `KeyEvent.KEYCODE_BACK`, Windows for `SystemNavigationManager.BackRequested`) call `shell.go_back()` which routes through the same guard chain.
+- Tests: [`tests/mock_handlers/shell_test.cpp`](../../tests/mock_handlers/shell_test.cpp) covers the full activate/deactivate/blocked matrix + page lifecycle ordering against the mock handler.
+- Closure evidence: [[_Archive/T-0017-typed-routing-demo]] — Win/Linux/Android live demos exercising the guard chain end-to-end with screenshots + logcat artifacts.
+
 ## References
 
 - [[ADR-0016-shell-compile-time-routes]] — the deferral source.

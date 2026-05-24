@@ -65,6 +65,13 @@ This decision is mirrored as **CLAUDE rule 12** in [[CLAUDE]].
 - **Mac-only tooling** (MAUI does this for iOS builds). Rejected — locks out Windows-host developers.
 - **Linux-only tooling.** Rejected — most enterprise C++ devs are on Windows or macOS.
 
+## Implementation Notes
+
+- [`tools/mpapp/`](../../tools/mpapp/) — the developer CLI, built per-host. Runs on Windows, Linux, macOS today.
+- [`tools/mpapp-xc/`](../../tools/mpapp-xc/) — the XAML compiler, built per-host alongside `mpapp`. Same C++23 source tree everywhere; no host-OS-specific code paths in the tool itself.
+- [`cmake/toolchains/`](../../cmake/toolchains/) — toolchain files that let any host produce binaries for any target (the cross-compilation half of the goal). Apple-target signing requires macOS — documented in `cmake/toolchains/README.md`.
+- `mpapp-jni-gen` is not yet built; its eventual home is `tools/mpapp-jni-gen/` following the same per-host pattern.
+
 ## References
 
 - [[10_Architecture/Build System]]

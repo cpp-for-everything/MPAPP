@@ -59,6 +59,12 @@ This decision is mirrored as **CLAUDE rule 1** in [[CLAUDE]].
 - **Macros (MAUI-style `[ObservableProperty]` analog).** Rejected — directly contrary to the design philosophy here.
 - **C++ attributes (`[[mpapp::observable]]`).** Considered. Compatible with standard C++ (custom attribute namespaces are allowed since C++11). Would require a libclang-based meta-compiler to read them. **Rejected** in [[ADR-0009-public-api-template-wrappers-only]] in favor of pure template wrappers, which need no external tool.
 
+## Implementation Notes
+
+- [`include/mpapp/`](../../include/mpapp/) — every public header in this tree is macro-free by design. `grep -r '^#define MPAPP_' include/mpapp/` returns no public-API matches; the only `MPAPP_*` defines in headers are conditional-compilation gates (`#if defined(MPAPP_GRAPHICS_HAS_SKIA)` etc.).
+- Internal preprocessor (allowed): `MPAPP_GRAPHICS_BACKEND` / `MPAPP_GRAPHICS_HAS_*` set by [`CMakeLists.txt`](../../CMakeLists.txt) and consumed inside framework `.cpp` files; `MPAPP_PLATFORM_*` per-platform guards in the per-platform `src/handlers/<plat>/` trees.
+- The mechanism that replaces the macros: [`include/mpapp/observable.hpp`](../../include/mpapp/observable.hpp) / [`computed.hpp`](../../include/mpapp/computed.hpp) / [`command.hpp`](../../include/mpapp/command.hpp) — see [[ADR-0009-public-api-template-wrappers-only]] for the design.
+
 ## References
 
 - [[10_Architecture/No Macros In Public API]]

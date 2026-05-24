@@ -80,6 +80,18 @@ Each page-level widget owns a `page_stack` instance and exposes its own user-fac
 - **Async-as-primitive**: make `push_async` the only mutator and have sync be a "wait for the task" wrapper. Rejected — forces the mock handler to host an executor, and the test harness becomes async-aware for what is fundamentally a synchronous data-structure mutation.
 - **Native stack types directly** (e.g., let each widget map directly onto `UINavigationController` and skip the engine). Rejected — the engine is the only place lifecycle + attached props + back-handling can be uniform across platforms.
 
+## Implementation Notes
+
+- Engine surface: [`include/mpapp/page.hpp`](../../include/mpapp/page.hpp) + [`include/mpapp/detail/page_stack.hpp`](../../include/mpapp/detail/page_stack.hpp) — `page_stack` with push/pop/insert/remove + `page_will_appear` / `page_did_appear` / disappear-equivalents + attached-property store.
+- Page-level widgets that build on it:
+  [`include/mpapp/navigation_page.hpp`](../../include/mpapp/navigation_page.hpp)
+  · [`include/mpapp/tabbed_page.hpp`](../../include/mpapp/tabbed_page.hpp)
+  · [`include/mpapp/flyout_page.hpp`](../../include/mpapp/flyout_page.hpp)
+  · [`include/mpapp/shell.hpp`](../../include/mpapp/shell.hpp).
+- Real per-platform handlers translate stack events to native container ops — see
+  [`src/handlers/windows/navigation_page_handler.cpp`](../../src/handlers/windows/navigation_page_handler.cpp) (and Linux/Android peers); same pattern for the other three widgets.
+- Tests: [`tests/mock_handlers/navigation_page_test.cpp`](../../tests/mock_handlers/navigation_page_test.cpp) + the peer cell-tree tests cover push/pop ordering, lifecycle event sequence, and attached-property cleanup.
+
 ## References
 
 - [[ADR-0006-interop-parity]] — every public feature on every platform.

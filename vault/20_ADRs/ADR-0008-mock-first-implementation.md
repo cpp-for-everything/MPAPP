@@ -68,6 +68,13 @@ This decision is mirrored as **CLAUDE rule 6** in [[CLAUDE]].
 - **Platform-by-platform incremental.** Rejected — risks first-platform bias.
 - **Spec-only design without code.** Rejected — written specs drift from implementations; types-as-spec doesn't.
 
+## Implementation Notes
+
+- [`include/mpapp/handlers/mock/`](../../include/mpapp/handlers/mock/) — 66 mock handlers, one per component, each `<component>_handler<platform::mock>`. Recording-pattern body: every `map_<property>` invocation appends to a `calls()` vector for assertion.
+- [`tests/mock_handlers/`](../../tests/mock_handlers/) — 66 paired `<component>_test.cpp` files exercising the mock-handler recording surface. Glob-included in [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt) so adding a component's tests doesn't require touching CMake.
+- [`include/mpapp/platform.hpp`](../../include/mpapp/platform.hpp) — the `platform::mock` tag that selects these specializations.
+- Status traceability: every component's `mpappStatus` in `vault/10_Architecture/Components/<Name>.md` frontmatter advances through the `not-started → mock → <platform>-real → parity-complete` state machine. [[Controls Inventory]] is the live snapshot.
+
 ## References
 
 - [[10_Architecture/Test Harness]]

@@ -54,6 +54,12 @@ The XAML compiler `mpapp-xc` parses `.xaml` files and emits `consteval` C++ stru
 - **MPAPP-DSL (Slint-inspired).** Rejected — would split the developer audience and make the C++ API a second-class citizen.
 - **No markup, C++ only.** Rejected — XAML is widely used in the MAUI / WPF ecosystem; supporting it is a force multiplier for adoption.
 
+## Implementation Notes
+
+- [`tools/mpapp-xc/`](../../tools/mpapp-xc/) — the XAML compiler that lowers `.xaml` to `consteval` C++ trees. The only codegen tool MPAPP ships.
+- [`tools/mpapp/`](../../tools/mpapp/) — developer CLI that wraps `mpapp-xc` invocation alongside other commands.
+- The emit target: every type in [`include/mpapp/`](../../include/mpapp/) is the same C++ surface a hand-written UI uses. No codegen-private headers, no DSL-specific glue layer.
+
 ## References
 
 - [[10_Architecture/Markup]]

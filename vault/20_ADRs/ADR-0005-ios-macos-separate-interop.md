@@ -62,6 +62,12 @@ The same applies to every other handler.
 - **AppKit-only, drop iOS until later.** Rejected — iOS is a core target.
 - **Single Objective-C++ codebase, dispatch at runtime.** Rejected — defeats the static-dispatch handler architecture and introduces ABI ambiguity.
 
+## Implementation Notes
+
+- [`src/handlers/macos/`](../../src/handlers/macos/) — AppKit handlers in Objective-C++ `.mm` files. App-shell seed set today (`application_handler.mm`, `button_handler.mm`, `label_handler.mm`); further components fill in once an Apple host is online (M-07).
+- [`src/handlers/ios/`](../../src/handlers/ios/) — UIKit handlers in Objective-C++ `.mm` files. Same seed shape as macOS but targeting UIKit (`UIButton` etc.); fill-in pending M-08.
+- Two separate directory trees with separate `.mm` files; no shared "Apple" path, no Catalyst — implementation matches the decision verbatim.
+
 ## References
 
 - [[10_Architecture/Platform Interop]]

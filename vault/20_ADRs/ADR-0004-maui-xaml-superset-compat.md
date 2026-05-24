@@ -63,6 +63,13 @@ Documentation lives **one file per component** in `10_Architecture/Components/<N
 - **Subset compatibility.** Rejected — the user explicitly wants the whole set.
 - **Custom XAML dialect with breaking changes from MAUI.** Rejected — defeats migration goal.
 
+## Implementation Notes
+
+- [`include/mpapp/`](../../include/mpapp/) — 79 component headers covering every MAUI handler listed in this ADR. The full porting status is in [[10_Architecture/Controls Inventory]] (61 of 64 widgets at `android-real` as of M-04c close).
+- [`tools/mpapp-xc/`](../../tools/mpapp-xc/) — the XAML compiler that consumes any well-formed MAUI XAML and emits the `consteval` C++ tree calling into the public headers above.
+- Per-component compatibility narratives + Known Differences tables live in [`vault/10_Architecture/Components/`](../10_Architecture/Components/) (one `.md` per MAUI handler — the same set this ADR lists, plus the cell tree per [[ADR-0021-tableview-cell-types]]).
+- Cross-cutting compat matrix: [[XAML Compatibility]] is the index over those per-component docs.
+
 ## References
 
 - [[ADR-0003-xaml-only-no-custom-dsl]]
