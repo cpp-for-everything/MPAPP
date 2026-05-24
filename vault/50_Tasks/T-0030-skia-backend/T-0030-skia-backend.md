@@ -150,7 +150,17 @@ the existing `cairo_render_demo` is the closure step.
 
   End-to-end verified:
   - Linux x64 (WSL Ubuntu 24.04) — `cmake -DMPAPP_GRAPHICS_BACKEND=skia`
-    auto-fetched the linux-x64 zip, built `mpapp-core.a` cleanly.
+    auto-fetched the linux-x64 zip, built mpapp-core.a + the
+    headless_canvas_demo executable, ran it, and produced 6 PNGs
+    (1 graphics_view + 5 shape_view kinds). All 6 are **byte-identical
+    (sha256-matched)** to the reference PNGs in
+    `screenshots/t0029_graphicsview_skia_linux.png` and
+    `screenshots/t0031_{rectangle,ellipse,line,polygon,path}_skia_linux.png`
+    from the earlier vcpkg m148 verification. Skia m143 (HumbleUI)
+    and m148 (vcpkg) produce bit-identical output for the
+    facade's primitives — confirmation the API contract held across
+    milestones and the auto-fetch path renders correctly, not just
+    links.
   - Android x64 (NDK clang via Windows host) — same pattern with
     `--toolchain <ndk>/build/cmake/android.toolchain.cmake
     -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-28` —
@@ -161,6 +171,19 @@ the existing `cairo_render_demo` is the closure step.
     the usual Developer Command Prompt env (INCLUDE/LIB).
   - Override path: `-DMPAPP_SKIA_PREFIX=$HOME/vcpkg/installed/x64-linux`
     reports `skia (vcpkg)` — backward-compat preserved.
+
+  Required follow-up after first integration attempt: HumbleUI's
+  Linux prebuilt is built with `skia_use_system_freetype2=true`, so
+  `libfreetype.so.6` must come from the system at link time. The
+  helper now appends per-platform system libs to the imported
+  target's INTERFACE_LINK_LIBRARIES (freetype + fontconfig + GL +
+  EGL + GLESv2 + m/dl/pthread on Linux; log/android/EGL/GLESv2 on
+  Android; user32/gdi32/opengl32/d3d12/dxgi/... on Windows;
+  CoreFoundation/CoreGraphics/CoreText/Foundation/Metal frameworks
+  on macOS). Mirrors what vcpkg's `unofficial-skia` config does via
+  `z_vcpkg_skia_get_link_libraries`, minus the deps HumbleUI bundles
+  in the zip as .a files (png, jpeg, webp, expat, zlib, harfbuzz,
+  icu).
 
   `build.gradle.kts` no longer forces `MPAPP_SKIA_PREFIX` to the
   vcpkg path; `-PmpappSkiaPrefix=...` only forwards the override

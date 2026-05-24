@@ -185,11 +185,49 @@ macro(_mpapp_skia_apply_prebuilt_layout _mpapp_skia_prefix)
             _mpapp_skia_defs_list "${_mpapp_skia_defs_text}")
         list(TRANSFORM _mpapp_skia_defs_list REPLACE "^-D" "")
 
+        # Platform system libs the prebuilt expects on the link line.
+        # HumbleUI's Linux build sets `skia_use_system_freetype2=true`
+        # — so freetype/fontconfig must come from the system. The other
+        # entries mirror what vcpkg's `unofficial-skia` Linux config
+        # passes (modulo the deps HumbleUI bundles into the zip as
+        # .a files: png, jpeg, webp, expat, zlib, harfbuzz, icu).
+        #
+        # Windows + Android + macOS prebuilts bundle everything they
+        # need from third_party/, so only the platform's own
+        # system-provided libraries are added here.
+        set(_mpapp_skia_syslibs "")
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+            list(APPEND _mpapp_skia_syslibs
+                freetype fontconfig
+                GL EGL GLESv2 # SK_GL / SK_GANESH refs even when unused
+                m dl pthread)
+        elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+            list(APPEND _mpapp_skia_syslibs
+                EGL GLESv2 # SK_GL paths
+                log android)
+        elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+            list(APPEND _mpapp_skia_syslibs
+                user32 gdi32 opengl32 winmm fontsub usp10
+                ole32 oleaut32 advapi32 # GDI / DirectWrite / D3D plumbing
+                d3d12 d3dcompiler dxgi)
+        elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+            # macOS uses framework linkage; CMake expects "-framework Foo"
+            # tokens directly in INTERFACE_LINK_LIBRARIES.
+            list(APPEND _mpapp_skia_syslibs
+                "-framework CoreFoundation"
+                "-framework CoreGraphics"
+                "-framework CoreText"
+                "-framework CoreServices"
+                "-framework Foundation"
+                "-framework Metal"
+                "-framework MetalKit")
+        endif()
+
         add_library(unofficial::skia::skia INTERFACE IMPORTED)
         set_target_properties(unofficial::skia::skia PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${_mpapp_skia_prefix}"
-            INTERFACE_LINK_LIBRARIES "${_mpapp_skia_libs}"
-            INTERFACE_COMPILE_DEFINITIONS "${_mpapp_skia_defs_list}"
+            INTERFACE_LINK_LIBRARIES       "${_mpapp_skia_libs};${_mpapp_skia_syslibs}"
+            INTERFACE_COMPILE_DEFINITIONS  "${_mpapp_skia_defs_list}"
         )
         set(MPAPP_SKIA_FOUND ON)
     endif()
