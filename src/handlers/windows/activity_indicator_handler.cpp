@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 activity_indicator handler implementation.
+// Part of MPAPP. WinUI 3 basic_activity_indicator handler implementation.
 
 #include "mpapp/handlers/windows/activity_indicator_handler.hpp"
 
@@ -15,7 +15,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Media.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxm  = ::winrt::Microsoft::UI::Xaml::Media;
@@ -71,30 +71,28 @@ void activity_indicator_handler<platform::windows>::apply_color(const brush_ref&
     native_.Foreground(brush);
 }
 
-void activity_indicator_handler<platform::windows>::map_is_running(activity_indicator& a) {
+void activity_indicator_handler<platform::windows>::map_is_running(basic_activity_indicator& a) {
     apply_is_running(a.is_running.get());
     a.is_running.changed.subscribe(is_running_slot_, is_running_cb_);
 }
 
-void activity_indicator_handler<platform::windows>::map_color(activity_indicator& a) {
+void activity_indicator_handler<platform::windows>::map_color(basic_activity_indicator& a) {
     apply_color(a.color.get());
     a.color.changed.subscribe(color_slot_, color_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register activity_indicator so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_activity_indicator so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_activity_indicator(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::activity_indicator*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_activity_indicator*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

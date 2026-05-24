@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock handler for `mpapp::hybrid_web_view`.
+// Mock handler for `mpapp::basic_hybrid_web_view`.
 
 #ifndef MPAPP_HANDLERS_MOCK_HYBRID_WEB_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_HYBRID_WEB_VIEW_HANDLER_HPP
 
 #include <string>
 
-#include "../../hybrid_web_view.hpp"
+#include "../../internal/basic_hybrid_web_view.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class hybrid_web_view_handler<platform::mock> : public mock_handler_base {
@@ -23,7 +23,7 @@ public:
     hybrid_web_view_handler(hybrid_web_view_handler&&)                 = delete;
     hybrid_web_view_handler& operator=(hybrid_web_view_handler&&)      = delete;
 
-    void map_messages(hybrid_web_view& h) {
+    void map_messages(basic_hybrid_web_view& h) {
         h.message_received.subscribe(slot_recv_, recv_cb_);
         h.message_sent.subscribe(slot_sent_, sent_cb_);
     }
@@ -47,6 +47,5 @@ private:
     signal_slot<const std::string&> slot_sent_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_HYBRID_WEB_VIEW_HANDLER_HPP

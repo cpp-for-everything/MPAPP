@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android shape_view handler. T-0031 phase 2: rendering goes through
+// Android basic_shape_view handler. T-0031 phase 2: rendering goes through
 // the shared detail::graphics::render_shape_view helper into an
 // off-screen canvas; pixels are then byte-swapped (BGRA → RGBA byte
 // order, matching ANDROID_BITMAP_FORMAT_RGBA_8888 in memory) and
@@ -10,7 +10,7 @@
 //
 // The ImageView subscribes to View.OnLayoutChangeListener so the
 // canvas reallocates + repaints whenever the layout assigns the
-// shape_view a new size, matching the auto-stretch behavior the
+// basic_shape_view a new size, matching the auto-stretch behavior the
 // previous custom View provided through its onMeasure / onDraw.
 
 #ifndef MPAPP_HANDLERS_ANDROID_SHAPE_VIEW_HANDLER_HPP
@@ -21,14 +21,14 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../shape_view.hpp"
+#include "../../internal/basic_shape_view.hpp"
 #include "../../signal.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class shape_view_handler<platform::android> {
@@ -41,12 +41,12 @@ public:
     shape_view_handler(shape_view_handler&&)                 = delete;
     shape_view_handler& operator=(shape_view_handler&&)      = delete;
 
-    void map_kind(shape_view& s);
-    void map_data(shape_view& s);
-    void map_fill(shape_view& s);
-    void map_stroke(shape_view& s);
-    void map_stroke_thickness(shape_view& s);
-    void map_opacity(shape_view& s);
+    void map_kind(basic_shape_view& s);
+    void map_data(basic_shape_view& s);
+    void map_fill(basic_shape_view& s);
+    void map_stroke(basic_shape_view& s);
+    void map_stroke_thickness(basic_shape_view& s);
+    void map_opacity(basic_shape_view& s);
 
     jobject native() const noexcept { return native_; }
 
@@ -69,7 +69,7 @@ private:
     int         bitmap_h_ = 0;
     int         layout_w_ = 0;
     int         layout_h_ = 0;
-    shape_view* bound_    = nullptr;
+    basic_shape_view* bound_    = nullptr;
 
     invalidate_cb_t                 cb_{this};
     signal_slot<const shape_kind&>  kind_slot_{};
@@ -80,7 +80,6 @@ private:
     signal_slot<const double&>      opacity_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SHAPE_VIEW_HANDLER_HPP

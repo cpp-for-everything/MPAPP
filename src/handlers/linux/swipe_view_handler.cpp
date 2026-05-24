@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 swipe_view handler implementation.
+// Part of MPAPP. GTK4 basic_swipe_view handler implementation.
 
 #include "mpapp/handlers/linux/swipe_view_handler.hpp"
 
@@ -11,7 +11,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 swipe_view_handler<platform::linux_>::swipe_view_handler() {
     // Vertical GtkBox host — content fills the available space. The
@@ -42,7 +42,7 @@ void swipe_view_handler<platform::linux_>::apply_content(view* v) {
 
 void swipe_view_handler<platform::linux_>::apply_left_items(const std::vector<view*>& items) {
     // GTK4 gesture-reveal is deferred — the items are intentionally not
-    // attached to the host yet. Touching the registry on each entry is
+    // attached to the host yet. Touching the registry on each basic_entry is
     // still useful so any child handler that needs its native handle
     // materialised (e.g. for an out-of-band parent test) has it.
     for (view* v : items) {
@@ -56,29 +56,28 @@ void swipe_view_handler<platform::linux_>::apply_right_items(const std::vector<v
     }
 }
 
-void swipe_view_handler<platform::linux_>::map_content(swipe_view& sv) {
+void swipe_view_handler<platform::linux_>::map_content(basic_swipe_view& sv) {
     apply_content(sv.content.get());
     sv.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void swipe_view_handler<platform::linux_>::map_left_items(swipe_view& sv) {
+void swipe_view_handler<platform::linux_>::map_left_items(basic_swipe_view& sv) {
     apply_left_items(sv.left_items.get());
     sv.left_items.changed.subscribe(left_slot_, left_cb_);
 }
 
-void swipe_view_handler<platform::linux_>::map_right_items(swipe_view& sv) {
+void swipe_view_handler<platform::linux_>::map_right_items(basic_swipe_view& sv) {
     apply_right_items(sv.right_items.get());
     sv.right_items.changed.subscribe(right_slot_, right_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------
 
 namespace {
 
 GtkWidget* dispatch_swipe_view(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::swipe_view*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_swipe_view*>(v); s && s->has_handler()) {
         return GTK_WIDGET(s->handler().native());
     }
     return nullptr;

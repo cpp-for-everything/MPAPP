@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock progress_bar handler.
+// Part of MPAPP. Mock basic_progress_bar handler.
 
 #ifndef MPAPP_HANDLERS_MOCK_PROGRESS_BAR_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_PROGRESS_BAR_HANDLER_HPP
 
 #include "../../platform.hpp"
-#include "../../progress_bar.hpp"
+#include "../../internal/basic_progress_bar.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class progress_bar_handler<platform::mock>
@@ -16,9 +16,9 @@ class progress_bar_handler<platform::mock>
 public:
     progress_bar_handler() = default;
 
-    void map_progress(progress_bar& p)         { bind("progress",         p.progress,         binding_progress_); }
-    void map_color(progress_bar& p)            { bind("color",            p.color,            binding_color_); }
-    void map_background_color(progress_bar& p) { bind("background_color", p.background_color, binding_bg_); }
+    void map_progress(basic_progress_bar& p)         { bind("progress",         p.progress,         binding_progress_); }
+    void map_color(basic_progress_bar& p)            { bind("color",            p.color,            binding_color_); }
+    void map_background_color(basic_progress_bar& p) { bind("background_color", p.background_color, binding_bg_); }
 
 private:
     detail::property_binding<double>    binding_progress_{};
@@ -26,6 +26,5 @@ private:
     detail::property_binding<brush_ref> binding_bg_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_PROGRESS_BAR_HANDLER_HPP

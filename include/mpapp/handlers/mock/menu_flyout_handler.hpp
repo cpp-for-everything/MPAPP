@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock menu_flyout handler.
+// Part of MPAPP. Mock basic_menu_flyout handler.
 //
 // `items` is a `vector<view*>` (no std::format spelling), so we record
-// the count instead of the contents — same pattern toolbar / picker
+// the count instead of the contents — same pattern basic_toolbar / basic_picker
 // use for their items vectors. `is_open` is recorded through the
 // standard `bind()` helper.
 
@@ -12,13 +12,13 @@
 #include <cstddef>
 #include <vector>
 
-#include "../../menu_flyout.hpp"
+#include "../../internal/basic_menu_flyout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_handler<platform::mock>
@@ -26,12 +26,12 @@ class menu_flyout_handler<platform::mock>
 public:
     menu_flyout_handler() = default;
 
-    void map_items(menu_flyout& f) {
+    void map_items(basic_menu_flyout& f) {
         record("items.count", f.items.get().size());
         f.items.changed.subscribe(items_slot_, items_cb_);
     }
 
-    void map_is_open(menu_flyout& f) {
+    void map_is_open(basic_menu_flyout& f) {
         bind("is_open", f.is_open, binding_is_open_);
     }
 
@@ -48,6 +48,5 @@ private:
     detail::property_binding<bool>            binding_is_open_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_MENU_FLYOUT_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 graphics_view handler — wraps a GtkDrawingArea and pumps a
+// GTK4 basic_graphics_view handler — wraps a GtkDrawingArea and pumps a
 // user-supplied `drawable` callback through the ADR-0015 canvas facade
 // each time GTK asks the area to paint. The handler renders into a
 // facade-owned off-screen surface (currently Cairo when the Cairo
@@ -18,13 +18,13 @@
 
 #include <cstddef>
 
-#include "../../graphics_view.hpp"
+#include "../../internal/basic_graphics_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class graphics_view_handler<platform::linux_> {
@@ -37,18 +37,18 @@ public:
     graphics_view_handler(graphics_view_handler&&)                 = delete;
     graphics_view_handler& operator=(graphics_view_handler&&)      = delete;
 
-    void map_size(graphics_view& gv);
-    void map_draw_count(graphics_view& gv);
-    void map_drawable(graphics_view& gv);
+    void map_size(basic_graphics_view& gv);
+    void map_draw_count(basic_graphics_view& gv);
+    void map_drawable(basic_graphics_view& gv);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
 
     // Public so the static GTK draw callback (in the .cpp) can read
-    // the bound graphics_view. Marked here rather than as a friend so
+    // the bound basic_graphics_view. Marked here rather than as a friend so
     // the .cpp can stay free-function (matches existing dispatch
     // patterns in this codebase).
-    graphics_view* bound() const noexcept { return bound_; }
+    basic_graphics_view* bound() const noexcept { return bound_; }
 
 private:
     void apply_width(int w);
@@ -69,13 +69,13 @@ private:
     };
     struct drawable_cb_t {
         graphics_view_handler<platform::linux_>* self;
-        void operator()(const graphics_view::draw_callback_t& /*f*/) const {
+        void operator()(const basic_graphics_view::draw_callback_t& /*f*/) const {
             self->queue_redraw();
         }
     };
 
     void*           native_ = nullptr;  // GtkDrawingArea*
-    graphics_view*  bound_  = nullptr;
+    basic_graphics_view*  bound_  = nullptr;
 
     w_cb_t        w_cb_{this};
     h_cb_t        h_cb_{this};
@@ -84,10 +84,9 @@ private:
     signal_slot<const int&>                            w_slot_{};
     signal_slot<const int&>                            h_slot_{};
     signal_slot<const std::size_t&>                    count_slot_{};
-    signal_slot<const graphics_view::draw_callback_t&> drawable_slot_{};
+    signal_slot<const basic_graphics_view::draw_callback_t&> drawable_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_GRAPHICS_VIEW_HANDLER_HPP

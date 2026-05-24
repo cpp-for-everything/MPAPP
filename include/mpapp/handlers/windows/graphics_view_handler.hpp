@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 graphics_view handler — wraps a muxc::Image whose Source is
+// WinUI 3 basic_graphics_view handler — wraps a muxc::Image whose Source is
 // a WriteableBitmap that we repaint from the user's `drawable`
 // callback via the ADR-0015 canvas facade. Each paint cycle:
 //
@@ -21,7 +21,7 @@
 #ifndef MPAPP_HANDLERS_WINDOWS_GRAPHICS_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_GRAPHICS_VIEW_HANDLER_HPP
 
-#include "../../graphics_view.hpp"
+#include "../../internal/basic_graphics_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -33,7 +33,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Media.Imaging.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class graphics_view_handler<platform::windows> {
@@ -46,9 +46,9 @@ public:
     graphics_view_handler(graphics_view_handler&&)                 = delete;
     graphics_view_handler& operator=(graphics_view_handler&&)      = delete;
 
-    void map_size(graphics_view& gv);
-    void map_draw_count(graphics_view& gv);
-    void map_drawable(graphics_view& gv);
+    void map_size(basic_graphics_view& gv);
+    void map_draw_count(basic_graphics_view& gv);
+    void map_drawable(basic_graphics_view& gv);
 
     winrt::Microsoft::UI::Xaml::Controls::Image&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Image& native() const noexcept { return native_; }
@@ -73,14 +73,14 @@ private:
     };
     struct drawable_cb_t {
         graphics_view_handler<platform::windows>* self;
-        void operator()(const graphics_view::draw_callback_t& /*f*/) const { self->repaint(); }
+        void operator()(const basic_graphics_view::draw_callback_t& /*f*/) const { self->repaint(); }
     };
 
     winrt::Microsoft::UI::Xaml::Controls::Image                native_{nullptr};
     winrt::Microsoft::UI::Xaml::Media::Imaging::WriteableBitmap bitmap_{nullptr};
     int             bitmap_w_ = 0;
     int             bitmap_h_ = 0;
-    graphics_view*  bound_    = nullptr;
+    basic_graphics_view*  bound_    = nullptr;
 
     w_cb_t        w_cb_{this};
     h_cb_t        h_cb_{this};
@@ -89,10 +89,9 @@ private:
     signal_slot<const int&>                            w_slot_{};
     signal_slot<const int&>                            h_slot_{};
     signal_slot<const std::size_t&>                    count_slot_{};
-    signal_slot<const graphics_view::draw_callback_t&> drawable_slot_{};
+    signal_slot<const basic_graphics_view::draw_callback_t&> drawable_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_GRAPHICS_VIEW_HANDLER_HPP

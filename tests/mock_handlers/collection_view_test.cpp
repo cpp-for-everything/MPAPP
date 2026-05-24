@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::collection_view`.
+// Mock-handler tests for `mpapp::internal::basic_collection_view`.
 
 #include <string>
 #include <vector>
@@ -15,7 +15,7 @@ using namespace mpapp;
 
 TEST_CASE("collection_view defaults are sensible",
           "[mock][collection_view]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     CHECK(cv.items_source.get().empty());
     CHECK(cv.selection_mode.get()   == collection_selection_mode::single);
     CHECK(cv.selected_index.get()   == -1);
@@ -25,7 +25,7 @@ TEST_CASE("collection_view defaults are sensible",
 
 TEST_CASE("select() honors selection_mode = none",
           "[mock][collection_view]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     cv.items_source = std::vector<std::string>{"x", "y"};
     cv.selection_mode = collection_selection_mode::none;
 
@@ -36,7 +36,7 @@ TEST_CASE("select() honors selection_mode = none",
 
 TEST_CASE("select() in single mode sets one entry",
           "[mock][collection_view]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     cv.items_source = std::vector<std::string>{"x", "y", "z"};
 
     cv.select(2);
@@ -52,7 +52,7 @@ TEST_CASE("select() in single mode sets one entry",
 
 TEST_CASE("select() in multiple mode appends",
           "[mock][collection_view]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     cv.items_source = std::vector<std::string>{"x", "y", "z", "w"};
     cv.selection_mode = collection_selection_mode::multiple;
 
@@ -67,7 +67,7 @@ TEST_CASE("select() in multiple mode appends",
 
 TEST_CASE("deselect() removes from multi-select",
           "[mock][collection_view]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     cv.items_source = std::vector<std::string>{"x", "y", "z"};
     cv.selection_mode = collection_selection_mode::multiple;
     cv.select(0);
@@ -82,7 +82,7 @@ TEST_CASE("deselect() removes from multi-select",
 
 TEST_CASE("clear_selection wipes both surfaces",
           "[mock][collection_view]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     cv.items_source = std::vector<std::string>{"x", "y"};
     cv.select(1);
     cv.clear_selection();
@@ -92,16 +92,16 @@ TEST_CASE("clear_selection wipes both surfaces",
 
 TEST_CASE("typed_items starts empty",
           "[mock][collection_view][typed]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     CHECK(cv.typed_items.get().empty());
 }
 
 TEST_CASE("typed_items holds non-owning view* pointers",
           "[mock][collection_view][typed]") {
-    collection_view cv;
-    label       a{};
-    label       b{};
-    text_cell   c{};
+    internal::basic_collection_view cv;
+    internal::basic_label a{};
+    internal::basic_label b{};
+    internal::basic_text_cell   c{};
 
     cv.typed_items = std::vector<view*>{ &a, &b, &c };
 
@@ -115,8 +115,8 @@ TEST_CASE("typed_items + items_source can coexist on the surface",
           "[mock][collection_view][typed]") {
     // Handler picks typed when non-empty; otherwise flat. Surface
     // doesn't enforce mutual exclusion.
-    collection_view cv;
-    label           a{};
+    internal::basic_collection_view cv;
+    internal::basic_label a{};
 
     cv.items_source = std::vector<std::string>{"flat-1", "flat-2"};
     cv.typed_items  = std::vector<view*>{ &a };
@@ -130,10 +130,10 @@ TEST_CASE("typed_items + items_source can coexist on the surface",
 
 TEST_CASE("item_template materializes a cell per items_source row",
           "[mock][collection_view][template]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
 
     cv.item_template = [](int i) -> std::unique_ptr<view> {
-        auto c  = std::make_unique<text_cell>();
+        auto c  = std::make_unique<internal::basic_text_cell>();
         c->text = "row-" + std::to_string(i);
         return c;
     };
@@ -153,9 +153,9 @@ TEST_CASE("item_template materializes a cell per items_source row",
 
 TEST_CASE("item_template re-materializes when items_source changes",
           "[mock][collection_view][template]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     cv.item_template = [](int) -> std::unique_ptr<view> {
-        return std::make_unique<text_cell>();
+        return std::make_unique<internal::basic_text_cell>();
     };
 
     cv.items_source = std::vector<std::string>{"a", "b"};
@@ -170,17 +170,17 @@ TEST_CASE("item_template re-materializes when items_source changes",
 
 TEST_CASE("item_template re-materializes when template changes",
           "[mock][collection_view][template]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     cv.items_source = std::vector<std::string>{"a", "b", "c"};
 
     // No template set yet — materialized is empty.
     CHECK(cv.materialized_count() == 0);
 
-    cv.item_template = [](int) { return std::make_unique<text_cell>(); };
+    cv.item_template = [](int) { return std::make_unique<internal::basic_text_cell>(); };
     CHECK(cv.materialized_count() == 3);
 
     // Replace with a different template — re-materialize.
-    cv.item_template = [](int) { return std::make_unique<label>(); };
+    cv.item_template = [](int) { return std::make_unique<internal::basic_label>(); };
     CHECK(cv.materialized_count() == 3);
 
     // Clear the template — materialized clears.
@@ -190,7 +190,7 @@ TEST_CASE("item_template re-materializes when template changes",
 
 TEST_CASE("item_template factory receives the row index",
           "[mock][collection_view][template]") {
-    collection_view  cv;
+    internal::basic_collection_view  cv;
     std::vector<int> seen;
 
     // Capture by value won't survive — capture by reference into a
@@ -198,7 +198,7 @@ TEST_CASE("item_template factory receives the row index",
     // observed-during-materialize behavior is recorded.
     cv.item_template = [&seen](int i) -> std::unique_ptr<view> {
         seen.push_back(i);
-        return std::make_unique<text_cell>();
+        return std::make_unique<internal::basic_text_cell>();
     };
     cv.items_source = std::vector<std::string>{"r0", "r1", "r2"};
 
@@ -212,10 +212,10 @@ TEST_CASE("item_template doesn't override typed_items on the surface",
           "[mock][collection_view][template]") {
     // The surface holds both; the handler decides precedence. Verify
     // they remain independent on the C++ side.
-    collection_view cv;
-    label           a{};
+    internal::basic_collection_view cv;
+    internal::basic_label a{};
     cv.typed_items  = std::vector<view*>{ &a };
-    cv.item_template = [](int) { return std::make_unique<text_cell>(); };
+    cv.item_template = [](int) { return std::make_unique<internal::basic_text_cell>(); };
     cv.items_source = std::vector<std::string>{"a", "b"};
 
     CHECK(cv.typed_items.get().size() == 1);
@@ -224,7 +224,7 @@ TEST_CASE("item_template doesn't override typed_items on the surface",
 
 TEST_CASE("materialized_changed fires on rematerialize",
           "[mock][collection_view][template]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     int hits = 0;
     struct cb_t {
         int* hits;
@@ -239,7 +239,7 @@ TEST_CASE("materialized_changed fires on rematerialize",
     CHECK(hits == 1);
 
     // Template set → fires.
-    cv.item_template = [](int) { return std::make_unique<text_cell>(); };
+    cv.item_template = [](int) { return std::make_unique<internal::basic_text_cell>(); };
     CHECK(hits == 2);
 
     // items_source change → fires.
@@ -253,7 +253,7 @@ TEST_CASE("materialized_changed fires on rematerialize",
 
 TEST_CASE("layout default is vertical_list and map_layout records it",
           "[mock][collection_view][layout]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     collection_view_handler<platform::mock> h;
     h.map_layout(cv);
 
@@ -263,7 +263,7 @@ TEST_CASE("layout default is vertical_list and map_layout records it",
 
 TEST_CASE("layout cycles through all four enum values",
           "[mock][collection_view][layout]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     collection_view_handler<platform::mock> h;
     h.map_layout(cv);
 
@@ -282,7 +282,7 @@ TEST_CASE("layout cycles through all four enum values",
 
 TEST_CASE("layout change does not perturb items_source or selection",
           "[mock][collection_view][layout]") {
-    collection_view cv;
+    internal::basic_collection_view cv;
     cv.items_source   = std::vector<std::string>{"a", "b", "c"};
     cv.selection_mode = collection_selection_mode::multiple;
     cv.select(0);

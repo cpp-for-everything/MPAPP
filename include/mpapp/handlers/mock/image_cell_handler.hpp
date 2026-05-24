@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock handler for `mpapp::image_cell`. Extends text_cell with image_uri.
+// Mock handler for `mpapp::basic_image_cell`. Extends basic_text_cell with image_uri.
 
 #ifndef MPAPP_HANDLERS_MOCK_IMAGE_CELL_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_IMAGE_CELL_HANDLER_HPP
 
 #include <string>
 
-#include "../../image_cell.hpp"
+#include "../../internal/basic_image_cell.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_cell_handler<platform::mock> : public mock_handler_base {
@@ -23,11 +23,11 @@ public:
     image_cell_handler(image_cell_handler&&)                 = delete;
     image_cell_handler& operator=(image_cell_handler&&)      = delete;
 
-    void map_text(image_cell& c) {
+    void map_text(basic_image_cell& c) {
         record_change("text", c.text.get());
         c.text.changed.subscribe(text_slot_, text_cb_);
     }
-    void map_image_uri(image_cell& c) {
+    void map_image_uri(basic_image_cell& c) {
         record_change("image_uri", c.image_uri.get());
         c.image_uri.changed.subscribe(uri_slot_, uri_cb_);
     }
@@ -40,6 +40,5 @@ private:
     signal_slot<const std::string&>             uri_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_IMAGE_CELL_HANDLER_HPP

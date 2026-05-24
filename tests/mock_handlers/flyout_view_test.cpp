@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::flyout_view`.
+// Mock-handler tests for `mpapp::internal::basic_flyout_view`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -19,7 +19,7 @@ class plain_view : public view {};
 
 TEST_CASE("flyout_view mock records initial values on bind",
           "[mock][flyout_view]") {
-    flyout_view fv;
+    internal::basic_flyout_view fv;
     flyout_view_handler<platform::mock> h;
 
     h.map_flyout(fv);
@@ -37,7 +37,7 @@ TEST_CASE("flyout_view mock records initial values on bind",
 
 TEST_CASE("flyout_view mock tracks pane assignments and drawer toggles",
           "[mock][flyout_view]") {
-    flyout_view fv;
+    internal::basic_flyout_view fv;
     flyout_view_handler<platform::mock> h;
 
     h.map_flyout(fv);

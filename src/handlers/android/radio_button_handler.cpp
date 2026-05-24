@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android radio_button handler implementation.
+// Part of MPAPP. Android basic_radio_button handler implementation.
 
 #include "mpapp/handlers/android/radio_button_handler.hpp"
 
@@ -10,13 +10,13 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 // Per-process group registry: group_name → global ref to the
 // android.widget.RadioGroup container that owns the RadioButtons of
-// that group. The first radio_button to bind a non-empty group_name
+// that group. The first basic_radio_button to bind a non-empty group_name
 // creates the RadioGroup; subsequent ones attach to it.
 std::map<std::string, jobject>& group_registry() {
     static std::map<std::string, jobject> g;
@@ -160,7 +160,7 @@ void radio_button_handler<platform::android>::apply_group_name(const std::string
     }
 }
 
-void radio_button_handler<platform::android>::map_is_checked(radio_button& r) {
+void radio_button_handler<platform::android>::map_is_checked(basic_radio_button& r) {
     bound_ = &r;
     apply_is_checked(r.is_checked.get());
     r.is_checked.changed.subscribe(is_checked_slot_, is_checked_cb_);
@@ -174,7 +174,7 @@ void radio_button_handler<platform::android>::map_is_checked(radio_button& r) {
     }
 }
 
-void radio_button_handler<platform::android>::map_group_name(radio_button& r) {
+void radio_button_handler<platform::android>::map_group_name(basic_radio_button& r) {
     apply_group_name(r.group_name.get());
     r.group_name.changed.subscribe(group_name_slot_, group_name_cb_);
 }
@@ -190,20 +190,18 @@ void android_radio_button_dispatch_checked_changed(radio_button_handler<platform
     if (h != nullptr) h->on_native_checked_changed(checked);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register radio_button so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_radio_button so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/radio_button.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
 
 namespace {
 
 jobject dispatch_radio_button(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::radio_button*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_radio_button*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

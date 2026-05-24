@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android shape_view handler implementation. See header for the
+// Android basic_shape_view handler implementation. See header for the
 // design — ImageView + Bitmap fed by the shared
 // detail::graphics::render_shape_view helper (T-0031 phase 2).
 
@@ -15,7 +15,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -285,33 +285,33 @@ void shape_view_handler<platform::android>::repaint() {
     AndroidBitmap_unlockPixels(env, bitmap_);
     imageview_set_bitmap(env, native_, bitmap_);
 
-    // Honor shape_view.opacity at the View level too (legacy
+    // Honor basic_shape_view.opacity at the View level too (legacy
     // MppShapeView faded the whole view, not just the paint).
     imageview_set_alpha(env, native_, static_cast<jfloat>(bound_->opacity.get()));
 }
 
-void shape_view_handler<platform::android>::map_kind(shape_view& s) {
+void shape_view_handler<platform::android>::map_kind(basic_shape_view& s) {
     bound_ = &s;
     repaint();
     s.kind.changed.subscribe(kind_slot_, cb_);
 }
-void shape_view_handler<platform::android>::map_data(shape_view& s) {
+void shape_view_handler<platform::android>::map_data(basic_shape_view& s) {
     bound_ = &s;
     s.data.changed.subscribe(data_slot_, cb_);
 }
-void shape_view_handler<platform::android>::map_fill(shape_view& s) {
+void shape_view_handler<platform::android>::map_fill(basic_shape_view& s) {
     bound_ = &s;
     s.fill.changed.subscribe(fill_slot_, cb_);
 }
-void shape_view_handler<platform::android>::map_stroke(shape_view& s) {
+void shape_view_handler<platform::android>::map_stroke(basic_shape_view& s) {
     bound_ = &s;
     s.stroke.changed.subscribe(stroke_slot_, cb_);
 }
-void shape_view_handler<platform::android>::map_stroke_thickness(shape_view& s) {
+void shape_view_handler<platform::android>::map_stroke_thickness(basic_shape_view& s) {
     bound_ = &s;
     s.stroke_thickness.changed.subscribe(stroke_thick_slot_, cb_);
 }
-void shape_view_handler<platform::android>::map_opacity(shape_view& s) {
+void shape_view_handler<platform::android>::map_opacity(basic_shape_view& s) {
     bound_ = &s;
     if (native_ != nullptr) {
         JNIEnv* env = detail::attach_current_thread();
@@ -320,8 +320,7 @@ void shape_view_handler<platform::android>::map_opacity(shape_view& s) {
     s.opacity.changed.subscribe(opacity_slot_, cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // JNI trampoline for MppShapeViewLayoutListener.onLayoutChange. The
 // Java listener supplies owner_ptr (the C++ handler `this`) plus the
 // new (w, h); we reinterpret and route into on_layout_changed.
@@ -340,7 +339,7 @@ Java_io_mpapp_MppShapeViewLayoutListener_nativeOnLayoutChanged(
 namespace {
 
 jobject dispatch_shape_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::shape_view*>(v); w && w->has_sv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_shape_view*>(v); w && w->has_sv_handler()) {
         return w->sv_handler().native();
     }
     return nullptr;

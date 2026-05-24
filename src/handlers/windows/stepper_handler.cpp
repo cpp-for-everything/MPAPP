@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 stepper handler implementation.
+// Part of MPAPP. WinUI 3 basic_stepper handler implementation.
 
 #include "mpapp/handlers/windows/stepper_handler.hpp"
 
@@ -10,7 +10,7 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -45,7 +45,7 @@ void stepper_handler<platform::windows>::apply_interval(double v) {
     if (native_ != nullptr) native_.SmallChange(v);
 }
 
-void stepper_handler<platform::windows>::map_value(stepper& s) {
+void stepper_handler<platform::windows>::map_value(basic_stepper& s) {
     bound_ = &s;
     apply_value(s.value.get());
     s.value.changed.subscribe(value_slot_, value_cb_);
@@ -55,7 +55,7 @@ void stepper_handler<platform::windows>::map_value(stepper& s) {
         native_.ValueChanged(value_changed_token_);
         value_changed_token_ = {};
     }
-    stepper* target = &s;
+    basic_stepper* target = &s;
     auto* self = this;
     value_changed_token_ = native_.ValueChanged(
         [target, self](muxc::NumberBox const& sender,
@@ -68,33 +68,31 @@ void stepper_handler<platform::windows>::map_value(stepper& s) {
         });
 }
 
-void stepper_handler<platform::windows>::map_minimum(stepper& s) {
+void stepper_handler<platform::windows>::map_minimum(basic_stepper& s) {
     apply_minimum(s.minimum.get());
     s.minimum.changed.subscribe(minimum_slot_, minimum_cb_);
 }
-void stepper_handler<platform::windows>::map_maximum(stepper& s) {
+void stepper_handler<platform::windows>::map_maximum(basic_stepper& s) {
     apply_maximum(s.maximum.get());
     s.maximum.changed.subscribe(maximum_slot_, maximum_cb_);
 }
-void stepper_handler<platform::windows>::map_interval(stepper& s) {
+void stepper_handler<platform::windows>::map_interval(basic_stepper& s) {
     apply_interval(s.interval.get());
     s.interval.changed.subscribe(interval_slot_, interval_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register stepper so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_stepper so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/stepper.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_stepper(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::stepper*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_stepper*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

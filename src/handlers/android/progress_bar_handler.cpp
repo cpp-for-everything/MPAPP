@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android progress_bar handler implementation.
+// Part of MPAPP. Android basic_progress_bar handler implementation.
 
 #include "mpapp/handlers/android/progress_bar_handler.hpp"
 
@@ -10,7 +10,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -134,33 +134,31 @@ void progress_bar_handler<platform::android>::apply_background_color(const brush
     set_tint(env, native_, "setProgressBackgroundTintList", parse_argb(b, static_cast<jint>(0xFFF0F0F0U)));
 }
 
-void progress_bar_handler<platform::android>::map_progress(progress_bar& p) {
+void progress_bar_handler<platform::android>::map_progress(basic_progress_bar& p) {
     apply_progress(p.progress.get());
     p.progress.changed.subscribe(progress_slot_, progress_cb_);
 }
-void progress_bar_handler<platform::android>::map_color(progress_bar& p) {
+void progress_bar_handler<platform::android>::map_color(basic_progress_bar& p) {
     apply_color(p.color.get());
     p.color.changed.subscribe(color_slot_, color_cb_);
 }
-void progress_bar_handler<platform::android>::map_background_color(progress_bar& p) {
+void progress_bar_handler<platform::android>::map_background_color(basic_progress_bar& p) {
     apply_background_color(p.background_color.get());
     p.background_color.changed.subscribe(bg_slot_, bg_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register progress_bar so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_progress_bar so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/progress_bar.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
 
 namespace {
 
 jobject dispatch_progress_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::progress_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_progress_bar*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

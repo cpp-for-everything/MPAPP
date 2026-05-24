@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::flyout_page`.
+// Mock-handler tests for `mpapp::internal::basic_flyout_page`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -11,7 +11,7 @@ using namespace mpapp;
 
 TEST_CASE("flyout_page defaults",
           "[mock][flyout_page]") {
-    flyout_page fp;
+    internal::basic_flyout_page fp;
     CHECK(fp.flyout.get()       == nullptr);
     CHECK(fp.detail.get()       == nullptr);
     CHECK(fp.is_presented.get() == false);
@@ -20,7 +20,7 @@ TEST_CASE("flyout_page defaults",
 
 TEST_CASE("present / dismiss / toggle drive is_presented",
           "[mock][flyout_page]") {
-    flyout_page fp;
+    internal::basic_flyout_page fp;
     fp.present();
     CHECK(fp.is_presented.get() == true);
 
@@ -35,7 +35,7 @@ TEST_CASE("present / dismiss / toggle drive is_presented",
 
 TEST_CASE("presented_changed signal fires on flip only",
           "[mock][flyout_page]") {
-    flyout_page fp;
+    internal::basic_flyout_page fp;
     int hits = 0;
     bool last = false;
     struct cb_t {
@@ -58,8 +58,8 @@ TEST_CASE("presented_changed signal fires on flip only",
 
 TEST_CASE("mock handler records flyout + detail + is_presented",
           "[mock][flyout_page]") {
-    page menu, content;
-    flyout_page fp;
+    internal::basic_page menu, content;
+    internal::basic_flyout_page fp;
     flyout_page_handler<platform::mock> h;
 
     h.map_flyout(fp);

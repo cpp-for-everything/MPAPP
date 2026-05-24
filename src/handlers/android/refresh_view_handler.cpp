@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android refresh_view handler implementation.
+// Part of MPAPP. Android basic_refresh_view handler implementation.
 
 #include "mpapp/handlers/android/refresh_view_handler.hpp"
 
@@ -11,7 +11,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -270,22 +270,22 @@ void refresh_view_handler<platform::android>::apply_refresh_color(const brush_re
     }
 }
 
-void refresh_view_handler<platform::android>::map_content(refresh_view& r) {
+void refresh_view_handler<platform::android>::map_content(basic_refresh_view& r) {
     apply_content(r.content.get());
     r.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void refresh_view_handler<platform::android>::map_is_refreshing(refresh_view& r) {
+void refresh_view_handler<platform::android>::map_is_refreshing(basic_refresh_view& r) {
     apply_is_refreshing(r.is_refreshing.get());
     r.is_refreshing.changed.subscribe(is_refreshing_slot_, is_refreshing_cb_);
 }
 
-void refresh_view_handler<platform::android>::map_refresh_color(refresh_view& r) {
+void refresh_view_handler<platform::android>::map_refresh_color(basic_refresh_view& r) {
     apply_refresh_color(r.refresh_color.get());
     r.refresh_color.changed.subscribe(refresh_color_slot_, refresh_color_cb_);
 }
 
-void refresh_view_handler<platform::android>::bind_content(refresh_view& r, view& child) {
+void refresh_view_handler<platform::android>::bind_content(basic_refresh_view& r, view& child) {
     r.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
@@ -294,7 +294,7 @@ void refresh_view_handler<platform::android>::bind_content(refresh_view& r, view
 namespace {
 
 jobject dispatch_refresh_view(::mpapp::view* v) {
-    if (auto* r = dynamic_cast<::mpapp::refresh_view*>(v); r && r->has_handler()) {
+    if (auto* r = dynamic_cast<::mpapp::internal::basic_refresh_view*>(v); r && r->has_handler()) {
         return r->handler().native();
     }
     return nullptr;
@@ -310,6 +310,5 @@ struct registrar {
 
 } // namespace
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__

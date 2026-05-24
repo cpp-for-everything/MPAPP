@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android scroll_view handler implementation.
+// Part of MPAPP. Android basic_scroll_view handler implementation.
 
 #include "mpapp/handlers/android/scroll_view_handler.hpp"
 
@@ -8,19 +8,19 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 #include "mpapp/border.hpp"
-#include "mpapp/box_view.hpp"
-#include "mpapp/date_picker.hpp"
-#include "mpapp/image.hpp"
-#include "mpapp/picker.hpp"
-#include "mpapp/time_picker.hpp"
-#include "mpapp/progress_bar.hpp"
-#include "mpapp/search_bar.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_date_picker.hpp"
+#include "mpapp/internal/basic_image.hpp"
+#include "mpapp/internal/basic_picker.hpp"
+#include "mpapp/internal/basic_time_picker.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/android/activity_indicator_handler.hpp"
 #include "mpapp/handlers/android/border_handler.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
@@ -40,14 +40,14 @@
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
 #include "mpapp/handlers/android/stepper_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stack_layout.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -129,28 +129,27 @@ void scroll_view_handler<platform::android>::apply_orientation(scroll_orientatio
     // widget per orientation.
 }
 
-void scroll_view_handler<platform::android>::map_content(scroll_view& s) {
+void scroll_view_handler<platform::android>::map_content(basic_scroll_view& s) {
     bound_ = &s;
     apply_content(s.content.get());
     s.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void scroll_view_handler<platform::android>::map_orientation(scroll_view& s) {
+void scroll_view_handler<platform::android>::map_orientation(basic_scroll_view& s) {
     apply_orientation(s.orientation.get());
     s.orientation.changed.subscribe(orient_slot_, orient_cb_);
 }
 
-void scroll_view_handler<platform::android>::bind_content(scroll_view& s, view& child) {
+void scroll_view_handler<platform::android>::bind_content(basic_scroll_view& s, view& child) {
     s.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 namespace {
 
 jobject dispatch_scroll_view(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::scroll_view*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_scroll_view*>(v); s && s->has_handler()) {
         return s->handler().native();
     }
     return nullptr;

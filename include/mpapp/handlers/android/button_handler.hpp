@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — Android button handler. Wraps
+// Part of MPAPP. T-0011 — Android basic_button handler. Wraps
 // `android.widget.Button`.
 
 #ifndef MPAPP_HANDLERS_ANDROID_BUTTON_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_BUTTON_HANDLER_HPP
 
-#include "../../button.hpp"
+#include "../../internal/basic_button.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -14,7 +14,7 @@
 #include <jni.h>
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class button_handler<platform::android> {
@@ -27,8 +27,8 @@ public:
     button_handler(button_handler&&)                 = delete;
     button_handler& operator=(button_handler&&)      = delete;
 
-    void map_text(button& b);
-    void map_clicked(button& b);
+    void map_text(basic_button& b);
+    void map_clicked(basic_button& b);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -47,9 +47,9 @@ private:
 };
 
 // Called by the JNI bridge when the Java Button's onClick fires.
-void android_button_dispatch_click(button* b);
+void android_button_dispatch_click(basic_button* b);
 
-} // namespace mpapp
+} // namespace mpapp::internal
 
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_BUTTON_HANDLER_HPP

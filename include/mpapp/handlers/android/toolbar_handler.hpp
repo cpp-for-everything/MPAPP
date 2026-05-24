@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android toolbar handler — wraps `android.widget.Toolbar`
-// + per-item `android.view.MenuItem` entries added via the toolbar's
+// Part of MPAPP. Android basic_toolbar handler — wraps `android.widget.Toolbar`
+// + per-item `android.view.MenuItem` entries added via the basic_toolbar's
 // `Menu` (Toolbar.getMenu().add(...) / .clear()).
 
 #ifndef MPAPP_HANDLERS_ANDROID_TOOLBAR_HANDLER_HPP
@@ -11,13 +11,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../toolbar.hpp"
+#include "../../internal/basic_toolbar.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class toolbar_handler<platform::android> {
@@ -27,8 +27,8 @@ public:
     toolbar_handler(const toolbar_handler&)            = delete;
     toolbar_handler& operator=(const toolbar_handler&) = delete;
 
-    void map_items(toolbar& t);
-    void map_title(toolbar& t);
+    void map_items(basic_toolbar& t);
+    void map_title(basic_toolbar& t);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -48,7 +48,6 @@ private:
     signal_slot<const std::string&>                     title_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_TOOLBAR_HANDLER_HPP

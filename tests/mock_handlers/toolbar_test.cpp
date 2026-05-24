@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::toolbar`.
+// Mock-handler tests for `mpapp::internal::basic_toolbar`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("toolbar mock records initial values on bind",
           "[mock][toolbar]") {
-    toolbar t;
+    internal::basic_toolbar t;
     toolbar_handler<platform::mock> h;
 
     h.map_items(t);
@@ -25,7 +25,7 @@ TEST_CASE("toolbar mock records initial values on bind",
 
 TEST_CASE("toolbar records items.count when collection changes",
           "[mock][toolbar]") {
-    toolbar t;
+    internal::basic_toolbar t;
     toolbar_handler<platform::mock> h;
 
     h.map_items(t);
@@ -55,7 +55,7 @@ TEST_CASE("toolbar records items.count when collection changes",
 
 TEST_CASE("toolbar records title changes",
           "[mock][toolbar]") {
-    toolbar t;
+    internal::basic_toolbar t;
     toolbar_handler<platform::mock> h;
 
     h.map_title(t);

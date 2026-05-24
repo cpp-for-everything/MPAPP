@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::table_view`.
+// Mock-handler tests for `mpapp::internal::basic_table_view`.
 
 #include <vector>
 
@@ -16,7 +16,7 @@ using namespace mpapp;
 
 TEST_CASE("table_view starts empty",
           "[mock][table_view]") {
-    table_view tv;
+    internal::basic_table_view tv;
     CHECK(tv.sections.get().empty());
     CHECK(tv.intent.get()     == table_intent::data);
     CHECK(tv.row_height.get() == -1);
@@ -25,7 +25,7 @@ TEST_CASE("table_view starts empty",
 
 TEST_CASE("add_section + add_row updates sections + total_row_count",
           "[mock][table_view]") {
-    table_view tv;
+    internal::basic_table_view tv;
     tv.add_section("Profile");
     tv.add_section("Preferences");
 
@@ -43,7 +43,7 @@ TEST_CASE("add_section + add_row updates sections + total_row_count",
 
 TEST_CASE("add_row to invalid section is a no-op",
           "[mock][table_view]") {
-    table_view tv;
+    internal::basic_table_view tv;
     tv.add_section("Only one");
     tv.add_row(5, "ignored");
     CHECK(tv.sections.get()[0].rows.empty());
@@ -52,7 +52,7 @@ TEST_CASE("add_row to invalid section is a no-op",
 
 TEST_CASE("mock handler records sections.count + row_height",
           "[mock][table_view]") {
-    table_view tv;
+    internal::basic_table_view tv;
     table_view_handler<platform::mock> h;
     h.map_sections(tv);
     h.map_row_height(tv);
@@ -70,16 +70,16 @@ TEST_CASE("mock handler records sections.count + row_height",
 
 TEST_CASE("typed_sections starts empty + records count via mock handler",
           "[mock][table_view][typed]") {
-    table_view tv;
+    internal::basic_table_view tv;
     table_view_handler<platform::mock> h;
     h.map_typed_sections(tv);
     h.clear_calls();
 
     CHECK(tv.typed_sections.get().empty());
 
-    text_cell   name{};
-    text_cell   email{};
-    switch_cell notifications{};
+    internal::basic_text_cell   name{};
+    internal::basic_text_cell   email{};
+    internal::basic_switch_cell notifications{};
 
     tv.typed_sections = std::vector<table_section_typed>{
         table_section_typed{
@@ -111,8 +111,8 @@ TEST_CASE("typed_sections + flat sections can coexist on the surface",
     // The surface itself doesn't enforce mutual exclusion — both
     // Observables hold values independently. Verify both can be set
     // and read back.
-    table_view tv;
-    text_cell  row_a{};
+    internal::basic_table_view tv;
+    internal::basic_text_cell  row_a{};
 
     tv.add_section("Flat header");
     tv.add_row(0, "Flat row");
@@ -129,10 +129,10 @@ TEST_CASE("typed_sections + flat sections can coexist on the surface",
 
 TEST_CASE("cell_at resolves typed-section coordinates",
           "[mock][table_view][typed]") {
-    table_view  tv;
-    text_cell   a{};
-    text_cell   b{};
-    switch_cell c{};
+    internal::basic_table_view  tv;
+    internal::basic_text_cell   a{};
+    internal::basic_text_cell   b{};
+    internal::basic_switch_cell c{};
 
     tv.typed_sections = std::vector<table_section_typed>{
         table_section_typed{ "Profile", std::vector<cell*>{ &a, &b } },
@@ -153,7 +153,7 @@ TEST_CASE("cell_at resolves typed-section coordinates",
 TEST_CASE("cell_at returns nullptr when typed_sections is empty",
           "[mock][table_view][typed]") {
     // Flat sections only — cell_at can't resolve any coordinate.
-    table_view tv;
+    internal::basic_table_view tv;
     tv.add_section("Flat");
     tv.add_row(0, "Row 0");
     tv.add_row(0, "Row 1");
@@ -166,8 +166,8 @@ TEST_CASE("cell.tapped emits via cell_at lookup as handlers do at runtime",
           "[mock][table_view][typed]") {
     // Simulates what handlers do after row_tapped: look up the cell at
     // (section, row) via cell_at() and emit its tapped signal.
-    table_view tv;
-    text_cell  row{};
+    internal::basic_table_view tv;
+    internal::basic_text_cell  row{};
 
     tv.typed_sections = std::vector<table_section_typed>{
         table_section_typed{ "Settings", std::vector<cell*>{ &row } }

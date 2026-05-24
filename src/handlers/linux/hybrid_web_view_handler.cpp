@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 hybrid_web_view handler implementation.
+// GTK4 basic_hybrid_web_view handler implementation.
 
 #include "mpapp/handlers/linux/hybrid_web_view_handler.hpp"
 
@@ -10,7 +10,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -19,19 +19,19 @@ namespace {
 // WebKitGTK's `webkit.messageHandlers.mpapp_send`).
 constexpr const char* kBridgeShim =
     "(function(){"
-    "  if (window.mpapp && window.mpapp.__mpapp) return;"
+    "  if (basic_window.mpapp && basic_window.mpapp.__mpapp) return;"
     "  var listeners = [];"
     "  var methods   = {};"
     "  var nextId    = 0;"
-    "  window.mpapp = {"
+    "  basic_window.mpapp = {"
     "    __mpapp: true,"
-    "    send: function(p) { window.webkit.messageHandlers.mpapp_send.postMessage(String(p)); },"
+    "    send: function(p) { basic_window.webkit.messageHandlers.mpapp_send.postMessage(String(p)); },"
     "    on:   function(fn) { listeners.push(fn); },"
     "    register: function(name, fn) { methods[name] = fn; },"
     "    call: function(name) {"
     "      var id = ++nextId;"
     "      var args = Array.prototype.slice.call(arguments, 1);"
-    "      window.mpapp.send(JSON.stringify({id: id, method: name, args: args}));"
+    "      basic_window.mpapp.send(JSON.stringify({id: id, method: name, args: args}));"
     "      return id;"
     "    },"
     "    _receive: function(p) {"
@@ -42,10 +42,10 @@ constexpr const char* kBridgeShim =
     "        var ret;"
     "        try { ret = methods[env.method].apply(null, env.args || []); }"
     "        catch (e) {"
-    "          window.mpapp.send(JSON.stringify({id: env.id, error: String(e)}));"
+    "          basic_window.mpapp.send(JSON.stringify({id: env.id, error: String(e)}));"
     "          return;"
     "        }"
-    "        window.mpapp.send(JSON.stringify({"
+    "        basic_window.mpapp.send(JSON.stringify({"
     "          id: env.id,"
     "          result: ret === undefined ? null : ret"
     "        }));"
@@ -134,10 +134,10 @@ void hybrid_web_view_handler<platform::linux_>::send_outbound(const std::string&
         }
     }
     esc.push_back('"');
-    std::string js = std::string{"window.mpapp && window.mpapp._receive("} + esc + std::string{");"};
+    std::string js = std::string{"window.mpapp && basic_window.mpapp._receive("} + esc + std::string{");"};
 
     // WebKitGTK 6.x evaluate_javascript signature:
-    // (web_view, body, length, world_name, source_uri, cancellable, callback, user_data)
+    // (basic_web_view, body, length, world_name, source_uri, cancellable, callback, user_data)
     webkit_web_view_evaluate_javascript(
         WEBKIT_WEB_VIEW(static_cast<GtkWidget*>(native_)),
         js.c_str(), -1, nullptr, nullptr, nullptr, nullptr, nullptr);
@@ -145,13 +145,13 @@ void hybrid_web_view_handler<platform::linux_>::send_outbound(const std::string&
 
 void hybrid_web_view_handler<platform::linux_>::on_native_inbound(const std::string& payload) {
     if (bound_ == nullptr) return;
-    // Single choke point — hybrid_web_view::process_inbound decides
+    // Single choke point — basic_hybrid_web_view::process_inbound decides
     // whether to route through an attached bridge or fall through to
     // the raw message_received signal.
     bound_->process_inbound(payload);
 }
 
-void hybrid_web_view_handler<platform::linux_>::map_messages(hybrid_web_view& h) {
+void hybrid_web_view_handler<platform::linux_>::map_messages(basic_hybrid_web_view& h) {
     bound_ = &h;
     h.message_sent.subscribe(sent_slot_, sent_cb_);
 
@@ -180,18 +180,17 @@ void hybrid_web_view_handler<platform::linux_>::apply_html(const std::string& ht
         nullptr /*base_uri*/);
 }
 
-void hybrid_web_view_handler<platform::linux_>::map_html_source(hybrid_web_view& h) {
+void hybrid_web_view_handler<platform::linux_>::map_html_source(basic_hybrid_web_view& h) {
     apply_html(h.html_source.get());
     h.html_source.changed.subscribe(html_slot_, html_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_hybrid_web_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::hybrid_web_view*>(v); w && w->has_hwv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_hybrid_web_view*>(v); w && w->has_hwv_handler()) {
         return GTK_WIDGET(w->hwv_handler().native());
     }
     return nullptr;
@@ -210,7 +209,7 @@ struct registrar {
 // Stub when WebKitGTK isn't found at configure time.
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 hybrid_web_view_handler<platform::linux_>::hybrid_web_view_handler() = default;
 hybrid_web_view_handler<platform::linux_>::~hybrid_web_view_handler() = default;
@@ -218,13 +217,12 @@ hybrid_web_view_handler<platform::linux_>::~hybrid_web_view_handler() = default;
 void hybrid_web_view_handler<platform::linux_>::send_outbound(const std::string&) {}
 void hybrid_web_view_handler<platform::linux_>::on_native_inbound(const std::string&) {}
 
-void hybrid_web_view_handler<platform::linux_>::map_messages(hybrid_web_view& h) {
+void hybrid_web_view_handler<platform::linux_>::map_messages(basic_hybrid_web_view& h) {
     bound_ = &h;
     h.message_sent.subscribe(sent_slot_, sent_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 namespace {
 GtkWidget* dispatch_hybrid_web_view_stub(::mpapp::view*) { return nullptr; }
 struct registrar_stub {

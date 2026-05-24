@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 stepper handler implementation.
+// Part of MPAPP. GTK4 basic_stepper handler implementation.
 
 #include "mpapp/handlers/linux/stepper_handler.hpp"
 
@@ -7,12 +7,12 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct value_changed_ctx {
-    stepper*                            target;
+    basic_stepper*                            target;
     stepper_handler<platform::linux_>*  handler;
 };
 
@@ -62,12 +62,12 @@ void stepper_handler<platform::linux_>::apply_maximum(double v) {
 
 void stepper_handler<platform::linux_>::apply_interval(double v) {
     if (native_ == nullptr) return;
-    double step = 0.0, page = 0.0;
-    gtk_spin_button_get_increments(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), &step, &page);
-    gtk_spin_button_set_increments(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), v, page > 0 ? page : v * 10.0);
+    double step = 0.0, basic_page = 0.0;
+    gtk_spin_button_get_increments(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), &step, &basic_page);
+    gtk_spin_button_set_increments(GTK_SPIN_BUTTON(static_cast<GtkWidget*>(native_)), v, basic_page > 0 ? basic_page : v * 10.0);
 }
 
-void stepper_handler<platform::linux_>::map_value(stepper& s) {
+void stepper_handler<platform::linux_>::map_value(basic_stepper& s) {
     apply_value(s.value.get());
     s.value.changed.subscribe(value_slot_, value_cb_);
 
@@ -86,33 +86,31 @@ void stepper_handler<platform::linux_>::map_value(stepper& s) {
         static_cast<GConnectFlags>(0));
 }
 
-void stepper_handler<platform::linux_>::map_minimum(stepper& s) {
+void stepper_handler<platform::linux_>::map_minimum(basic_stepper& s) {
     apply_minimum(s.minimum.get());
     s.minimum.changed.subscribe(minimum_slot_, minimum_cb_);
 }
-void stepper_handler<platform::linux_>::map_maximum(stepper& s) {
+void stepper_handler<platform::linux_>::map_maximum(basic_stepper& s) {
     apply_maximum(s.maximum.get());
     s.maximum.changed.subscribe(maximum_slot_, maximum_cb_);
 }
-void stepper_handler<platform::linux_>::map_interval(stepper& s) {
+void stepper_handler<platform::linux_>::map_interval(basic_stepper& s) {
     apply_interval(s.interval.get());
     s.interval.changed.subscribe(interval_slot_, interval_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register stepper so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_stepper so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/stepper.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
 
 namespace {
 
 GtkWidget* dispatch_stepper(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::stepper*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_stepper*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

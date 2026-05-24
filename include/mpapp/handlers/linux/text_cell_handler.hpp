@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 text_cell handler — vertical GtkBox of two GtkLabels (text +
-// detail). Both labels start-aligned; detail label hidden when empty.
+// GTK4 basic_text_cell handler — vertical GtkBox of two GtkLabels (text +
+// detail). Both labels start-aligned; detail basic_label hidden when empty.
 
 #ifndef MPAPP_HANDLERS_LINUX_TEXT_CELL_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_TEXT_CELL_HANDLER_HPP
@@ -9,11 +9,11 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../text_cell.hpp"
+#include "../../internal/basic_text_cell.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class text_cell_handler<platform::linux_> {
@@ -26,8 +26,8 @@ public:
     text_cell_handler(text_cell_handler&&)                 = delete;
     text_cell_handler& operator=(text_cell_handler&&)      = delete;
 
-    void map_text(text_cell& c);
-    void map_detail(text_cell& c);
+    void map_text(basic_text_cell& c);
+    void map_detail(basic_text_cell& c);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -55,7 +55,6 @@ private:
     signal_slot<const std::string&> detail_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_TEXT_CELL_HANDLER_HPP

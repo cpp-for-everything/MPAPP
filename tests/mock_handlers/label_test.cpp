@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::label`.
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_label`.
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@ using label_mock = mpapp::label_handler<mpapp::platform::mock>;
 } // namespace
 
 TEST_CASE("label mock handler records initial text", "[mock][label]") {
-    mpapp::label l;
+    mpapp::internal::basic_label l;
     label_mock   h;
 
     l.text = "Initial";
@@ -27,7 +27,7 @@ TEST_CASE("label mock handler records initial text", "[mock][label]") {
 
 TEST_CASE("label mock handler fires once per real text change",
           "[mock][label]") {
-    mpapp::label l;
+    mpapp::internal::basic_label l;
     label_mock   h;
 
     h.map_text(l);
@@ -41,7 +41,7 @@ TEST_CASE("label mock handler fires once per real text change",
 }
 
 TEST_CASE("label mock handler ignores no-op writes", "[mock][label]") {
-    mpapp::label l;
+    mpapp::internal::basic_label l;
     label_mock   h;
 
     l.text = "stable";

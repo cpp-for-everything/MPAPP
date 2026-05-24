@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 image_cell handler — horizontal GtkBox: leading GtkImage +
+// GTK4 basic_image_cell handler — horizontal GtkBox: leading GtkImage +
 // vertical GtkBox of two GtkLabels (text + detail). Image loaded from
 // the `image_uri` string via gtk_image_set_from_file (file://, plain
 // paths) or gtk_image_set_from_icon_name (for icon: prefix).
@@ -9,13 +9,13 @@
 
 #include <string>
 
-#include "../../image_cell.hpp"
+#include "../../internal/basic_image_cell.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_cell_handler<platform::linux_> {
@@ -28,9 +28,9 @@ public:
     image_cell_handler(image_cell_handler&&)                 = delete;
     image_cell_handler& operator=(image_cell_handler&&)      = delete;
 
-    void map_text(image_cell& c);
-    void map_detail(image_cell& c);
-    void map_image_uri(image_cell& c);
+    void map_text(basic_image_cell& c);
+    void map_detail(basic_image_cell& c);
+    void map_image_uri(basic_image_cell& c);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -55,7 +55,7 @@ private:
 
     void* native_       = nullptr;  // GtkBox* horizontal
     void* image_w_      = nullptr;  // GtkImage*
-    void* text_box_     = nullptr;  // GtkBox* vertical (label pair)
+    void* text_box_     = nullptr;  // GtkBox* vertical (basic_label pair)
     void* text_label_   = nullptr;  // GtkLabel*
     void* detail_label_ = nullptr;  // GtkLabel*
 
@@ -67,7 +67,6 @@ private:
     signal_slot<const std::string&> uri_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_IMAGE_CELL_HANDLER_HPP

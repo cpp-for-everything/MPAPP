@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::switch_`.
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_switch_`.
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@ using switch_mock = mpapp::switch_handler<mpapp::platform::mock>;
 } // namespace
 
 TEST_CASE("switch mock handler logs initial is_on", "[mock][switch]") {
-    mpapp::switch_ s;
+    mpapp::internal::basic_switch_ s;
     switch_mock    h;
 
     h.map_is_on(s);
@@ -25,7 +25,7 @@ TEST_CASE("switch mock handler logs initial is_on", "[mock][switch]") {
 }
 
 TEST_CASE("switch mock handler fires once per toggle", "[mock][switch]") {
-    mpapp::switch_ s;
+    mpapp::internal::basic_switch_ s;
     switch_mock    h;
 
     h.map_is_on(s);
@@ -44,7 +44,7 @@ TEST_CASE("switch mock handler fires once per toggle", "[mock][switch]") {
 
 TEST_CASE("switch mock handler ignores same-value writes",
           "[mock][switch]") {
-    mpapp::switch_ s;
+    mpapp::internal::basic_switch_ s;
     switch_mock    h;
 
     s.is_on = true;

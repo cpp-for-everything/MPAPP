@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android tabbed_view handler.
+// Part of MPAPP. Android basic_tabbed_view handler.
 //
 // Deliberately avoids the spec's preferred `TabLayout + ViewPager2`
 // pair (it requires androidx, which the minimal `android_hello`
@@ -13,14 +13,14 @@
 //
 //   LinearLayout (vertical, the host ViewGroup)
 //   ├─ LinearLayout (horizontal — the tab strip; one Button per title)
-//   └─ FrameLayout  (the page host)
-//      ├─ FrameLayout (placeholder for page 0)
-//      ├─ FrameLayout (placeholder for page 1)
+//   └─ FrameLayout  (the basic_page host)
+//      ├─ FrameLayout (placeholder for basic_page 0)
+//      ├─ FrameLayout (placeholder for basic_page 1)
 //      └─ ...
 //
 // `selected_index` toggles the placeholders' visibility (GONE for the
-// inactive pages, VISIBLE for the active one). Real page bodies land
-// when the `TabbedPage` page-level wiring arrives.
+// inactive pages, VISIBLE for the active one). Real basic_page bodies land
+// when the `TabbedPage` basic_page-level wiring arrives.
 //
 // JNI conventions follow the rest of the Android handlers — every
 // helper starts with `if (env->ExceptionCheck()) env->ExceptionClear()`
@@ -35,13 +35,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../tabbed_view.hpp"
+#include "../../internal/basic_tabbed_view.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class tabbed_view_handler<platform::android> {
@@ -54,8 +54,8 @@ public:
     tabbed_view_handler(tabbed_view_handler&&)                 = delete;
     tabbed_view_handler& operator=(tabbed_view_handler&&)      = delete;
 
-    void map_tab_titles(tabbed_view& t);
-    void map_selected_index(tabbed_view& t);
+    void map_tab_titles(basic_tabbed_view& t);
+    void map_selected_index(basic_tabbed_view& t);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -83,7 +83,6 @@ private:
     signal_slot<const int&>                      selected_index_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_TABBED_VIEW_HANDLER_HPP

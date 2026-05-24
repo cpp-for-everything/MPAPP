@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 grid_layout handler implementation.
+// GTK4 basic_grid_layout handler implementation.
 
 #include "mpapp/handlers/linux/grid_layout_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 grid_layout_handler<platform::linux_>::grid_layout_handler() {
     native_ = gtk_grid_new();
@@ -41,7 +41,7 @@ void grid_layout_handler<platform::linux_>::rebuild_dummy_columns(const std::vec
     // Same as rebuild_dummy_rows.
 }
 
-void grid_layout_handler<platform::linux_>::add_child(grid_layout& g, view& child) {
+void grid_layout_handler<platform::linux_>::add_child(basic_grid_layout& g, view& child) {
     if (native_ == nullptr) return;
     GtkWidget* w = detail::linux_dispatch::dispatch(&child);
     if (w == nullptr) return;
@@ -66,33 +66,32 @@ void grid_layout_handler<platform::linux_>::add_child(grid_layout& g, view& chil
     }
 }
 
-void grid_layout_handler<platform::linux_>::map_row_definitions(grid_layout& g) {
+void grid_layout_handler<platform::linux_>::map_row_definitions(basic_grid_layout& g) {
     rebuild_dummy_rows(g.row_definitions.get());
     g.row_definitions.changed.subscribe(rows_slot_, rows_cb_);
 }
 
-void grid_layout_handler<platform::linux_>::map_column_definitions(grid_layout& g) {
+void grid_layout_handler<platform::linux_>::map_column_definitions(basic_grid_layout& g) {
     rebuild_dummy_columns(g.column_definitions.get());
     g.column_definitions.changed.subscribe(cols_slot_, cols_cb_);
 }
 
-void grid_layout_handler<platform::linux_>::map_row_spacing(grid_layout& g) {
+void grid_layout_handler<platform::linux_>::map_row_spacing(basic_grid_layout& g) {
     apply_row_spacing(g.row_spacing.get());
     g.row_spacing.changed.subscribe(rsp_slot_, rsp_cb_);
 }
 
-void grid_layout_handler<platform::linux_>::map_column_spacing(grid_layout& g) {
+void grid_layout_handler<platform::linux_>::map_column_spacing(basic_grid_layout& g) {
     apply_column_spacing(g.column_spacing.get());
     g.column_spacing.changed.subscribe(csp_slot_, csp_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_grid_layout(::mpapp::view* v) {
-    if (auto* g = dynamic_cast<::mpapp::grid_layout*>(v); g && g->has_handler()) {
+    if (auto* g = dynamic_cast<::mpapp::internal::basic_grid_layout*>(v); g && g->has_handler()) {
         return GTK_WIDGET(g->handler().native());
     }
     return nullptr;

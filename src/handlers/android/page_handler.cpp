@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android page handler implementation.
+// Part of MPAPP. Android basic_page handler implementation.
 
 #include "mpapp/handlers/android/page_handler.hpp"
 
@@ -10,10 +10,10 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/page.hpp"
+#include "mpapp/internal/basic_page.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -215,33 +215,32 @@ void page_handler<platform::android>::apply_is_busy(bool v) {
     view_set_visibility(env, busy_bar_, v ? 0 : 8);
 }
 
-void page_handler<platform::android>::map_title(page& p) {
+void page_handler<platform::android>::map_title(basic_page& p) {
     apply_title(p.title.get());
     p.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-void page_handler<platform::android>::map_content(page& p) {
+void page_handler<platform::android>::map_content(basic_page& p) {
     apply_content(p.content.get());
     p.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void page_handler<platform::android>::map_is_busy(page& p) {
+void page_handler<platform::android>::map_is_busy(basic_page& p) {
     apply_is_busy(p.is_busy.get());
     p.is_busy.changed.subscribe(busy_slot_, busy_cb_);
 }
 
-void page_handler<platform::android>::bind_content(page& p, view& child) {
+void page_handler<platform::android>::bind_content(basic_page& p, view& child) {
     p.content.set(&child);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 jobject dispatch_page(::mpapp::view* v) {
-    if (auto* p = dynamic_cast<::mpapp::page*>(v); p && p->has_handler()) {
+    if (auto* p = dynamic_cast<::mpapp::internal::basic_page*>(v); p && p->has_handler()) {
         return p->handler().native();
     }
     return nullptr;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 text_cell handler implementation.
+// GTK4 basic_text_cell handler implementation.
 
 #include "mpapp/handlers/linux/text_cell_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 text_cell_handler<platform::linux_>::text_cell_handler() {
     native_       = gtk_box_new(GTK_ORIENTATION_VERTICAL, 2);
@@ -48,23 +48,22 @@ void text_cell_handler<platform::linux_>::apply_detail(const std::string& v) {
     gtk_widget_set_visible(static_cast<GtkWidget*>(detail_label_), v.empty() ? FALSE : TRUE);
 }
 
-void text_cell_handler<platform::linux_>::map_text(text_cell& c) {
+void text_cell_handler<platform::linux_>::map_text(basic_text_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void text_cell_handler<platform::linux_>::map_detail(text_cell& c) {
+void text_cell_handler<platform::linux_>::map_detail(basic_text_cell& c) {
     apply_detail(c.detail.get());
     c.detail.changed.subscribe(detail_slot_, detail_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_text_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::text_cell*>(v); c && c->has_tc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_text_cell*>(v); c && c->has_tc_handler()) {
         return GTK_WIDGET(c->tc_handler().native());
     }
     return nullptr;

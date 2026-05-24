@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android web_view handler — wraps android.webkit.WebView. JavaScript
+// Android basic_web_view handler — wraps android.webkit.WebView. JavaScript
 // enabled by default. url -> loadUrl; html_source -> loadDataWithBaseURL.
 // MppWebViewClient (custom WebViewClient) routes onPageStarted /
 // onPageFinished through the shared trampoline, driving is_loading +
@@ -12,13 +12,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../web_view.hpp"
+#include "../../internal/basic_web_view.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class web_view_handler<platform::android> {
@@ -31,8 +31,8 @@ public:
     web_view_handler(web_view_handler&&)                 = delete;
     web_view_handler& operator=(web_view_handler&&)      = delete;
 
-    void map_url(web_view& wv);
-    void map_html(web_view& wv);
+    void map_url(basic_web_view& wv);
+    void map_html(basic_web_view& wv);
 
     jobject native() const noexcept { return native_; }
 
@@ -56,7 +56,7 @@ private:
 
     jobject       native_   = nullptr;  // WebView (global ref)
     jobject       client_   = nullptr;  // MppWebViewClient (global ref)
-    web_view*     bound_    = nullptr;
+    basic_web_view*     bound_    = nullptr;
     bool          suppress_echo_ = false;
 
     url_cb_t                        url_cb_{this};
@@ -71,7 +71,6 @@ void android_web_view_dispatch_page_finished(web_view_handler<platform::android>
                                              const std::string& url,
                                              bool success);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_WEB_VIEW_HANDLER_HPP

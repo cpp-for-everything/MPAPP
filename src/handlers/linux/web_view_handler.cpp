@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 web_view handler implementation. WebKitGTK 6.x — dynamically
+// GTK4 basic_web_view handler implementation. WebKitGTK 6.x — dynamically
 // linked, LGPL runtime per Rule 9 / RFC-0001.
 
 #include "mpapp/handlers/linux/web_view_handler.hpp"
@@ -11,12 +11,12 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct load_ctx {
-    web_view*                          target;
+    basic_web_view*                          target;
     web_view_handler<platform::linux_>* handler;
 };
 
@@ -82,7 +82,7 @@ void web_view_handler<platform::linux_>::apply_html(const std::string& v) {
                               nullptr /* base_uri */);
 }
 
-void web_view_handler<platform::linux_>::map_url(web_view& wv) {
+void web_view_handler<platform::linux_>::map_url(basic_web_view& wv) {
     bound_ = &wv;
     apply_url(wv.url.get());
     wv.url.changed.subscribe(url_slot_, url_cb_);
@@ -103,18 +103,17 @@ void web_view_handler<platform::linux_>::map_url(web_view& wv) {
         static_cast<GConnectFlags>(0));
 }
 
-void web_view_handler<platform::linux_>::map_html(web_view& wv) {
+void web_view_handler<platform::linux_>::map_html(basic_web_view& wv) {
     apply_html(wv.html_source.get());
     wv.html_source.changed.subscribe(html_slot_, html_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_web_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::web_view*>(v); w && w->has_wv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_web_view*>(v); w && w->has_wv_handler()) {
         return GTK_WIDGET(w->wv_handler().native());
     }
     return nullptr;
@@ -132,12 +131,12 @@ struct registrar {
 
 // Stub when WebKitGTK isn't found at configure time. Constructors / map
 // methods are valid but the widget cannot render content. Keeps the
-// build link-clean so an example using web_view still compiles even on
+// build link-clean so an example using basic_web_view still compiles even on
 // hosts without webkitgtk installed.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 web_view_handler<platform::linux_>::web_view_handler() = default;
 web_view_handler<platform::linux_>::~web_view_handler() = default;
@@ -145,16 +144,15 @@ web_view_handler<platform::linux_>::~web_view_handler() = default;
 void web_view_handler<platform::linux_>::apply_url(const std::string&)  {}
 void web_view_handler<platform::linux_>::apply_html(const std::string&) {}
 
-void web_view_handler<platform::linux_>::map_url(web_view& wv) {
+void web_view_handler<platform::linux_>::map_url(basic_web_view& wv) {
     bound_ = &wv;
     wv.url.changed.subscribe(url_slot_, url_cb_);
 }
-void web_view_handler<platform::linux_>::map_html(web_view& wv) {
+void web_view_handler<platform::linux_>::map_html(basic_web_view& wv) {
     wv.html_source.changed.subscribe(html_slot_, html_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 namespace {
 GtkWidget* dispatch_web_view_stub(::mpapp::view*) { return nullptr; }
 struct registrar_stub {

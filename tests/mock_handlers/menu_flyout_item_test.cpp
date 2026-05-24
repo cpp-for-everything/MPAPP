@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::menu_flyout_item` (M-04b).
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_menu_flyout_item` (M-04b).
 
 #include <string>
 
@@ -12,7 +12,7 @@ using namespace mpapp;
 
 TEST_CASE("menu_flyout_item mock records initial property values on bind",
           "[mock][menu_flyout_item]") {
-    menu_flyout_item i;
+    internal::basic_menu_flyout_item i;
     menu_flyout_item_handler<platform::mock> h;
 
     h.map_text(i);
@@ -27,7 +27,7 @@ TEST_CASE("menu_flyout_item mock records initial property values on bind",
 
 TEST_CASE("menu_flyout_item mock tracks text + is_enabled changes",
           "[mock][menu_flyout_item]") {
-    menu_flyout_item i;
+    internal::basic_menu_flyout_item i;
     menu_flyout_item_handler<platform::mock> h;
 
     h.map_text(i);
@@ -50,7 +50,7 @@ TEST_CASE("menu_flyout_item mock tracks text + is_enabled changes",
 
 TEST_CASE("menu_flyout_item clicked signal fires for subscribers",
           "[mock][menu_flyout_item]") {
-    menu_flyout_item i;
+    internal::basic_menu_flyout_item i;
 
     int fire_count = 0;
     struct counter_t { int* n; void operator()() const { ++(*n); } } counter{&fire_count};

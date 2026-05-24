@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 search_bar handler implementation.
+// Part of MPAPP. WinUI 3 basic_search_bar handler implementation.
 
 #include "mpapp/handlers/windows/search_bar_handler.hpp"
 
@@ -11,7 +11,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -42,29 +42,27 @@ void search_bar_handler<platform::windows>::apply_placeholder(const std::string&
     } catch (...) {}
 }
 
-void search_bar_handler<platform::windows>::map_text(search_bar& s) {
+void search_bar_handler<platform::windows>::map_text(basic_search_bar& s) {
     apply_text(s.text.get());
     s.text.changed.subscribe(text_slot_, text_cb_);
 }
-void search_bar_handler<platform::windows>::map_placeholder(search_bar& s) {
+void search_bar_handler<platform::windows>::map_placeholder(basic_search_bar& s) {
     apply_placeholder(s.placeholder.get());
     s.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register search_bar so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_search_bar so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/search_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_search_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::search_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_search_bar*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

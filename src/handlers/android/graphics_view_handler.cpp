@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android graphics_view handler implementation.
+// Android basic_graphics_view handler implementation.
 //
-// Renders graphics_view::drawable through the ADR-0015 canvas facade
+// Renders basic_graphics_view::drawable through the ADR-0015 canvas facade
 // into an android.graphics.Bitmap whose pixels are hosted in an
 // ImageView. See the header for the full paint-cycle description.
 
@@ -17,7 +17,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -224,7 +224,7 @@ void graphics_view_handler<platform::android>::repaint() {
     imageview_set_bitmap(env, native_, bitmap_);
 }
 
-void graphics_view_handler<platform::android>::map_size(graphics_view& gv) {
+void graphics_view_handler<platform::android>::map_size(basic_graphics_view& gv) {
     bound_ = &gv;
     apply_width(gv.width.get());
     apply_height(gv.height.get());
@@ -232,24 +232,23 @@ void graphics_view_handler<platform::android>::map_size(graphics_view& gv) {
     gv.height.changed.subscribe(h_slot_, h_cb_);
 }
 
-void graphics_view_handler<platform::android>::map_draw_count(graphics_view& gv) {
+void graphics_view_handler<platform::android>::map_draw_count(basic_graphics_view& gv) {
     bound_ = &gv;
     gv.draw_count.changed.subscribe(count_slot_, count_cb_);
 }
 
-void graphics_view_handler<platform::android>::map_drawable(graphics_view& gv) {
+void graphics_view_handler<platform::android>::map_drawable(basic_graphics_view& gv) {
     bound_ = &gv;
     gv.drawable.changed.subscribe(drawable_slot_, drawable_cb_);
     repaint();
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_graphics_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::graphics_view*>(v); w && w->has_gv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_graphics_view*>(v); w && w->has_gv_handler()) {
         return w->gv_handler().native();
     }
     return nullptr;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android view_cell handler implementation.
+// Android basic_view_cell handler implementation.
 
 #include "mpapp/handlers/android/view_cell_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -96,18 +96,17 @@ void view_cell_handler<platform::android>::apply_content(view* v) {
     }
 }
 
-void view_cell_handler<platform::android>::map_content(view_cell& c) {
+void view_cell_handler<platform::android>::map_content(basic_view_cell& c) {
     apply_content(c.content.get());
     c.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_view_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::view_cell*>(v); c && c->has_vc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_view_cell*>(v); c && c->has_vc_handler()) {
         return c->vc_handler().native();
     }
     return nullptr;

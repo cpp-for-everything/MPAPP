@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 refresh_view handler implementation.
+// Part of MPAPP. GTK4 basic_refresh_view handler implementation.
 
 #include "mpapp/handlers/linux/refresh_view_handler.hpp"
 
@@ -14,7 +14,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -70,7 +70,7 @@ refresh_view_handler<platform::linux_>::refresh_view_handler() {
     gtk_box_append(GTK_BOX(box), spin);
 
     // Per-handler CSS provider so the spinner colour can be tinted via a
-    // unique class name. Mirrors activity_indicator's approach.
+    // unique class name. Mirrors basic_activity_indicator's approach.
     class_name_ = next_class();
     gtk_widget_add_css_class(spin, class_name_.c_str());
     GtkCssProvider* provider = gtk_css_provider_new();
@@ -132,22 +132,22 @@ void refresh_view_handler<platform::linux_>::apply_refresh_color(const brush_ref
         static_cast<GtkCssProvider*>(provider_), buf, -1);
 }
 
-void refresh_view_handler<platform::linux_>::map_content(refresh_view& r) {
+void refresh_view_handler<platform::linux_>::map_content(basic_refresh_view& r) {
     apply_content(r.content.get());
     r.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void refresh_view_handler<platform::linux_>::map_is_refreshing(refresh_view& r) {
+void refresh_view_handler<platform::linux_>::map_is_refreshing(basic_refresh_view& r) {
     apply_is_refreshing(r.is_refreshing.get());
     r.is_refreshing.changed.subscribe(is_refreshing_slot_, is_refreshing_cb_);
 }
 
-void refresh_view_handler<platform::linux_>::map_refresh_color(refresh_view& r) {
+void refresh_view_handler<platform::linux_>::map_refresh_color(basic_refresh_view& r) {
     apply_refresh_color(r.refresh_color.get());
     r.refresh_color.changed.subscribe(refresh_color_slot_, refresh_color_cb_);
 }
 
-void refresh_view_handler<platform::linux_>::bind_content(refresh_view& r, view& child) {
+void refresh_view_handler<platform::linux_>::bind_content(basic_refresh_view& r, view& child) {
     r.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
@@ -156,7 +156,7 @@ void refresh_view_handler<platform::linux_>::bind_content(refresh_view& r, view&
 namespace {
 
 GtkWidget* dispatch_refresh_view(::mpapp::view* v) {
-    if (auto* r = dynamic_cast<::mpapp::refresh_view*>(v); r && r->has_handler()) {
+    if (auto* r = dynamic_cast<::mpapp::internal::basic_refresh_view*>(v); r && r->has_handler()) {
         return GTK_WIDGET(r->handler().native());
     }
     return nullptr;
@@ -172,6 +172,5 @@ struct registrar {
 
 } // namespace
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__

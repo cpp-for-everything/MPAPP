@@ -4,12 +4,12 @@
 #ifndef MPAPP_HANDLERS_MOCK_CHECK_BOX_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_CHECK_BOX_HANDLER_HPP
 
-#include "../../check_box.hpp"
+#include "../../internal/basic_check_box.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class check_box_handler<platform::mock> : public mock_handler_base {
@@ -22,7 +22,7 @@ public:
     check_box_handler(check_box_handler&&)                 = delete;
     check_box_handler& operator=(check_box_handler&&)      = delete;
 
-    void map_is_checked(check_box& c) {
+    void map_is_checked(basic_check_box& c) {
         record_change("is_checked", c.is_checked.get());
         c.is_checked.changed.subscribe(is_checked_slot_, is_checked_cb_);
     }
@@ -34,6 +34,5 @@ private:
     signal_slot<const bool&>             is_checked_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_CHECK_BOX_HANDLER_HPP

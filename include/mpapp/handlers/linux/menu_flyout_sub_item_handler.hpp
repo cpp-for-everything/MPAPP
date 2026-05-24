@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 `menu_flyout_sub_item` handler — wraps a
+// Part of MPAPP. GTK4 `basic_menu_flyout_sub_item` handler — wraps a
 // `GtkMenuButton` whose `popover` is a nested `GtkPopover` containing
 // a vertical `GtkBox` for the submenu children. `text` flows through
-// to the button label; `items` rebuild the nested box from the
+// to the basic_button basic_label; `items` rebuild the nested box from the
 // ADR-0013 dispatch registry.
 
 #ifndef MPAPP_HANDLERS_LINUX_MENU_FLYOUT_SUB_ITEM_HANDLER_HPP
@@ -11,14 +11,14 @@
 #include <string>
 #include <vector>
 
-#include "../../menu_flyout_sub_item.hpp"
+#include "../../internal/basic_menu_flyout_sub_item.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_sub_item_handler<platform::linux_> {
@@ -30,8 +30,8 @@ public:
     menu_flyout_sub_item_handler(menu_flyout_sub_item_handler&&)                 = delete;
     menu_flyout_sub_item_handler& operator=(menu_flyout_sub_item_handler&&)      = delete;
 
-    void map_text(menu_flyout_sub_item& s);
-    void map_items(menu_flyout_sub_item& s);
+    void map_text(basic_menu_flyout_sub_item& s);
+    void map_items(basic_menu_flyout_sub_item& s);
 
     void*       native() noexcept       { return native_; }  // GtkMenuButton*
     const void* native() const noexcept { return native_; }
@@ -53,7 +53,6 @@ private:
     signal_slot<std::vector<view*> const&>     items_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_MENU_FLYOUT_SUB_ITEM_HANDLER_HPP

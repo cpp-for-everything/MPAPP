@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 follow-up — GTK4 entry handler implementation.
+// Part of MPAPP. T-0011 follow-up — GTK4 basic_entry handler implementation.
 
 #include "mpapp/handlers/linux/entry_handler.hpp"
 
@@ -7,12 +7,12 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct on_changed_ctx {
-    entry*                            target;
+    basic_entry*                            target;
     entry_handler<platform::linux_>*  handler;
 };
 
@@ -66,7 +66,7 @@ void entry_handler<platform::linux_>::apply_is_read_only(bool ro) {
     }
 }
 
-void entry_handler<platform::linux_>::map_text(entry& e) {
+void entry_handler<platform::linux_>::map_text(basic_entry& e) {
     apply_text(e.text.get());
     e.text.changed.subscribe(text_slot_, text_cb_);
 
@@ -88,30 +88,28 @@ void entry_handler<platform::linux_>::map_text(entry& e) {
         static_cast<GConnectFlags>(0));
 }
 
-void entry_handler<platform::linux_>::map_placeholder(entry& e) {
+void entry_handler<platform::linux_>::map_placeholder(basic_entry& e) {
     apply_placeholder(e.placeholder.get());
     e.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
 }
 
-void entry_handler<platform::linux_>::map_is_read_only(entry& e) {
+void entry_handler<platform::linux_>::map_is_read_only(basic_entry& e) {
     apply_is_read_only(e.is_read_only.get());
     e.is_read_only.changed.subscribe(readonly_slot_, readonly_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register entry so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_entry so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 
 namespace {
 
 GtkWidget* dispatch_entry(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::entry*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_entry*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

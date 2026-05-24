@@ -1,70 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/ContentPage.md
 //
-// `mpapp::content_page` — the simplest concrete `mpapp::page` subclass.
-// Hosts a single child view, exposes a page-level `title`, and applies
-// platform padding around the content.
+// `mpapp::content_page` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_content_page` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::content_page x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// Mirrors MAUI's `ContentPage` (the workhorse leaf for 99% of app
-// screens; the default content for NavigationPage / TabbedPage / Shell).
-// Mock surface (P2) — keeps `hide_soft_input_on_tapped` /
-// `safe_area_edges` off the C++ class until the safe-area types land in
-// P3; tests + handlers only touch content / title / padding.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
 //
-// The `content` Observable differs from base `page::content` (which is
-// `Observable<view*>`): on `content_page` it is `Observable<shared_ptr<view>>`
-// so the handlers can share the single-child wrap pattern used by
-// `content_view` / `border` / `scroll_view`. The shadowing is
-// intentional — accessing `cp.content` through a `content_page&` resolves
-// to the shared_ptr Observable; accessing through a `page&` falls back
-// to the base's view* surface. Real platforms only ever set the derived
-// `content`.
+//     mpapp::internal::basic_content_page x;
+//     mpapp::content_page_handler<mpapp::platform::mock> h;
+//     h.map_title(x);
 
 #ifndef MPAPP_CONTENT_PAGE_HPP
 #define MPAPP_CONTENT_PAGE_HPP
 
-#include <memory>
-#include <string>
+#include "internal/basic_content_page.hpp"
 
-#include "layout.hpp"     // for `thickness`
-#include "observable.hpp"
-#include "page.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_content_page` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/content_page_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class content_page_handler;
-
-class content_page : public page {
+class content_page : public internal::basic_content_page {
 public:
-    content_page() = default;
-    ~content_page() override = default;
+    content_page() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_title(*this);
+        embedded_handler_.map_content(*this);
+        embedded_handler_.map_padding(*this);
+    }
 
     content_page(const content_page&)            = delete;
     content_page& operator=(const content_page&) = delete;
     content_page(content_page&&)                 = delete;
     content_page& operator=(content_page&&)      = delete;
 
-    // ----- Properties ----------------------------------------------------
-    // Hosted view (shared_ptr-typed; shadows base `page::content`).
-    Observable<std::shared_ptr<view>>   content{};
-    // Page padding. Base `page` does not yet expose padding; declared
-    // here per the Worker prompt.
-    Observable<thickness>               padding{};
-    // `title` lives on `page` already and is reused as-is.
-
-    // ----- Handler -------------------------------------------------------
-    content_page_handler<platform::current>&       handler() noexcept       { return *content_page_handler_; }
-    const content_page_handler<platform::current>& handler() const noexcept { return *content_page_handler_; }
-    bool                                           has_handler() const noexcept { return content_page_handler_ != nullptr; }
-    void                                           set_handler(content_page_handler<platform::current>& h) noexcept { content_page_handler_ = &h; }
-
 private:
-    // Distinct from base `page::page_handler_` and `view::handler_`.
-    content_page_handler<platform::current>* content_page_handler_ = nullptr;
+    internal::content_page_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::content_page_handler<>` (host-current) and
+// `mpapp::content_page_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using content_page_handler = internal::content_page_handler<Platform>;
 
 } // namespace mpapp
 

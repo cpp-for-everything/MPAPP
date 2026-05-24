@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 swipe_item_view handler implementation.
+// Part of MPAPP. WinUI 3 basic_swipe_item_view handler implementation.
 
 #include "mpapp/handlers/windows/swipe_item_view_handler.hpp"
 
@@ -12,7 +12,7 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -39,19 +39,18 @@ void swipe_item_view_handler<platform::windows>::apply_content(view* v) {
     }
 }
 
-void swipe_item_view_handler<platform::windows>::map_content(swipe_item_view& iv) {
+void swipe_item_view_handler<platform::windows>::map_content(basic_swipe_item_view& iv) {
     apply_content(iv.content.get());
     iv.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_swipe_item_view(::mpapp::view* v) {
-    if (auto* iv = dynamic_cast<::mpapp::swipe_item_view*>(v); iv && iv->has_handler()) {
+    if (auto* iv = dynamic_cast<::mpapp::internal::basic_swipe_item_view*>(v); iv && iv->has_handler()) {
         return iv->handler().native();
     }
     return nullptr;

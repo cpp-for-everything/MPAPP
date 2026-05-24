@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 title_bar handler — wraps `GtkHeaderBar`. The
+// Part of MPAPP. GTK4 basic_title_bar handler — wraps `GtkHeaderBar`. The
 // header bar's title-widget slot hosts a `GtkLabel` for the title and a
 // second `GtkLabel` packed underneath in a vertical box for the subtitle
 // (GTK4 dropped the built-in subtitle slot that GtkHeaderBar had on
@@ -10,13 +10,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../title_bar.hpp"
+#include "../../internal/basic_title_bar.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class title_bar_handler<platform::linux_> {
@@ -28,8 +28,8 @@ public:
     title_bar_handler(title_bar_handler&&)                 = delete;
     title_bar_handler& operator=(title_bar_handler&&)      = delete;
 
-    void map_title(title_bar& t);
-    void map_subtitle(title_bar& t);
+    void map_title(basic_title_bar& t);
+    void map_subtitle(basic_title_bar& t);
 
     // GtkWidget* (the GtkHeaderBar), type-erased.
     void*       native() noexcept       { return native_; }
@@ -52,7 +52,6 @@ private:
     signal_slot<const std::string&>  subtitle_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_TITLE_BAR_HANDLER_HPP

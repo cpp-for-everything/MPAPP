@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android swipe_item_view handler implementation.
+// Part of MPAPP. Android basic_swipe_item_view handler implementation.
 
 #include "mpapp/handlers/android/swipe_item_view_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -89,19 +89,18 @@ void swipe_item_view_handler<platform::android>::apply_content(view* v) {
     view_group_add(env, native_, current_child_);
 }
 
-void swipe_item_view_handler<platform::android>::map_content(swipe_item_view& iv) {
+void swipe_item_view_handler<platform::android>::map_content(basic_swipe_item_view& iv) {
     apply_content(iv.content.get());
     iv.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------
 
 namespace {
 
 jobject dispatch_swipe_item_view(::mpapp::view* v) {
-    if (auto* iv = dynamic_cast<::mpapp::swipe_item_view*>(v); iv && iv->has_handler()) {
+    if (auto* iv = dynamic_cast<::mpapp::internal::basic_swipe_item_view*>(v); iv && iv->has_handler()) {
         return iv->handler().native();
     }
     return nullptr;

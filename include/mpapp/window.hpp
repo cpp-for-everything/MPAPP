@@ -1,88 +1,53 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Window.md
 //
-// `mpapp::window` — top-level chrome. Owns a title, a single content
-// view (non-owning reference), and a few sizing properties. The platform
-// handler mirrors writes into a native window (Windows: `mux::Window`,
-// Linux: `GtkWindow`, macOS: `NSWindow`, iOS: `UIWindow`, Android:
-// `Activity` content view).
+// `mpapp::window` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_window` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::window x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// `content` is a non-owning `view*`. The user owns the view's lifetime
-// (typically as a sibling field of the `mpapp::application` subclass).
-// When the value of `content` changes the handler rebinds the native
-// window's content slot.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_window x;
+//     mpapp::window_handler<mpapp::platform::mock> h;
+//     h.map_text(x);
 
 #ifndef MPAPP_WINDOW_HPP
 #define MPAPP_WINDOW_HPP
 
-#include <string>
+#include "internal/basic_window.hpp"
 
-#include "control.hpp"
-#include "observable.hpp"
-#include "platform.hpp"
-#include "signal.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_window` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/window_handler.hpp"
 
 namespace mpapp {
 
-class view;
-
-template <class Platform = platform::current>
-class window_handler;
-
-class window : public control<window> {
+class window : public internal::basic_window {
 public:
-    window() = default;
-    ~window() = default;
+    window() {
+        set_handler(embedded_handler_);
+        embedded_handler_.bind(*this);
+    }
 
     window(const window&)            = delete;
     window& operator=(const window&) = delete;
     window(window&&)                 = delete;
     window& operator=(window&&)      = delete;
 
-    // ----- Properties ----------------------------------------------------
-    Observable<std::string> title{""};
-    Observable<view*>       content{nullptr};
-    // Logical (DIP) size hint. Zero means "let the platform pick".
-    Observable<int>         width{0};
-    Observable<int>         height{0};
-    Observable<bool>        is_visible{false};
-
-    // ----- Events --------------------------------------------------------
-    // Fires after the platform window becomes visible (`Activate` /
-    // `present` / `makeKeyAndVisible`).
-    mpapp::signal<>         activated;
-    // Fires after the user (or programmatic close()) dismisses the window.
-    mpapp::signal<>         closed;
-
-    // ----- Imperative commands ------------------------------------------
-    // Handler forwards to the native `Activate`/`makeKeyAndVisible`/
-    // `gtk_window_present`. The activation also sets `is_visible = true`
-    // which lets a binding observe the state change.
-    void show();
-    void close();
-
-    // ----- Handler -------------------------------------------------------
-    window_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const window_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                     has_handler() const noexcept { return handler_ != nullptr; }
-    void                                     set_handler(window_handler<platform::current>& h) noexcept { handler_ = &h; }
-
 private:
-    window_handler<platform::current>* handler_ = nullptr;
+    internal::window_handler<platform::current> embedded_handler_;
 };
 
-// Inline implementations — the handler chooses to interpret these as
-// "set is_visible, signal the handler" without re-entering the Observable
-// machinery (it's just a flag flip).
-
-inline void window::show() {
-    is_visible.set(true);
-}
-
-inline void window::close() {
-    is_visible.set(false);
-    closed.emit();
-}
+// Template alias so `mpapp::window_handler<>` (host-current) and
+// `mpapp::window_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using window_handler = internal::window_handler<Platform>;
 
 } // namespace mpapp
 

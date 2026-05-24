@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 hybrid_web_view handler implementation.
+// WinUI 3 basic_hybrid_web_view handler implementation.
 
 #include "mpapp/handlers/windows/hybrid_web_view_handler.hpp"
 
@@ -15,7 +15,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace wv2c = ::winrt::Microsoft::Web::WebView2::Core;
@@ -37,19 +37,19 @@ namespace {
 //     hybrid_bridge.
 constexpr const char* kBridgeShim =
     "(function(){"
-    "  if (window.mpapp && window.mpapp.__mpapp) return;"
+    "  if (basic_window.mpapp && basic_window.mpapp.__mpapp) return;"
     "  var listeners = [];"
     "  var methods   = {};"
     "  var nextId    = 0;"
-    "  window.mpapp = {"
+    "  basic_window.mpapp = {"
     "    __mpapp: true,"
-    "    send: function(p) { window.chrome.webview.postMessage(String(p)); },"
+    "    send: function(p) { basic_window.chrome.webview.postMessage(String(p)); },"
     "    on:   function(fn) { listeners.push(fn); },"
     "    register: function(name, fn) { methods[name] = fn; },"
     "    call: function(name) {"
     "      var id = ++nextId;"
     "      var args = Array.prototype.slice.call(arguments, 1);"
-    "      window.mpapp.send(JSON.stringify({id: id, method: name, args: args}));"
+    "      basic_window.mpapp.send(JSON.stringify({id: id, method: name, args: args}));"
     "      return id;"
     "    },"
     "    _receive: function(p) {"
@@ -60,10 +60,10 @@ constexpr const char* kBridgeShim =
     "        var ret;"
     "        try { ret = methods[env.method].apply(null, env.args || []); }"
     "        catch (e) {"
-    "          window.mpapp.send(JSON.stringify({id: env.id, error: String(e)}));"
+    "          basic_window.mpapp.send(JSON.stringify({id: env.id, error: String(e)}));"
     "          return;"
     "        }"
-    "        window.mpapp.send(JSON.stringify({"
+    "        basic_window.mpapp.send(JSON.stringify({"
     "          id: env.id,"
     "          result: ret === undefined ? null : ret"
     "        }));"
@@ -105,7 +105,7 @@ hybrid_web_view_handler<platform::windows>::~hybrid_web_view_handler() {
 // on an IAsyncOperation/IAsyncAction whose only strong ref is a local
 // `auto op = ...` is fragile — the runtime can drop the operation before
 // the delegate fires. co_await keeps each op alive via the coroutine
-// frame and naturally serializes the steps so the JS shim is in place
+// basic_frame and naturally serializes the steps so the JS shim is in place
 // before navigation begins, eliminating the original async-init race.
 //
 // `this` outlives the coroutine: the handler is owned by the demo app
@@ -127,19 +127,19 @@ hybrid_web_view_handler<platform::windows>::async_init() {
     if (core == nullptr) co_return;
 
     // Install the JS shim BEFORE any navigation. co_await keeps the
-    // op alive via the coroutine frame, sidestepping the orphaned-
+    // op alive via the coroutine basic_frame, sidestepping the orphaned-
     // Completed-delegate pitfall that was the original async-init race.
     try {
         co_await core.AddScriptToExecuteOnDocumentCreatedAsync(
             detail::to_hstring_utf8(kBridgeShim));
     } catch (::winrt::hresult_error const&) {
-        // Continue: the page will still load, just without the bridge.
+        // Continue: the basic_page will still load, just without the bridge.
     }
     shim_added_ = true;
 
     // Subscribe WebMessageReceived once.
     if (web_message_token_.value == 0) {
-        hybrid_web_view* target = bound_;
+        basic_hybrid_web_view* target = bound_;
         web_message_token_ = core.WebMessageReceived(
             [target](wv2c::CoreWebView2 const&,
                      wv2c::CoreWebView2WebMessageReceivedEventArgs const& args) {
@@ -193,7 +193,7 @@ void hybrid_web_view_handler<platform::windows>::wire_bridge() {
         try { core.WebMessageReceived(web_message_token_); } catch (...) {}
         web_message_token_ = {};
     }
-    hybrid_web_view* target = bound_;
+    basic_hybrid_web_view* target = bound_;
     web_message_token_ = core.WebMessageReceived(
         [target](wv2c::CoreWebView2 const&,
                  wv2c::CoreWebView2WebMessageReceivedEventArgs const& args) {
@@ -216,7 +216,7 @@ void hybrid_web_view_handler<platform::windows>::send_outbound(const std::string
     } catch (...) {}
 }
 
-void hybrid_web_view_handler<platform::windows>::map_messages(hybrid_web_view& h) {
+void hybrid_web_view_handler<platform::windows>::map_messages(basic_hybrid_web_view& h) {
     bound_ = &h;
     h.message_sent.subscribe(sent_slot_, sent_cb_);
 
@@ -266,18 +266,17 @@ void hybrid_web_view_handler<platform::windows>::apply_html(const std::string& h
     } catch (...) {}
 }
 
-void hybrid_web_view_handler<platform::windows>::map_html_source(hybrid_web_view& h) {
+void hybrid_web_view_handler<platform::windows>::map_html_source(basic_hybrid_web_view& h) {
     apply_html(h.html_source.get());
     h.html_source.changed.subscribe(html_slot_, html_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_hybrid_web_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::hybrid_web_view*>(v); w && w->has_hwv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_hybrid_web_view*>(v); w && w->has_hwv_handler()) {
         return w->hwv_handler().native();
     }
     return nullptr;

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock menu_flyout_sub_item handler.
+// Part of MPAPP. Mock basic_menu_flyout_sub_item handler.
 //
 // Records `text` via `bind()` and `items.count` via a custom callback
-// (vector<view*> has no std::format spelling). Mirrors the menu_flyout
+// (vector<view*> has no std::format spelling). Mirrors the basic_menu_flyout
 // shape since the two share the items-vector mechanic.
 
 #ifndef MPAPP_HANDLERS_MOCK_MENU_FLYOUT_SUB_ITEM_HANDLER_HPP
@@ -12,13 +12,13 @@
 #include <string>
 #include <vector>
 
-#include "../../menu_flyout_sub_item.hpp"
+#include "../../internal/basic_menu_flyout_sub_item.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_sub_item_handler<platform::mock>
@@ -26,11 +26,11 @@ class menu_flyout_sub_item_handler<platform::mock>
 public:
     menu_flyout_sub_item_handler() = default;
 
-    void map_text(menu_flyout_sub_item& s) {
+    void map_text(basic_menu_flyout_sub_item& s) {
         bind("text", s.text, binding_text_);
     }
 
-    void map_items(menu_flyout_sub_item& s) {
+    void map_items(basic_menu_flyout_sub_item& s) {
         record("items.count", s.items.get().size());
         s.items.changed.subscribe(items_slot_, items_cb_);
     }
@@ -48,6 +48,5 @@ private:
     signal_slot<std::vector<view*> const&>     items_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_MENU_FLYOUT_SUB_ITEM_HANDLER_HPP

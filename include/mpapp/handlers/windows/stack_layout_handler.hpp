@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — WinUI 3 stack_layout handler.
+// Part of MPAPP. T-0011 — WinUI 3 basic_stack_layout handler.
 //
 // `stack_layout_handler<platform::windows>` — wraps a
 // `winrt::Microsoft::UI::Xaml::Controls::StackPanel`, propagates
@@ -17,14 +17,14 @@
 #include "../../layout_types.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../stack_layout.hpp"
+#include "../../internal/basic_stack_layout.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class stack_layout_handler<platform::windows> {
@@ -38,16 +38,16 @@ public:
     stack_layout_handler& operator=(stack_layout_handler&&)      = delete;
 
     // Wires every property + the initial child list in one call.
-    void bind(stack_layout& s);
+    void bind(basic_stack_layout& s);
 
     // Append a child view to the native StackPanel. Dispatches on the
-    // known view subclasses (button / label / nested stack_layout) to
+    // known view subclasses (basic_button / basic_label / nested basic_stack_layout) to
     // pull the right native widget. New widget types added here as the
     // surface grows.
     void add_child(view& child);
 
     // Native widget access — used by the window handler when this
-    // stack_layout is set as the window's content.
+    // basic_stack_layout is set as the window's content.
     winrt::Microsoft::UI::Xaml::Controls::StackPanel&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::StackPanel& native() const noexcept { return native_; }
 
@@ -80,7 +80,7 @@ private:
     };
 
     winrt::Microsoft::UI::Xaml::Controls::StackPanel native_{nullptr};
-    stack_layout*                                    bound_ = nullptr;
+    basic_stack_layout*                                    bound_ = nullptr;
 
     orient_cb_t                       orient_cb_{this};
     spacing_cb_t                      spacing_cb_{this};
@@ -94,7 +94,6 @@ private:
     signal_slot<const v_align&>       v_align_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_STACK_LAYOUT_HANDLER_HPP

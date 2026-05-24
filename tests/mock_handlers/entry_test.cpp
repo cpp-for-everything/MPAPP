@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::entry`.
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_entry`.
 
 #include <string>
 #include <vector>
@@ -17,7 +17,7 @@ using entry_mock = mpapp::entry_handler<mpapp::platform::mock>;
 
 TEST_CASE("entry mock handler records all initial values on map",
           "[mock][entry]") {
-    mpapp::entry e;
+    mpapp::internal::basic_entry e;
     entry_mock   h;
 
     e.text = "abc";
@@ -40,7 +40,7 @@ TEST_CASE("entry mock handler records all initial values on map",
 
 TEST_CASE("entry mock handler fires once per real text change",
           "[mock][entry]") {
-    mpapp::entry e;
+    mpapp::internal::basic_entry e;
     entry_mock   h;
 
     h.map_text(e);
@@ -53,7 +53,7 @@ TEST_CASE("entry mock handler fires once per real text change",
 
 TEST_CASE("entry mock handler ignores same-value text writes",
           "[mock][entry]") {
-    mpapp::entry e;
+    mpapp::internal::basic_entry e;
     entry_mock   h;
 
     e.text = "fixed";
@@ -66,7 +66,7 @@ TEST_CASE("entry mock handler ignores same-value text writes",
 }
 
 TEST_CASE("entry mock handler tracks password toggle", "[mock][entry]") {
-    mpapp::entry e;
+    mpapp::internal::basic_entry e;
     entry_mock   h;
 
     h.map_is_password(e);
@@ -83,7 +83,7 @@ TEST_CASE("entry mock handler tracks password toggle", "[mock][entry]") {
 }
 
 TEST_CASE("entry mock handler tracks cursor position", "[mock][entry]") {
-    mpapp::entry e;
+    mpapp::internal::basic_entry e;
     entry_mock   h;
 
     h.map_cursor_position(e);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — AppKit application handler implementation.
+// Part of MPAPP. T-0011 — AppKit basic_application handler implementation.
 //
 // Owns the NSApplication + NSApplicationDelegate dance so user code's
 // main() is just `return mpapp::run<MyApp>(argc, argv);`.
@@ -12,15 +12,15 @@
 #import <Foundation/Foundation.h>
 
 @interface MppAppDelegate : NSObject <NSApplicationDelegate>
-@property (nonatomic, assign) mpapp::detail::appkit_application_launcher launcher;
-@property (nonatomic, assign) mpapp::application** outAppSlot;
+@property (nonatomic, assign) ::mpapp::detail::appkit_application_launcher launcher;
+@property (nonatomic, assign) mpapp::internal::basic_application** outAppSlot;
 @end
 
 @implementation MppAppDelegate
 - (void)applicationDidFinishLaunching:(NSNotification*)notification {
     (void)notification;
     if (_launcher.construct == nullptr) return;
-    mpapp::application* app = _launcher.construct();
+    mpapp::internal::basic_application* app = _launcher.construct();
     if (_outAppSlot) {
         *_outAppSlot = app;
     }
@@ -42,7 +42,7 @@ namespace mpapp::detail {
 
 int appkit_run_app_impl(const appkit_application_launcher& launcher,
                         int /*argc*/, char** /*argv*/,
-                        mpapp::application*& out_app) {
+                        mpapp::internal::basic_application*& out_app) {
     @autoreleasepool {
         NSApplication* app = [NSApplication sharedApplication];
         [app setActivationPolicy:NSApplicationActivationPolicyRegular];

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 stepper handler — wraps GtkSpinButton.
+// Part of MPAPP. GTK4 basic_stepper handler — wraps GtkSpinButton.
 
 #ifndef MPAPP_HANDLERS_LINUX_STEPPER_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_STEPPER_HANDLER_HPP
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../stepper.hpp"
+#include "../../internal/basic_stepper.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class stepper_handler<platform::linux_> {
@@ -23,10 +23,10 @@ public:
     stepper_handler(stepper_handler&&)                 = delete;
     stepper_handler& operator=(stepper_handler&&)      = delete;
 
-    void map_value(stepper& s);
-    void map_minimum(stepper& s);
-    void map_maximum(stepper& s);
-    void map_interval(stepper& s);
+    void map_value(basic_stepper& s);
+    void map_minimum(basic_stepper& s);
+    void map_maximum(basic_stepper& s);
+    void map_interval(basic_stepper& s);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -56,7 +56,6 @@ private:
     signal_slot<const double&>   interval_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_STEPPER_HANDLER_HPP

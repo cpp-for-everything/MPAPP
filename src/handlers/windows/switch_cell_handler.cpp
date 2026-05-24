@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 switch_cell handler implementation.
+// WinUI 3 basic_switch_cell handler implementation.
 
 #include "mpapp/handlers/windows/switch_cell_handler.hpp"
 
@@ -15,7 +15,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -26,7 +26,7 @@ switch_cell_handler<platform::windows>::switch_cell_handler() {
     text_block_ = muxc::TextBlock{};
     toggle_     = muxc::ToggleSwitch{};
 
-    // Two-column layout: label (star) + toggle (auto).
+    // Two-column layout: basic_label (star) + toggle (auto).
     muxc::ColumnDefinition col_text{};
     col_text.Width(mux::GridLengthHelper::FromValueAndType(1.0, mux::GridUnitType::Star));
     muxc::ColumnDefinition col_toggle{};
@@ -38,7 +38,7 @@ switch_cell_handler<platform::windows>::switch_cell_handler() {
     muxc::Grid::SetColumn(text_block_, 0);
     muxc::Grid::SetColumn(toggle_, 1);
 
-    // ToggleSwitch defaults render with a leading on/off label and large
+    // ToggleSwitch defaults render with a leading on/off basic_label and large
     // gutter; squeeze for a cell row.
     toggle_.OnContent(nullptr);
     toggle_.OffContent(nullptr);
@@ -69,12 +69,12 @@ void switch_cell_handler<platform::windows>::apply_on(bool v) {
     suppress_echo_ = false;
 }
 
-void switch_cell_handler<platform::windows>::map_text(switch_cell& c) {
+void switch_cell_handler<platform::windows>::map_text(basic_switch_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void switch_cell_handler<platform::windows>::map_on(switch_cell& c) {
+void switch_cell_handler<platform::windows>::map_on(basic_switch_cell& c) {
     bound_ = &c;
     apply_on(c.on.get());
     c.on.changed.subscribe(on_slot_, on_cb_);
@@ -84,7 +84,7 @@ void switch_cell_handler<platform::windows>::map_on(switch_cell& c) {
         toggle_.Toggled(toggled_token_);
         toggled_token_ = {};
     }
-    switch_cell* target = &c;
+    basic_switch_cell* target = &c;
     auto* self = this;
     toggled_token_ = toggle_.Toggled(
         [target, self](winrt::Windows::Foundation::IInspectable const& sender,
@@ -99,13 +99,12 @@ void switch_cell_handler<platform::windows>::map_on(switch_cell& c) {
         });
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_switch_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::switch_cell*>(v); c && c->has_sc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_switch_cell*>(v); c && c->has_sc_handler()) {
         return c->sc_handler().native();
     }
     return nullptr;

@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android search_bar handler — wraps `android.widget.SearchView`.
+// Part of MPAPP. Android basic_search_bar handler — wraps `android.widget.SearchView`.
 
 #ifndef MPAPP_HANDLERS_ANDROID_SEARCH_BAR_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_SEARCH_BAR_HANDLER_HPP
 
 #include "../../platform.hpp"
-#include "../../search_bar.hpp"
+#include "../../internal/basic_search_bar.hpp"
 #include "../../signal.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class search_bar_handler<platform::android> {
@@ -22,8 +22,8 @@ public:
     search_bar_handler(const search_bar_handler&)            = delete;
     search_bar_handler& operator=(const search_bar_handler&) = delete;
 
-    void map_text(search_bar& s);
-    void map_placeholder(search_bar& s);
+    void map_text(basic_search_bar& s);
+    void map_placeholder(basic_search_bar& s);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -43,7 +43,6 @@ private:
     signal_slot<const std::string&>    placeholder_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SEARCH_BAR_HANDLER_HPP

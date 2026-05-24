@@ -7,7 +7,7 @@ using namespace mpapp;
 
 TEST_CASE("content_view mock records initial content as null",
           "[mock][content_view]") {
-    content_view c;
+    internal::basic_content_view c;
     content_view_handler<platform::mock> h;
     h.map_content(c);
     REQUIRE(h.calls().size() == 1);

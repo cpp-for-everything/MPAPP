@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 image_cell handler implementation.
+// GTK4 basic_image_cell handler implementation.
 
 #include "mpapp/handlers/linux/image_cell_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 image_cell_handler<platform::linux_>::image_cell_handler() {
     native_       = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
@@ -18,7 +18,7 @@ image_cell_handler<platform::linux_>::image_cell_handler() {
     text_label_   = gtk_label_new("");
     detail_label_ = gtk_label_new("");
 
-    // Icon-size leading image (40px square, matches cell-row aesthetic).
+    // Icon-size leading basic_image (40px square, matches cell-row aesthetic).
     gtk_image_set_pixel_size(GTK_IMAGE(static_cast<GtkWidget*>(image_w_)), 40);
     gtk_widget_set_valign(static_cast<GtkWidget*>(image_w_), GTK_ALIGN_CENTER);
 
@@ -74,28 +74,27 @@ void image_cell_handler<platform::linux_>::apply_image_uri(const std::string& v)
     }
 }
 
-void image_cell_handler<platform::linux_>::map_text(image_cell& c) {
+void image_cell_handler<platform::linux_>::map_text(basic_image_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void image_cell_handler<platform::linux_>::map_detail(image_cell& c) {
+void image_cell_handler<platform::linux_>::map_detail(basic_image_cell& c) {
     apply_detail(c.detail.get());
     c.detail.changed.subscribe(detail_slot_, detail_cb_);
 }
 
-void image_cell_handler<platform::linux_>::map_image_uri(image_cell& c) {
+void image_cell_handler<platform::linux_>::map_image_uri(basic_image_cell& c) {
     apply_image_uri(c.image_uri.get());
     c.image_uri.changed.subscribe(uri_slot_, uri_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_image_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::image_cell*>(v); c && c->has_ic_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_image_cell*>(v); c && c->has_ic_handler()) {
         return GTK_WIDGET(c->ic_handler().native());
     }
     return nullptr;

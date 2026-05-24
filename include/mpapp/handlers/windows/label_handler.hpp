@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0003 — WinUI 3 button spike.
+// Part of MPAPP. T-0003 — WinUI 3 basic_button spike.
 //
 // `label_handler<platform::windows>` — wraps a
 // `winrt::Microsoft::UI::Xaml::Controls::TextBlock`. Single property
@@ -8,7 +8,7 @@
 #ifndef MPAPP_HANDLERS_WINDOWS_LABEL_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_LABEL_HANDLER_HPP
 
-#include "../../label.hpp"
+#include "../../internal/basic_label.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -18,7 +18,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class label_handler<platform::windows> {
@@ -31,7 +31,7 @@ public:
     label_handler(label_handler&&)                 = delete;
     label_handler& operator=(label_handler&&)      = delete;
 
-    void map_text(label& l);
+    void map_text(basic_label& l);
 
     winrt::Microsoft::UI::Xaml::Controls::TextBlock&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::TextBlock& native() const noexcept { return native_; }
@@ -49,7 +49,6 @@ private:
     text_callback                                   text_callback_{this};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_LABEL_HANDLER_HPP

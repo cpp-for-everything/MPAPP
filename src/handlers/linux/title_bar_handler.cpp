@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 title_bar handler implementation.
+// Part of MPAPP. GTK4 basic_title_bar handler implementation.
 
 #include "mpapp/handlers/linux/title_bar_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -72,24 +72,23 @@ void title_bar_handler<platform::linux_>::apply_subtitle(const std::string& v) {
     gtk_widget_set_visible(w, !v.empty());
 }
 
-void title_bar_handler<platform::linux_>::map_title(title_bar& t) {
+void title_bar_handler<platform::linux_>::map_title(basic_title_bar& t) {
     apply_title(t.title.get());
     t.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-void title_bar_handler<platform::linux_>::map_subtitle(title_bar& t) {
+void title_bar_handler<platform::linux_>::map_subtitle(basic_title_bar& t) {
     apply_subtitle(t.subtitle.get());
     t.subtitle.changed.subscribe(subtitle_slot_, subtitle_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // --- ADR-0013 self-registration --------------------------------------------
 
 namespace {
 
 GtkWidget* dispatch_title_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::title_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_title_bar*>(v); w && w->has_handler()) {
         return static_cast<GtkWidget*>(w->handler().native());
     }
     return nullptr;

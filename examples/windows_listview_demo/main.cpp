@@ -15,7 +15,6 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/list_view_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
@@ -46,9 +45,6 @@ public:
         lv_.item_tapped.subscribe(tap_slot_, tap_cb_);
         lv_.selected_index.changed.subscribe(sel_slot_, sel_cb_);
 
-        rotate_btn_.set_handler(rotate_btn_handler_);
-        rotate_btn_handler_.map_text(rotate_btn_);
-        rotate_btn_handler_.map_clicked(rotate_btn_);
         rotate_btn_.text = "Rotate items_source";
         rotate_btn_.clicked.subscribe(rotate_slot_, rotate_cb_);
 
@@ -122,7 +118,6 @@ private:
     mpapp::list_view_handler<wp>        lv_handler_{};
 
     mpapp::button                       rotate_btn_{};
-    mpapp::button_handler<wp>           rotate_btn_handler_{};
 
     mpapp::label                        status_label_{};
     mpapp::label_handler<wp>            status_label_handler_{};

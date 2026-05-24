@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::search_bar`.
+// Mock-handler tests for `mpapp::internal::basic_search_bar`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("search_bar mock records initial values on bind",
           "[mock][search_bar]") {
-    search_bar s;
+    internal::basic_search_bar s;
     search_bar_handler<platform::mock> h;
 
     h.map_text(s);
@@ -24,7 +24,7 @@ TEST_CASE("search_bar mock records initial values on bind",
 
 TEST_CASE("search_bar records text changes",
           "[mock][search_bar]") {
-    search_bar s;
+    internal::basic_search_bar s;
     search_bar_handler<platform::mock> h;
 
     h.map_text(s);

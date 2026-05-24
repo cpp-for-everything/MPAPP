@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android navigation_page handler implementation.
+// Android basic_navigation_page handler implementation.
 
 #include "mpapp/handlers/android/navigation_page_handler.hpp"
 
@@ -7,9 +7,9 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/page.hpp"
+#include "mpapp/internal/basic_page.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -155,7 +155,7 @@ void navigation_page_handler<platform::android>::apply_top(view* new_top) {
         }
     }
 
-    if (auto* p = dynamic_cast<page*>(new_top); p != nullptr) {
+    if (auto* p = dynamic_cast<basic_page*>(new_top); p != nullptr) {
         apply_title(p->title.get());
     } else {
         apply_title("");
@@ -176,13 +176,13 @@ void navigation_page_handler<platform::android>::apply_back_visibility(std::size
     view_set_visibility(env, back_button_, depth > 1 ? VIEW_VISIBLE : VIEW_GONE);
 }
 
-// Install an MppActionRouter(navigation_page*, kind=0, payload=0) as the
-// back button's OnClickListener. The router fires nav.pop() on the
-// owning navigation_page when the user taps the back chrome.
+// Install an MppActionRouter(basic_navigation_page*, kind=0, payload=0) as the
+// back basic_button's OnClickListener. The router fires nav.pop() on the
+// owning basic_navigation_page when the user taps the back chrome.
 namespace {
 
-void install_back_router(JNIEnv* env, jobject button, mpapp::navigation_page* np) {
-    if (env == nullptr || button == nullptr) return;
+void install_back_router(JNIEnv* env, jobject basic_button, mpapp::internal::basic_navigation_page* np) {
+    if (env == nullptr || basic_button == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass router_cls = env->FindClass("io/mpapp/MppActionRouter");
     if (router_cls == nullptr) { env->ExceptionClear(); return; }
@@ -200,13 +200,13 @@ void install_back_router(JNIEnv* env, jobject button, mpapp::navigation_page* np
     }
     env->DeleteLocalRef(router_cls);
 
-    // button.setOnClickListener(router)
+    // basic_button.setOnClickListener(router)
     jclass view_cls = env->FindClass("android/view/View");
     if (view_cls != nullptr) {
         jmethodID set_listener = env->GetMethodID(view_cls, "setOnClickListener",
             "(Landroid/view/View$OnClickListener;)V");
         if (set_listener != nullptr) {
-            env->CallVoidMethod(button, set_listener, router);
+            env->CallVoidMethod(basic_button, set_listener, router);
             if (env->ExceptionCheck()) env->ExceptionClear();
         }
         env->DeleteLocalRef(view_cls);
@@ -216,24 +216,23 @@ void install_back_router(JNIEnv* env, jobject button, mpapp::navigation_page* np
 
 } // namespace
 
-void navigation_page_handler<platform::android>::map_stack(navigation_page& np) {
+void navigation_page_handler<platform::android>::map_stack(basic_navigation_page& np) {
     bound_ = &np;
     apply_top(np.stack().top());
     apply_back_visibility(np.stack().depth());
     np.stack().page_did_appear.subscribe(did_appear_slot_, did_appear_cb_);
     np.stack_depth.changed.subscribe(depth_slot_, depth_cb_);
-    // Wire the back-button OnClickListener via MppActionRouter (kind=0).
+    // Wire the back-basic_button OnClickListener via MppActionRouter (kind=0).
     JNIEnv* env = detail::attach_current_thread();
     if (env != nullptr) install_back_router(env, back_button_, &np);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_navigation_page(::mpapp::view* v) {
-    if (auto* n = dynamic_cast<::mpapp::navigation_page*>(v); n && n->has_np_handler()) {
+    if (auto* n = dynamic_cast<::mpapp::internal::basic_navigation_page*>(v); n && n->has_np_handler()) {
         return n->np_handler().native();
     }
     return nullptr;

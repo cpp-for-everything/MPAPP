@@ -1,57 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/RefreshView.md
 //
-// `mpapp::refresh_view` — single-child container wrapping a scrollable
-// child with a pull-to-refresh affordance. The spinner is visible (and
-// animating) iff `is_refreshing == true`. `refresh_color` carries the
-// symbolic tint; real handlers parse it into the platform-native color
-// type.
+// `mpapp::refresh_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_refresh_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::refresh_view x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// This is the M-04b "real handlers on three platforms" landing of the
-// widget. The mock surface is intentionally narrow — just the three
-// observable properties that the platform handlers consume. The richer
-// `refresh_command` / `is_refresh_enabled` / `refreshing` event
-// surface described in the component doc lands in a follow-up alongside
-// gesture-event plumbing.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_refresh_view x;
+//     mpapp::refresh_view_handler<mpapp::platform::mock> h;
+//     h.map_content(x);
 
 #ifndef MPAPP_REFRESH_VIEW_HPP
 #define MPAPP_REFRESH_VIEW_HPP
 
-#include <memory>
+#include "internal/basic_refresh_view.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_refresh_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/refresh_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class refresh_view_handler;
-
-class refresh_view : public view {
+class refresh_view : public internal::basic_refresh_view {
 public:
-    refresh_view() = default;
+    refresh_view() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_content(*this);
+        embedded_handler_.map_is_refreshing(*this);
+        embedded_handler_.map_refresh_color(*this);
+    }
 
-    // The wrapped scrollable child. Same Observable<shared_ptr<view>>
-    // shape used by scroll_view, content_view, and border.
-    Observable<std::shared_ptr<view>>  content{};
-
-    // True while a refresh is in flight; flips the spinner on. Consumers
-    // are responsible for setting it back to false when their fetch
-    // completes (matches MAUI's RefreshView contract).
-    Observable<bool>                   is_refreshing{false};
-
-    // Spinner tint, symbolic — handlers resolve to native color types.
-    Observable<brush_ref>              refresh_color{};
-
-    refresh_view_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const refresh_view_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                           has_handler() const noexcept { return handler_ != nullptr; }
-    void                                           set_handler(refresh_view_handler<platform::current>& h) noexcept { handler_ = &h; }
+    refresh_view(const refresh_view&)            = delete;
+    refresh_view& operator=(const refresh_view&) = delete;
+    refresh_view(refresh_view&&)                 = delete;
+    refresh_view& operator=(refresh_view&&)      = delete;
 
 private:
-    refresh_view_handler<platform::current>* handler_ = nullptr;
+    internal::refresh_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::refresh_view_handler<>` (host-current) and
+// `mpapp::refresh_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using refresh_view_handler = internal::refresh_view_handler<Platform>;
 
 } // namespace mpapp
 

@@ -1,101 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/WebView.md
 //
-// `mpapp::web_view` — native browser embed. The mock surface keeps the
-// URL / HTML observables plus the back/forward/reload commands; the
-// real per-platform handler binds these to WebView2 (Windows),
-// WebKitGTK (Linux — see RFC-0001 § Linux licensing), Android WebView
-// (Android), and WKWebView (macOS/iOS).
+// `mpapp::web_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_web_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::web_view x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_web_view x;
+//     mpapp::web_view_handler<mpapp::platform::mock> h;
+//     h.map_url(x);
 
 #ifndef MPAPP_WEB_VIEW_HPP
 #define MPAPP_WEB_VIEW_HPP
 
-#include <string>
+#include "internal/basic_web_view.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "signal.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_web_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/web_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class web_view_handler;
-
-class web_view : public view {
+class web_view : public internal::basic_web_view {
 public:
-    web_view() = default;
-    ~web_view() override = default;
+    web_view() {
+        set_wv_handler(embedded_handler_);
+        embedded_handler_.map_url(*this);
+        embedded_handler_.map_html(*this);
+    }
 
     web_view(const web_view&)            = delete;
     web_view& operator=(const web_view&) = delete;
     web_view(web_view&&)                 = delete;
     web_view& operator=(web_view&&)      = delete;
 
-    // ----- Surface ------------------------------------------------------
-
-    Observable<std::string> url{""};
-    Observable<std::string> html_source{""};
-    Observable<bool>        is_loading{false};
-    Observable<bool>        can_go_back{false};
-    Observable<bool>        can_go_forward{false};
-
-    // ----- Signals ------------------------------------------------------
-
-    signal<const std::string&>           navigating{};   // emits URL just before nav
-    signal<const std::string&, bool>     navigated{};    // emits (URL, success) after nav
-
-    // ----- Commands -----------------------------------------------------
-
-    // Mock implementations only flip the navigation state; real handlers
-    // call into the native widget's history API.
-    void load(const std::string& target_url) {
-        url.set(target_url);
-        is_loading.set(true);
-        navigating.emit(target_url);
-        // mock "completes" immediately
-        is_loading.set(false);
-        navigated.emit(target_url, true);
-    }
-
-    void load_html(const std::string& html) {
-        html_source.set(html);
-        is_loading.set(true);
-        navigating.emit(std::string{"about:blank"});
-        is_loading.set(false);
-        navigated.emit(std::string{"about:blank"}, true);
-    }
-
-    void go_back() {
-        if (!can_go_back.get()) return;
-        // mock can't actually traverse history; just emits signals
-        navigating.emit(url.get());
-        navigated.emit(url.get(), true);
-    }
-
-    void go_forward() {
-        if (!can_go_forward.get()) return;
-        navigating.emit(url.get());
-        navigated.emit(url.get(), true);
-    }
-
-    void reload() {
-        is_loading.set(true);
-        navigating.emit(url.get());
-        is_loading.set(false);
-        navigated.emit(url.get(), true);
-    }
-
-    // ----- Handler ------------------------------------------------------
-
-    web_view_handler<platform::current>&       wv_handler() noexcept       { return *wv_handler_; }
-    const web_view_handler<platform::current>& wv_handler() const noexcept { return *wv_handler_; }
-    bool                                       has_wv_handler() const noexcept { return wv_handler_ != nullptr; }
-    void                                       set_wv_handler(web_view_handler<platform::current>& h) noexcept { wv_handler_ = &h; }
-
 private:
-    web_view_handler<platform::current>* wv_handler_ = nullptr;
+    internal::web_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::web_view_handler<>` (host-current) and
+// `mpapp::web_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using web_view_handler = internal::web_view_handler<Platform>;
 
 } // namespace mpapp
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 swipe_item_menu_item handler.
+// Part of MPAPP. WinUI 3 basic_swipe_item_menu_item handler.
 //
 // Hosts the action as a `muxc::Button` carrying the `text` content and
-// raising the `invoked` signal from the button's Click event. WinUI's
+// raising the `invoked` signal from the basic_button's Click event. WinUI's
 // `muxc::SwipeItem` is the canonical native shape (icon + text)
 // but `SwipeItem` is not a `UIElement` — it inherits from
 // `DependencyObject` and lives only inside `muxc::SwipeItems`. The
@@ -23,14 +23,14 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../swipe_item_menu_item.hpp"
+#include "../../internal/basic_swipe_item_menu_item.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Windows.Foundation.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class swipe_item_menu_item_handler<platform::windows> {
@@ -43,9 +43,9 @@ public:
     swipe_item_menu_item_handler(swipe_item_menu_item_handler&&)                 = delete;
     swipe_item_menu_item_handler& operator=(swipe_item_menu_item_handler&&)      = delete;
 
-    void map_text(swipe_item_menu_item& m);
-    void map_icon_uri(swipe_item_menu_item& m);
-    void map_invoked(swipe_item_menu_item& m);
+    void map_text(basic_swipe_item_menu_item& m);
+    void map_icon_uri(basic_swipe_item_menu_item& m);
+    void map_invoked(basic_swipe_item_menu_item& m);
 
     winrt::Microsoft::UI::Xaml::Controls::Button&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Button& native() const noexcept { return native_; }
@@ -75,7 +75,6 @@ private:
     signal_slot<const std::string&> icon_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_SWIPE_ITEM_MENU_ITEM_HANDLER_HPP

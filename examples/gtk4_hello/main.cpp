@@ -24,7 +24,6 @@
 #include <mpapp/switch_.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/entry_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
@@ -40,7 +39,9 @@ struct view_model {
 class spike_app : public mpapp::application {
 public:
     void on_launch() override {
-        btn_.set_handler(btn_handler_);
+        // `mpapp::button` is a wrapper that auto-binds its embedded handler
+        // in its constructor — no btn_handler_ member, no set_handler /
+        // map_text / map_clicked calls required.
         lbl_.set_handler(lbl_handler_);
         name_.set_handler(name_handler_);
         shout_.set_handler(shout_handler_);
@@ -51,8 +52,6 @@ public:
         name_.placeholder = "Type your name";
         shout_.is_on      = false;
 
-        btn_handler_.map_text(btn_);
-        btn_handler_.map_clicked(btn_);
         lbl_handler_.map_text(lbl_);
         name_handler_.map_text(name_);
         name_handler_.map_placeholder(name_);
@@ -118,7 +117,6 @@ private:
     mpapp::stack_layout     layout_{};
     mpapp::window           window_{};
 
-    mpapp::button_handler<>       btn_handler_{};
     mpapp::label_handler<>        lbl_handler_{};
     mpapp::entry_handler<>        name_handler_{};
     mpapp::switch_handler<>       shout_handler_{};

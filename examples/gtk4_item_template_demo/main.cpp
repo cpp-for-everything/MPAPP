@@ -31,7 +31,6 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/collection_view_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
@@ -102,9 +101,6 @@ public:
         cv_.items_source = items_sets_[0];
 
         // ---- "Rotate items" button -------------------------------
-        rotate_btn_.set_handler(rotate_btn_handler_);
-        rotate_btn_handler_.map_text(rotate_btn_);
-        rotate_btn_handler_.map_clicked(rotate_btn_);
         rotate_btn_.text = "Rotate items_source";
         rotate_btn_.clicked.subscribe(rotate_slot_, rotate_cb_);
 
@@ -165,7 +161,6 @@ private:
     mpapp::collection_view_handler<>  cv_handler_{};
 
     mpapp::button                       rotate_btn_{};
-    mpapp::button_handler<>           rotate_btn_handler_{};
 
     mpapp::label                        status_label_{};
     mpapp::label_handler<>            status_label_handler_{};

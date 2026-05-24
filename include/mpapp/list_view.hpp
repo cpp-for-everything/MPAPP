@@ -1,59 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/ListView.md
 //
-// `mpapp::list_view` — legacy MAUI virtualized item host. Modern MAUI
-// code uses [[CollectionView]]; ListView ships for source-compat parity.
-// Mock surface keeps items as a flat `std::vector<std::string>` (real
-// item_template handling is deferred to the virtualized-item-host ADR).
+// `mpapp::list_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_list_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::list_view x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_list_view x;
+//     mpapp::list_view_handler<mpapp::platform::mock> h;
+//     h.map_items_source(x);
 
 #ifndef MPAPP_LIST_VIEW_HPP
 #define MPAPP_LIST_VIEW_HPP
 
-#include <cstdint>
-#include <string>
-#include <vector>
+#include "internal/basic_list_view.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "signal.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_list_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/list_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class list_view_handler;
-
-class list_view : public view {
+class list_view : public internal::basic_list_view {
 public:
-    list_view() = default;
-    ~list_view() override = default;
+    list_view() {
+        set_lv_handler(embedded_handler_);
+        embedded_handler_.map_items_source(*this);
+        embedded_handler_.map_selected_index(*this);
+    }
 
     list_view(const list_view&)            = delete;
     list_view& operator=(const list_view&) = delete;
     list_view(list_view&&)                 = delete;
     list_view& operator=(list_view&&)      = delete;
 
-    // ----- Surface ------------------------------------------------------
-
-    Observable<std::vector<std::string>> items_source{};
-    Observable<int>                      selected_index{-1};   // -1 = none
-    Observable<int>                      row_height{-1};       // -1 = native default
-    Observable<bool>                     has_unevenly_sized_rows{false};
-
-    // ----- Events -------------------------------------------------------
-
-    signal<int>                          item_tapped{};        // emits tapped row index
-
-    // ----- Handler ------------------------------------------------------
-
-    list_view_handler<platform::current>&       lv_handler() noexcept       { return *lv_handler_; }
-    const list_view_handler<platform::current>& lv_handler() const noexcept { return *lv_handler_; }
-    bool                                        has_lv_handler() const noexcept { return lv_handler_ != nullptr; }
-    void                                        set_lv_handler(list_view_handler<platform::current>& h) noexcept { lv_handler_ = &h; }
-
 private:
-    list_view_handler<platform::current>* lv_handler_ = nullptr;
+    internal::list_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::list_view_handler<>` (host-current) and
+// `mpapp::list_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using list_view_handler = internal::list_view_handler<Platform>;
 
 } // namespace mpapp
 

@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock handler for `mpapp::entry_cell`.
+// Mock handler for `mpapp::basic_entry_cell`.
 
 #ifndef MPAPP_HANDLERS_MOCK_ENTRY_CELL_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_ENTRY_CELL_HANDLER_HPP
 
 #include <string>
 
-#include "../../entry_cell.hpp"
+#include "../../internal/basic_entry_cell.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class entry_cell_handler<platform::mock> : public mock_handler_base {
@@ -23,11 +23,11 @@ public:
     entry_cell_handler(entry_cell_handler&&)                 = delete;
     entry_cell_handler& operator=(entry_cell_handler&&)      = delete;
 
-    void map_label(entry_cell& c) {
+    void map_label(basic_entry_cell& c) {
         record_change("label", c.label.get());
         c.label.changed.subscribe(label_slot_, label_cb_);
     }
-    void map_text(entry_cell& c) {
+    void map_text(basic_entry_cell& c) {
         record_change("text", c.text.get());
         c.text.changed.subscribe(text_slot_, text_cb_);
     }
@@ -40,6 +40,5 @@ private:
     signal_slot<const std::string&>             text_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_ENTRY_CELL_HANDLER_HPP

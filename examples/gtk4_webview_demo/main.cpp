@@ -23,7 +23,6 @@
 #include <mpapp/web_view.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
 #include <mpapp/handlers/web_view_handler.hpp>
@@ -56,9 +55,6 @@ public:
         wv_.navigated.subscribe(nav_slot_, nav_cb_);
         wv_.is_loading.changed.subscribe(loading_slot_, loading_cb_);
 
-        toggle_btn_.set_handler(toggle_btn_handler_);
-        toggle_btn_handler_.map_text(toggle_btn_);
-        toggle_btn_handler_.map_clicked(toggle_btn_);
         toggle_btn_.text = "Toggle content";
         toggle_btn_.clicked.subscribe(toggle_slot_, toggle_cb_);
 
@@ -120,7 +116,6 @@ private:
     mpapp::web_view_handler<>      wv_handler_{};
 
     mpapp::button                    toggle_btn_{};
-    mpapp::button_handler<>        toggle_btn_handler_{};
 
     mpapp::label                     status_label_{};
     mpapp::label_handler<>         status_label_handler_{};

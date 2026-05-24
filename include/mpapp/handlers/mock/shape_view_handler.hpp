@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock handler for `mpapp::shape_view`.
+// Mock handler for `mpapp::basic_shape_view`.
 
 #ifndef MPAPP_HANDLERS_MOCK_SHAPE_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_SHAPE_VIEW_HANDLER_HPP
@@ -8,10 +8,10 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../shape_view.hpp"
+#include "../../internal/basic_shape_view.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class shape_view_handler<platform::mock> : public mock_handler_base {
@@ -24,17 +24,17 @@ public:
     shape_view_handler(shape_view_handler&&)                 = delete;
     shape_view_handler& operator=(shape_view_handler&&)      = delete;
 
-    void map_kind(shape_view& s) {
+    void map_kind(basic_shape_view& s) {
         record_change("kind", static_cast<std::uint8_t>(s.kind.get()));
         s.kind.changed.subscribe(slot_kind_, kind_cb_);
     }
 
-    void map_data(shape_view& s) {
+    void map_data(basic_shape_view& s) {
         record_change("data", s.data.get());
         s.data.changed.subscribe(slot_data_, data_cb_);
     }
 
-    void map_fill(shape_view& s) {
+    void map_fill(basic_shape_view& s) {
         record_change("fill", s.fill.get());
         s.fill.changed.subscribe(slot_fill_, fill_cb_);
     }
@@ -64,6 +64,5 @@ private:
     signal_slot<const std::string&> slot_fill_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_SHAPE_VIEW_HANDLER_HPP

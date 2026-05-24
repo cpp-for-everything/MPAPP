@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android indicator_view handler — renders a row of dots
+// Part of MPAPP. Android basic_indicator_view handler — renders a row of dots
 // manually using a horizontal `android.widget.LinearLayout` of
 // `android.view.View` children whose background is a circular
 // `GradientDrawable`.
 //
-// No native page-indicator widget exists in the AOSP framework. The
+// No native basic_page-indicator widget exists in the AOSP framework. The
 // handler rebuilds the LinearLayout's children whenever `count` changes
 // and re-creates the per-dot drawable whenever `position` /
 // `indicator_color` / `selected_indicator_color` change. Per ADR-0013
@@ -13,7 +13,7 @@
 #ifndef MPAPP_HANDLERS_ANDROID_INDICATOR_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_INDICATOR_VIEW_HANDLER_HPP
 
-#include "../../indicator_view.hpp"
+#include "../../internal/basic_indicator_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -21,7 +21,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class indicator_view_handler<platform::android> {
@@ -32,10 +32,10 @@ public:
     indicator_view_handler(const indicator_view_handler&)            = delete;
     indicator_view_handler& operator=(const indicator_view_handler&) = delete;
 
-    void map_count(indicator_view& iv);
-    void map_position(indicator_view& iv);
-    void map_indicator_color(indicator_view& iv);
-    void map_selected_indicator_color(indicator_view& iv);
+    void map_count(basic_indicator_view& iv);
+    void map_position(basic_indicator_view& iv);
+    void map_indicator_color(basic_indicator_view& iv);
+    void map_selected_indicator_color(basic_indicator_view& iv);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -71,7 +71,6 @@ private:
     signal_slot<const brush_ref&> sel_color_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_INDICATOR_VIEW_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 box_view handler implementation.
+// Part of MPAPP. WinUI 3 basic_box_view handler implementation.
 
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 
@@ -17,7 +17,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Media.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxm  = ::winrt::Microsoft::UI::Xaml::Media;
@@ -68,31 +68,29 @@ void box_view_handler<platform::windows>::apply_corners(const corner_radius& r) 
     native_.CornerRadius(cr);
 }
 
-void box_view_handler<platform::windows>::map_fill(box_view& b) {
+void box_view_handler<platform::windows>::map_fill(basic_box_view& b) {
     bound_ = &b;
     apply_fill(b.fill.get());
     b.fill.changed.subscribe(fill_slot_, fill_cb_);
 }
 
-void box_view_handler<platform::windows>::map_corners(box_view& b) {
+void box_view_handler<platform::windows>::map_corners(basic_box_view& b) {
     apply_corners(b.corners.get());
     b.corners.changed.subscribe(corners_slot_, corners_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register box_view so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_box_view so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/box_view.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_box_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::box_view*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_box_view*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

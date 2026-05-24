@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — UIKit application handler implementation.
+// Part of MPAPP. T-0011 — UIKit basic_application handler implementation.
 
 #include "mpapp/handlers/ios/application_handler.hpp"
 
@@ -15,7 +15,7 @@ namespace mpapp::detail {
 // string, not an instance, so we stash the launcher in a global.
 struct uikit_handoff {
     uikit_application_launcher launcher{};
-    mpapp::application*        out_app  = nullptr;
+    mpapp::internal::basic_application*        out_app  = nullptr;
 };
 
 static uikit_handoff g_uikit_handoff{};
@@ -23,15 +23,15 @@ static uikit_handoff g_uikit_handoff{};
 } // namespace mpapp::detail
 
 @interface MppUIKitAppDelegate : UIResponder <UIApplicationDelegate>
-@property (strong, nonatomic) UIWindow* window;
+@property (strong, nonatomic) UIWindow* basic_window;
 @end
 
 @implementation MppUIKitAppDelegate
-- (BOOL)application:(UIApplication*)application
+- (BOOL)basic_application:(UIApplication*)basic_application
         didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
-    (void)application;
+    (void)basic_application;
     (void)launchOptions;
-    auto& h = mpapp::detail::g_uikit_handoff;
+    auto& h = ::mpapp::detail::g_uikit_handoff;
     if (h.launcher.construct) {
         h.out_app = h.launcher.construct();
         if (h.out_app) {
@@ -41,21 +41,21 @@ static uikit_handoff g_uikit_handoff{};
     return YES;
 }
 
-- (void)applicationWillResignActive:(UIApplication*)application {
-    (void)application;
-    auto& h = mpapp::detail::g_uikit_handoff;
+- (void)applicationWillResignActive:(UIApplication*)basic_application {
+    (void)basic_application;
+    auto& h = ::mpapp::detail::g_uikit_handoff;
     if (h.out_app) h.out_app->on_suspend();
 }
 
-- (void)applicationDidBecomeActive:(UIApplication*)application {
-    (void)application;
-    auto& h = mpapp::detail::g_uikit_handoff;
+- (void)applicationDidBecomeActive:(UIApplication*)basic_application {
+    (void)basic_application;
+    auto& h = ::mpapp::detail::g_uikit_handoff;
     if (h.out_app) h.out_app->on_resume();
 }
 
-- (void)applicationWillTerminate:(UIApplication*)application {
-    (void)application;
-    auto& h = mpapp::detail::g_uikit_handoff;
+- (void)applicationWillTerminate:(UIApplication*)basic_application {
+    (void)basic_application;
+    auto& h = ::mpapp::detail::g_uikit_handoff;
     if (h.out_app) h.out_app->on_terminate();
 }
 @end
@@ -64,7 +64,7 @@ namespace mpapp::detail {
 
 int uikit_run_app_impl(const uikit_application_launcher& launcher,
                        int argc, char** argv,
-                       mpapp::application*& out_app) {
+                       mpapp::internal::basic_application*& out_app) {
     @autoreleasepool {
         g_uikit_handoff.launcher = launcher;
         const int rc = UIApplicationMain(

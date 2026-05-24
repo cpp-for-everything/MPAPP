@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — Android window handler implementation.
+// Part of MPAPP. T-0011 — Android basic_window handler implementation.
 
 #include "mpapp/handlers/android/window_handler.hpp"
 
@@ -8,20 +8,20 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 #include "mpapp/border.hpp"
-#include "mpapp/box_view.hpp"
-#include "mpapp/date_picker.hpp"
-#include "mpapp/image.hpp"
-#include "mpapp/image_button.hpp"
-#include "mpapp/picker.hpp"
-#include "mpapp/time_picker.hpp"
-#include "mpapp/progress_bar.hpp"
-#include "mpapp/search_bar.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_date_picker.hpp"
+#include "mpapp/internal/basic_image.hpp"
+#include "mpapp/internal/basic_image_button.hpp"
+#include "mpapp/internal/basic_picker.hpp"
+#include "mpapp/internal/basic_time_picker.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/android/activity_indicator_handler.hpp"
 #include "mpapp/handlers/android/border_handler.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
@@ -43,15 +43,15 @@
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
 #include "mpapp/handlers/android/stepper_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/scroll_view.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stack_layout.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_scroll_view.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -118,7 +118,7 @@ void window_handler<platform::android>::apply_content(view* v) {
 
     // Clear any pending JNI exception from earlier calls so ART's
     // CheckJNI doesn't abort on the next JNI call. See
-    // vault/50_Tasks/T-0011-app-shell-abstraction/screenshots/evidence.md
+    // vault/50_Tasks/T-0011-app-basic_shell-abstraction/screenshots/evidence.md
     // for the diagnosis that surfaced this requirement.
     if (env->ExceptionCheck()) env->ExceptionClear();
 
@@ -147,7 +147,7 @@ void window_handler<platform::android>::apply_is_visible(bool /*v*/) {
     // app to foreground via Intent flags lands in the M-05 surface.
 }
 
-void window_handler<platform::android>::bind(window& w) {
+void window_handler<platform::android>::bind(basic_window& w) {
     bound_ = &w;
 
     apply_title(w.title.get());
@@ -160,6 +160,5 @@ void window_handler<platform::android>::bind(window& w) {
     w.is_visible.changed.subscribe(visible_slot_, visible_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__

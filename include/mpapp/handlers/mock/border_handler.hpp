@@ -2,17 +2,17 @@
 // Part of MPAPP. See vault/10_Architecture/Components/Border.md
 //
 // `border_handler<platform::mock>` — records property mappers for the
-// `border` decorator. `content` is recorded as a presence flag (same
-// reason as scroll_view); `stroke_dash_array` is recorded by length.
+// `basic_border` decorator. `content` is recorded as a presence flag (same
+// reason as basic_scroll_view); `stroke_dash_array` is recorded by length.
 
 #ifndef MPAPP_HANDLERS_MOCK_BORDER_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_BORDER_HANDLER_HPP
 
-#include "../../border.hpp"
+#include "../../internal/basic_border.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class border_handler<platform::mock>
@@ -20,23 +20,23 @@ class border_handler<platform::mock>
 public:
     border_handler() = default;
 
-    void map_padding(border& b)              { bind("padding",              b.padding,              binding_padding_); }
-    void map_stroke_shape(border& b)         { bind("stroke_shape",         b.stroke_shape,         binding_stroke_shape_); }
-    void map_stroke(border& b)               { bind("stroke",               b.stroke,               binding_stroke_); }
-    void map_stroke_thickness(border& b)     { bind("stroke_thickness",     b.stroke_thickness,     binding_stroke_thickness_); }
-    void map_stroke_dash_offset(border& b)   { bind("stroke_dash_offset",   b.stroke_dash_offset,   binding_dash_offset_); }
-    void map_stroke_line_cap(border& b)      { bind("stroke_line_cap",      b.stroke_line_cap,      binding_line_cap_); }
-    void map_stroke_line_join(border& b)     { bind("stroke_line_join",     b.stroke_line_join,     binding_line_join_); }
-    void map_stroke_miter_limit(border& b)   { bind("stroke_miter_limit",   b.stroke_miter_limit,   binding_miter_limit_); }
+    void map_padding(basic_border& b)              { bind("padding",              b.padding,              binding_padding_); }
+    void map_stroke_shape(basic_border& b)         { bind("stroke_shape",         b.stroke_shape,         binding_stroke_shape_); }
+    void map_stroke(basic_border& b)               { bind("stroke",               b.stroke,               binding_stroke_); }
+    void map_stroke_thickness(basic_border& b)     { bind("stroke_thickness",     b.stroke_thickness,     binding_stroke_thickness_); }
+    void map_stroke_dash_offset(basic_border& b)   { bind("stroke_dash_offset",   b.stroke_dash_offset,   binding_dash_offset_); }
+    void map_stroke_line_cap(basic_border& b)      { bind("stroke_line_cap",      b.stroke_line_cap,      binding_line_cap_); }
+    void map_stroke_line_join(basic_border& b)     { bind("stroke_line_join",     b.stroke_line_join,     binding_line_join_); }
+    void map_stroke_miter_limit(basic_border& b)   { bind("stroke_miter_limit",   b.stroke_miter_limit,   binding_miter_limit_); }
 
     // shared_ptr<view> + std::vector<double> get presence/length-only treatment.
-    void map_content(border& b) {
+    void map_content(basic_border& b) {
         record("content.present", b.content.get() != nullptr);
         content_callback_ = content_cb{this};
         b.content.changed.subscribe(content_slot_, content_callback_);
     }
 
-    void map_stroke_dash_array(border& b) {
+    void map_stroke_dash_array(basic_border& b) {
         record("stroke_dash_array.size", b.stroke_dash_array.get().size());
         dash_array_callback_ = dash_array_cb{this};
         b.stroke_dash_array.changed.subscribe(dash_array_slot_, dash_array_callback_);
@@ -71,6 +71,5 @@ private:
     dash_array_cb                           dash_array_callback_{this};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_BORDER_HANDLER_HPP

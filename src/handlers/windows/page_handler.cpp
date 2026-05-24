@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 page handler implementation.
+// Part of MPAPP. WinUI 3 basic_page handler implementation.
 
 #include "mpapp/handlers/windows/page_handler.hpp"
 
@@ -15,10 +15,10 @@
 
 #include "winrt_strings.hpp"
 
-#include "mpapp/page.hpp"
+#include "mpapp/internal/basic_page.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -36,7 +36,7 @@ page_handler<platform::windows>::page_handler() {
     // ProgressRing depends on the WinUI 3 theme resources, and
     // pre-emptively instantiating one — even with IsActive=false — has
     // been seen to crash the layout pass in unpackaged WinUI 3 apps
-    // when the host page is nested inside another container's
+    // when the host basic_page is nested inside another container's
     // ContentControl (see T-0014 follow-up).
 
     // Row definitions: row 0 Auto (title), row 1 * (content fills).
@@ -92,33 +92,32 @@ void page_handler<platform::windows>::apply_is_busy(bool v) {
     busy_ring_.IsActive(true);
 }
 
-void page_handler<platform::windows>::map_title(page& p) {
+void page_handler<platform::windows>::map_title(basic_page& p) {
     apply_title(p.title.get());
     p.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-void page_handler<platform::windows>::map_content(page& p) {
+void page_handler<platform::windows>::map_content(basic_page& p) {
     apply_content(p.content.get());
     p.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void page_handler<platform::windows>::map_is_busy(page& p) {
+void page_handler<platform::windows>::map_is_busy(basic_page& p) {
     apply_is_busy(p.is_busy.get());
     p.is_busy.changed.subscribe(busy_slot_, busy_cb_);
 }
 
-void page_handler<platform::windows>::bind_content(page& p, view& child) {
+void page_handler<platform::windows>::bind_content(basic_page& p, view& child) {
     p.content.set(&child);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_page(::mpapp::view* v) {
-    if (auto* p = dynamic_cast<::mpapp::page*>(v); p && p->has_handler()) {
+    if (auto* p = dynamic_cast<::mpapp::internal::basic_page*>(v); p && p->has_handler()) {
         return p->handler().native();
     }
     return nullptr;

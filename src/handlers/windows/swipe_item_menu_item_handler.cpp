@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 swipe_item_menu_item handler implementation.
+// Part of MPAPP. WinUI 3 basic_swipe_item_menu_item handler implementation.
 
 #include "mpapp/handlers/windows/swipe_item_menu_item_handler.hpp"
 
@@ -15,7 +15,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -43,23 +43,23 @@ void swipe_item_menu_item_handler<platform::windows>::apply_text(const std::stri
 
 void swipe_item_menu_item_handler<platform::windows>::apply_icon_uri(const std::string& v) {
     // Icon plumbing is symbolic — the real `image_source` variant lands
-    // alongside the broader image-source resolver. For now, just touching
+    // alongside the broader basic_image-source resolver. For now, just touching
     // the icon URI is a no-op on the WinUI side; the value is still
     // captured + observable for tests / future consumers.
     (void)v;
 }
 
-void swipe_item_menu_item_handler<platform::windows>::map_text(swipe_item_menu_item& m) {
+void swipe_item_menu_item_handler<platform::windows>::map_text(basic_swipe_item_menu_item& m) {
     apply_text(m.text.get());
     m.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void swipe_item_menu_item_handler<platform::windows>::map_icon_uri(swipe_item_menu_item& m) {
+void swipe_item_menu_item_handler<platform::windows>::map_icon_uri(basic_swipe_item_menu_item& m) {
     apply_icon_uri(m.icon_uri.get());
     m.icon_uri.changed.subscribe(icon_slot_, icon_cb_);
 }
 
-void swipe_item_menu_item_handler<platform::windows>::map_invoked(swipe_item_menu_item& m) {
+void swipe_item_menu_item_handler<platform::windows>::map_invoked(basic_swipe_item_menu_item& m) {
     if (native_ == nullptr) return;
     invoked_signal_ = &m.invoked;
     if (click_token_.value != 0) {
@@ -76,15 +76,14 @@ void swipe_item_menu_item_handler<platform::windows>::map_invoked(swipe_item_men
     } catch (...) {}
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement
 dispatch_swipe_item_menu_item(::mpapp::view* v) {
-    if (auto* m = dynamic_cast<::mpapp::swipe_item_menu_item*>(v); m && m->has_handler()) {
+    if (auto* m = dynamic_cast<::mpapp::internal::basic_swipe_item_menu_item*>(v); m && m->has_handler()) {
         return m->handler().native();
     }
     return nullptr;

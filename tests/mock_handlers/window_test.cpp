@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::window` (T-0011).
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_window` (T-0011).
 //
 // Validates the window property-mapper contract and the imperative
 // commands (`show()` / `close()`) plus the activated/closed signal
@@ -18,7 +18,7 @@ using namespace mpapp;
 
 TEST_CASE("window mock handler records initial property values on bind",
           "[mock][window]") {
-    window w;
+    internal::basic_window w;
     window_handler<platform::mock> h;
 
     h.map_title(w);
@@ -42,7 +42,7 @@ TEST_CASE("window mock handler records initial property values on bind",
 
 TEST_CASE("window mock handler fires once per real title change",
           "[mock][window]") {
-    window w;
+    internal::basic_window w;
     window_handler<platform::mock> h;
 
     h.map_title(w);
@@ -58,8 +58,8 @@ TEST_CASE("window mock handler fires once per real title change",
 
 TEST_CASE("window mock handler records content.present transition when assigned a view",
           "[mock][window]") {
-    button some_button{};
-    window w;
+    internal::basic_button some_button{};
+    internal::basic_window w;
     window_handler<platform::mock> h;
 
     h.map_content(w);
@@ -76,7 +76,7 @@ TEST_CASE("window mock handler records content.present transition when assigned 
 
 TEST_CASE("window::show toggles is_visible and the handler records it",
           "[mock][window]") {
-    window w;
+    internal::basic_window w;
     window_handler<platform::mock> h;
 
     h.map_is_visible(w);
@@ -89,7 +89,7 @@ TEST_CASE("window::show toggles is_visible and the handler records it",
 
 TEST_CASE("window::close fires closed signal and toggles is_visible",
           "[mock][window]") {
-    window w;
+    internal::basic_window w;
     window_handler<platform::mock> h;
     h.map_is_visible(w);
 
@@ -111,7 +111,7 @@ TEST_CASE("window::close fires closed signal and toggles is_visible",
 
 TEST_CASE("window activated simulator drives user-side subscribers",
           "[mock][window]") {
-    window w;
+    internal::basic_window w;
     window_handler<platform::mock> h;
 
     int activated_count = 0;

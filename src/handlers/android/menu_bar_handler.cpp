@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android menu_bar handler implementation.
+// Part of MPAPP. Android basic_menu_bar handler implementation.
 
 #include "mpapp/handlers/android/menu_bar_handler.hpp"
 
@@ -11,9 +11,9 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/menu_bar_item_handler.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/menu_bar_item.hpp"
+#include "mpapp/internal/basic_menu_bar_item.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -35,7 +35,7 @@ jobject make_toolbar(JNIEnv* env, jobject context) {
     return global;
 }
 
-// Clear the toolbar's menu and add one MenuItem per child menu_bar_item.
+// Clear the basic_toolbar's menu and add one MenuItem per child basic_menu_bar_item.
 // Returns silently on any JNI exception. Mirrors toolbar_handler's
 // approach.
 void rebuild_menu(JNIEnv* env, jobject toolbar_obj,
@@ -84,7 +84,7 @@ void rebuild_menu(JNIEnv* env, jobject toolbar_obj,
 
     for (view* child : items) {
         if (child == nullptr) continue;
-        auto* mbi = dynamic_cast<menu_bar_item*>(child);
+        auto* mbi = dynamic_cast<basic_menu_bar_item*>(child);
         if (mbi == nullptr || !mbi->has_handler()) continue;
         const std::string& title = mbi->handler().current_title();
         jstring js = env->NewStringUTF(title.c_str());
@@ -124,19 +124,18 @@ void menu_bar_handler<platform::android>::apply_items(const std::vector<view*>& 
     rebuild_menu(env, native_, v);
 }
 
-void menu_bar_handler<platform::android>::map_items(menu_bar& b) {
+void menu_bar_handler<platform::android>::map_items(basic_menu_bar& b) {
     apply_items(b.items.get());
     b.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // --- ADR-0013 self-registration --------------------------------------------
 
 namespace {
 
 jobject dispatch_menu_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::menu_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_menu_bar*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

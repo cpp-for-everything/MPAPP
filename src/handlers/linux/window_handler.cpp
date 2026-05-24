@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — GTK4 window handler implementation.
+// Part of MPAPP. T-0011 — GTK4 basic_window handler implementation.
 
 #include "mpapp/handlers/linux/window_handler.hpp"
 
@@ -9,20 +9,20 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 #include "mpapp/border.hpp"
-#include "mpapp/box_view.hpp"
-#include "mpapp/date_picker.hpp"
-#include "mpapp/image.hpp"
-#include "mpapp/image_button.hpp"
-#include "mpapp/picker.hpp"
-#include "mpapp/time_picker.hpp"
-#include "mpapp/progress_bar.hpp"
-#include "mpapp/search_bar.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_date_picker.hpp"
+#include "mpapp/internal/basic_image.hpp"
+#include "mpapp/internal/basic_image_button.hpp"
+#include "mpapp/internal/basic_picker.hpp"
+#include "mpapp/internal/basic_time_picker.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/linux/activity_indicator_handler.hpp"
 #include "mpapp/handlers/linux/border_handler.hpp"
 #include "mpapp/handlers/linux/box_view_handler.hpp"
@@ -44,15 +44,15 @@
 #include "mpapp/handlers/linux/stack_layout_handler.hpp"
 #include "mpapp/handlers/linux/stepper_handler.hpp"
 #include "mpapp/handlers/linux/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/scroll_view.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stack_layout.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_scroll_view.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 window_handler<platform::linux_>::window_handler() = default;
 
@@ -125,7 +125,7 @@ void window_handler<platform::linux_>::apply_is_visible(bool v) {
 namespace {
 
 void on_window_close_request(GtkWindow* /*win*/, gpointer user_data) {
-    auto* w = static_cast<mpapp::window*>(user_data);
+    auto* w = static_cast<mpapp::internal::basic_window*>(user_data);
     if (w != nullptr) {
         w->closed.emit();
     }
@@ -133,7 +133,7 @@ void on_window_close_request(GtkWindow* /*win*/, gpointer user_data) {
 
 } // namespace
 
-void window_handler<platform::linux_>::bind(window& w) {
+void window_handler<platform::linux_>::bind(basic_window& w) {
     bound_ = &w;
 
     if (native_ == nullptr) {
@@ -170,6 +170,5 @@ void window_handler<platform::linux_>::bind(window& w) {
                      &w);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__

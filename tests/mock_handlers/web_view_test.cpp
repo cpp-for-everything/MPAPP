@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::web_view`.
+// Mock-handler tests for `mpapp::internal::basic_web_view`.
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ using namespace mpapp;
 
 TEST_CASE("web_view defaults",
           "[mock][web_view]") {
-    web_view wv;
+    internal::basic_web_view wv;
     CHECK(wv.url.get().empty());
     CHECK(wv.html_source.get().empty());
     CHECK(wv.is_loading.get()     == false);
@@ -23,7 +23,7 @@ TEST_CASE("web_view defaults",
 
 TEST_CASE("load() updates url + emits navigating/navigated",
           "[mock][web_view]") {
-    web_view wv;
+    internal::basic_web_view wv;
     int nav_starts = 0, nav_ends = 0;
     std::string seen;
     struct s_cb { int* n; std::string* seen;
@@ -47,7 +47,7 @@ TEST_CASE("load() updates url + emits navigating/navigated",
 
 TEST_CASE("mock handler records url + is_loading",
           "[mock][web_view]") {
-    web_view wv;
+    internal::basic_web_view wv;
     web_view_handler<platform::mock> h;
     h.map_url(wv);
     h.map_is_loading(wv);

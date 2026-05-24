@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android content_view handler implementation.
+// Android basic_content_view handler implementation.
 
 #include "mpapp/handlers/android/content_view_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -70,24 +70,23 @@ void content_view_handler<platform::android>::apply_content(const std::shared_pt
     env->DeleteLocalRef(vg);
 }
 
-void content_view_handler<platform::android>::map_content(content_view& c) {
+void content_view_handler<platform::android>::map_content(basic_content_view& c) {
     apply_content(c.content.get());
     c.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void content_view_handler<platform::android>::bind_content(content_view& c, view& child) {
+void content_view_handler<platform::android>::bind_content(basic_content_view& c, view& child) {
     c.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-#include "mpapp/content_view.hpp"
+#include "mpapp/internal/basic_content_view.hpp"
 
 namespace {
 
 jobject dispatch_content_view(::mpapp::view* v) {
-    if (auto* cv = dynamic_cast<::mpapp::content_view*>(v); cv && cv->has_handler()) {
+    if (auto* cv = dynamic_cast<::mpapp::internal::basic_content_view*>(v); cv && cv->has_handler()) {
         return cv->handler().native();
     }
     return nullptr;

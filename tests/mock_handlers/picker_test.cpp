@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::picker`.
+// Mock-handler tests for `mpapp::internal::basic_picker`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("picker mock records initial values on bind",
           "[mock][picker]") {
-    picker p;
+    internal::basic_picker p;
     picker_handler<platform::mock> h;
 
     h.map_items(p);
@@ -27,7 +27,7 @@ TEST_CASE("picker mock records initial values on bind",
 
 TEST_CASE("picker records items.count when collection changes",
           "[mock][picker]") {
-    picker p;
+    internal::basic_picker p;
     picker_handler<platform::mock> h;
 
     h.map_items(p);
@@ -41,7 +41,7 @@ TEST_CASE("picker records items.count when collection changes",
 
 TEST_CASE("picker records selection changes",
           "[mock][picker]") {
-    picker p;
+    internal::basic_picker p;
     picker_handler<platform::mock> h;
 
     h.map_selected_index(p);

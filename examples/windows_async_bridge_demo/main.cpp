@@ -19,7 +19,6 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
 #include <mpapp/handlers/window_handler.hpp>
@@ -73,16 +72,16 @@ public:
         bind_label(pending_label_,       pending_label_handler_,
                    "pending_count: 0");
 
-        bind_button(btn_sync_, btn_sync_handler_,
+        bind_button(btn_sync_,
                     "dispatch  add_sync(2, 3)",
                     btn_sync_slot_, btn_sync_cb_);
-        bind_button(btn_async_inline_, btn_async_inline_handler_,
+        bind_button(btn_async_inline_,
                     "dispatch_async  add_async_inline(10, 20)",
                     btn_async_inline_slot_, btn_async_inline_cb_);
-        bind_button(btn_async_defer_, btn_async_defer_handler_,
+        bind_button(btn_async_defer_,
                     "dispatch_async  defer_add(7, 8)",
                     btn_async_defer_slot_, btn_async_defer_cb_);
-        bind_button(btn_resolve_, btn_resolve_handler_,
+        bind_button(btn_resolve_,
                     "resolve pending  defer_add",
                     btn_resolve_slot_, btn_resolve_cb_);
 
@@ -118,12 +117,11 @@ private:
         lbl.text = text;
     }
     template <class Cb>
-    void bind_button(mpapp::button& btn, mpapp::button_handler<wp>& h,
+    void bind_button(mpapp::button& btn,
                      const std::string& text,
                      mpapp::signal_slot<>& slot, Cb& cb) {
-        btn.set_handler(h);
-        h.map_text(btn);
-        h.map_clicked(btn);
+        // `mpapp::button` auto-binds its embedded handler in its ctor;
+        // this helper just sets the label + click subscription.
         btn.text = text;
         btn.clicked.subscribe(slot, cb);
     }
@@ -209,10 +207,6 @@ private:
     mpapp::label_handler<wp>        last_request_label_handler_{};
     mpapp::label_handler<wp>        last_response_label_handler_{};
     mpapp::label_handler<wp>        pending_label_handler_{};
-    mpapp::button_handler<wp>       btn_sync_handler_{};
-    mpapp::button_handler<wp>       btn_async_inline_handler_{};
-    mpapp::button_handler<wp>       btn_async_defer_handler_{};
-    mpapp::button_handler<wp>       btn_resolve_handler_{};
     mpapp::stack_layout_handler<wp> layout_handler_{};
     mpapp::window_handler<wp>       window_handler_{};
 

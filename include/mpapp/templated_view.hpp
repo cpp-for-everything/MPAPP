@@ -1,73 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/TemplatedView.md
 //
-// `mpapp::templated_view` — single-child container whose surface is
-// supplied by an external `ControlTemplate`. Mirrors MAUI's
-// `TemplatedView`, the base class for any "lookless" control whose
-// visual chrome is theme-driven (search boxes, chips, custom cards).
+// `mpapp::templated_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_templated_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::templated_view x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// For M-04b the templating engine is still a P3 design item, so this
-// surface is intentionally minimal:
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
 //
-//   * `content`     — the live child view rendered by the handler. Real
-//                     platforms host this directly via the same
-//                     single-child container pattern as `content_view`.
-//   * `template_id` — a string handle naming a `ControlTemplate`. The
-//                     handlers record it (so XAML/markup wiring can be
-//                     verified end-to-end), but the actual template
-//                     instantiation step is deferred to the templating
-//                     engine ADR. Setting `template_id` does not, in
-//                     this revision, replace `content` automatically.
-//
-// The shape is deliberately analogous to `content_view`: a templated
-// view *is* a content view whose contents are supposed to come from a
-// template. Until the templating engine lands, the user is expected to
-// set `content` themselves (or let an interpreter do so) — what this
-// class provides is the typed Observable slot pair.
+//     mpapp::internal::basic_templated_view x;
+//     mpapp::templated_view_handler<mpapp::platform::mock> h;
+//     h.map_content(x);
 
 #ifndef MPAPP_TEMPLATED_VIEW_HPP
 #define MPAPP_TEMPLATED_VIEW_HPP
 
-#include <memory>
-#include <string>
+#include "internal/basic_templated_view.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_templated_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/templated_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class templated_view_handler;
-
-class templated_view : public view {
+class templated_view : public internal::basic_templated_view {
 public:
-    templated_view()                                     = default;
-    ~templated_view() override                           = default;
-    templated_view(const templated_view&)                = delete;
-    templated_view& operator=(const templated_view&)     = delete;
-    templated_view(templated_view&&)                     = delete;
-    templated_view& operator=(templated_view&&)          = delete;
+    templated_view() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_content(*this);
+        embedded_handler_.map_template_id(*this);
+    }
 
-    // ----- Properties ----------------------------------------------------
-    // The currently-hosted view. When non-null the handler renders it
-    // directly into the platform-native single-child container.
-    Observable<std::shared_ptr<view>>   content{};
-
-    // String handle for the ControlTemplate that *would* generate
-    // `content`. Recorded by each platform handler for end-to-end
-    // verification; template instantiation itself is deferred.
-    Observable<std::string>             template_id{""};
-
-    // ----- Handler -------------------------------------------------------
-    templated_view_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const templated_view_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                             has_handler() const noexcept { return handler_ != nullptr; }
-    void                                             set_handler(templated_view_handler<platform::current>& h) noexcept { handler_ = &h; }
+    templated_view(const templated_view&)            = delete;
+    templated_view& operator=(const templated_view&) = delete;
+    templated_view(templated_view&&)                 = delete;
+    templated_view& operator=(templated_view&&)      = delete;
 
 private:
-    templated_view_handler<platform::current>* handler_ = nullptr;
+    internal::templated_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::templated_view_handler<>` (host-current) and
+// `mpapp::templated_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using templated_view_handler = internal::templated_view_handler<Platform>;
 
 } // namespace mpapp
 

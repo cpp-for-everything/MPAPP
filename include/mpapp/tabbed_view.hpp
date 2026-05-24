@@ -1,55 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/TabbedView.md
 //
-// `mpapp::tabbed_view` — embeddable tabs container with a horizontal
-// tab bar and a single visible page region. This is the M-04b "real
-// handlers on three platforms" landing of the widget; the mock surface
-// is intentionally narrow — just `tab_titles` (the labels rendered on
-// the tab strip) and `selected_index` (the active tab).
+// `mpapp::tabbed_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_tabbed_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::tabbed_view x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// The richer surface from the component doc (bar colors, child page
-// templates, ItemsSource binding) lands in follow-ups alongside the
-// `TabbedPage` page-level wiring and the templating engine ADR.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_tabbed_view x;
+//     mpapp::tabbed_view_handler<mpapp::platform::mock> h;
+//     h.map_tab_titles(x);
 
 #ifndef MPAPP_TABBED_VIEW_HPP
 #define MPAPP_TABBED_VIEW_HPP
 
-#include <string>
-#include <vector>
+#include "internal/basic_tabbed_view.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_tabbed_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/tabbed_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class tabbed_view_handler;
-
-class tabbed_view : public view {
+class tabbed_view : public internal::basic_tabbed_view {
 public:
-    tabbed_view() = default;
+    tabbed_view() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_tab_titles(*this);
+        embedded_handler_.map_selected_index(*this);
+    }
 
-    // The tab labels rendered on the horizontal tab strip. On Windows
-    // each label becomes a `mux::Controls::TabViewItem`; on Linux each
-    // label is a `GtkLabel` attached to an empty page placeholder in a
-    // `GtkNotebook`; on Android each label becomes a `TabHost` tab.
-    // Adding/removing entries rebuilds the strip.
-    Observable<std::vector<std::string>> tab_titles{};
-
-    // The currently-selected tab index (0-based). -1 means "no
-    // selection"; out-of-range values are clamped by the host control's
-    // own semantics (most platforms silently ignore an invalid index).
-    Observable<int>                      selected_index{-1};
-
-    tabbed_view_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const tabbed_view_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                          has_handler() const noexcept { return handler_ != nullptr; }
-    void                                          set_handler(tabbed_view_handler<platform::current>& h) noexcept { handler_ = &h; }
+    tabbed_view(const tabbed_view&)            = delete;
+    tabbed_view& operator=(const tabbed_view&) = delete;
+    tabbed_view(tabbed_view&&)                 = delete;
+    tabbed_view& operator=(tabbed_view&&)      = delete;
 
 private:
-    tabbed_view_handler<platform::current>* handler_ = nullptr;
+    internal::tabbed_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::tabbed_view_handler<>` (host-current) and
+// `mpapp::tabbed_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using tabbed_view_handler = internal::tabbed_view_handler<Platform>;
 
 } // namespace mpapp
 

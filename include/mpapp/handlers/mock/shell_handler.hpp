@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock handler for `mpapp::shell`.
+// Part of MPAPP. Mock handler for `mpapp::basic_shell`.
 
 #ifndef MPAPP_HANDLERS_MOCK_SHELL_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_SHELL_HANDLER_HPP
@@ -7,10 +7,10 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../shell.hpp"
+#include "../../internal/basic_shell.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class shell_handler<platform::mock> : public mock_handler_base {
@@ -23,17 +23,17 @@ public:
     shell_handler(shell_handler&&)                 = delete;
     shell_handler& operator=(shell_handler&&)      = delete;
 
-    void map_current_route(shell& s) {
+    void map_current_route(basic_shell& s) {
         record_change("current_route", s.current_route.get());
         s.current_route.changed.subscribe(slot_route_, route_cb_);
     }
 
-    void map_current_tab_index(shell& s) {
+    void map_current_tab_index(basic_shell& s) {
         record_change("current_tab_index", s.current_tab_index.get());
         s.current_tab_index.changed.subscribe(slot_tab_, tab_cb_);
     }
 
-    void map_is_flyout_open(shell& s) {
+    void map_is_flyout_open(basic_shell& s) {
         record_change("is_flyout_open", s.is_flyout_open.get());
         s.is_flyout_open.changed.subscribe(slot_fly_, fly_cb_);
     }
@@ -63,6 +63,5 @@ private:
     signal_slot<const bool&>        slot_fly_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_SHELL_HANDLER_HPP

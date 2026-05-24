@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android swipe_view handler.
+// Part of MPAPP. Android basic_swipe_view handler.
 //
 // `android.widget.FrameLayout` host for the wrapped content. The
 // `androidx.viewpager2.widget.ViewPager2`-driven swipe is deferred to a
@@ -14,14 +14,14 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../swipe_view.hpp"
+#include "../../internal/basic_swipe_view.hpp"
 #include "../../view.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class swipe_view_handler<platform::android> {
@@ -34,9 +34,9 @@ public:
     swipe_view_handler(swipe_view_handler&&)                 = delete;
     swipe_view_handler& operator=(swipe_view_handler&&)      = delete;
 
-    void map_content(swipe_view& sv);
-    void map_left_items(swipe_view& sv);
-    void map_right_items(swipe_view& sv);
+    void map_content(basic_swipe_view& sv);
+    void map_left_items(basic_swipe_view& sv);
+    void map_right_items(basic_swipe_view& sv);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -70,7 +70,6 @@ private:
     signal_slot<const std::vector<view*>&>      right_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SWIPE_VIEW_HANDLER_HPP

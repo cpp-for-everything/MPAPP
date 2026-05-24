@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 search_bar handler implementation.
+// Part of MPAPP. GTK4 basic_search_bar handler implementation.
 
 #include "mpapp/handlers/linux/search_bar_handler.hpp"
 
@@ -7,7 +7,7 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 search_bar_handler<platform::linux_>::search_bar_handler() {
     native_ = gtk_search_entry_new();
@@ -28,29 +28,27 @@ void search_bar_handler<platform::linux_>::apply_placeholder(const std::string& 
         GTK_ENTRY(static_cast<GtkWidget*>(native_)), v.c_str());
 }
 
-void search_bar_handler<platform::linux_>::map_text(search_bar& s) {
+void search_bar_handler<platform::linux_>::map_text(basic_search_bar& s) {
     apply_text(s.text.get());
     s.text.changed.subscribe(text_slot_, text_cb_);
 }
-void search_bar_handler<platform::linux_>::map_placeholder(search_bar& s) {
+void search_bar_handler<platform::linux_>::map_placeholder(basic_search_bar& s) {
     apply_placeholder(s.placeholder.get());
     s.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register search_bar so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_search_bar so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/search_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
 
 namespace {
 
 GtkWidget* dispatch_search_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::search_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_search_bar*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

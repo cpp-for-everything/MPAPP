@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock menu_bar_item handler — records `title` via the
+// Part of MPAPP. Mock basic_menu_bar_item handler — records `title` via the
 // standard `bind()` plumbing and `items.count` for the sub-item
-// collection (same pattern used by menu_bar / toolbar / picker).
+// collection (same pattern used by basic_menu_bar / basic_toolbar / basic_picker).
 
 #ifndef MPAPP_HANDLERS_MOCK_MENU_BAR_ITEM_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_MENU_BAR_ITEM_HANDLER_HPP
@@ -10,13 +10,13 @@
 #include <string>
 #include <vector>
 
-#include "../../menu_bar_item.hpp"
+#include "../../internal/basic_menu_bar_item.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_bar_item_handler<platform::mock>
@@ -24,11 +24,11 @@ class menu_bar_item_handler<platform::mock>
 public:
     menu_bar_item_handler() = default;
 
-    void map_title(menu_bar_item& m) {
+    void map_title(basic_menu_bar_item& m) {
         bind("title", m.title, binding_title_);
     }
 
-    void map_items(menu_bar_item& m) {
+    void map_items(basic_menu_bar_item& m) {
         record("items.count", m.items.get().size());
         m.items.changed.subscribe(items_slot_, items_cb_);
     }
@@ -46,6 +46,5 @@ private:
     signal_slot<std::vector<view*> const&>    items_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_MENU_BAR_ITEM_HANDLER_HPP

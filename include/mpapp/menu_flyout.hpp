@@ -1,63 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/MenuFlyout.md
 //
-// `mpapp::menu_flyout` — popup / context menu host. A flyout owns a flat
-// list of menu elements (items / separators / sub-items) and an
-// `is_open` toggle. The richer MAUI surface (anchor placement,
-// `show(point)`/`hide()` commands, KeyboardAccelerators) lands
-// incrementally alongside the M-05 input plumbing; the M-04b real
-// surface is the items + visibility pair every host platform can
-// implement uniformly.
+// `mpapp::menu_flyout` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_menu_flyout` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::menu_flyout x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// `items` is held as `Observable<std::vector<view*>>` — the menu
-// flyout children (menu_flyout_item / menu_flyout_separator /
-// menu_flyout_sub_item) are themselves `view` subclasses, dispatched
-// to native widgets through the ADR-0013 per-platform registry.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
 //
-// Lifetime: the `items` vector stores non-owning pointers; the user
-// owns each element's lifetime. The handlers rebuild the native menu
-// whenever the items vector mutates (same shape as `toolbar::items`).
+//     mpapp::internal::basic_menu_flyout x;
+//     mpapp::menu_flyout_handler<mpapp::platform::mock> h;
+//     h.map_items(x);
 
 #ifndef MPAPP_MENU_FLYOUT_HPP
 #define MPAPP_MENU_FLYOUT_HPP
 
-#include <vector>
+#include "internal/basic_menu_flyout.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_menu_flyout` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/menu_flyout_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class menu_flyout_handler;
-
-class menu_flyout : public view {
+class menu_flyout : public internal::basic_menu_flyout {
 public:
-    menu_flyout()                                = default;
-    ~menu_flyout() override                      = default;
-    menu_flyout(const menu_flyout&)              = delete;
-    menu_flyout& operator=(const menu_flyout&)   = delete;
-    menu_flyout(menu_flyout&&)                   = delete;
-    menu_flyout& operator=(menu_flyout&&)        = delete;
+    menu_flyout() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_items(*this);
+        embedded_handler_.map_is_open(*this);
+    }
 
-    // ----- Properties ----------------------------------------------------
-    // Flat list of child menu elements (menu_flyout_item /
-    // menu_flyout_separator / menu_flyout_sub_item). Non-owning.
-    Observable<std::vector<view*>>  items{};
-
-    // True when the flyout is currently shown.
-    Observable<bool>                is_open{false};
-
-    // ----- Handler -------------------------------------------------------
-    menu_flyout_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const menu_flyout_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                          has_handler() const noexcept { return handler_ != nullptr; }
-    void                                          set_handler(menu_flyout_handler<platform::current>& h) noexcept { handler_ = &h; }
+    menu_flyout(const menu_flyout&)            = delete;
+    menu_flyout& operator=(const menu_flyout&) = delete;
+    menu_flyout(menu_flyout&&)                 = delete;
+    menu_flyout& operator=(menu_flyout&&)      = delete;
 
 private:
-    menu_flyout_handler<platform::current>* handler_ = nullptr;
+    internal::menu_flyout_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::menu_flyout_handler<>` (host-current) and
+// `mpapp::menu_flyout_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using menu_flyout_handler = internal::menu_flyout_handler<Platform>;
 
 } // namespace mpapp
 

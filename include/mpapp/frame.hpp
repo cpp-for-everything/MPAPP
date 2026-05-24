@@ -12,41 +12,47 @@
 #ifndef MPAPP_FRAME_HPP
 #define MPAPP_FRAME_HPP
 
-#include <memory>
+#include "internal/basic_frame.hpp"
 
-#include "box_view.hpp"   // for `color`
-#include "layout.hpp"     // for `thickness`
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_frame` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/frame_handler.hpp"
 
 namespace mpapp {
-
-template <class Platform = platform::current>
-class frame_handler;
 
 // `[[deprecated]]` attribute is applied so any user code touching the
 // type gets a compiler diagnostic suggesting the replacement. This
 // matches MAUI's `[Obsolete("Use Border instead.")]` on the C# control.
+// The surface (`internal::basic_frame`) is NOT marked deprecated so the
+// wrapper + handler can inherit / hold it without warnings.
 class [[deprecated("mpapp::frame is deprecated; use mpapp::border instead.")]]
-frame : public view {
+frame : public internal::basic_frame {
 public:
-    frame() = default;
+    frame() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_content(*this);
+        embedded_handler_.map_border_color(*this);
+        embedded_handler_.map_has_shadow(*this);
+        embedded_handler_.map_corner_radius(*this);
+        embedded_handler_.map_padding(*this);
+    }
 
-    Observable<std::shared_ptr<view>>   content{};
-    Observable<color>                   border_color{};
-    Observable<bool>                    has_shadow{true};
-    Observable<float>                   corner_radius{-1.0f};   // -1 = platform default
-    Observable<thickness>               padding{thickness{20.0}};
-
-    frame_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const frame_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                    has_handler() const noexcept { return handler_ != nullptr; }
-    void                                    set_handler(frame_handler<platform::current>& h) noexcept { handler_ = &h; }
+    frame(const frame&)            = delete;
+    frame& operator=(const frame&) = delete;
+    frame(frame&&)                 = delete;
+    frame& operator=(frame&&)      = delete;
 
 private:
-    frame_handler<platform::current>* handler_ = nullptr;
+    internal::frame_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::frame_handler<>` (host-current) and
+// `mpapp::frame_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using frame_handler = internal::frame_handler<Platform>;
 
 } // namespace mpapp
 

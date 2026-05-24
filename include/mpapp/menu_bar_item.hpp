@@ -1,61 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/MenuBarItem.md
 //
-// `mpapp::menu_bar_item` — a single top-level entry inside a [[MenuBar]]
-// ("File", "Edit", "View", …). Exposes a `title` label and a child
-// collection that real handlers render as a drop-down menu when the
-// entry is activated. The child collection is currently typed as
-// `std::vector<view*>` (the M-04b cross-platform subset) so the menu_bar
-// family parents can share the dispatch-by-view-pointer pattern used by
-// stack_layout / scroll_view / border. Richer item types (separator,
-// sub-item) land alongside the M-04c menu_flyout family.
+// `mpapp::menu_bar_item` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_menu_bar_item` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::menu_bar_item x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// Real handlers map `title` → the platform native string slot and
-// rebuild a child list whenever `items` changes. The rebuild is naive
-// (clear + re-populate) for now; granular `MenuBarItemHandlerUpdate`
-// patching mirrors MAUI's surface and lands with the binding-layer work.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_menu_bar_item x;
+//     mpapp::menu_bar_item_handler<mpapp::platform::mock> h;
+//     h.map_title(x);
 
 #ifndef MPAPP_MENU_BAR_ITEM_HPP
 #define MPAPP_MENU_BAR_ITEM_HPP
 
-#include <string>
-#include <vector>
+#include "internal/basic_menu_bar_item.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_menu_bar_item` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/menu_bar_item_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class menu_bar_item_handler;
-
-class menu_bar_item : public view {
+class menu_bar_item : public internal::basic_menu_bar_item {
 public:
-    menu_bar_item() = default;
+    menu_bar_item() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_title(*this);
+        embedded_handler_.map_items(*this);
+    }
 
     menu_bar_item(const menu_bar_item&)            = delete;
     menu_bar_item& operator=(const menu_bar_item&) = delete;
     menu_bar_item(menu_bar_item&&)                 = delete;
     menu_bar_item& operator=(menu_bar_item&&)      = delete;
 
-    // Label rendered as the top-level entry text ("File", "Edit", …).
-    Observable<std::string>          title{};
-
-    // Child entries that render in the drop-down. Non-owning pointers —
-    // ownership stays with the caller. Same shape used by `menu_bar`'s
-    // top-level `items` collection. The M-04b subset accepts any view*;
-    // the menu_flyout family lands a typed `menu_element` variant later.
-    Observable<std::vector<view*>>   items{};
-
-    menu_bar_item_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const menu_bar_item_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                            has_handler() const noexcept { return handler_ != nullptr; }
-    void                                            set_handler(menu_bar_item_handler<platform::current>& h) noexcept { handler_ = &h; }
-
 private:
-    menu_bar_item_handler<platform::current>* handler_ = nullptr;
+    internal::menu_bar_item_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::menu_bar_item_handler<>` (host-current) and
+// `mpapp::menu_bar_item_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using menu_bar_item_handler = internal::menu_bar_item_handler<Platform>;
 
 } // namespace mpapp
 

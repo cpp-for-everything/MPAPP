@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 templated_view handler implementation.
+// Part of MPAPP. WinUI 3 basic_templated_view handler implementation.
 
 #include "mpapp/handlers/windows/templated_view_handler.hpp"
 
@@ -12,10 +12,10 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-#include "mpapp/templated_view.hpp"
+#include "mpapp/internal/basic_templated_view.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -46,28 +46,27 @@ void templated_view_handler<platform::windows>::apply_template_id(const std::str
     template_id_ = v;
 }
 
-void templated_view_handler<platform::windows>::map_content(templated_view& t) {
+void templated_view_handler<platform::windows>::map_content(basic_templated_view& t) {
     apply_content(t.content.get());
     t.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void templated_view_handler<platform::windows>::map_template_id(templated_view& t) {
+void templated_view_handler<platform::windows>::map_template_id(basic_templated_view& t) {
     apply_template_id(t.template_id.get());
     t.template_id.changed.subscribe(template_id_slot_, template_id_cb_);
 }
 
-void templated_view_handler<platform::windows>::bind_content(templated_view& t, view& child) {
+void templated_view_handler<platform::windows>::bind_content(basic_templated_view& t, view& child) {
     t.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_templated_view(::mpapp::view* v) {
-    if (auto* t = dynamic_cast<::mpapp::templated_view*>(v); t && t->has_handler()) {
+    if (auto* t = dynamic_cast<::mpapp::internal::basic_templated_view*>(v); t && t->has_handler()) {
         return t->handler().native();
     }
     return nullptr;

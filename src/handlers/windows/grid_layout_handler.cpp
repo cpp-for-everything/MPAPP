@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 grid_layout handler implementation.
+// WinUI 3 basic_grid_layout handler implementation.
 
 #include "mpapp/handlers/windows/grid_layout_handler.hpp"
 
@@ -13,7 +13,7 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -67,7 +67,7 @@ void grid_layout_handler<platform::windows>::apply_column_spacing(double s) {
     native_.ColumnSpacing(s);
 }
 
-void grid_layout_handler<platform::windows>::add_child(grid_layout& g, view& child) {
+void grid_layout_handler<platform::windows>::add_child(basic_grid_layout& g, view& child) {
     if (native_ == nullptr) return;
     auto el = detail::windows_dispatch::dispatch(&child);
     if (el == nullptr) return;
@@ -83,33 +83,32 @@ void grid_layout_handler<platform::windows>::add_child(grid_layout& g, view& chi
     native_.Children().Append(el);
 }
 
-void grid_layout_handler<platform::windows>::map_row_definitions(grid_layout& g) {
+void grid_layout_handler<platform::windows>::map_row_definitions(basic_grid_layout& g) {
     rebuild_rows(g.row_definitions.get());
     g.row_definitions.changed.subscribe(rows_slot_, rows_cb_);
 }
 
-void grid_layout_handler<platform::windows>::map_column_definitions(grid_layout& g) {
+void grid_layout_handler<platform::windows>::map_column_definitions(basic_grid_layout& g) {
     rebuild_columns(g.column_definitions.get());
     g.column_definitions.changed.subscribe(cols_slot_, cols_cb_);
 }
 
-void grid_layout_handler<platform::windows>::map_row_spacing(grid_layout& g) {
+void grid_layout_handler<platform::windows>::map_row_spacing(basic_grid_layout& g) {
     apply_row_spacing(g.row_spacing.get());
     g.row_spacing.changed.subscribe(rsp_slot_, rsp_cb_);
 }
 
-void grid_layout_handler<platform::windows>::map_column_spacing(grid_layout& g) {
+void grid_layout_handler<platform::windows>::map_column_spacing(basic_grid_layout& g) {
     apply_column_spacing(g.column_spacing.get());
     g.column_spacing.changed.subscribe(csp_slot_, csp_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_grid_layout(::mpapp::view* v) {
-    if (auto* g = dynamic_cast<::mpapp::grid_layout*>(v); g && g->has_handler()) {
+    if (auto* g = dynamic_cast<::mpapp::internal::basic_grid_layout*>(v); g && g->has_handler()) {
         return g->handler().native();
     }
     return nullptr;

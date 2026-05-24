@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 entry_cell handler — horizontal GtkBox: leading GtkLabel +
+// GTK4 basic_entry_cell handler — horizontal GtkBox: leading GtkLabel +
 // trailing GtkEntry bound to `text`. GtkEntry "activate" signal
 // (Enter key) emits `completed`. Keyboard kind maps to
 // gtk_entry_set_input_purpose.
@@ -9,13 +9,13 @@
 
 #include <string>
 
-#include "../../entry_cell.hpp"
+#include "../../internal/basic_entry_cell.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class entry_cell_handler<platform::linux_> {
@@ -28,10 +28,10 @@ public:
     entry_cell_handler(entry_cell_handler&&)                 = delete;
     entry_cell_handler& operator=(entry_cell_handler&&)      = delete;
 
-    void map_label(entry_cell& c);
-    void map_text(entry_cell& c);
-    void map_placeholder(entry_cell& c);
-    void map_keyboard(entry_cell& c);
+    void map_label(basic_entry_cell& c);
+    void map_text(basic_entry_cell& c);
+    void map_placeholder(basic_entry_cell& c);
+    void map_keyboard(basic_entry_cell& c);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -65,7 +65,7 @@ private:
     unsigned long changed_handler_id_  = 0;
     unsigned long activate_handler_id_ = 0;
     bool          suppress_echo_ = false;
-    entry_cell*   bound_         = nullptr;
+    basic_entry_cell*   bound_         = nullptr;
 
     label_cb_t                          label_cb_{this};
     text_cb_t                           text_cb_{this};
@@ -77,7 +77,6 @@ private:
     signal_slot<const keyboard_kind&>   keyboard_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_ENTRY_CELL_HANDLER_HPP

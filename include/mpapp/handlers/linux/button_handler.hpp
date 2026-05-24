@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — GTK4 button handler.
+// Part of MPAPP. T-0011 — GTK4 basic_button handler.
 
 #ifndef MPAPP_HANDLERS_LINUX_BUTTON_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_BUTTON_HANDLER_HPP
 
-#include "../../button.hpp"
+#include "../../internal/basic_button.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class button_handler<platform::linux_> {
@@ -25,8 +25,8 @@ public:
     button_handler(button_handler&&)                 = delete;
     button_handler& operator=(button_handler&&)      = delete;
 
-    void map_text(button& b);
-    void map_clicked(button& b);
+    void map_text(basic_button& b);
+    void map_clicked(basic_button& b);
 
     // GtkWidget* (GtkButton), type-erased.
     void*       native() noexcept       { return native_; }
@@ -41,13 +41,13 @@ private:
     };
 
     void*                            native_      = nullptr; // GtkWidget*
-    button*                          bound_       = nullptr;
+    basic_button*                    bound_       = nullptr;
     unsigned long                    click_handler_id_ = 0;  // gulong from g_signal_connect
     text_callback                    text_cb_{this};
     signal_slot<const std::string&>  text_slot_{};
 };
 
-} // namespace mpapp
+} // namespace mpapp::internal
 
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_BUTTON_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 scroll_view handler — wraps
+// Part of MPAPP. WinUI 3 basic_scroll_view handler — wraps
 // mux::Controls::ScrollViewer.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_SCROLL_VIEW_HANDLER_HPP
@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "../../platform.hpp"
-#include "../../scroll_view.hpp"
+#include "../../internal/basic_scroll_view.hpp"
 #include "../../signal.hpp"
 
 #if defined(_WIN32)
@@ -16,7 +16,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Windows.Foundation.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class scroll_view_handler<platform::windows> {
@@ -29,12 +29,12 @@ public:
     scroll_view_handler(scroll_view_handler&&)                 = delete;
     scroll_view_handler& operator=(scroll_view_handler&&)      = delete;
 
-    void map_content(scroll_view& s);
-    void map_orientation(scroll_view& s);
+    void map_content(basic_scroll_view& s);
+    void map_orientation(basic_scroll_view& s);
 
-    // Convenience: assign a non-owning child to scroll_view.content
+    // Convenience: assign a non-owning child to basic_scroll_view.content
     // without forcing the caller to manage a real shared_ptr.
-    void bind_content(scroll_view& s, view& child);
+    void bind_content(basic_scroll_view& s, view& child);
 
     winrt::Microsoft::UI::Xaml::Controls::ScrollViewer&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::ScrollViewer& native() const noexcept { return native_; }
@@ -53,7 +53,7 @@ private:
     };
 
     winrt::Microsoft::UI::Xaml::Controls::ScrollViewer native_{nullptr};
-    scroll_view*                                       bound_ = nullptr;
+    basic_scroll_view*                                       bound_ = nullptr;
 
     content_cb_t                                  content_cb_{this};
     orient_cb_t                                   orient_cb_{this};
@@ -61,7 +61,6 @@ private:
     signal_slot<const scroll_orientation&>        orient_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_SCROLL_VIEW_HANDLER_HPP

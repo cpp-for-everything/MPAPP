@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android image handler implementation.
+// Android basic_image handler implementation.
 
 #include "mpapp/handlers/android/image_handler.hpp"
 
@@ -7,7 +7,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -117,29 +117,27 @@ void image_handler<platform::android>::apply_aspect(aspect_mode v) {
     env->DeleteLocalRef(cls);
 }
 
-void image_handler<platform::android>::map_source(image& i) {
+void image_handler<platform::android>::map_source(basic_image& i) {
     apply_source(i.source.get());
     i.source.changed.subscribe(source_slot_, source_cb_);
 }
-void image_handler<platform::android>::map_aspect(image& i) {
+void image_handler<platform::android>::map_aspect(basic_image& i) {
     apply_aspect(i.aspect.get());
     i.aspect.changed.subscribe(aspect_slot_, aspect_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register image so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_image so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/image.hpp"
+#include "mpapp/internal/basic_image.hpp"
 
 namespace {
 
 jobject dispatch_image(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::image*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_image*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

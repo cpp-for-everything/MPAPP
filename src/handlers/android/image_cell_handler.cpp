@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android image_cell handler implementation.
+// Android basic_image_cell handler implementation.
 
 #include "mpapp/handlers/android/image_cell_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -152,8 +152,8 @@ void apply_linear_weight_lp(JNIEnv* env, jobject child,
     env->DeleteLocalRef(lp);
 }
 
-// BitmapFactory.decodeFile — mirrors the existing image handler's loader
-// so image_cell behaves identically for filesystem-path image URIs.
+// BitmapFactory.decodeFile — mirrors the existing basic_image handler's loader
+// so basic_image_cell behaves identically for filesystem-path basic_image URIs.
 jobject decode_file(JNIEnv* env, const std::string& path) {
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass bf_cls = env->FindClass("android/graphics/BitmapFactory");
@@ -253,28 +253,27 @@ void image_cell_handler<platform::android>::apply_image_uri(const std::string& v
     }
 }
 
-void image_cell_handler<platform::android>::map_text(image_cell& c) {
+void image_cell_handler<platform::android>::map_text(basic_image_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void image_cell_handler<platform::android>::map_detail(image_cell& c) {
+void image_cell_handler<platform::android>::map_detail(basic_image_cell& c) {
     apply_detail(c.detail.get());
     c.detail.changed.subscribe(detail_slot_, detail_cb_);
 }
 
-void image_cell_handler<platform::android>::map_image_uri(image_cell& c) {
+void image_cell_handler<platform::android>::map_image_uri(basic_image_cell& c) {
     apply_image_uri(c.image_uri.get());
     c.image_uri.changed.subscribe(uri_slot_, uri_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_image_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::image_cell*>(v); c && c->has_ic_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_image_cell*>(v); c && c->has_ic_handler()) {
         return c->ic_handler().native();
     }
     return nullptr;

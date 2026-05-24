@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 check_box handler — wraps GtkCheckButton.
+// Part of MPAPP. GTK4 basic_check_box handler — wraps GtkCheckButton.
 
 #ifndef MPAPP_HANDLERS_LINUX_CHECK_BOX_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_CHECK_BOX_HANDLER_HPP
 
-#include "../../check_box.hpp"
+#include "../../internal/basic_check_box.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class check_box_handler<platform::linux_> {
@@ -23,7 +23,7 @@ public:
     check_box_handler(check_box_handler&&)                 = delete;
     check_box_handler& operator=(check_box_handler&&)      = delete;
 
-    void map_is_checked(check_box& c);
+    void map_is_checked(basic_check_box& c);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -43,7 +43,6 @@ private:
     signal_slot<const bool&> slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_CHECK_BOX_HANDLER_HPP

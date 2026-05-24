@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 switch_cell handler implementation.
+// GTK4 basic_switch_cell handler implementation.
 
 #include "mpapp/handlers/linux/switch_cell_handler.hpp"
 
@@ -9,12 +9,12 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct state_set_ctx {
-    switch_cell*                          target;
+    basic_switch_cell*                          target;
     switch_cell_handler<platform::linux_>* handler;
 };
 
@@ -91,12 +91,12 @@ void switch_cell_handler<platform::linux_>::apply_on(bool v) {
     suppress_echo_ = false;
 }
 
-void switch_cell_handler<platform::linux_>::map_text(switch_cell& c) {
+void switch_cell_handler<platform::linux_>::map_text(basic_switch_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void switch_cell_handler<platform::linux_>::map_on(switch_cell& c) {
+void switch_cell_handler<platform::linux_>::map_on(basic_switch_cell& c) {
     bound_ = &c;
     apply_on(c.on.get());
     c.on.changed.subscribe(on_slot_, on_cb_);
@@ -117,13 +117,12 @@ void switch_cell_handler<platform::linux_>::map_on(switch_cell& c) {
         static_cast<GConnectFlags>(0));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_switch_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::switch_cell*>(v); c && c->has_sc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_switch_cell*>(v); c && c->has_sc_handler()) {
         return GTK_WIDGET(c->sc_handler().native());
     }
     return nullptr;

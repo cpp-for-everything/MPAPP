@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 title_bar handler — wraps
+// Part of MPAPP. WinUI 3 basic_title_bar handler — wraps
 // `mux::Controls::TitleBar` (WinUI 3 1.5+). Surfaces the `Title` and
 // `Subtitle` text slots.
 
@@ -8,7 +8,7 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../title_bar.hpp"
+#include "../../internal/basic_title_bar.hpp"
 
 #if defined(_WIN32)
 
@@ -16,7 +16,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class title_bar_handler<platform::windows> {
@@ -28,8 +28,8 @@ public:
     title_bar_handler(title_bar_handler&&)                 = delete;
     title_bar_handler& operator=(title_bar_handler&&)      = delete;
 
-    void map_title(title_bar& t);
-    void map_subtitle(title_bar& t);
+    void map_title(basic_title_bar& t);
+    void map_subtitle(basic_title_bar& t);
 
     winrt::Microsoft::UI::Xaml::Controls::TitleBar&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::TitleBar& native() const noexcept { return native_; }
@@ -49,7 +49,6 @@ private:
     signal_slot<const std::string&>  subtitle_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_TITLE_BAR_HANDLER_HPP

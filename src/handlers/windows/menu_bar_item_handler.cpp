@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 menu_bar_item handler implementation.
+// Part of MPAPP. WinUI 3 basic_menu_bar_item handler implementation.
 
 #include "mpapp/handlers/windows/menu_bar_item_handler.hpp"
 
@@ -14,7 +14,7 @@
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -42,7 +42,7 @@ void menu_bar_item_handler<platform::windows>::apply_items(const std::vector<vie
         items.Clear();
         // The Items collection of a WinUI MenuBarItem expects
         // MenuFlyoutItemBase descendants (MenuFlyoutItem,
-        // MenuFlyoutSeparator, MenuFlyoutSubItem). The M-04c menu_flyout
+        // MenuFlyoutSeparator, MenuFlyoutSubItem). The M-04c basic_menu_flyout
         // family will populate these via the ADR-0013 registry; for the
         // M-04b baseline we accept anything that resolves to a
         // `MenuFlyoutItemBase` via the dispatch registry and silently
@@ -59,25 +59,24 @@ void menu_bar_item_handler<platform::windows>::apply_items(const std::vector<vie
     } catch (...) { /* ignore */ }
 }
 
-void menu_bar_item_handler<platform::windows>::map_title(menu_bar_item& m) {
+void menu_bar_item_handler<platform::windows>::map_title(basic_menu_bar_item& m) {
     apply_title(m.title.get());
     m.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-void menu_bar_item_handler<platform::windows>::map_items(menu_bar_item& m) {
+void menu_bar_item_handler<platform::windows>::map_items(basic_menu_bar_item& m) {
     apply_items(m.items.get());
     m.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // --- ADR-0013 self-registration --------------------------------------------
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement
 dispatch_menu_bar_item(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::menu_bar_item*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_menu_bar_item*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android swipe_view handler implementation.
+// Part of MPAPP. Android basic_swipe_view handler implementation.
 
 #include "mpapp/handlers/android/swipe_view_handler.hpp"
 
@@ -10,7 +10,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -94,7 +94,7 @@ void swipe_view_handler<platform::android>::apply_content(view* v) {
 
 void swipe_view_handler<platform::android>::apply_left_items(const std::vector<view*>& items) {
     // Gesture-revealed pane composition is deferred. We still walk the
-    // registry per entry so any child's native handle gets materialised
+    // registry per basic_entry so any child's native handle gets materialised
     // (mirrors the Linux degradation path).
     for (view* v : items) {
         if (v != nullptr) (void)detail::android_dispatch::dispatch(v);
@@ -107,29 +107,28 @@ void swipe_view_handler<platform::android>::apply_right_items(const std::vector<
     }
 }
 
-void swipe_view_handler<platform::android>::map_content(swipe_view& sv) {
+void swipe_view_handler<platform::android>::map_content(basic_swipe_view& sv) {
     apply_content(sv.content.get());
     sv.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void swipe_view_handler<platform::android>::map_left_items(swipe_view& sv) {
+void swipe_view_handler<platform::android>::map_left_items(basic_swipe_view& sv) {
     apply_left_items(sv.left_items.get());
     sv.left_items.changed.subscribe(left_slot_, left_cb_);
 }
 
-void swipe_view_handler<platform::android>::map_right_items(swipe_view& sv) {
+void swipe_view_handler<platform::android>::map_right_items(basic_swipe_view& sv) {
     apply_right_items(sv.right_items.get());
     sv.right_items.changed.subscribe(right_slot_, right_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------
 
 namespace {
 
 jobject dispatch_swipe_view(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::swipe_view*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_swipe_view*>(v); s && s->has_handler()) {
         return s->handler().native();
     }
     return nullptr;

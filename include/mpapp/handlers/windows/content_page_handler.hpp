@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 content_page handler — wraps a
+// Part of MPAPP. WinUI 3 basic_content_page handler — wraps a
 // `mux::Controls::Border` (which honors Padding) containing a 2-row
 // `Grid`:
 //   - row 0 ("Auto"): a `TextBlock` carrying `title`
@@ -9,10 +9,10 @@
 // is the WinUI navigation-host control and misbehaves when nested
 // inside another container's `ContentControl` or pane slot — the
 // late-layout-pass `STATUS_APPLICATION_INTERNAL_EXCEPTION` we
-// debugged in T-0014 hits content_page the same way it hit
-// navigation_page. Switched to Border (which is a plain UIElement
+// debugged in T-0014 hits basic_content_page the same way it hit
+// basic_navigation_page. Switched to Border (which is a plain UIElement
 // that wraps a single child + has a Padding property) so
-// content_page can be safely nested anywhere a UIElement is
+// basic_content_page can be safely nested anywhere a UIElement is
 // accepted. `padding` now writes to `Border.Padding`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_CONTENT_PAGE_HANDLER_HPP
@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 
-#include "../../content_page.hpp"
+#include "../../internal/basic_content_page.hpp"
 #include "../../layout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
@@ -31,7 +31,7 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class content_page_handler<platform::windows> {
@@ -44,12 +44,12 @@ public:
     content_page_handler(content_page_handler&&)                 = delete;
     content_page_handler& operator=(content_page_handler&&)      = delete;
 
-    void map_title(content_page& p);
-    void map_content(content_page& p);
-    void map_padding(content_page& p);
+    void map_title(basic_content_page& p);
+    void map_content(basic_content_page& p);
+    void map_padding(basic_content_page& p);
 
     // Convenience for tests / spike: assign a non-owning child.
-    void bind_content(content_page& p, view& child);
+    void bind_content(basic_content_page& p, view& child);
 
     winrt::Microsoft::UI::Xaml::Controls::Border&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Border& native() const noexcept { return native_; }
@@ -80,7 +80,6 @@ private:
     signal_slot<const thickness&>             padding_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_CONTENT_PAGE_HANDLER_HPP

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 entry_cell handler — Border wrapping a 2-column Grid:
-// leading label TextBlock + trailing TextBox bound to `text`. KeyDown
+// WinUI 3 basic_entry_cell handler — Border wrapping a 2-column Grid:
+// leading basic_label TextBlock + trailing TextBox bound to `text`. KeyDown
 // Enter emits `completed`. Keyboard kind maps to InputScope.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_ENTRY_CELL_HANDLER_HPP
@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "../../entry_cell.hpp"
+#include "../../internal/basic_entry_cell.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -18,7 +18,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Input.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class entry_cell_handler<platform::windows> {
@@ -31,10 +31,10 @@ public:
     entry_cell_handler(entry_cell_handler&&)                 = delete;
     entry_cell_handler& operator=(entry_cell_handler&&)      = delete;
 
-    void map_label(entry_cell& c);
-    void map_text(entry_cell& c);
-    void map_placeholder(entry_cell& c);
-    void map_keyboard(entry_cell& c);
+    void map_label(basic_entry_cell& c);
+    void map_text(basic_entry_cell& c);
+    void map_placeholder(basic_entry_cell& c);
+    void map_keyboard(basic_entry_cell& c);
 
     winrt::Microsoft::UI::Xaml::Controls::Border&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Border& native() const noexcept { return native_; }
@@ -69,7 +69,7 @@ private:
 
     winrt::event_token text_changed_token_{};
     winrt::event_token key_down_token_{};
-    entry_cell*        bound_         = nullptr;
+    basic_entry_cell*        bound_         = nullptr;
     bool               suppress_echo_ = false;
 
     label_cb_t                          label_cb_{this};
@@ -82,7 +82,6 @@ private:
     signal_slot<const keyboard_kind&>   keyboard_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_ENTRY_CELL_HANDLER_HPP

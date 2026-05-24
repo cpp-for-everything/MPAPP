@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 content_page handler — wraps a vertical `GtkBox`:
+// Part of MPAPP. GTK4 basic_content_page handler — wraps a vertical `GtkBox`:
 //   - top child: a `GtkLabel` carrying `title`
 //   - bottom child: a single-child host for `content`
 // Padding is applied via `gtk_widget_set_margin_*` on the outer box.
@@ -10,14 +10,14 @@
 #include <memory>
 #include <string>
 
-#include "../../content_page.hpp"
+#include "../../internal/basic_content_page.hpp"
 #include "../../layout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class content_page_handler<platform::linux_> {
@@ -30,11 +30,11 @@ public:
     content_page_handler(content_page_handler&&)                 = delete;
     content_page_handler& operator=(content_page_handler&&)      = delete;
 
-    void map_title(content_page& p);
-    void map_content(content_page& p);
-    void map_padding(content_page& p);
+    void map_title(basic_content_page& p);
+    void map_content(basic_content_page& p);
+    void map_padding(basic_content_page& p);
 
-    void bind_content(content_page& p, view& child);
+    void bind_content(basic_content_page& p, view& child);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -60,7 +60,6 @@ private:
     signal_slot<const thickness&>             padding_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_CONTENT_PAGE_HANDLER_HPP

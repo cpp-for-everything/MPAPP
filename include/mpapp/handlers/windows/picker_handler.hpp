@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 picker handler — wraps `mux::Controls::ComboBox`.
+// Part of MPAPP. WinUI 3 basic_picker handler — wraps `mux::Controls::ComboBox`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_PICKER_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_PICKER_HANDLER_HPP
@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "../../picker.hpp"
+#include "../../internal/basic_picker.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -15,7 +15,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class picker_handler<platform::windows> {
@@ -25,9 +25,9 @@ public:
     picker_handler(const picker_handler&)            = delete;
     picker_handler& operator=(const picker_handler&) = delete;
 
-    void map_items(picker& p);
-    void map_selected_index(picker& p);
-    void map_title(picker& p);
+    void map_items(basic_picker& p);
+    void map_selected_index(basic_picker& p);
+    void map_title(basic_picker& p);
 
     winrt::Microsoft::UI::Xaml::Controls::ComboBox&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::ComboBox& native() const noexcept { return native_; }
@@ -52,7 +52,6 @@ private:
     signal_slot<const std::string&>                     title_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_PICKER_HANDLER_HPP

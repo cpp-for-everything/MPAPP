@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 image handler — wraps `GtkPicture`.
+// GTK4 basic_image handler — wraps `GtkPicture`.
 
 #ifndef MPAPP_HANDLERS_LINUX_IMAGE_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_IMAGE_HANDLER_HPP
 
-#include "../../image.hpp"
+#include "../../internal/basic_image.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_handler<platform::linux_> {
@@ -20,8 +20,8 @@ public:
     image_handler(const image_handler&)            = delete;
     image_handler& operator=(const image_handler&) = delete;
 
-    void map_source(image& i);
-    void map_aspect(image& i);
+    void map_source(basic_image& i);
+    void map_aspect(basic_image& i);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -41,7 +41,6 @@ private:
     signal_slot<const aspect_mode&>    aspect_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_IMAGE_HANDLER_HPP

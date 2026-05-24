@@ -6,11 +6,11 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../switch_.hpp"
+#include "../../internal/basic_switch_.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class switch_handler<platform::linux_> {
@@ -23,7 +23,7 @@ public:
     switch_handler(switch_handler&&)                 = delete;
     switch_handler& operator=(switch_handler&&)      = delete;
 
-    void map_is_on(switch_& s);
+    void map_is_on(basic_switch_& s);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -43,7 +43,6 @@ private:
     signal_slot<const bool&> is_on_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_SWITCH_HANDLER_HPP

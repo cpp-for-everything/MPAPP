@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — GTK4 stack_layout handler implementation.
+// Part of MPAPP. T-0011 — GTK4 basic_stack_layout handler implementation.
 
 #include "mpapp/handlers/linux/stack_layout_handler.hpp"
 
@@ -9,20 +9,20 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 #include "mpapp/border.hpp"
-#include "mpapp/box_view.hpp"
-#include "mpapp/date_picker.hpp"
-#include "mpapp/image.hpp"
-#include "mpapp/image_button.hpp"
-#include "mpapp/picker.hpp"
-#include "mpapp/time_picker.hpp"
-#include "mpapp/progress_bar.hpp"
-#include "mpapp/search_bar.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_date_picker.hpp"
+#include "mpapp/internal/basic_image.hpp"
+#include "mpapp/internal/basic_image_button.hpp"
+#include "mpapp/internal/basic_picker.hpp"
+#include "mpapp/internal/basic_time_picker.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/linux/activity_indicator_handler.hpp"
 #include "mpapp/handlers/linux/border_handler.hpp"
 #include "mpapp/handlers/linux/box_view_handler.hpp"
@@ -42,13 +42,13 @@
 #include "mpapp/handlers/linux/slider_handler.hpp"
 #include "mpapp/handlers/linux/stepper_handler.hpp"
 #include "mpapp/handlers/linux/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -113,7 +113,7 @@ void stack_layout_handler<platform::linux_>::apply_vertical_alignment(v_align a)
     gtk_widget_set_valign(static_cast<GtkWidget*>(native_), to_native(a));
 }
 
-void stack_layout_handler<platform::linux_>::bind(stack_layout& s) {
+void stack_layout_handler<platform::linux_>::bind(basic_stack_layout& s) {
     bound_ = &s;
 
     apply_orientation(s.stack_orientation.get());
@@ -152,13 +152,12 @@ void stack_layout_handler<platform::linux_>::add_child(view& child) {
     // via ADR-0013; the legacy dynamic_cast chain has been removed.
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 namespace {
 
 GtkWidget* dispatch_stack_layout(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::stack_layout*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_stack_layout*>(v); s && s->has_handler()) {
         return GTK_WIDGET(s->handler().native());
     }
     return nullptr;

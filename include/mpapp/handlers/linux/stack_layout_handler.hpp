@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — GTK4 stack_layout handler.
+// Part of MPAPP. T-0011 — GTK4 basic_stack_layout handler.
 //
 // Wraps a `GtkBox`. Orientation drives `gtk_box_set_orientation`;
 // spacing drives `gtk_box_set_spacing`; padding drives the four
@@ -13,11 +13,11 @@
 #include "../../layout_types.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../stack_layout.hpp"
+#include "../../internal/basic_stack_layout.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class stack_layout_handler<platform::linux_> {
@@ -30,7 +30,7 @@ public:
     stack_layout_handler(stack_layout_handler&&)                 = delete;
     stack_layout_handler& operator=(stack_layout_handler&&)      = delete;
 
-    void bind(stack_layout& s);
+    void bind(basic_stack_layout& s);
     void add_child(view& child);
 
     // GtkBox*, type-erased.
@@ -66,7 +66,7 @@ private:
     };
 
     void*         native_ = nullptr;  // GtkWidget* (GtkBox)
-    stack_layout* bound_  = nullptr;
+    basic_stack_layout* bound_  = nullptr;
 
     orient_cb_t                       orient_cb_{this};
     spacing_cb_t                      spacing_cb_{this};
@@ -80,7 +80,6 @@ private:
     signal_slot<const v_align&>       v_align_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_STACK_LAYOUT_HANDLER_HPP

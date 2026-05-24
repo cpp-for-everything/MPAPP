@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android image_cell handler — horizontal LinearLayout: leading
+// Android basic_image_cell handler — horizontal LinearLayout: leading
 // ImageView + vertical LinearLayout of two TextViews. Image loaded
 // via ImageView.setImageURI(Uri.parse(image_uri)); ImageView handles
 // file://, content://, http:// (the latter requires app perms — same
@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include "../../image_cell.hpp"
+#include "../../internal/basic_image_cell.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -18,7 +18,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_cell_handler<platform::android> {
@@ -31,9 +31,9 @@ public:
     image_cell_handler(image_cell_handler&&)                 = delete;
     image_cell_handler& operator=(image_cell_handler&&)      = delete;
 
-    void map_text(image_cell& c);
-    void map_detail(image_cell& c);
-    void map_image_uri(image_cell& c);
+    void map_text(basic_image_cell& c);
+    void map_detail(basic_image_cell& c);
+    void map_image_uri(basic_image_cell& c);
 
     jobject native() const noexcept { return native_; }
 
@@ -69,7 +69,6 @@ private:
     signal_slot<const std::string&> uri_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_IMAGE_CELL_HANDLER_HPP

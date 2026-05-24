@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android image_button handler — wraps `android.widget.ImageButton`.
+// Android basic_image_button handler — wraps `android.widget.ImageButton`.
 
 #ifndef MPAPP_HANDLERS_ANDROID_IMAGE_BUTTON_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_IMAGE_BUTTON_HANDLER_HPP
 
-#include "../../image_button.hpp"
+#include "../../internal/basic_image_button.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_button_handler<platform::android> {
@@ -22,8 +22,8 @@ public:
     image_button_handler(const image_button_handler&)            = delete;
     image_button_handler& operator=(const image_button_handler&) = delete;
 
-    void map_source(image_button& b);
-    void map_aspect(image_button& b);
+    void map_source(basic_image_button& b);
+    void map_aspect(basic_image_button& b);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -43,7 +43,6 @@ private:
     signal_slot<const aspect_mode&>    aspect_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_IMAGE_BUTTON_HANDLER_HPP

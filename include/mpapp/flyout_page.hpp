@@ -1,78 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/FlyoutPage.md
-//                  vault/20_ADRs/ADR-0014-page-navigation-stack.md
 //
-// `mpapp::flyout_page` — page-level master/detail container. Has two
-// child Page slots (`flyout` and `detail`) and an `is_presented` toggle
-// for the flyout pane. Distinct from `flyout_view` (wave-2, view-level)
-// which has the same shape but is intended to live inside a page.
+// `mpapp::flyout_page` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_flyout_page` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::flyout_page x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_flyout_page x;
+//     mpapp::flyout_page_handler<mpapp::platform::mock> h;
+//     h.map_flyout(x);
 
 #ifndef MPAPP_FLYOUT_PAGE_HPP
 #define MPAPP_FLYOUT_PAGE_HPP
 
-#include <cstdint>
+#include "internal/basic_flyout_page.hpp"
 
-#include "observable.hpp"
-#include "page.hpp"
-#include "platform.hpp"
-#include "signal.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_flyout_page` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/flyout_page_handler.hpp"
 
 namespace mpapp {
 
-enum class flyout_layout_behavior : std::uint8_t {
-    default_           = 0,
-    popover            = 1,
-    split              = 2,
-    split_on_landscape = 3,
-    split_on_portrait  = 4,
-};
-
-template <class Platform = platform::current>
-class flyout_page_handler;
-
-class flyout_page : public page {
+class flyout_page : public internal::basic_flyout_page {
 public:
-    flyout_page() = default;
-    ~flyout_page() override = default;
+    flyout_page() {
+        set_fp_handler(embedded_handler_);
+        embedded_handler_.map_flyout(*this);
+        embedded_handler_.map_detail(*this);
+        embedded_handler_.map_is_presented(*this);
+    }
 
     flyout_page(const flyout_page&)            = delete;
     flyout_page& operator=(const flyout_page&) = delete;
     flyout_page(flyout_page&&)                 = delete;
     flyout_page& operator=(flyout_page&&)      = delete;
 
-    // ----- Slots --------------------------------------------------------
-
-    Observable<page*>                  flyout{nullptr};
-    Observable<page*>                  detail{nullptr};
-    Observable<bool>                   is_presented{false};
-    Observable<flyout_layout_behavior> layout_behavior{flyout_layout_behavior::default_};
-
-    // ----- Lifecycle signals --------------------------------------------
-
-    signal<bool> presented_changed{};   // emits new value after is_presented flip
-
-    // ----- Mutators -----------------------------------------------------
-
-    void present()    { set_presented(true);  }
-    void dismiss()    { set_presented(false); }
-    void toggle()     { set_presented(!is_presented.get()); }
-
-    // ----- Handler ------------------------------------------------------
-
-    flyout_page_handler<platform::current>&       fp_handler() noexcept       { return *fp_handler_; }
-    const flyout_page_handler<platform::current>& fp_handler() const noexcept { return *fp_handler_; }
-    bool                                          has_fp_handler() const noexcept { return fp_handler_ != nullptr; }
-    void                                          set_fp_handler(flyout_page_handler<platform::current>& h) noexcept { fp_handler_ = &h; }
-
 private:
-    void set_presented(bool v) {
-        if (is_presented.get() == v) return;
-        is_presented.set(v);
-        presented_changed.emit(v);
-    }
-
-    flyout_page_handler<platform::current>* fp_handler_ = nullptr;
+    internal::flyout_page_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::flyout_page_handler<>` (host-current) and
+// `mpapp::flyout_page_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using flyout_page_handler = internal::flyout_page_handler<Platform>;
 
 } // namespace mpapp
 

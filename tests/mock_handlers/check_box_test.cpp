@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::check_box`.
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_check_box`.
 
 #include <string>
 #include <vector>
@@ -17,7 +17,7 @@ using check_box_mock = mpapp::check_box_handler<mpapp::platform::mock>;
 
 TEST_CASE("check_box mock handler logs initial is_checked",
           "[mock][check_box]") {
-    mpapp::check_box c;
+    mpapp::internal::basic_check_box c;
     check_box_mock   h;
 
     h.map_is_checked(c);
@@ -27,7 +27,7 @@ TEST_CASE("check_box mock handler logs initial is_checked",
 
 TEST_CASE("check_box mock handler fires once per real toggle",
           "[mock][check_box]") {
-    mpapp::check_box c;
+    mpapp::internal::basic_check_box c;
     check_box_mock   h;
 
     h.map_is_checked(c);
@@ -44,7 +44,7 @@ TEST_CASE("check_box mock handler fires once per real toggle",
 
 TEST_CASE("check_box mock handler ignores same-value writes",
           "[mock][check_box]") {
-    mpapp::check_box c;
+    mpapp::internal::basic_check_box c;
     check_box_mock   h;
 
     c.is_checked = true;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 navigation_page handler implementation.
+// GTK4 basic_navigation_page handler implementation.
 
 #include "mpapp/handlers/linux/navigation_page_handler.hpp"
 
@@ -8,14 +8,14 @@
 #include <gtk/gtk.h>
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/page.hpp"
+#include "mpapp/internal/basic_page.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 void on_back_clicked(GtkButton* /*btn*/, gpointer user_data) {
-    auto* np = static_cast<mpapp::navigation_page*>(user_data);
+    auto* np = static_cast<mpapp::internal::basic_navigation_page*>(user_data);
     if (np != nullptr && np->stack().depth() > 1) np->pop();
 }
 
@@ -59,7 +59,7 @@ void navigation_page_handler<platform::linux_>::apply_top(view* new_top) {
             current_child_ = w;
         }
     }
-    if (auto* p = dynamic_cast<page*>(new_top); p != nullptr) {
+    if (auto* p = dynamic_cast<basic_page*>(new_top); p != nullptr) {
         apply_title(p->title.get());
     } else {
         apply_title("");
@@ -76,7 +76,7 @@ void navigation_page_handler<platform::linux_>::apply_back_visibility(std::size_
     gtk_widget_set_visible(static_cast<GtkWidget*>(back_button_), depth > 1 ? TRUE : FALSE);
 }
 
-void navigation_page_handler<platform::linux_>::map_stack(navigation_page& np) {
+void navigation_page_handler<platform::linux_>::map_stack(basic_navigation_page& np) {
     bound_ = &np;
     apply_top(np.stack().top());
     apply_back_visibility(np.stack().depth());
@@ -88,13 +88,12 @@ void navigation_page_handler<platform::linux_>::map_stack(navigation_page& np) {
                      G_CALLBACK(on_back_clicked), &np);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_navigation_page(::mpapp::view* v) {
-    if (auto* n = dynamic_cast<::mpapp::navigation_page*>(v); n && n->has_np_handler()) {
+    if (auto* n = dynamic_cast<::mpapp::internal::basic_navigation_page*>(v); n && n->has_np_handler()) {
         return GTK_WIDGET(n->np_handler().native());
     }
     return nullptr;

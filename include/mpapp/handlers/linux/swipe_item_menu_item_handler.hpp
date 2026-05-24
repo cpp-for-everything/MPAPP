@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 swipe_item_menu_item handler.
+// Part of MPAPP. GTK4 basic_swipe_item_menu_item handler.
 //
-// `GtkButton` styled as a pill (label + optional icon name). Click on
-// the button fires the cross-platform `invoked` signal. The host
-// `swipe_view`'s reveal gesture is deferred to a follow-up batch, but
-// the action button is still functional as a standalone activator.
+// `GtkButton` styled as a pill (basic_label + optional icon name). Click on
+// the basic_button fires the cross-platform `invoked` signal. The host
+// `basic_swipe_view`'s reveal gesture is deferred to a follow-up batch, but
+// the action basic_button is still functional as a standalone activator.
 
 #ifndef MPAPP_HANDLERS_LINUX_SWIPE_ITEM_MENU_ITEM_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_SWIPE_ITEM_MENU_ITEM_HANDLER_HPP
@@ -13,11 +13,11 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../swipe_item_menu_item.hpp"
+#include "../../internal/basic_swipe_item_menu_item.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class swipe_item_menu_item_handler<platform::linux_> {
@@ -30,9 +30,9 @@ public:
     swipe_item_menu_item_handler(swipe_item_menu_item_handler&&)                 = delete;
     swipe_item_menu_item_handler& operator=(swipe_item_menu_item_handler&&)      = delete;
 
-    void map_text(swipe_item_menu_item& m);
-    void map_icon_uri(swipe_item_menu_item& m);
-    void map_invoked(swipe_item_menu_item& m);
+    void map_text(basic_swipe_item_menu_item& m);
+    void map_icon_uri(basic_swipe_item_menu_item& m);
+    void map_invoked(basic_swipe_item_menu_item& m);
 
     // GtkButton (GtkWidget*) type-erased.
     void*       native() noexcept       { return native_; }
@@ -65,7 +65,6 @@ private:
     signal_slot<const std::string&> icon_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_SWIPE_ITEM_MENU_ITEM_HANDLER_HPP

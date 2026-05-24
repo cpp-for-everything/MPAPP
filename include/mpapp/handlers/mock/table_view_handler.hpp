@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock handler for `mpapp::table_view`.
+// Part of MPAPP. Mock handler for `mpapp::basic_table_view`.
 
 #ifndef MPAPP_HANDLERS_MOCK_TABLE_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_TABLE_VIEW_HANDLER_HPP
@@ -8,10 +8,10 @@
 #include <vector>
 
 #include "../../platform.hpp"
-#include "../../table_view.hpp"
+#include "../../internal/basic_table_view.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class table_view_handler<platform::mock> : public mock_handler_base {
@@ -24,17 +24,17 @@ public:
     table_view_handler(table_view_handler&&)                 = delete;
     table_view_handler& operator=(table_view_handler&&)      = delete;
 
-    void map_sections(table_view& tv) {
+    void map_sections(basic_table_view& tv) {
         record_change("sections.count", tv.sections.get().size());
         tv.sections.changed.subscribe(slot_sec_, sec_cb_);
     }
 
-    void map_typed_sections(table_view& tv) {
+    void map_typed_sections(basic_table_view& tv) {
         record_change("typed_sections.count", tv.typed_sections.get().size());
         tv.typed_sections.changed.subscribe(slot_typed_, typed_cb_);
     }
 
-    void map_row_height(table_view& tv) {
+    void map_row_height(basic_table_view& tv) {
         record_change("row_height", tv.row_height.get());
         tv.row_height.changed.subscribe(slot_rh_, rh_cb_);
     }
@@ -68,6 +68,5 @@ private:
     signal_slot<const int&>                              slot_rh_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_TABLE_VIEW_HANDLER_HPP

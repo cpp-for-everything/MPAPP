@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock handler for `mpapp::switch_cell`.
+// Mock handler for `mpapp::basic_switch_cell`.
 
 #ifndef MPAPP_HANDLERS_MOCK_SWITCH_CELL_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_SWITCH_CELL_HANDLER_HPP
@@ -7,10 +7,10 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../switch_cell.hpp"
+#include "../../internal/basic_switch_cell.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class switch_cell_handler<platform::mock> : public mock_handler_base {
@@ -23,11 +23,11 @@ public:
     switch_cell_handler(switch_cell_handler&&)                 = delete;
     switch_cell_handler& operator=(switch_cell_handler&&)      = delete;
 
-    void map_text(switch_cell& c) {
+    void map_text(basic_switch_cell& c) {
         record_change("text", c.text.get());
         c.text.changed.subscribe(text_slot_, text_cb_);
     }
-    void map_on(switch_cell& c) {
+    void map_on(basic_switch_cell& c) {
         record_change("on", c.on.get());
         c.on.changed.subscribe(on_slot_, on_cb_);
     }
@@ -40,6 +40,5 @@ private:
     signal_slot<const bool&>                    on_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_SWITCH_CELL_HANDLER_HPP

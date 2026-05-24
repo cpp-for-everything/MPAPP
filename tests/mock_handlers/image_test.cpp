@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::image`.
+// Mock-handler tests for `mpapp::internal::basic_image`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("image mock records initial values on bind",
           "[mock][image]") {
-    image i;
+    internal::basic_image i;
     image_handler<platform::mock> h;
 
     h.map_source(i);
@@ -25,7 +25,7 @@ TEST_CASE("image mock records initial values on bind",
 
 TEST_CASE("image records source changes",
           "[mock][image]") {
-    image i;
+    internal::basic_image i;
     image_handler<platform::mock> h;
 
     h.map_source(i);

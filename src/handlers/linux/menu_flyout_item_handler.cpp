@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 menu_flyout_item handler implementation.
+// Part of MPAPP. GTK4 basic_menu_flyout_item handler implementation.
 
 #include "mpapp/handlers/linux/menu_flyout_item_handler.hpp"
 
@@ -9,14 +9,14 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-#include "mpapp/menu_flyout_item.hpp"
+#include "mpapp/internal/basic_menu_flyout_item.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 extern "C" void mpapp_mfi_on_clicked(GtkButton* /*btn*/, gpointer user_data) {
-    auto* owner = static_cast<menu_flyout_item*>(user_data);
+    auto* owner = static_cast<basic_menu_flyout_item*>(user_data);
     if (owner != nullptr) {
         owner->clicked.emit();
     }
@@ -27,7 +27,7 @@ extern "C" void mpapp_mfi_on_clicked(GtkButton* /*btn*/, gpointer user_data) {
 menu_flyout_item_handler<platform::linux_>::menu_flyout_item_handler() {
     native_ = gtk_button_new_with_label("");
     // Match the visual style of a menu item rather than a regular
-    // chrome-heavy button — flat removes the button's default
+    // chrome-heavy basic_button — flat removes the basic_button's default
     // background so the popover looks like a menu.
     gtk_widget_add_css_class(GTK_WIDGET(static_cast<GtkWidget*>(native_)), "flat");
 }
@@ -49,7 +49,7 @@ void menu_flyout_item_handler<platform::linux_>::apply_is_enabled(bool v) {
     gtk_widget_set_sensitive(GTK_WIDGET(static_cast<GtkWidget*>(native_)), v ? TRUE : FALSE);
 }
 
-void menu_flyout_item_handler<platform::linux_>::map_text(menu_flyout_item& i) {
+void menu_flyout_item_handler<platform::linux_>::map_text(basic_menu_flyout_item& i) {
     owner_ = &i;
     apply_text(i.text.get());
     i.text.changed.subscribe(text_slot_, text_cb_);
@@ -63,19 +63,18 @@ void menu_flyout_item_handler<platform::linux_>::map_text(menu_flyout_item& i) {
     }
 }
 
-void menu_flyout_item_handler<platform::linux_>::map_is_enabled(menu_flyout_item& i) {
+void menu_flyout_item_handler<platform::linux_>::map_is_enabled(basic_menu_flyout_item& i) {
     apply_is_enabled(i.is_enabled.get());
     i.is_enabled.changed.subscribe(is_enabled_slot_, is_enabled_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 GtkWidget* dispatch_menu_flyout_item(::mpapp::view* v) {
-    if (auto* i = dynamic_cast<::mpapp::menu_flyout_item*>(v); i && i->has_handler()) {
+    if (auto* i = dynamic_cast<::mpapp::internal::basic_menu_flyout_item*>(v); i && i->has_handler()) {
         return GTK_WIDGET(static_cast<GtkWidget*>(i->handler().native()));
     }
     return nullptr;

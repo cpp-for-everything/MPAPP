@@ -1,59 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/FlyoutView.md
 //
-// `mpapp::flyout_view` — two-pane master/detail container. The
-// `flyout` pane is the slide-out side panel; `detail` is the main
-// content area. `is_presented` toggles the drawer open/closed and is
-// expected to be two-way bindable by `FlyoutPage`/`Shell` consumers.
+// `mpapp::flyout_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_flyout_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::flyout_view x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// This is the M-04b "real handlers on three platforms" landing of the
-// widget. The mock surface is intentionally narrow — just the three
-// observable properties (`flyout`, `detail`, `is_presented`) that
-// every host platform can implement uniformly. The richer
-// `flyout_behavior`/`flyout_width`/`is_gesture_enabled` surface
-// described in the component doc lands in a follow-up alongside the
-// Shell/FlyoutPage page-level wiring.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_flyout_view x;
+//     mpapp::flyout_view_handler<mpapp::platform::mock> h;
+//     h.map_flyout(x);
 
 #ifndef MPAPP_FLYOUT_VIEW_HPP
 #define MPAPP_FLYOUT_VIEW_HPP
 
-#include <memory>
+#include "internal/basic_flyout_view.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_flyout_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/flyout_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class flyout_view_handler;
-
-class flyout_view : public view {
+class flyout_view : public internal::basic_flyout_view {
 public:
-    flyout_view() = default;
+    flyout_view() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_flyout(*this);
+        embedded_handler_.map_detail(*this);
+        embedded_handler_.map_is_presented(*this);
+    }
 
-    // The drawer pane. On Windows this becomes the NavigationView's
-    // PaneContent; on Linux it is the start child of a horizontal
-    // GtkPaned; on Android it is added to the DrawerLayout with
-    // Gravity.START.
-    Observable<std::shared_ptr<view>>  flyout{};
-
-    // The main content pane. On Windows: NavigationView.Content; on
-    // Linux: end child of the GtkPaned; on Android: the first
-    // DrawerLayout child (the non-drawer one).
-    Observable<std::shared_ptr<view>>  detail{};
-
-    // True when the drawer is open. Matches MAUI's `IsPresented`.
-    Observable<bool>                   is_presented{false};
-
-    flyout_view_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const flyout_view_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                          has_handler() const noexcept { return handler_ != nullptr; }
-    void                                          set_handler(flyout_view_handler<platform::current>& h) noexcept { handler_ = &h; }
+    flyout_view(const flyout_view&)            = delete;
+    flyout_view& operator=(const flyout_view&) = delete;
+    flyout_view(flyout_view&&)                 = delete;
+    flyout_view& operator=(flyout_view&&)      = delete;
 
 private:
-    flyout_view_handler<platform::current>* handler_ = nullptr;
+    internal::flyout_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::flyout_view_handler<>` (host-current) and
+// `mpapp::flyout_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using flyout_view_handler = internal::flyout_view_handler<Platform>;
 
 } // namespace mpapp
 

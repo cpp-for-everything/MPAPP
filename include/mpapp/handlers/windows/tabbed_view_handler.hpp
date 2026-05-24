@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 tabbed_view handler.
+// Part of MPAPP. WinUI 3 basic_tabbed_view handler.
 //
 // Wraps `mux::Controls::TabView` — the WinUI 3 control whose
 // `TabItems` collection + `SelectedIndex` directly mirror
-// `mpapp::tabbed_view`'s `tab_titles` and `selected_index`. Each tab
-// is a header-only `TabViewItem`; the page-content slot is left empty
+// `mpapp::basic_tabbed_view`'s `tab_titles` and `selected_index`. Each tab
+// is a header-only `TabViewItem`; the basic_page-content slot is left empty
 // here and will be wired by the upcoming `TabbedPage`/templating-engine
 // follow-up.
 //
@@ -20,13 +20,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../tabbed_view.hpp"
+#include "../../internal/basic_tabbed_view.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class tabbed_view_handler<platform::windows> {
@@ -39,8 +39,8 @@ public:
     tabbed_view_handler(tabbed_view_handler&&)                 = delete;
     tabbed_view_handler& operator=(tabbed_view_handler&&)      = delete;
 
-    void map_tab_titles(tabbed_view& t);
-    void map_selected_index(tabbed_view& t);
+    void map_tab_titles(basic_tabbed_view& t);
+    void map_selected_index(basic_tabbed_view& t);
 
     // The TabView IS the native UIElement exposed to dispatch surfaces.
     winrt::Microsoft::UI::Xaml::Controls::TabView&       native() noexcept       { return native_; }
@@ -62,7 +62,6 @@ private:
     signal_slot<const int&>                      selected_index_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_TABBED_VIEW_HANDLER_HPP

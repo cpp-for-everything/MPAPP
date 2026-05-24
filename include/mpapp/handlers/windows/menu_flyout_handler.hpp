@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 `menu_flyout` handler — wraps
+// Part of MPAPP. WinUI 3 `basic_menu_flyout` handler — wraps
 // `mux::Controls::MenuFlyout`. Items are appended into the flyout's
 // `Items` collection by resolving each child `view*` through the
-// ADR-0013 dispatch registry; menu_flyout_item / menu_flyout_separator
-// / menu_flyout_sub_item each contribute the appropriate child
+// ADR-0013 dispatch registry; basic_menu_flyout_item / basic_menu_flyout_separator
+// / basic_menu_flyout_sub_item each contribute the appropriate child
 // MenuFlyoutItemBase subclass. `is_open` is reflected by calling
 // `ShowAt`/`Hide`; the flyout's `Closed` event flips the Observable
 // back when the user dismisses it.
@@ -13,7 +13,7 @@
 
 #include <vector>
 
-#include "../../menu_flyout.hpp"
+#include "../../internal/basic_menu_flyout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
@@ -23,7 +23,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_handler<platform::windows> {
@@ -35,8 +35,8 @@ public:
     menu_flyout_handler(menu_flyout_handler&&)                 = delete;
     menu_flyout_handler& operator=(menu_flyout_handler&&)      = delete;
 
-    void map_items(menu_flyout& f);
-    void map_is_open(menu_flyout& f);
+    void map_items(basic_menu_flyout& f);
+    void map_is_open(basic_menu_flyout& f);
 
     winrt::Microsoft::UI::Xaml::Controls::MenuFlyout&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::MenuFlyout& native() const noexcept { return native_; }
@@ -56,7 +56,6 @@ private:
     signal_slot<const bool&>                  is_open_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_MENU_FLYOUT_HANDLER_HPP

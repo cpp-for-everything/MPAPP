@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — GTK4 button handler implementation.
+// Part of MPAPP. T-0011 — GTK4 basic_button handler implementation.
 
 #include "mpapp/handlers/linux/button_handler.hpp"
 
@@ -7,12 +7,12 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 void on_clicked(GtkButton* /*btn*/, gpointer user_data) {
-    auto* b = static_cast<mpapp::button*>(user_data);
+    auto* b = static_cast<basic_button*>(user_data);
     if (b != nullptr) {
         b->clicked.emit();
     }
@@ -28,7 +28,7 @@ button_handler<platform::linux_>::~button_handler() {
     // The GtkButton is parented into a GtkBox/GtkWindow by the time
     // we're done; that owner unrefs it. Disconnect the clicked handler
     // explicitly so a late "clicked" signal doesn't fire into a freed
-    // button pointer.
+    // basic_button pointer.
     if (native_ != nullptr && click_handler_id_ != 0) {
         g_signal_handler_disconnect(static_cast<GtkWidget*>(native_),
                                     click_handler_id_);
@@ -43,13 +43,13 @@ void button_handler<platform::linux_>::apply_text(const std::string& text) {
     }
 }
 
-void button_handler<platform::linux_>::map_text(button& b) {
+void button_handler<platform::linux_>::map_text(basic_button& b) {
     bound_ = &b;
     apply_text(b.text.get());
     b.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void button_handler<platform::linux_>::map_clicked(button& b) {
+void button_handler<platform::linux_>::map_clicked(basic_button& b) {
     bound_ = &b;
     if (native_ == nullptr) {
         return;
@@ -65,19 +65,19 @@ void button_handler<platform::linux_>::map_clicked(button& b) {
         &b);
 }
 
-} // namespace mpapp
+} // namespace mpapp::internal
 
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register button so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_button so ADR-0013 fall-through
 // dispatch can find its GtkWidget* without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/button.hpp"
+#include "mpapp/internal/basic_button.hpp"
 
 namespace {
 
 GtkWidget* dispatch_button(::mpapp::view* v) {
-    if (auto* b = dynamic_cast<::mpapp::button*>(v); b && b->has_handler()) {
+    if (auto* b = dynamic_cast<::mpapp::internal::basic_button*>(v); b && b->has_handler()) {
         return GTK_WIDGET(b->handler().native());
     }
     return nullptr;

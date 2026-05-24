@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::hybrid_web_view`.
+// Mock-handler tests for `mpapp::internal::basic_hybrid_web_view`.
 
 #include <string>
 #include <vector>
@@ -29,7 +29,7 @@ public:
 
 TEST_CASE("hybrid_web_view bridge sends and receives",
           "[mock][hybrid_web_view]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     CHECK(h.hybrid_namespace.get() == "mpapp");
     CHECK(h.last_message_in.get().empty());
     CHECK(h.last_message_out().empty());
@@ -43,7 +43,7 @@ TEST_CASE("hybrid_web_view bridge sends and receives",
 
 TEST_CASE("mock handler records bridge traffic",
           "[mock][hybrid_web_view]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     hybrid_web_view_handler<platform::mock> hh;
     hh.map_messages(h);
     hh.clear_calls();
@@ -59,7 +59,7 @@ TEST_CASE("mock handler records bridge traffic",
 
 TEST_CASE("set_bridge<T> attaches a typed bridge",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     CHECK(!h.has_bridge());
     CHECK(h.bridge() == nullptr);
 
@@ -75,7 +75,7 @@ TEST_CASE("set_bridge<T> attaches a typed bridge",
 
 TEST_CASE("attached bridge handles JSON envelope and posts response via send_to_js",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     h.set_bridge<echo_bridge>();
 
     // Capture outbound traffic.
@@ -100,7 +100,7 @@ TEST_CASE("attached bridge handles JSON envelope and posts response via send_to_
 
 TEST_CASE("attached bridge does NOT fire message_received for envelopes",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     h.set_bridge<echo_bridge>();
 
     int received_hits = 0;
@@ -123,7 +123,7 @@ TEST_CASE("attached bridge does NOT fire message_received for envelopes",
 
 TEST_CASE("attached bridge unknown method writes error envelope",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     h.set_bridge<echo_bridge>();
 
     std::string last_response;
@@ -143,7 +143,7 @@ TEST_CASE("no bridge attached: envelopes still go through message_received",
           "[mock][hybrid_web_view][bridge]") {
     // Bridge is opt-in. Without one, even JSON-shaped payloads
     // surface on message_received as raw strings.
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     std::string received;
     struct cb_t {
         std::string* dst;
@@ -159,7 +159,7 @@ TEST_CASE("no bridge attached: envelopes still go through message_received",
 
 TEST_CASE("invoke_js writes a typed JSON-RPC envelope through send_to_js",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     std::vector<std::string> outbound;
     struct cb_t {
         std::vector<std::string>* out;
@@ -193,7 +193,7 @@ TEST_CASE("invoke_js + bridge dispatch interleave on message_sent",
     // invoke_js increments the outbound id counter; bridge responses
     // use the inbound envelope's id. Verify they don't collide and
     // that they can interleave on message_sent.
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     h.set_bridge<echo_bridge>();
 
     std::vector<std::string> outbound;
@@ -220,7 +220,7 @@ TEST_CASE("invoke_js + bridge dispatch interleave on message_sent",
 
 TEST_CASE("invoke_js_cb fires the callback when JS posts a response",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
 
     std::optional<int> received_result;
     int                hits = 0;
@@ -246,7 +246,7 @@ TEST_CASE("invoke_js_cb fires the callback when JS posts a response",
 
 TEST_CASE("invoke_js_cb fires with nullopt on error response",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     std::optional<std::string> received;
     int                        hits = 0;
     auto cb = [&](std::optional<std::string> r) {
@@ -264,7 +264,7 @@ TEST_CASE("invoke_js_cb fires with nullopt on error response",
 
 TEST_CASE("invoke_js_cb pending callbacks route to the right id",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
 
     std::vector<std::pair<int, std::optional<int>>> got;
     auto make_cb = [&](int label) {
@@ -290,7 +290,7 @@ TEST_CASE("invoke_js_cb pending callbacks route to the right id",
 
 TEST_CASE("response with no matching pending callback falls through to message_received",
           "[mock][hybrid_web_view][bridge]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     std::string received;
     struct rb_t {
         std::string* dst;
@@ -313,12 +313,14 @@ namespace {
 // Driver coroutine for the Phase E task<T> async-bridge tests. Stores
 // the result so the test can inspect it after simulate_inbound resumes
 // the coroutine.
-mpapp::task<void> drive_invoke_js_async(hybrid_web_view& wv, std::optional<int>& out) {
+mpapp::task<void> drive_invoke_js_async(internal::basic_hybrid_web_view& wv,
+                                        std::optional<int>& out) {
     out = co_await wv.invoke_js_async<int>("add", 3, 4);
     co_return;
 }
 
-mpapp::task<void> drive_invoke_js_async_error(hybrid_web_view& wv, std::optional<std::string>& out) {
+mpapp::task<void> drive_invoke_js_async_error(internal::basic_hybrid_web_view& wv,
+                                              std::optional<std::string>& out) {
     out = co_await wv.invoke_js_async<std::string>("greet", std::string{"Ada"});
     co_return;
 }
@@ -327,7 +329,7 @@ mpapp::task<void> drive_invoke_js_async_error(hybrid_web_view& wv, std::optional
 
 TEST_CASE("invoke_js_async resolves the coroutine when JS posts a response",
           "[mock][hybrid_web_view][bridge][async]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     std::optional<int> received;
 
     // Eager-start coroutine — runs until the first co_await suspends.
@@ -349,7 +351,7 @@ TEST_CASE("invoke_js_async resolves the coroutine when JS posts a response",
 
 TEST_CASE("invoke_js_async error response resolves the coroutine to nullopt",
           "[mock][hybrid_web_view][bridge][async]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     std::optional<std::string> received;
     auto t = drive_invoke_js_async_error(h, received);
 
@@ -388,7 +390,7 @@ private:
 
 TEST_CASE("bridge async method defers response across process_inbound",
           "[mock][hybrid_web_view][bridge][async]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     auto& b = h.set_bridge<deferred_bridge>();
 
     std::vector<std::string> outbound;
@@ -413,7 +415,7 @@ TEST_CASE("bridge async method defers response across process_inbound",
 
 TEST_CASE("bridge async method bad-args still posts error inline",
           "[mock][hybrid_web_view][bridge][async]") {
-    hybrid_web_view h;
+    internal::basic_hybrid_web_view h;
     h.set_bridge<deferred_bridge>();
 
     std::string last_response;

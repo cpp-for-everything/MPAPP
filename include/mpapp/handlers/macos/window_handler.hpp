@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — AppKit window handler.
+// Part of MPAPP. T-0011 — AppKit basic_window handler.
 //
 // `window_handler<platform::macos>` wraps `NSWindow`. The underlying
 // objc handle is stored as `void*` so this header has no AppKit deps.
@@ -9,7 +9,7 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../window.hpp"
+#include "../../internal/basic_window.hpp"
 
 #if defined(__APPLE__)
 #  include <TargetConditionals.h>
@@ -17,7 +17,7 @@
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class window_handler<platform::macos> {
@@ -30,7 +30,7 @@ public:
     window_handler(window_handler&&)                 = delete;
     window_handler& operator=(window_handler&&)      = delete;
 
-    void bind(window& w);
+    void bind(basic_window& w);
 
     // NSWindow*, retained, type-erased.
     void*       native() noexcept       { return native_; }
@@ -64,7 +64,7 @@ private:
     };
 
     void*   native_   = nullptr;  // retained NSWindow*
-    window* bound_    = nullptr;
+    basic_window* bound_    = nullptr;
 
     title_cb_t                       title_cb_{this};
     content_cb_t                     content_cb_{this};
@@ -78,8 +78,7 @@ private:
     signal_slot<const bool&>         visible_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #  endif // !TARGET_OS_IPHONE
 #endif // __APPLE__
 #endif // MPAPP_HANDLERS_MACOS_WINDOW_HANDLER_HPP

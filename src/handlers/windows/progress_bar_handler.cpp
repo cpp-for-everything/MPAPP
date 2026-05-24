@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 progress_bar handler implementation.
+// Part of MPAPP. WinUI 3 basic_progress_bar handler implementation.
 
 #include "mpapp/handlers/windows/progress_bar_handler.hpp"
 
@@ -16,7 +16,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
 #include <winrt/Microsoft.UI.Xaml.Media.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxm  = ::winrt::Microsoft::UI::Xaml::Media;
@@ -81,33 +81,31 @@ void progress_bar_handler<platform::windows>::apply_background_color(const brush
     native_.Background(brush);
 }
 
-void progress_bar_handler<platform::windows>::map_progress(progress_bar& p) {
+void progress_bar_handler<platform::windows>::map_progress(basic_progress_bar& p) {
     apply_progress(p.progress.get());
     p.progress.changed.subscribe(progress_slot_, progress_cb_);
 }
-void progress_bar_handler<platform::windows>::map_color(progress_bar& p) {
+void progress_bar_handler<platform::windows>::map_color(basic_progress_bar& p) {
     apply_color(p.color.get());
     p.color.changed.subscribe(color_slot_, color_cb_);
 }
-void progress_bar_handler<platform::windows>::map_background_color(progress_bar& p) {
+void progress_bar_handler<platform::windows>::map_background_color(basic_progress_bar& p) {
     apply_background_color(p.background_color.get());
     p.background_color.changed.subscribe(bg_slot_, bg_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register progress_bar so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_progress_bar so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/progress_bar.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_progress_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::progress_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_progress_bar*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

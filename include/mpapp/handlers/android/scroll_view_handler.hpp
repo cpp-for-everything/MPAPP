@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android scroll_view handler.
+// Part of MPAPP. Android basic_scroll_view handler.
 //
 // Wraps android.widget.ScrollView (vertical) / HorizontalScrollView
 // depending on orientation. Single-child container — matches the
@@ -11,14 +11,14 @@
 #include <memory>
 
 #include "../../platform.hpp"
-#include "../../scroll_view.hpp"
+#include "../../internal/basic_scroll_view.hpp"
 #include "../../signal.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class scroll_view_handler<platform::android> {
@@ -31,10 +31,10 @@ public:
     scroll_view_handler(scroll_view_handler&&)                 = delete;
     scroll_view_handler& operator=(scroll_view_handler&&)      = delete;
 
-    void map_content(scroll_view& s);
-    void map_orientation(scroll_view& s);
+    void map_content(basic_scroll_view& s);
+    void map_orientation(basic_scroll_view& s);
 
-    void bind_content(scroll_view& s, view& child);
+    void bind_content(basic_scroll_view& s, view& child);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -53,7 +53,7 @@ private:
     };
 
     jobject       native_ = nullptr;  // ScrollView global ref
-    scroll_view*  bound_  = nullptr;
+    basic_scroll_view*  bound_  = nullptr;
 
     content_cb_t                                  content_cb_{this};
     orient_cb_t                                   orient_cb_{this};
@@ -61,7 +61,6 @@ private:
     signal_slot<const scroll_orientation&>        orient_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SCROLL_VIEW_HANDLER_HPP

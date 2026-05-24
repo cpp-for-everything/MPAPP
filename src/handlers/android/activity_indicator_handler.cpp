@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android activity_indicator handler implementation.
+// Part of MPAPP. Android basic_activity_indicator handler implementation.
 
 #include "mpapp/handlers/android/activity_indicator_handler.hpp"
 
@@ -10,7 +10,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -119,30 +119,28 @@ void activity_indicator_handler<platform::android>::apply_color(const brush_ref&
     env->DeleteLocalRef(csl);
 }
 
-void activity_indicator_handler<platform::android>::map_is_running(activity_indicator& a) {
+void activity_indicator_handler<platform::android>::map_is_running(basic_activity_indicator& a) {
     apply_is_running(a.is_running.get());
     a.is_running.changed.subscribe(is_running_slot_, is_running_cb_);
 }
 
-void activity_indicator_handler<platform::android>::map_color(activity_indicator& a) {
+void activity_indicator_handler<platform::android>::map_color(basic_activity_indicator& a) {
     apply_color(a.color.get());
     a.color.changed.subscribe(color_slot_, color_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register activity_indicator so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_activity_indicator so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 
 namespace {
 
 jobject dispatch_activity_indicator(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::activity_indicator*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_activity_indicator*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

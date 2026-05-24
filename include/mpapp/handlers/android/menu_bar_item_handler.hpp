@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android menu_bar_item handler — wraps an
-// `android.widget.TextView` carrying the entry's `title`. The text view
-// is what gets packed into the parent menu_bar's host layout. The
+// Part of MPAPP. Android basic_menu_bar_item handler — wraps an
+// `android.widget.TextView` carrying the basic_entry's `title`. The text view
+// is what gets packed into the parent basic_menu_bar's host layout. The
 // drop-down menu model is rendered by the parent's `Menu` (see
 // `menu_bar_handler.cpp`); the child's `items` collection is observed
 // at this level so granular updates can be wired later when the
-// menu_flyout family arrives in M-04c.
+// basic_menu_flyout family arrives in M-04c.
 
 #ifndef MPAPP_HANDLERS_ANDROID_MENU_BAR_ITEM_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_MENU_BAR_ITEM_HANDLER_HPP
@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include "../../menu_bar_item.hpp"
+#include "../../internal/basic_menu_bar_item.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
@@ -22,7 +22,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_bar_item_handler<platform::android> {
@@ -32,10 +32,10 @@ public:
     menu_bar_item_handler(const menu_bar_item_handler&)            = delete;
     menu_bar_item_handler& operator=(const menu_bar_item_handler&) = delete;
 
-    void map_title(menu_bar_item& m);
-    void map_items(menu_bar_item& m);
+    void map_title(basic_menu_bar_item& m);
+    void map_items(basic_menu_bar_item& m);
 
-    // Current title text. Read by the parent menu_bar handler when it
+    // Current title text. Read by the parent basic_menu_bar handler when it
     // rebuilds its `Menu` from the child entries — Android has no
     // "MenuBarItem" native widget, so the parent flattens children into
     // MenuItem entries via this accessor.
@@ -66,7 +66,6 @@ private:
     signal_slot<std::vector<view*> const&>  items_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_MENU_BAR_ITEM_HANDLER_HPP

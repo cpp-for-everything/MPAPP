@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 content_page handler implementation.
+// Part of MPAPP. WinUI 3 basic_content_page handler implementation.
 
 #include "mpapp/handlers/windows/content_page_handler.hpp"
 
@@ -15,10 +15,10 @@
 
 #include "winrt_strings.hpp"
 
-#include "mpapp/content_page.hpp"
+#include "mpapp/internal/basic_content_page.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -76,33 +76,32 @@ void content_page_handler<platform::windows>::apply_padding(const thickness& t) 
     native_.Padding(wt);
 }
 
-void content_page_handler<platform::windows>::map_title(content_page& p) {
+void content_page_handler<platform::windows>::map_title(basic_content_page& p) {
     apply_title(p.title.get());
     p.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-void content_page_handler<platform::windows>::map_content(content_page& p) {
+void content_page_handler<platform::windows>::map_content(basic_content_page& p) {
     apply_content(p.content.get());
     p.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void content_page_handler<platform::windows>::map_padding(content_page& p) {
+void content_page_handler<platform::windows>::map_padding(basic_content_page& p) {
     apply_padding(p.padding.get());
     p.padding.changed.subscribe(padding_slot_, padding_cb_);
 }
 
-void content_page_handler<platform::windows>::bind_content(content_page& p, view& child) {
+void content_page_handler<platform::windows>::bind_content(basic_content_page& p, view& child) {
     p.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_content_page(::mpapp::view* v) {
-    if (auto* cp = dynamic_cast<::mpapp::content_page*>(v); cp && cp->has_handler()) {
+    if (auto* cp = dynamic_cast<::mpapp::internal::basic_content_page*>(v); cp && cp->has_handler()) {
         return cp->handler().native();
     }
     return nullptr;

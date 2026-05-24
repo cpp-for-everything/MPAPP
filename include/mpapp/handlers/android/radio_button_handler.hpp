@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android radio_button handler.
+// Part of MPAPP. Android basic_radio_button handler.
 //
 // Wraps android.widget.RadioButton. Native grouping is via
 // android.widget.RadioGroup; the handler maintains a per-app
@@ -11,7 +11,7 @@
 #define MPAPP_HANDLERS_ANDROID_RADIO_BUTTON_HANDLER_HPP
 
 #include "../../platform.hpp"
-#include "../../radio_button.hpp"
+#include "../../internal/basic_radio_button.hpp"
 #include "../../signal.hpp"
 
 #if defined(__ANDROID__)
@@ -19,7 +19,7 @@
 #include <jni.h>
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class radio_button_handler<platform::android> {
@@ -32,8 +32,8 @@ public:
     radio_button_handler(radio_button_handler&&)                 = delete;
     radio_button_handler& operator=(radio_button_handler&&)      = delete;
 
-    void map_is_checked(radio_button& r);
-    void map_group_name(radio_button& r);
+    void map_is_checked(basic_radio_button& r);
+    void map_group_name(basic_radio_button& r);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -56,7 +56,7 @@ private:
 
     jobject                  native_      = nullptr;  // RadioButton
     jobject                  listener_    = nullptr;
-    radio_button*            bound_       = nullptr;
+    basic_radio_button*            bound_       = nullptr;
     std::string              attached_group_{};
     bool                     suppress_echo_ = false;
 
@@ -68,7 +68,6 @@ private:
 
 void android_radio_button_dispatch_checked_changed(radio_button_handler<platform::android>* h, bool checked);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_RADIO_BUTTON_HANDLER_HPP

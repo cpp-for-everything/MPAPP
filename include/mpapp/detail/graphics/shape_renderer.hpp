@@ -18,7 +18,7 @@
 #define MPAPP_DETAIL_GRAPHICS_SHAPE_RENDERER_HPP
 
 namespace mpapp {
-class shape_view;
+namespace internal { class basic_shape_view; }
 namespace detail::graphics {
 class canvas;
 }
@@ -33,10 +33,15 @@ namespace mpapp::detail::graphics {
 // for stroke. The renderer never clears the canvas — the handler
 // is expected to do that itself (or rely on the facade's default
 // transparent allocation).
-void render_shape_view(canvas&            c,
-                       const shape_view&  sv,
-                       int                w,
-                       int                h);
+//
+// Takes the surface (`internal::basic_shape_view`) rather than the
+// wrapper so handler call sites can pass either the surface
+// directly or a `mpapp::shape_view` wrapper (which IS-A
+// `basic_shape_view`).
+void render_shape_view(canvas&                          c,
+                       const internal::basic_shape_view& sv,
+                       int                              w,
+                       int                              h);
 
 } // namespace mpapp::detail::graphics
 

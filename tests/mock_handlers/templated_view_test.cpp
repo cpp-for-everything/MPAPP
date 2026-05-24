@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::templated_view` (M-04b).
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_templated_view` (M-04b).
 
 #include <memory>
 #include <string>
@@ -21,7 +21,7 @@ class plain_view : public view {};
 
 TEST_CASE("templated_view mock handler records initial property values on bind",
           "[mock][templated_view]") {
-    templated_view t;
+    internal::basic_templated_view t;
     templated_view_handler<platform::mock> h;
 
     h.map_content(t);
@@ -36,7 +36,7 @@ TEST_CASE("templated_view mock handler records initial property values on bind",
 
 TEST_CASE("templated_view mock handler tracks content + template_id changes",
           "[mock][templated_view]") {
-    templated_view t;
+    internal::basic_templated_view t;
     templated_view_handler<platform::mock> h;
 
     h.map_content(t);

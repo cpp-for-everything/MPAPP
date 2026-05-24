@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 refresh_view handler.
+// Part of MPAPP. WinUI 3 basic_refresh_view handler.
 //
 // Composes a `mux::Controls::Grid` host with two cell-overlaid children:
 //   - the wrapped scrollable content, and
@@ -17,14 +17,14 @@
 #include <memory>
 
 #include "../../platform.hpp"
-#include "../../refresh_view.hpp"
+#include "../../internal/basic_refresh_view.hpp"
 #include "../../signal.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class refresh_view_handler<platform::windows> {
@@ -37,11 +37,11 @@ public:
     refresh_view_handler(refresh_view_handler&&)                 = delete;
     refresh_view_handler& operator=(refresh_view_handler&&)      = delete;
 
-    void map_content(refresh_view& r);
-    void map_is_refreshing(refresh_view& r);
-    void map_refresh_color(refresh_view& r);
+    void map_content(basic_refresh_view& r);
+    void map_is_refreshing(basic_refresh_view& r);
+    void map_refresh_color(basic_refresh_view& r);
 
-    void bind_content(refresh_view& r, view& child);
+    void bind_content(basic_refresh_view& r, view& child);
 
     // The host Grid IS the native UIElement exposed to dispatch surfaces.
     winrt::Microsoft::UI::Xaml::Controls::Grid&       native() noexcept       { return native_; }
@@ -67,7 +67,6 @@ private:
     signal_slot<const brush_ref&>             refresh_color_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_REFRESH_VIEW_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 border handler — wraps `mux::Controls::Border`,
+// Part of MPAPP. WinUI 3 basic_border handler — wraps `mux::Controls::Border`,
 // which exposes Background, BorderBrush, BorderThickness, CornerRadius,
 // Padding, and Child natively.
 
@@ -8,7 +8,7 @@
 
 #include <memory>
 
-#include "../../border.hpp"
+#include "../../internal/basic_border.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -17,7 +17,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Windows.Foundation.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class border_handler<platform::windows> {
@@ -30,13 +30,13 @@ public:
     border_handler(border_handler&&)                 = delete;
     border_handler& operator=(border_handler&&)      = delete;
 
-    void map_content(border& b);
-    void map_padding(border& b);
-    void map_stroke(border& b);
-    void map_stroke_thickness(border& b);
-    void map_stroke_shape(border& b);
+    void map_content(basic_border& b);
+    void map_padding(basic_border& b);
+    void map_stroke(basic_border& b);
+    void map_stroke_thickness(basic_border& b);
+    void map_stroke_shape(basic_border& b);
 
-    void bind_content(border& b, view& child);
+    void bind_content(basic_border& b, view& child);
 
     winrt::Microsoft::UI::Xaml::Controls::Border&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Border& native() const noexcept { return native_; }
@@ -68,7 +68,6 @@ private:
     signal_slot<const stroke_shape_desc&>     stroke_shape_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_BORDER_HANDLER_HPP

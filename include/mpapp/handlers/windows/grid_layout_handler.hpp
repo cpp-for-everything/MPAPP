@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 grid_layout handler. Wraps mux::Controls::Grid, populating
+// WinUI 3 basic_grid_layout handler. Wraps mux::Controls::Grid, populating
 // RowDefinitions + ColumnDefinitions from the cross-platform track_def
 // vectors (ADR-0017 surface). Per-child placement reads the attached
-// store on grid_layout and calls Grid.SetRow / Grid.SetColumn.
+// store on basic_grid_layout and calls Grid.SetRow / Grid.SetColumn.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_GRID_LAYOUT_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_GRID_LAYOUT_HANDLER_HPP
 
 #include <vector>
 
-#include "../../grid_layout.hpp"
+#include "../../internal/basic_grid_layout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -18,7 +18,7 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class grid_layout_handler<platform::windows> {
@@ -31,14 +31,14 @@ public:
     grid_layout_handler(grid_layout_handler&&)                 = delete;
     grid_layout_handler& operator=(grid_layout_handler&&)      = delete;
 
-    void map_row_definitions(grid_layout& g);
-    void map_column_definitions(grid_layout& g);
-    void map_row_spacing(grid_layout& g);
-    void map_column_spacing(grid_layout& g);
+    void map_row_definitions(basic_grid_layout& g);
+    void map_column_definitions(basic_grid_layout& g);
+    void map_row_spacing(basic_grid_layout& g);
+    void map_column_spacing(basic_grid_layout& g);
 
     // Add a child at its attached (row, column, spans). The child's
     // native UIElement is resolved via the ADR-0013 dispatch registry.
-    void add_child(grid_layout& g, view& child);
+    void add_child(basic_grid_layout& g, view& child);
 
     winrt::Microsoft::UI::Xaml::Controls::Grid&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Grid& native() const noexcept { return native_; }
@@ -78,7 +78,6 @@ private:
     signal_slot<const double&>                  csp_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_GRID_LAYOUT_HANDLER_HPP

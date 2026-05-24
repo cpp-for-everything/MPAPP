@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 follow-up — Android entry handler.
+// Part of MPAPP. T-0011 follow-up — Android basic_entry handler.
 //
 // Wraps `android.widget.EditText`. Reverse binding (user typing into
-// the EditText updates `entry::text`) is wired via a Java
+// the EditText updates `basic_entry::text`) is wired via a Java
 // `android.text.TextWatcher` shim — see
 // `examples/android_hello/.../io/mpapp/MppTextWatcher.java`.
 
 #ifndef MPAPP_HANDLERS_ANDROID_ENTRY_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_ENTRY_HANDLER_HPP
 
-#include "../../entry.hpp"
+#include "../../internal/basic_entry.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -18,7 +18,7 @@
 #include <jni.h>
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class entry_handler<platform::android> {
@@ -31,9 +31,9 @@ public:
     entry_handler(entry_handler&&)                 = delete;
     entry_handler& operator=(entry_handler&&)      = delete;
 
-    void map_text(entry& e);
-    void map_placeholder(entry& e);
-    void map_is_read_only(entry& e);
+    void map_text(basic_entry& e);
+    void map_placeholder(basic_entry& e);
+    void map_is_read_only(basic_entry& e);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -62,7 +62,7 @@ private:
 
     jobject                          native_   = nullptr;  // global ref to EditText
     jobject                          watcher_  = nullptr;  // global ref to MppTextWatcher
-    entry*                           bound_    = nullptr;
+    basic_entry*                           bound_    = nullptr;
     bool                             suppress_echo_ = false;
     text_callback                    text_cb_{this};
     placeholder_callback             placeholder_cb_{this};
@@ -77,7 +77,6 @@ private:
 void android_entry_dispatch_text_changed(entry_handler<platform::android>* h,
                                          const std::string& text);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_ENTRY_HANDLER_HPP

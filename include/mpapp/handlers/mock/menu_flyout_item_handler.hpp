@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock menu_flyout_item handler.
+// Part of MPAPP. Mock basic_menu_flyout_item handler.
 //
 // Records `text` and `is_enabled` via the standard `bind()` plumbing.
 // Tests that need to verify the click signal subscribe to
@@ -11,11 +11,11 @@
 
 #include <string>
 
-#include "../../menu_flyout_item.hpp"
+#include "../../internal/basic_menu_flyout_item.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_item_handler<platform::mock>
@@ -23,14 +23,13 @@ class menu_flyout_item_handler<platform::mock>
 public:
     menu_flyout_item_handler() = default;
 
-    void map_text(menu_flyout_item& i)       { bind("text",       i.text,       binding_text_); }
-    void map_is_enabled(menu_flyout_item& i) { bind("is_enabled", i.is_enabled, binding_is_enabled_); }
+    void map_text(basic_menu_flyout_item& i)       { bind("text",       i.text,       binding_text_); }
+    void map_is_enabled(basic_menu_flyout_item& i) { bind("is_enabled", i.is_enabled, binding_is_enabled_); }
 
 private:
     detail::property_binding<std::string> binding_text_{};
     detail::property_binding<bool>        binding_is_enabled_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_MENU_FLYOUT_ITEM_HANDLER_HPP

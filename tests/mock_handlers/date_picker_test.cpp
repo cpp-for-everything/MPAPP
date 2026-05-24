@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::date_picker`.
+// Mock-handler tests for `mpapp::internal::basic_date_picker`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("date_picker mock records initial values on bind",
           "[mock][date_picker]") {
-    date_picker p;
+    internal::basic_date_picker p;
     date_picker_handler<platform::mock> h;
 
     h.map_date(p);
@@ -24,7 +24,7 @@ TEST_CASE("date_picker mock records initial values on bind",
 
 TEST_CASE("date_picker records date changes",
           "[mock][date_picker]") {
-    date_picker p;
+    internal::basic_date_picker p;
     date_picker_handler<platform::mock> h;
 
     h.map_date(p);

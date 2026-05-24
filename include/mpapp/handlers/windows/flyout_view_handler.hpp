@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 flyout_view handler.
+// Part of MPAPP. WinUI 3 basic_flyout_view handler.
 //
 // Wraps `mux::Controls::NavigationView` — the WinUI 3 control whose
 // Content / PaneCustomContent / IsPaneOpen surfaces directly mirror
-// `mpapp::flyout_view`'s `detail` / `flyout` / `is_presented`.
+// `mpapp::basic_flyout_view`'s `detail` / `flyout` / `is_presented`.
 //
 // Per ADR-0013 the .cpp self-registers with `windows_dispatch`. The
 // NavigationView itself is a `UIElement` (via `Control` → `FrameworkElement`),
@@ -14,7 +14,7 @@
 
 #include <memory>
 
-#include "../../flyout_view.hpp"
+#include "../../internal/basic_flyout_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -22,7 +22,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class flyout_view_handler<platform::windows> {
@@ -35,12 +35,12 @@ public:
     flyout_view_handler(flyout_view_handler&&)                 = delete;
     flyout_view_handler& operator=(flyout_view_handler&&)      = delete;
 
-    void map_flyout(flyout_view& f);
-    void map_detail(flyout_view& f);
-    void map_is_presented(flyout_view& f);
+    void map_flyout(basic_flyout_view& f);
+    void map_detail(basic_flyout_view& f);
+    void map_is_presented(basic_flyout_view& f);
 
-    void bind_flyout(flyout_view& f, view& child);
-    void bind_detail(flyout_view& f, view& child);
+    void bind_flyout(basic_flyout_view& f, view& child);
+    void bind_detail(basic_flyout_view& f, view& child);
 
     // The host NavigationView IS the native UIElement exposed to dispatch
     // surfaces.
@@ -66,7 +66,6 @@ private:
     signal_slot<const bool&>                  is_presented_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_FLYOUT_VIEW_HANDLER_HPP

@@ -9,7 +9,7 @@
 #include <string_view>
 
 #include "mpapp/detail/graphics/canvas.hpp"
-#include "mpapp/shape_view.hpp"
+#include "mpapp/internal/basic_shape_view.hpp"
 
 namespace mpapp::detail::graphics {
 
@@ -41,7 +41,7 @@ bool parse_line(std::string_view data, double& x1, double& y1, double& x2, doubl
 
 } // namespace
 
-void render_shape_view(canvas& c, const shape_view& sv, int w, int h) {
+void render_shape_view(canvas& c, const internal::basic_shape_view& sv, int w, int h) {
     if (w <= 0 || h <= 0) return;
 
     const double thickness   = sv.stroke_thickness.get();

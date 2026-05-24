@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock handler for `mpapp::navigation_page`.
+// Part of MPAPP. Mock handler for `mpapp::basic_navigation_page`.
 //
 // Records lifecycle events from the page_stack engine so tests can
 // assert: "when I push, did page_will_appear fire for the right view?"
@@ -11,11 +11,11 @@
 
 #include <cstddef>
 
-#include "../../navigation_page.hpp"
+#include "../../internal/basic_navigation_page.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class navigation_page_handler<platform::mock> : public mock_handler_base {
@@ -28,7 +28,7 @@ public:
     navigation_page_handler(navigation_page_handler&&)                 = delete;
     navigation_page_handler& operator=(navigation_page_handler&&)      = delete;
 
-    void map_stack(navigation_page& np) {
+    void map_stack(basic_navigation_page& np) {
         record_change("stack.depth", np.stack().depth());
         // Subscribe to the four lifecycle signals.
         np.stack().page_will_appear.subscribe(slot_will_app_, will_app_);
@@ -38,7 +38,7 @@ public:
         np_ = &np;
     }
 
-    void map_current_page(navigation_page& np) {
+    void map_current_page(basic_navigation_page& np) {
         record_change("current_page.present", np.current_page.get() != nullptr);
         np.current_page.changed.subscribe(slot_cur_, cur_cb_);
         np_ = &np;
@@ -55,10 +55,10 @@ private:
 
     struct cur_recorder {
         self_t* self = nullptr;
-        void operator()(page* p) const { self->record_change("current_page.present", p != nullptr); }
+        void operator()(basic_page* p) const { self->record_change("current_page.present", p != nullptr); }
     };
 
-    navigation_page* np_ = nullptr;
+    basic_navigation_page* np_ = nullptr;
 
     lifecycle_recorder will_app_{this, "page_will_appear"};
     lifecycle_recorder did_app_{this,  "page_did_appear"};
@@ -70,9 +70,8 @@ private:
     signal_slot<view*> slot_did_app_{};
     signal_slot<view*> slot_will_dis_{};
     signal_slot<view*> slot_did_dis_{};
-    signal_slot<page* const&> slot_cur_{};
+    signal_slot<basic_page* const&> slot_cur_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_NAVIGATION_PAGE_HANDLER_HPP

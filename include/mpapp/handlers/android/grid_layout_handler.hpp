@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android grid_layout handler. Wraps android.widget.GridLayout. Per-child
+// Android basic_grid_layout handler. Wraps android.widget.GridLayout. Per-child
 // placement uses GridLayout.LayoutParams (row, column, rowSpan, columnSpan).
 
 #ifndef MPAPP_HANDLERS_ANDROID_GRID_LAYOUT_HANDLER_HPP
@@ -7,7 +7,7 @@
 
 #include <vector>
 
-#include "../../grid_layout.hpp"
+#include "../../internal/basic_grid_layout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -15,7 +15,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class grid_layout_handler<platform::android> {
@@ -28,12 +28,12 @@ public:
     grid_layout_handler(grid_layout_handler&&)                 = delete;
     grid_layout_handler& operator=(grid_layout_handler&&)      = delete;
 
-    void map_row_definitions(grid_layout& g);
-    void map_column_definitions(grid_layout& g);
-    void map_row_spacing(grid_layout& g);
-    void map_column_spacing(grid_layout& g);
+    void map_row_definitions(basic_grid_layout& g);
+    void map_column_definitions(basic_grid_layout& g);
+    void map_row_spacing(basic_grid_layout& g);
+    void map_column_spacing(basic_grid_layout& g);
 
-    void add_child(grid_layout& g, view& child);
+    void add_child(basic_grid_layout& g, view& child);
 
     jobject native() const noexcept { return native_; }
 
@@ -76,7 +76,6 @@ private:
     signal_slot<const double&>                  csp_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_GRID_LAYOUT_HANDLER_HPP

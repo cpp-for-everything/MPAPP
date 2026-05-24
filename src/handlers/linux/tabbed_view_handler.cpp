@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 tabbed_view handler implementation.
+// Part of MPAPP. GTK4 basic_tabbed_view handler implementation.
 
 #include "mpapp/handlers/linux/tabbed_view_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 tabbed_view_handler<platform::linux_>::tabbed_view_handler() {
     GtkWidget* notebook = gtk_notebook_new();
@@ -35,14 +35,14 @@ void tabbed_view_handler<platform::linux_>::apply_tab_titles(const std::vector<s
         gtk_notebook_remove_page(notebook, i);
     }
 
-    // Append one page per title. Each page body is an empty
+    // Append one basic_page per title. Each basic_page body is an empty
     // placeholder GtkBox — real content lands when the templating
-    // engine ADR wires per-tab page bodies. The tab label is a
+    // engine ADR wires per-tab basic_page bodies. The tab basic_label is a
     // GtkLabel rendered on the tab strip.
     for (const auto& title : v) {
         GtkWidget* placeholder = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-        GtkWidget* label       = gtk_label_new(title.c_str());
-        gtk_notebook_append_page(notebook, placeholder, label);
+        GtkWidget* basic_label       = gtk_label_new(title.c_str());
+        gtk_notebook_append_page(notebook, placeholder, basic_label);
     }
 
     suppress_echo_ = false;
@@ -51,7 +51,7 @@ void tabbed_view_handler<platform::linux_>::apply_tab_titles(const std::vector<s
 void tabbed_view_handler<platform::linux_>::apply_selected_index(int v) {
     if (native_ == nullptr) return;
     GtkNotebook* notebook = GTK_NOTEBOOK(static_cast<GtkWidget*>(native_));
-    if (v < 0) return;  // -1 ⇒ leave the notebook's own current page
+    if (v < 0) return;  // -1 ⇒ leave the notebook's own current basic_page
 
     const int page_count = gtk_notebook_get_n_pages(notebook);
     if (v >= page_count) return;  // out of range — no-op
@@ -61,24 +61,23 @@ void tabbed_view_handler<platform::linux_>::apply_selected_index(int v) {
     suppress_echo_ = false;
 }
 
-void tabbed_view_handler<platform::linux_>::map_tab_titles(tabbed_view& t) {
+void tabbed_view_handler<platform::linux_>::map_tab_titles(basic_tabbed_view& t) {
     apply_tab_titles(t.tab_titles.get());
     t.tab_titles.changed.subscribe(tab_titles_slot_, tab_titles_cb_);
 }
 
-void tabbed_view_handler<platform::linux_>::map_selected_index(tabbed_view& t) {
+void tabbed_view_handler<platform::linux_>::map_selected_index(basic_tabbed_view& t) {
     apply_selected_index(t.selected_index.get());
     t.selected_index.changed.subscribe(selected_index_slot_, selected_index_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------
 
 namespace {
 
 GtkWidget* dispatch_tabbed_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::tabbed_view*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_tabbed_view*>(v); w && w->has_handler()) {
         return static_cast<GtkWidget*>(w->handler().native());
     }
     return nullptr;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — GTK4 window handler.
+// Part of MPAPP. T-0011 — GTK4 basic_window handler.
 //
 // `window_handler<platform::linux_>` wraps a `GtkApplicationWindow`. The
 // underlying `GtkWidget*` is owned through a `void*` so this header
@@ -10,13 +10,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../window.hpp"
+#include "../../internal/basic_window.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class window_handler<platform::linux_> {
@@ -29,14 +29,14 @@ public:
     window_handler(window_handler&&)                 = delete;
     window_handler& operator=(window_handler&&)      = delete;
 
-    void bind(window& w);
+    void bind(basic_window& w);
 
     // Native widget access — `void*` is a `GtkWidget*` to the underlying
     // GtkApplicationWindow. Type-erased so consumers don't need GTK.
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
 
-    // The window must be attached to a GtkApplication before it can be
+    // The basic_window must be attached to a GtkApplication before it can be
     // shown. The application_handler calls this from inside the GTK
     // "activate" signal callback.
     void attach_to_application(void* gtk_application);
@@ -70,7 +70,7 @@ private:
 
     void*   native_       = nullptr;  // GtkWidget*
     void*   gtk_app_      = nullptr;  // GtkApplication*
-    window* bound_        = nullptr;
+    basic_window* bound_        = nullptr;
 
     title_cb_t                       title_cb_{this};
     content_cb_t                     content_cb_{this};
@@ -84,7 +84,6 @@ private:
     signal_slot<const bool&>         visible_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_WINDOW_HANDLER_HPP

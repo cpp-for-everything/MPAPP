@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 table_view handler. GtkListBox in GtkScrolledWindow with
+// GTK4 basic_table_view handler. GtkListBox in GtkScrolledWindow with
 // gtk_list_box_set_header_func setting section headers as
 // non-selectable rows above each section.
 
@@ -11,11 +11,11 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../table_view.hpp"
+#include "../../internal/basic_table_view.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class table_view_handler<platform::linux_> {
@@ -28,9 +28,9 @@ public:
     table_view_handler(table_view_handler&&)                 = delete;
     table_view_handler& operator=(table_view_handler&&)      = delete;
 
-    void map_sections(table_view& tv);
-    void map_typed_sections(table_view& tv);
-    void map_row_height(table_view& tv);
+    void map_sections(basic_table_view& tv);
+    void map_typed_sections(basic_table_view& tv);
+    void map_row_height(basic_table_view& tv);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -57,7 +57,7 @@ private:
     void* native_   = nullptr;  // GtkScrolledWindow*
     void* list_box_ = nullptr;  // GtkListBox*
     bool  tap_wired_ = false;
-    table_view* bound_ = nullptr;
+    basic_table_view* bound_ = nullptr;
 
     sec_cb_t   sec_cb_{this};
     typed_cb_t typed_cb_{this};
@@ -67,7 +67,6 @@ private:
     signal_slot<const int&>                              rh_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_TABLE_VIEW_HANDLER_HPP

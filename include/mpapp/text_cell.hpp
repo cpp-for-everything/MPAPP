@@ -1,47 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. See vault/20_ADRs/ADR-0021-tableview-cell-types.md
+// Part of MPAPP. See vault/10_Architecture/Components/TextCell.md
 //
-// `mpapp::text_cell` — TableView row showing primary `text` + optional
-// `detail` text. Both render with native row styling on each platform
-// (iOS Settings-style rows, Android list items, etc.).
+// `mpapp::text_cell` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_text_cell` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::text_cell x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_text_cell x;
+//     mpapp::text_cell_handler<mpapp::platform::mock> h;
+//     h.map_text(x);
 
 #ifndef MPAPP_TEXT_CELL_HPP
 #define MPAPP_TEXT_CELL_HPP
 
-#include <string>
+#include "internal/basic_text_cell.hpp"
 
-#include "cell.hpp"
-#include "observable.hpp"
-#include "platform.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_text_cell` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/text_cell_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class text_cell_handler;
-
-class text_cell : public cell {
+class text_cell : public internal::basic_text_cell {
 public:
-    text_cell() = default;
-    ~text_cell() override = default;
+    text_cell() {
+        set_tc_handler(embedded_handler_);
+        embedded_handler_.map_text(*this);
+        embedded_handler_.map_detail(*this);
+    }
 
     text_cell(const text_cell&)            = delete;
     text_cell& operator=(const text_cell&) = delete;
     text_cell(text_cell&&)                 = delete;
     text_cell& operator=(text_cell&&)      = delete;
 
-    Observable<std::string> text{""};
-    Observable<std::string> detail{""};
-    Observable<std::string> text_color{""};
-    Observable<std::string> detail_color{""};
-
-    text_cell_handler<platform::current>&       tc_handler() noexcept       { return *tc_handler_; }
-    const text_cell_handler<platform::current>& tc_handler() const noexcept { return *tc_handler_; }
-    bool                                        has_tc_handler() const noexcept { return tc_handler_ != nullptr; }
-    void                                        set_tc_handler(text_cell_handler<platform::current>& h) noexcept { tc_handler_ = &h; }
-
 private:
-    text_cell_handler<platform::current>* tc_handler_ = nullptr;
+    internal::text_cell_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::text_cell_handler<>` (host-current) and
+// `mpapp::text_cell_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using text_cell_handler = internal::text_cell_handler<Platform>;
 
 } // namespace mpapp
 

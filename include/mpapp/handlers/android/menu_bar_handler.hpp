@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android menu_bar handler — wraps
+// Part of MPAPP. Android basic_menu_bar handler — wraps
 // `androidx.appcompat.widget.Toolbar` (falling back to
 // `android.widget.Toolbar`) configured as a menu host. Each child
-// `menu_bar_item`'s `title` is added as a `MenuItem` entry on the
-// toolbar's `Menu` (Toolbar.getMenu().add(...) / .clear()). On Android
+// `basic_menu_bar_item`'s `title` is added as a `MenuItem` basic_entry on the
+// basic_toolbar's `Menu` (Toolbar.getMenu().add(...) / .clear()). On Android
 // there is no top-level menu bar surface — the entries collapse into
 // the action-bar overflow on tap, which mirrors MAUI's behaviour on
 // the platform.
@@ -13,7 +13,7 @@
 
 #include <vector>
 
-#include "../../menu_bar.hpp"
+#include "../../internal/basic_menu_bar.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
@@ -22,7 +22,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_bar_handler<platform::android> {
@@ -32,7 +32,7 @@ public:
     menu_bar_handler(const menu_bar_handler&)            = delete;
     menu_bar_handler& operator=(const menu_bar_handler&) = delete;
 
-    void map_items(menu_bar& b);
+    void map_items(basic_menu_bar& b);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -51,7 +51,6 @@ private:
     signal_slot<std::vector<view*> const&>  items_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_MENU_BAR_HANDLER_HPP

@@ -1,61 +1,53 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/MenuBar.md
 //
-// `mpapp::menu_bar` — top-level, horizontal application menu attached to
-// a window or page. A flat collection of [[MenuBarItem]] children (File,
-// Edit, View, …); on platforms with a native window-chrome menu (Windows
-// + Linux desktops) the bar maps onto the native menu surface, and on
-// mobile platforms (Android) it collapses into an overflow / toolbar
-// affordance.
+// `mpapp::menu_bar` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_menu_bar` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::menu_bar x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// `items` carries the children as non-owning `view*` pointers — same
-// shape used by stack_layout / scroll_view children and the M-04b
-// dispatch-by-view-pointer pattern. The richer `observable_list` +
-// granular `MenuBarHandlerUpdate(index, item)` surface MAUI exposes
-// lands with the binding-layer work; a naive clear+repopulate rebuild
-// is the M-04b baseline.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
 //
-// `is_enabled` is inherited from `view`. The MenuBar component doc lists
-// it as the only `BindableProperty` MAUI exposes on top of the children
-// collection, so no extra Observable is needed at this layer.
+//     mpapp::internal::basic_menu_bar x;
+//     mpapp::menu_bar_handler<mpapp::platform::mock> h;
+//     h.map_items(x);
 
 #ifndef MPAPP_MENU_BAR_HPP
 #define MPAPP_MENU_BAR_HPP
 
-#include <vector>
+#include "internal/basic_menu_bar.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_menu_bar` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/menu_bar_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class menu_bar_handler;
-
-class menu_bar : public view {
+class menu_bar : public internal::basic_menu_bar {
 public:
-    menu_bar() = default;
+    menu_bar() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_items(*this);
+    }
 
     menu_bar(const menu_bar&)            = delete;
     menu_bar& operator=(const menu_bar&) = delete;
     menu_bar(menu_bar&&)                 = delete;
     menu_bar& operator=(menu_bar&&)      = delete;
 
-    // Top-level entries. Each pointer is conventionally a
-    // `mpapp::menu_bar_item*` (the dispatch registry resolves the type),
-    // but any view* is accepted so future menu element variants can
-    // slot in without changing the public API.
-    Observable<std::vector<view*>>  items{};
-
-    menu_bar_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const menu_bar_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                       has_handler() const noexcept { return handler_ != nullptr; }
-    void                                       set_handler(menu_bar_handler<platform::current>& h) noexcept { handler_ = &h; }
-
 private:
-    menu_bar_handler<platform::current>* handler_ = nullptr;
+    internal::menu_bar_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::menu_bar_handler<>` (host-current) and
+// `mpapp::menu_bar_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using menu_bar_handler = internal::menu_bar_handler<Platform>;
 
 } // namespace mpapp
 

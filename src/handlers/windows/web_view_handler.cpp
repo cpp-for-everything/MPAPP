@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 web_view handler implementation.
+// WinUI 3 basic_web_view handler implementation.
 
 #include "mpapp/handlers/windows/web_view_handler.hpp"
 
@@ -15,7 +15,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace wf   = ::winrt::Windows::Foundation;
@@ -59,13 +59,13 @@ void web_view_handler<platform::windows>::apply_html(const std::string& v) {
     } catch (...) {}
 }
 
-void web_view_handler<platform::windows>::map_url(web_view& wv) {
+void web_view_handler<platform::windows>::map_url(basic_web_view& wv) {
     bound_ = &wv;
     apply_url(wv.url.get());
     wv.url.changed.subscribe(url_slot_, url_cb_);
 
     if (native_ == nullptr) return;
-    web_view* target = &wv;
+    basic_web_view* target = &wv;
     if (nav_starting_token_.value != 0) {
         native_.NavigationStarting(nav_starting_token_);
         nav_starting_token_ = {};
@@ -98,18 +98,17 @@ void web_view_handler<platform::windows>::map_url(web_view& wv) {
         });
 }
 
-void web_view_handler<platform::windows>::map_html(web_view& wv) {
+void web_view_handler<platform::windows>::map_html(basic_web_view& wv) {
     apply_html(wv.html_source.get());
     wv.html_source.changed.subscribe(html_slot_, html_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_web_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::web_view*>(v); w && w->has_wv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_web_view*>(v); w && w->has_wv_handler()) {
         return w->wv_handler().native();
     }
     return nullptr;

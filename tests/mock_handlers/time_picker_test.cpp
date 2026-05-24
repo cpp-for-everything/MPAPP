@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::time_picker`.
+// Mock-handler tests for `mpapp::internal::basic_time_picker`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("time_picker mock records initial values on bind",
           "[mock][time_picker]") {
-    time_picker p;
+    internal::basic_time_picker p;
     time_picker_handler<platform::mock> h;
 
     h.map_time(p);
@@ -23,7 +23,7 @@ TEST_CASE("time_picker mock records initial values on bind",
 
 TEST_CASE("time_picker records time changes",
           "[mock][time_picker]") {
-    time_picker p;
+    internal::basic_time_picker p;
     time_picker_handler<platform::mock> h;
 
     h.map_time(p);

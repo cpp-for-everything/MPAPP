@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — AppKit window handler implementation.
+// Part of MPAPP. T-0011 — AppKit basic_window handler implementation.
 
 #include "mpapp/handlers/macos/window_handler.hpp"
 
@@ -7,15 +7,15 @@
 
 #import <AppKit/AppKit.h>
 
-#include "mpapp/button.hpp"
+#include "mpapp/internal/basic_button.hpp"
 #include "mpapp/handlers/macos/button_handler.hpp"
 #include "mpapp/handlers/macos/label_handler.hpp"
 #include "mpapp/handlers/macos/stack_layout_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/stack_layout.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
 
 @interface MppWindowDelegate : NSObject <NSWindowDelegate>
-@property (nonatomic, assign) mpapp::window* boundWindow;
+@property (nonatomic, assign) mpapp::internal::basic_window* boundWindow;
 @end
 
 @implementation MppWindowDelegate
@@ -27,7 +27,7 @@
 }
 @end
 
-namespace mpapp {
+namespace mpapp::internal {
 
 window_handler<platform::macos>::window_handler() {
     @autoreleasepool {
@@ -65,11 +65,11 @@ void window_handler<platform::macos>::apply_content(view* v) {
         return;
     }
     NSView* content = nil;
-    if (auto* sl = dynamic_cast<stack_layout*>(v); sl && sl->has_handler()) {
+    if (auto* sl = dynamic_cast<basic_stack_layout*>(v); sl && sl->has_handler()) {
         content = (__bridge NSView*)sl->handler().native();
-    } else if (auto* b = dynamic_cast<button*>(v); b && b->has_handler()) {
+    } else if (auto* b = dynamic_cast<basic_button*>(v); b && b->has_handler()) {
         content = (__bridge NSView*)b->handler().native();
-    } else if (auto* l = dynamic_cast<label*>(v); l && l->has_handler()) {
+    } else if (auto* l = dynamic_cast<basic_label*>(v); l && l->has_handler()) {
         content = (__bridge NSView*)l->handler().native();
     }
     if (content) {
@@ -99,7 +99,7 @@ void window_handler<platform::macos>::apply_is_visible(bool v) {
     }
 }
 
-void window_handler<platform::macos>::bind(window& w) {
+void window_handler<platform::macos>::bind(basic_window& w) {
     bound_ = &w;
 
     apply_title(w.title.get());
@@ -124,6 +124,5 @@ void window_handler<platform::macos>::bind(window& w) {
                              delegate, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __APPLE__ && !TARGET_OS_IPHONE

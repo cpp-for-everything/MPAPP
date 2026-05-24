@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 swipe_view handler implementation.
+// Part of MPAPP. WinUI 3 basic_swipe_view handler implementation.
 
 #include "mpapp/handlers/windows/swipe_view_handler.hpp"
 
@@ -14,11 +14,11 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/swipe_item_menu_item.hpp"
+#include "mpapp/internal/basic_swipe_item_menu_item.hpp"
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -54,8 +54,8 @@ void swipe_view_handler<platform::windows>::apply_content(view* v) {
 namespace {
 
 // Build a `muxc::SwipeItems` from the cross-platform vector. Only
-// `swipe_item_menu_item` entries map cleanly onto WinUI's `SwipeItem`
-// (icon + text). Custom-content entries (`swipe_item_view`) are silently
+// `basic_swipe_item_menu_item` entries map cleanly onto WinUI's `SwipeItem`
+// (icon + text). Custom-content entries (`basic_swipe_item_view`) are silently
 // skipped — the SwipeControl pane will only show the named-action subset
 // in this M-04b landing. The richer custom-content branch lands alongside
 // gesture-event plumbing in a follow-up batch.
@@ -67,7 +67,7 @@ muxc::SwipeItems build_swipe_items(const std::vector<view*>& items) {
         return muxc::SwipeItems{nullptr};
     }
     for (view* v : items) {
-        auto* m = dynamic_cast<swipe_item_menu_item*>(v);
+        auto* m = dynamic_cast<basic_swipe_item_menu_item*>(v);
         if (m == nullptr) continue;
         try {
             muxc::SwipeItem si{};
@@ -76,7 +76,7 @@ muxc::SwipeItems build_swipe_items(const std::vector<view*>& items) {
             if (!uri.empty()) {
                 muxc::SymbolIconSource sym{};
                 // Default to a tag-style symbol — a richer URI→IconSource
-                // resolver lands with image-source plumbing.
+                // resolver lands with basic_image-source plumbing.
                 sym.Symbol(::winrt::Microsoft::UI::Xaml::Controls::Symbol::Tag);
                 si.IconSource(sym);
             }
@@ -104,29 +104,28 @@ void swipe_view_handler<platform::windows>::apply_right_items(const std::vector<
     } catch (...) {}
 }
 
-void swipe_view_handler<platform::windows>::map_content(swipe_view& sv) {
+void swipe_view_handler<platform::windows>::map_content(basic_swipe_view& sv) {
     apply_content(sv.content.get());
     sv.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void swipe_view_handler<platform::windows>::map_left_items(swipe_view& sv) {
+void swipe_view_handler<platform::windows>::map_left_items(basic_swipe_view& sv) {
     apply_left_items(sv.left_items.get());
     sv.left_items.changed.subscribe(left_slot_, left_cb_);
 }
 
-void swipe_view_handler<platform::windows>::map_right_items(swipe_view& sv) {
+void swipe_view_handler<platform::windows>::map_right_items(basic_swipe_view& sv) {
     apply_right_items(sv.right_items.get());
     sv.right_items.changed.subscribe(right_slot_, right_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_swipe_view(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::swipe_view*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_swipe_view*>(v); s && s->has_handler()) {
         return s->handler().native();
     }
     return nullptr;

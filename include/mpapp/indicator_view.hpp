@@ -1,49 +1,56 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/IndicatorView.md
 //
-// `mpapp::indicator_view` — a row of small dots showing how many items are
-// in a paged collection and which one is currently selected. Presentational
-// only; the host wires `count` to the paired collection's item count and
-// `position` to the currently visible index.
+// `mpapp::indicator_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_indicator_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::indicator_view x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// No native page-indicator widget exists on any of the three supported
-// runtime platforms. Each handler renders the row manually:
-//   - Windows: a horizontal `mux::Controls::StackPanel` of
-//     `mux::Shapes::Ellipse` instances.
-//   - Linux:   a horizontal `GtkBox` of GTK widgets with CSS-styled
-//     background-color dots.
-//   - Android: a horizontal `LinearLayout` of `View`s whose background is
-//     a circular `GradientDrawable`.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_indicator_view x;
+//     mpapp::indicator_view_handler<mpapp::platform::mock> h;
+//     h.map_count(x);
 
 #ifndef MPAPP_INDICATOR_VIEW_HPP
 #define MPAPP_INDICATOR_VIEW_HPP
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+#include "internal/basic_indicator_view.hpp"
+
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_indicator_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/indicator_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class indicator_view_handler;
-
-class indicator_view : public view {
+class indicator_view : public internal::basic_indicator_view {
 public:
-    indicator_view() = default;
+    indicator_view() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_count(*this);
+        embedded_handler_.map_position(*this);
+        embedded_handler_.map_indicator_color(*this);
+        embedded_handler_.map_selected_indicator_color(*this);
+    }
 
-    Observable<int>        count{0};                       // number of dots
-    Observable<int>        position{0};                    // highlighted dot index
-    Observable<brush_ref>  indicator_color{};              // unselected dot tint
-    Observable<brush_ref>  selected_indicator_color{};     // selected dot tint
-
-    indicator_view_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const indicator_view_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                             has_handler() const noexcept { return handler_ != nullptr; }
-    void                                             set_handler(indicator_view_handler<platform::current>& h) noexcept { handler_ = &h; }
+    indicator_view(const indicator_view&)            = delete;
+    indicator_view& operator=(const indicator_view&) = delete;
+    indicator_view(indicator_view&&)                 = delete;
+    indicator_view& operator=(indicator_view&&)      = delete;
 
 private:
-    indicator_view_handler<platform::current>* handler_ = nullptr;
+    internal::indicator_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::indicator_view_handler<>` (host-current) and
+// `mpapp::indicator_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using indicator_view_handler = internal::indicator_view_handler<Platform>;
 
 } // namespace mpapp
 

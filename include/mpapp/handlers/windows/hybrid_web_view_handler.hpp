@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 hybrid_web_view handler — extends the WebView2 surface with
+// WinUI 3 basic_hybrid_web_view handler — extends the WebView2 surface with
 // a C++ <-> JS bridge. Inbound messages arrive via
 // CoreWebView2.WebMessageReceived; outbound via CoreWebView2.
 // PostWebMessageAsString. A small script is injected at document
-// creation that exposes `window.mpapp = { send: ..., on: ... }`.
+// creation that exposes `basic_window.mpapp = { send: ..., on: ... }`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_HYBRID_WEB_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_HYBRID_WEB_VIEW_HANDLER_HPP
 
 #include <string>
 
-#include "../../hybrid_web_view.hpp"
+#include "../../internal/basic_hybrid_web_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -20,7 +20,7 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class hybrid_web_view_handler<platform::windows> {
@@ -33,8 +33,8 @@ public:
     hybrid_web_view_handler(hybrid_web_view_handler&&)                 = delete;
     hybrid_web_view_handler& operator=(hybrid_web_view_handler&&)      = delete;
 
-    void map_messages(hybrid_web_view& h);
-    void map_html_source(hybrid_web_view& h);
+    void map_messages(basic_hybrid_web_view& h);
+    void map_html_source(basic_hybrid_web_view& h);
 
     winrt::Microsoft::UI::Xaml::Controls::WebView2&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::WebView2& native() const noexcept { return native_; }
@@ -59,7 +59,7 @@ private:
 
     winrt::Microsoft::UI::Xaml::Controls::WebView2 native_{nullptr};
     winrt::event_token web_message_token_{};
-    hybrid_web_view*   bound_       = nullptr;
+    basic_hybrid_web_view*   bound_       = nullptr;
     bool               wired_       = false;
     // True once AddScriptToExecuteOnDocumentCreatedAsync has resolved.
     // Until then any html_source assignment is buffered in pending_html_
@@ -77,7 +77,6 @@ private:
     signal_slot<const std::string&> html_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_HYBRID_WEB_VIEW_HANDLER_HPP

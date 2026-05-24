@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 check_box handler implementation.
+// Part of MPAPP. GTK4 basic_check_box handler implementation.
 
 #include "mpapp/handlers/linux/check_box_handler.hpp"
 
@@ -7,12 +7,12 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct toggled_ctx {
-    check_box*                          target;
+    basic_check_box*                          target;
     check_box_handler<platform::linux_>* handler;
 };
 
@@ -47,7 +47,7 @@ void check_box_handler<platform::linux_>::apply_is_checked(bool v) {
     suppress_echo_ = false;
 }
 
-void check_box_handler<platform::linux_>::map_is_checked(check_box& c) {
+void check_box_handler<platform::linux_>::map_is_checked(basic_check_box& c) {
     apply_is_checked(c.is_checked.get());
     c.is_checked.changed.subscribe(slot_, cb_);
 
@@ -66,20 +66,18 @@ void check_box_handler<platform::linux_>::map_is_checked(check_box& c) {
         static_cast<GConnectFlags>(0));
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register check_box so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_check_box so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 
 namespace {
 
 GtkWidget* dispatch_check_box(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::check_box*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_check_box*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

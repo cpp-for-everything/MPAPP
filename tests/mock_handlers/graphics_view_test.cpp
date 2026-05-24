@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::graphics_view`.
+// Mock-handler tests for `mpapp::internal::basic_graphics_view`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -11,7 +11,7 @@ using namespace mpapp;
 
 TEST_CASE("graphics_view defaults",
           "[mock][graphics_view]") {
-    graphics_view gv;
+    internal::basic_graphics_view gv;
     CHECK(gv.width.get()  == 0);
     CHECK(gv.height.get() == 0);
     CHECK(gv.draw_count.get() == 0);
@@ -19,7 +19,7 @@ TEST_CASE("graphics_view defaults",
 
 TEST_CASE("invalidate() bumps draw_count and emits draw_requested",
           "[mock][graphics_view]") {
-    graphics_view gv;
+    internal::basic_graphics_view gv;
     int hits = 0;
     struct cb_t { int* hits; void operator()() const { ++*hits; } };
     cb_t cb{&hits};
@@ -36,7 +36,7 @@ TEST_CASE("invalidate() bumps draw_count and emits draw_requested",
 
 TEST_CASE("mock handler records draw_count + size",
           "[mock][graphics_view]") {
-    graphics_view gv;
+    internal::basic_graphics_view gv;
     graphics_view_handler<platform::mock> h;
     h.map_draw_count(gv);
     h.map_size(gv);
@@ -56,13 +56,13 @@ TEST_CASE("mock handler records draw_count + size",
 
 TEST_CASE("drawable defaults to an empty std::function",
           "[mock][graphics_view][drawable]") {
-    graphics_view gv;
+    internal::basic_graphics_view gv;
     CHECK_FALSE(static_cast<bool>(gv.drawable.get()));
 }
 
 TEST_CASE("mock handler records drawable install + clear",
           "[mock][graphics_view][drawable]") {
-    graphics_view gv;
+    internal::basic_graphics_view gv;
     graphics_view_handler<platform::mock> h;
     h.map_drawable(gv);
     CHECK(h.last_drawable_set == false);
@@ -91,7 +91,7 @@ TEST_CASE("drawable callback receives a canvas from make_canvas",
     bool   was_called = false;
     int    captured_w = 0;
     int    captured_h = 0;
-    graphics_view gv;
+    internal::basic_graphics_view gv;
     gv.drawable = [&](detail::graphics::canvas& c) {
         was_called = true;
         captured_w = c.width_px();

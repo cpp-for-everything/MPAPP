@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android switch_cell handler implementation.
+// Android basic_switch_cell handler implementation.
 
 #include "mpapp/handlers/android/switch_cell_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -88,7 +88,7 @@ void view_set_padding(JNIEnv* env, jobject view_obj, int left, int top, int righ
 }
 
 // Build LinearLayout.LayoutParams(width, height, weight) and assign it
-// to the given child via View.setLayoutParams. This gives the label its
+// to the given child via View.setLayoutParams. This gives the basic_label its
 // weight=1 so the switch is pushed to the trailing edge.
 void apply_linear_lp_with_weight(JNIEnv* env, jobject child,
                                   int width, int height, float weight) {
@@ -177,7 +177,7 @@ switch_cell_handler<platform::android>::switch_cell_handler() {
         ll_set_orientation(env, native_, LINEAR_LAYOUT_HORIZONTAL);
         view_set_padding(env, native_, 24, 12, 24, 12);
         if (text_view_ != nullptr) {
-            // weight=1 so the label takes the remaining width; switch hugs
+            // weight=1 so the basic_label takes the remaining width; switch hugs
             // the trailing edge.
             apply_linear_lp_with_weight(env, text_view_, 0, WRAP_CONTENT, 1.0f);
             vg_add(env, native_, text_view_);
@@ -214,12 +214,12 @@ void switch_cell_handler<platform::android>::apply_on(bool v) {
     suppress_echo_ = false;
 }
 
-void switch_cell_handler<platform::android>::map_text(switch_cell& c) {
+void switch_cell_handler<platform::android>::map_text(basic_switch_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void switch_cell_handler<platform::android>::map_on(switch_cell& c) {
+void switch_cell_handler<platform::android>::map_on(basic_switch_cell& c) {
     bound_ = &c;
     apply_on(c.on.get());
     c.on.changed.subscribe(on_slot_, on_cb_);
@@ -246,13 +246,12 @@ void android_switch_cell_dispatch_checked_changed(switch_cell_handler<platform::
     if (h != nullptr) h->on_native_checked_changed(checked);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_switch_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::switch_cell*>(v); c && c->has_sc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_switch_cell*>(v); c && c->has_sc_handler()) {
         return c->sc_handler().native();
     }
     return nullptr;

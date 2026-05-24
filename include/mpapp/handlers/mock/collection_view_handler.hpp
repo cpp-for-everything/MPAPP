@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock handler for `mpapp::collection_view`.
+// Part of MPAPP. Mock handler for `mpapp::basic_collection_view`.
 
 #ifndef MPAPP_HANDLERS_MOCK_COLLECTION_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_COLLECTION_VIEW_HANDLER_HPP
@@ -8,11 +8,11 @@
 #include <string>
 #include <vector>
 
-#include "../../collection_view.hpp"
+#include "../../internal/basic_collection_view.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class collection_view_handler<platform::mock> : public mock_handler_base {
@@ -25,17 +25,17 @@ public:
     collection_view_handler(collection_view_handler&&)                 = delete;
     collection_view_handler& operator=(collection_view_handler&&)      = delete;
 
-    void map_items_source(collection_view& cv) {
+    void map_items_source(basic_collection_view& cv) {
         record_change("items_source.count", cv.items_source.get().size());
         cv.items_source.changed.subscribe(slot_items_, items_cb_);
     }
 
-    void map_selected_index(collection_view& cv) {
+    void map_selected_index(basic_collection_view& cv) {
         record_change("selected_index", cv.selected_index.get());
         cv.selected_index.changed.subscribe(slot_sel_, sel_cb_);
     }
 
-    void map_selected_indices(collection_view& cv) {
+    void map_selected_indices(basic_collection_view& cv) {
         record_change("selected_indices.count", cv.selected_indices.get().size());
         cv.selected_indices.changed.subscribe(slot_seli_, seli_cb_);
     }
@@ -43,7 +43,7 @@ public:
     // Records the current layout enum as an integer so tests can assert
     // the full vertical_list / horizontal_list / vertical_grid /
     // horizontal_grid cycle reaches the handler.
-    void map_layout(collection_view& cv) {
+    void map_layout(basic_collection_view& cv) {
         record_change("layout",
                       static_cast<int>(cv.layout.get()));
         cv.layout.changed.subscribe(slot_layout_, layout_cb_);
@@ -91,6 +91,5 @@ private:
     signal_slot<const collection_layout&>        slot_layout_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_COLLECTION_VIEW_HANDLER_HPP

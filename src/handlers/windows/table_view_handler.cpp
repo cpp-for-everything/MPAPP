@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 table_view handler implementation.
+// WinUI 3 basic_table_view handler implementation.
 
 #include "mpapp/handlers/windows/table_view_handler.hpp"
 
@@ -16,7 +16,7 @@
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -27,7 +27,7 @@ namespace {
 // (section, row). Returns true if `position` lands on a data row;
 // false if it's a header (or out of range).
 //
-// Template-duck-typed on whichever section vector the table_view has
+// Template-duck-typed on whichever section vector the basic_table_view has
 // populated — both `table_section_data` and `table_section_typed`
 // expose `.rows.size()`.
 template <class SectionVec>
@@ -130,30 +130,29 @@ void table_view_handler<platform::windows>::apply_row_height(int /*h*/) {
     // not wired in v1.
 }
 
-void table_view_handler<platform::windows>::map_sections(table_view& tv) {
+void table_view_handler<platform::windows>::map_sections(basic_table_view& tv) {
     bound_ = &tv;
     rebuild_active();
     tv.sections.changed.subscribe(sec_slot_, sec_cb_);
 }
 
-void table_view_handler<platform::windows>::map_typed_sections(table_view& tv) {
+void table_view_handler<platform::windows>::map_typed_sections(basic_table_view& tv) {
     bound_ = &tv;
     rebuild_active();
     tv.typed_sections.changed.subscribe(typed_slot_, typed_cb_);
 }
 
-void table_view_handler<platform::windows>::map_row_height(table_view& tv) {
+void table_view_handler<platform::windows>::map_row_height(basic_table_view& tv) {
     apply_row_height(tv.row_height.get());
     tv.row_height.changed.subscribe(rh_slot_, rh_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_table_view(::mpapp::view* v) {
-    if (auto* t = dynamic_cast<::mpapp::table_view*>(v); t && t->has_tv_handler()) {
+    if (auto* t = dynamic_cast<::mpapp::internal::basic_table_view*>(v); t && t->has_tv_handler()) {
         return t->tv_handler().native();
     }
     return nullptr;

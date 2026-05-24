@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 menu_flyout_sub_item handler implementation.
+// Part of MPAPP. GTK4 basic_menu_flyout_sub_item handler implementation.
 
 #include "mpapp/handlers/linux/menu_flyout_sub_item_handler.hpp"
 
@@ -9,13 +9,13 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-#include "mpapp/menu_flyout_sub_item.hpp"
+#include "mpapp/internal/basic_menu_flyout_sub_item.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 menu_flyout_sub_item_handler<platform::linux_>::menu_flyout_sub_item_handler() {
-    // Sub-item presents as a button that, when clicked, opens its own
+    // Sub-item presents as a basic_button that, when clicked, opens its own
     // nested popover. GtkMenuButton handles the popover toggle.
     GtkWidget* btn        = gtk_menu_button_new();
     GtkWidget* sub_pop    = gtk_popover_new();
@@ -49,24 +49,23 @@ void menu_flyout_sub_item_handler<platform::linux_>::apply_items(const std::vect
     }
 }
 
-void menu_flyout_sub_item_handler<platform::linux_>::map_text(menu_flyout_sub_item& s) {
+void menu_flyout_sub_item_handler<platform::linux_>::map_text(basic_menu_flyout_sub_item& s) {
     apply_text(s.text.get());
     s.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void menu_flyout_sub_item_handler<platform::linux_>::map_items(menu_flyout_sub_item& s) {
+void menu_flyout_sub_item_handler<platform::linux_>::map_items(basic_menu_flyout_sub_item& s) {
     apply_items(s.items.get());
     s.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 GtkWidget* dispatch_menu_flyout_sub_item(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::menu_flyout_sub_item*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_menu_flyout_sub_item*>(v); s && s->has_handler()) {
         return GTK_WIDGET(static_cast<GtkWidget*>(s->handler().native()));
     }
     return nullptr;

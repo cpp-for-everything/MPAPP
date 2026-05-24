@@ -28,7 +28,6 @@
 #include <mpapp/switch_.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
 #include <mpapp/handlers/switch_handler.hpp>
@@ -101,22 +100,22 @@ public:
         shell_.add_tab("help");
 
         // ----- Buttons — one member-function callback per button ----
-        bind_button(btn_home_,             btn_home_handler_,
+        bind_button(btn_home_,
                     "go_to<\"home\", &routes>()",
                     btn_home_slot_,         btn_home_cb_);
-        bind_button(btn_home_details_,     btn_home_details_handler_,
+        bind_button(btn_home_details_,
                     "go_to<\"home/details\", &routes>(42)",
                     btn_home_details_slot_, btn_home_details_cb_);
-        bind_button(btn_settings_,         btn_settings_handler_,
+        bind_button(btn_settings_,
                     "go_to<\"settings\", &routes>()",
                     btn_settings_slot_,     btn_settings_cb_);
-        bind_button(btn_settings_profile_, btn_settings_profile_handler_,
+        bind_button(btn_settings_profile_,
                     "go_to<\"settings/profile\", &routes>(\"ada\")",
                     btn_settings_profile_slot_, btn_settings_profile_cb_);
-        bind_button(btn_help_,             btn_help_handler_,
+        bind_button(btn_help_,
                     "go_to<\"help\", &routes>()",
                     btn_help_slot_,         btn_help_cb_);
-        bind_button(btn_help_about_,       btn_help_about_handler_,
+        bind_button(btn_help_about_,
                     "go_to<\"help/about\", &routes>(4)",
                     btn_help_about_slot_,   btn_help_about_cb_);
 
@@ -159,13 +158,11 @@ private:
     }
     template <class Cb>
     void bind_button(mpapp::button& btn,
-                     mpapp::button_handler<>& h,
                      const std::string& text,
                      mpapp::signal_slot<>& slot,
                      Cb& cb) {
-        btn.set_handler(h);
-        h.map_text(btn);
-        h.map_clicked(btn);
+        // `mpapp::button` auto-binds its embedded handler in its ctor;
+        // this helper just sets the label + click subscription.
         btn.text = text;
         btn.clicked.subscribe(slot, cb);
     }
@@ -222,12 +219,6 @@ private:
     mpapp::label_handler<>        form_dirty_label_handler_{};
     mpapp::switch_handler<>       block_activate_handler_{};
     mpapp::switch_handler<>       form_dirty_handler_{};
-    mpapp::button_handler<>       btn_home_handler_{};
-    mpapp::button_handler<>       btn_home_details_handler_{};
-    mpapp::button_handler<>       btn_settings_handler_{};
-    mpapp::button_handler<>       btn_settings_profile_handler_{};
-    mpapp::button_handler<>       btn_help_handler_{};
-    mpapp::button_handler<>       btn_help_about_handler_{};
     mpapp::stack_layout_handler<> layout_handler_{};
     mpapp::window_handler<>       window_handler_{};
 

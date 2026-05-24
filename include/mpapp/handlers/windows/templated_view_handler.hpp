@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 `templated_view` handler — wraps
+// Part of MPAPP. WinUI 3 `basic_templated_view` handler — wraps
 // `mux::Controls::ContentControl`. The `content` slot maps to
 // `.Content()`; `template_id` is recorded into a member string (drives
 // no behavior until the templating engine ADR lands).
@@ -12,13 +12,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../templated_view.hpp"
+#include "../../internal/basic_templated_view.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class templated_view_handler<platform::windows> {
@@ -30,11 +30,11 @@ public:
     templated_view_handler(templated_view_handler&&)                 = delete;
     templated_view_handler& operator=(templated_view_handler&&)      = delete;
 
-    void map_content(templated_view& t);
-    void map_template_id(templated_view& t);
+    void map_content(basic_templated_view& t);
+    void map_template_id(basic_templated_view& t);
 
     // Convenience for tests / spike: assign a non-owning child.
-    void bind_content(templated_view& t, view& child);
+    void bind_content(basic_templated_view& t, view& child);
 
     // Currently-applied template id (P3 templating-engine deferred).
     const std::string& template_id() const noexcept { return template_id_; }
@@ -58,7 +58,6 @@ private:
     signal_slot<const std::string&>           template_id_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_TEMPLATED_VIEW_HANDLER_HPP

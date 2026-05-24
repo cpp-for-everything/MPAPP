@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock image_button handler.
+// Mock basic_image_button handler.
 
 #ifndef MPAPP_HANDLERS_MOCK_IMAGE_BUTTON_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_IMAGE_BUTTON_HANDLER_HPP
 
 #include <string>
 
-#include "../../image_button.hpp"
+#include "../../internal/basic_image_button.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_button_handler<platform::mock>
@@ -18,8 +18,8 @@ class image_button_handler<platform::mock>
 public:
     image_button_handler() = default;
 
-    void map_source(image_button& b) { bind("source", b.source, binding_source_); }
-    void map_aspect(image_button& b) {
+    void map_source(basic_image_button& b) { bind("source", b.source, binding_source_); }
+    void map_aspect(basic_image_button& b) {
         record("aspect", static_cast<int>(b.aspect.get()));
         b.aspect.changed.subscribe(aspect_slot_, aspect_cb_);
     }
@@ -37,6 +37,5 @@ private:
     signal_slot<const aspect_mode&>           aspect_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_IMAGE_BUTTON_HANDLER_HPP

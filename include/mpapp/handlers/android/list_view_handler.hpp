@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android list_view handler. Wraps android.widget.ListView with an
+// Android basic_list_view handler. Wraps android.widget.ListView with an
 // ArrayAdapter<String> bound to items_source.
 
 #ifndef MPAPP_HANDLERS_ANDROID_LIST_VIEW_HANDLER_HPP
@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 
-#include "../../list_view.hpp"
+#include "../../internal/basic_list_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -16,7 +16,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class list_view_handler<platform::android> {
@@ -29,8 +29,8 @@ public:
     list_view_handler(list_view_handler&&)                 = delete;
     list_view_handler& operator=(list_view_handler&&)      = delete;
 
-    void map_items_source(list_view& lv);
-    void map_selected_index(list_view& lv);
+    void map_items_source(basic_list_view& lv);
+    void map_selected_index(basic_list_view& lv);
 
     jobject native() const noexcept { return native_; }
 
@@ -48,7 +48,7 @@ private:
     };
 
     jobject native_ = nullptr;  // android.widget.ListView
-    list_view* bound_ = nullptr;
+    basic_list_view* bound_ = nullptr;
 
     items_cb_t items_cb_{this};
     sel_cb_t   sel_cb_{this};
@@ -56,7 +56,6 @@ private:
     signal_slot<const int&>                       sel_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_LIST_VIEW_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android flyout_view handler.
+// Part of MPAPP. Android basic_flyout_view handler.
 //
 // Tries `androidx.drawerlayout.widget.DrawerLayout` first via
 // `FindClass`. If that class is not on the runtime classpath (the
@@ -18,7 +18,7 @@
 
 #include <memory>
 
-#include "../../flyout_view.hpp"
+#include "../../internal/basic_flyout_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -26,7 +26,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class flyout_view_handler<platform::android> {
@@ -39,12 +39,12 @@ public:
     flyout_view_handler(flyout_view_handler&&)                 = delete;
     flyout_view_handler& operator=(flyout_view_handler&&)      = delete;
 
-    void map_flyout(flyout_view& f);
-    void map_detail(flyout_view& f);
-    void map_is_presented(flyout_view& f);
+    void map_flyout(basic_flyout_view& f);
+    void map_detail(basic_flyout_view& f);
+    void map_is_presented(basic_flyout_view& f);
 
-    void bind_flyout(flyout_view& f, view& child);
-    void bind_detail(flyout_view& f, view& child);
+    void bind_flyout(basic_flyout_view& f, view& child);
+    void bind_detail(basic_flyout_view& f, view& child);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -79,7 +79,6 @@ private:
     signal_slot<const bool&>                  is_presented_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_FLYOUT_VIEW_HANDLER_HPP

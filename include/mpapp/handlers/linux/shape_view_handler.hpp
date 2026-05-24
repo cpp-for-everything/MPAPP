@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 shape_view handler — wraps a GtkDrawingArea and renders into
+// GTK4 basic_shape_view handler — wraps a GtkDrawingArea and renders into
 // its cairo_t inside the `draw` callback. Hex color strings parse
 // into RGBA values; the callback dispatches on `kind` and draws the
 // appropriate cairo primitive. For v1, `polygon` and `path` render
@@ -11,12 +11,12 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../shape_view.hpp"
+#include "../../internal/basic_shape_view.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class shape_view_handler<platform::linux_> {
@@ -29,18 +29,18 @@ public:
     shape_view_handler(shape_view_handler&&)                 = delete;
     shape_view_handler& operator=(shape_view_handler&&)      = delete;
 
-    void map_kind(shape_view& s);
-    void map_data(shape_view& s);
-    void map_fill(shape_view& s);
-    void map_stroke(shape_view& s);
-    void map_stroke_thickness(shape_view& s);
-    void map_opacity(shape_view& s);
+    void map_kind(basic_shape_view& s);
+    void map_data(basic_shape_view& s);
+    void map_fill(basic_shape_view& s);
+    void map_stroke(basic_shape_view& s);
+    void map_stroke_thickness(basic_shape_view& s);
+    void map_opacity(basic_shape_view& s);
 
     void*       native() noexcept       { return native_; }   // GtkDrawingArea*
     const void* native() const noexcept { return native_; }
 
     // Used by the cairo draw callback to pull current state.
-    shape_view* bound() const noexcept { return bound_; }
+    basic_shape_view* bound() const noexcept { return bound_; }
 
 private:
     void invalidate_();
@@ -51,7 +51,7 @@ private:
     };
 
     void* native_ = nullptr;  // GtkDrawingArea*
-    shape_view* bound_ = nullptr;
+    basic_shape_view* bound_ = nullptr;
 
     invalidate_cb_t                 kind_cb_{this};
     invalidate_cb_t                 data_cb_{this};
@@ -67,7 +67,6 @@ private:
     signal_slot<const double&>      opacity_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_SHAPE_VIEW_HANDLER_HPP

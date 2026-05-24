@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 flyout_page handler implementation.
+// GTK4 basic_flyout_page handler implementation.
 
 #include "mpapp/handlers/linux/flyout_page_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 flyout_page_handler<platform::linux_>::flyout_page_handler() {
     native_ = gtk_paned_new(GTK_ORIENTATION_HORIZONTAL);
@@ -31,7 +31,7 @@ flyout_page_handler<platform::linux_>::flyout_page_handler() {
 
 flyout_page_handler<platform::linux_>::~flyout_page_handler() = default;
 
-void flyout_page_handler<platform::linux_>::apply_flyout(page* p) {
+void flyout_page_handler<platform::linux_>::apply_flyout(basic_page* p) {
     GtkBox* slot = GTK_BOX(static_cast<GtkWidget*>(flyout_slot_w_));
     if (current_flyout_child_ != nullptr) {
         gtk_box_remove(slot, GTK_WIDGET(current_flyout_child_));
@@ -45,7 +45,7 @@ void flyout_page_handler<platform::linux_>::apply_flyout(page* p) {
     }
 }
 
-void flyout_page_handler<platform::linux_>::apply_detail(page* p) {
+void flyout_page_handler<platform::linux_>::apply_detail(basic_page* p) {
     GtkBox* slot = GTK_BOX(static_cast<GtkWidget*>(detail_slot_w_));
     if (current_detail_child_ != nullptr) {
         gtk_box_remove(slot, GTK_WIDGET(current_detail_child_));
@@ -64,28 +64,27 @@ void flyout_page_handler<platform::linux_>::apply_is_presented(bool v) {
     gtk_widget_set_visible(static_cast<GtkWidget*>(flyout_slot_w_), v ? TRUE : FALSE);
 }
 
-void flyout_page_handler<platform::linux_>::map_flyout(flyout_page& fp) {
+void flyout_page_handler<platform::linux_>::map_flyout(basic_flyout_page& fp) {
     apply_flyout(fp.flyout.get());
     fp.flyout.changed.subscribe(flyout_slot_, flyout_cb_);
 }
 
-void flyout_page_handler<platform::linux_>::map_detail(flyout_page& fp) {
+void flyout_page_handler<platform::linux_>::map_detail(basic_flyout_page& fp) {
     apply_detail(fp.detail.get());
     fp.detail.changed.subscribe(detail_slot_, detail_cb_);
 }
 
-void flyout_page_handler<platform::linux_>::map_is_presented(flyout_page& fp) {
+void flyout_page_handler<platform::linux_>::map_is_presented(basic_flyout_page& fp) {
     apply_is_presented(fp.is_presented.get());
     fp.is_presented.changed.subscribe(presented_slot_, presented_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_flyout_page(::mpapp::view* v) {
-    if (auto* f = dynamic_cast<::mpapp::flyout_page*>(v); f && f->has_fp_handler()) {
+    if (auto* f = dynamic_cast<::mpapp::internal::basic_flyout_page*>(v); f && f->has_fp_handler()) {
         return GTK_WIDGET(f->fp_handler().native());
     }
     return nullptr;

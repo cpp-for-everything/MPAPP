@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 toolbar handler implementation.
+// Part of MPAPP. WinUI 3 basic_toolbar handler implementation.
 
 #include "mpapp/handlers/windows/toolbar_handler.hpp"
 
@@ -15,7 +15,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -55,24 +55,23 @@ void toolbar_handler<platform::windows>::apply_title(const std::string& v) {
     } catch (...) {}
 }
 
-void toolbar_handler<platform::windows>::map_items(toolbar& t) {
+void toolbar_handler<platform::windows>::map_items(basic_toolbar& t) {
     apply_items(t.items.get());
     t.items.changed.subscribe(items_slot_, items_cb_);
 }
-void toolbar_handler<platform::windows>::map_title(toolbar& t) {
+void toolbar_handler<platform::windows>::map_title(basic_toolbar& t) {
     apply_title(t.title.get());
     t.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 namespace {
 
 // Per ADR-0013: self-register so the container dispatch surfaces can
 // resolve `view*` → `UIElement` without a per-widget dynamic_cast branch
-// in stack_layout / window / scroll_view / border / content_view.
+// in basic_stack_layout / window / basic_scroll_view / border / basic_content_view.
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_toolbar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::toolbar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_toolbar*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

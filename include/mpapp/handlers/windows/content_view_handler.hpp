@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 content_view handler — wraps `mux::Controls::ContentControl`.
+// WinUI 3 basic_content_view handler — wraps `mux::Controls::ContentControl`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_CONTENT_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_CONTENT_VIEW_HANDLER_HPP
 
 #include <memory>
 
-#include "../../content_view.hpp"
+#include "../../internal/basic_content_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -14,7 +14,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class content_view_handler<platform::windows> {
@@ -24,8 +24,8 @@ public:
     content_view_handler(const content_view_handler&)            = delete;
     content_view_handler& operator=(const content_view_handler&) = delete;
 
-    void map_content(content_view& c);
-    void bind_content(content_view& c, view& child);
+    void map_content(basic_content_view& c);
+    void bind_content(basic_content_view& c, view& child);
 
     winrt::Microsoft::UI::Xaml::Controls::ContentControl&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::ContentControl& native() const noexcept { return native_; }
@@ -41,7 +41,6 @@ private:
     signal_slot<std::shared_ptr<view> const&> content_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_CONTENT_VIEW_HANDLER_HPP

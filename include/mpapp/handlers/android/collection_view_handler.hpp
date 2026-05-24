@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android collection_view handler. Outer FrameLayout (native_) is
+// Android basic_collection_view handler. Outer FrameLayout (native_) is
 // stable so the ADR-0013 dispatch handle doesn't move; inner_ is
 // a single androidx.recyclerview.widget.RecyclerView whose
 // LayoutManager swaps to cover all four collection_layout values:
@@ -21,7 +21,7 @@
 #include <string>
 #include <vector>
 
-#include "../../collection_view.hpp"
+#include "../../internal/basic_collection_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -29,7 +29,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class collection_view_handler<platform::android> {
@@ -42,11 +42,11 @@ public:
     collection_view_handler(collection_view_handler&&)                 = delete;
     collection_view_handler& operator=(collection_view_handler&&)      = delete;
 
-    void map_items_source(collection_view& cv);
-    void map_typed_items(collection_view& cv);
-    void map_selected_index(collection_view& cv);
-    void map_selection_mode(collection_view& cv);
-    void map_layout(collection_view& cv);
+    void map_items_source(basic_collection_view& cv);
+    void map_typed_items(basic_collection_view& cv);
+    void map_selected_index(basic_collection_view& cv);
+    void map_selection_mode(basic_collection_view& cv);
+    void map_layout(basic_collection_view& cv);
 
     jobject native() const noexcept { return native_; }
 
@@ -92,7 +92,7 @@ private:
     jobject native_  = nullptr;   // FrameLayout (outer)
     jobject inner_   = nullptr;   // androidx.recyclerview.widget.RecyclerView
     jobject adapter_ = nullptr;   // MppCollectionAdapter
-    collection_view* bound_ = nullptr;
+    basic_collection_view* bound_ = nullptr;
 
     items_cb_t        items_cb_{this};
     typed_cb_t        typed_cb_{this};
@@ -108,7 +108,6 @@ private:
     signal_slot<>                                          materialized_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_COLLECTION_VIEW_HANDLER_HPP

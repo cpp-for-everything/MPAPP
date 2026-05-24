@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — UIKit stack_layout handler implementation.
+// Part of MPAPP. T-0011 — UIKit basic_stack_layout handler implementation.
 
 #include "mpapp/handlers/ios/stack_layout_handler.hpp"
 
@@ -7,12 +7,12 @@
 
 #import <UIKit/UIKit.h>
 
-#include "mpapp/button.hpp"
+#include "mpapp/internal/basic_button.hpp"
 #include "mpapp/handlers/ios/button_handler.hpp"
 #include "mpapp/handlers/ios/label_handler.hpp"
-#include "mpapp/label.hpp"
+#include "mpapp/internal/basic_label.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -91,7 +91,7 @@ void stack_layout_handler<platform::ios>::apply_vertical_alignment(v_align a) {
     }
 }
 
-void stack_layout_handler<platform::ios>::bind(stack_layout& s) {
+void stack_layout_handler<platform::ios>::bind(basic_stack_layout& s) {
     bound_ = &s;
 
     apply_orientation(s.stack_orientation.get());
@@ -120,11 +120,11 @@ void stack_layout_handler<platform::ios>::add_child(view& child) {
     if (!native_) return;
     UIStackView* sv = (__bridge UIStackView*)native_;
     UIView* native_child = nil;
-    if (auto* b = dynamic_cast<button*>(&child); b && b->has_handler()) {
+    if (auto* b = dynamic_cast<basic_button*>(&child); b && b->has_handler()) {
         native_child = (__bridge UIView*)b->handler().native();
-    } else if (auto* l = dynamic_cast<label*>(&child); l && l->has_handler()) {
+    } else if (auto* l = dynamic_cast<basic_label*>(&child); l && l->has_handler()) {
         native_child = (__bridge UIView*)l->handler().native();
-    } else if (auto* sl = dynamic_cast<stack_layout*>(&child); sl && sl->has_handler()) {
+    } else if (auto* sl = dynamic_cast<basic_stack_layout*>(&child); sl && sl->has_handler()) {
         native_child = (__bridge UIView*)sl->handler().native();
     }
     if (native_child) {
@@ -132,6 +132,5 @@ void stack_layout_handler<platform::ios>::add_child(view& child) {
     }
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __APPLE__ && TARGET_OS_IPHONE

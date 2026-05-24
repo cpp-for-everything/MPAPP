@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — UIKit stack_layout handler. Wraps UIStackView.
+// Part of MPAPP. T-0011 — UIKit basic_stack_layout handler. Wraps UIStackView.
 
 #ifndef MPAPP_HANDLERS_IOS_STACK_LAYOUT_HANDLER_HPP
 #define MPAPP_HANDLERS_IOS_STACK_LAYOUT_HANDLER_HPP
@@ -8,13 +8,13 @@
 #include "../../layout_types.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../stack_layout.hpp"
+#include "../../internal/basic_stack_layout.hpp"
 
 #if defined(__APPLE__)
 #  include <TargetConditionals.h>
 #  if TARGET_OS_IPHONE
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class stack_layout_handler<platform::ios> {
@@ -27,7 +27,7 @@ public:
     stack_layout_handler(stack_layout_handler&&)                 = delete;
     stack_layout_handler& operator=(stack_layout_handler&&)      = delete;
 
-    void bind(stack_layout& s);
+    void bind(basic_stack_layout& s);
     void add_child(view& child);
 
     void*       native() noexcept       { return native_; }
@@ -47,7 +47,7 @@ private:
     struct v_align_cb_t  { stack_layout_handler<platform::ios>* self; void operator()(const v_align& v) const { self->apply_vertical_alignment(v); } };
 
     void*         native_ = nullptr;
-    stack_layout* bound_  = nullptr;
+    basic_stack_layout* bound_  = nullptr;
 
     orient_cb_t                       orient_cb_{this};
     spacing_cb_t                      spacing_cb_{this};
@@ -61,8 +61,7 @@ private:
     signal_slot<const v_align&>       v_align_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__
 #endif // MPAPP_HANDLERS_IOS_STACK_LAYOUT_HANDLER_HPP

@@ -1,46 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Switch.md
 //
-// `mpapp::switch_` — two-state toggle. The trailing underscore avoids the
-// C++ `switch` keyword; the XAML element name remains `<Switch>` per the
-// Known Differences row in Switch.md.
+// `mpapp::switch_` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_switch_` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::switch_ x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_switch_ x;
+//     mpapp::switch_handler<mpapp::platform::mock> h;
+//     h.map_is_on(x);
 
-#ifndef MPAPP_SWITCH_HPP
-#define MPAPP_SWITCH_HPP
+#ifndef MPAPP_SWITCH__HPP
+#define MPAPP_SWITCH__HPP
 
-#include "command.hpp"
-#include "control.hpp"
-#include "observable.hpp"
-#include "platform.hpp"
+#include "internal/basic_switch_.hpp"
+
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_switch_` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/switch_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class switch_handler;
-
-class switch_ : public control<switch_> {
+class switch_ : public internal::basic_switch_ {
 public:
-    switch_() = default;
+    switch_() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_is_on(*this);
+    }
 
     switch_(const switch_&)            = delete;
     switch_& operator=(const switch_&) = delete;
     switch_(switch_&&)                 = delete;
     switch_& operator=(switch_&&)      = delete;
 
-    Observable<bool> is_on{false};
-
-    void toggled(bool, Command<bool> = {}) {}
-
-    switch_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const switch_handler<platform::current>& handler() const noexcept { return *handler_; }
-
-    bool has_handler() const noexcept { return handler_ != nullptr; }
-    void set_handler(switch_handler<platform::current>& h) noexcept { handler_ = &h; }
-
 private:
-    switch_handler<platform::current>* handler_ = nullptr;
+    internal::switch_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::switch_handler<>` (host-current) and
+// `mpapp::switch_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using switch_handler = internal::switch_handler<Platform>;
 
 } // namespace mpapp
 
-#endif // MPAPP_SWITCH_HPP
+#endif // MPAPP_SWITCH__HPP

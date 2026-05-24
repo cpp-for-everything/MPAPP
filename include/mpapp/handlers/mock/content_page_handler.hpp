@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/ContentPage.md
 //
-// `content_page_handler<platform::mock>` — records the three page-level
+// `content_page_handler<platform::mock>` — records the three basic_page-level
 // mappers (title / content / padding). Inherits `mock_handler_base`.
 
 #ifndef MPAPP_HANDLERS_MOCK_CONTENT_PAGE_HANDLER_HPP
@@ -10,12 +10,12 @@
 #include <memory>
 #include <string>
 
-#include "../../content_page.hpp"
+#include "../../internal/basic_content_page.hpp"
 #include "../../layout.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class content_page_handler<platform::mock>
@@ -23,17 +23,17 @@ class content_page_handler<platform::mock>
 public:
     content_page_handler() = default;
 
-    void map_title(content_page& p) {
+    void map_title(basic_content_page& p) {
         record("title", p.title.get());
         p.title.changed.subscribe(title_slot_, title_cb_);
     }
 
-    void map_content(content_page& p) {
+    void map_content(basic_content_page& p) {
         record("content", p.content.get() ? std::string("set") : std::string("null"));
         p.content.changed.subscribe(content_slot_, content_cb_);
     }
 
-    void map_padding(content_page& p) {
+    void map_padding(basic_content_page& p) {
         record("padding", p.padding.get());
         p.padding.changed.subscribe(padding_slot_, padding_cb_);
     }
@@ -64,6 +64,5 @@ private:
     signal_slot<const thickness&>             padding_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_CONTENT_PAGE_HANDLER_HPP

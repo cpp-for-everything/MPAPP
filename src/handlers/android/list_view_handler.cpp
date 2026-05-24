@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android list_view handler implementation.
+// Android basic_list_view handler implementation.
 // Wraps android.widget.ListView with an ArrayAdapter<String>.
 
 #include "mpapp/handlers/android/list_view_handler.hpp"
@@ -9,7 +9,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -38,7 +38,7 @@ jobject make_list_view(JNIEnv* env, jobject context) {
 
 // Build a fresh ArrayAdapter<String> populated from `items` and attach
 // it to the ListView via setAdapter. Each refresh replaces the adapter.
-void install_adapter(JNIEnv* env, jobject context, jobject list_view,
+void install_adapter(JNIEnv* env, jobject context, jobject basic_list_view,
                      const std::vector<std::string>& items) {
     if (env->ExceptionCheck()) env->ExceptionClear();
 
@@ -86,7 +86,7 @@ void install_adapter(JNIEnv* env, jobject context, jobject list_view,
         jmethodID set_adapter = env->GetMethodID(lv_cls, "setAdapter",
             "(Landroid/widget/ListAdapter;)V");
         if (set_adapter != nullptr) {
-            env->CallVoidMethod(list_view, set_adapter, adapter);
+            env->CallVoidMethod(basic_list_view, set_adapter, adapter);
             if (env->ExceptionCheck()) env->ExceptionClear();
         }
         env->DeleteLocalRef(lv_cls);
@@ -94,14 +94,14 @@ void install_adapter(JNIEnv* env, jobject context, jobject list_view,
     env->DeleteLocalRef(adapter);
 }
 
-void list_view_set_selection(JNIEnv* env, jobject list_view, int idx) {
+void list_view_set_selection(JNIEnv* env, jobject basic_list_view, int idx) {
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass cls = env->FindClass("android/widget/ListView");
     if (cls == nullptr) { env->ExceptionClear(); return; }
     // ListView.setSelection(int)
     jmethodID m = env->GetMethodID(cls, "setSelection", "(I)V");
     if (m != nullptr && idx >= 0) {
-        env->CallVoidMethod(list_view, m, static_cast<jint>(idx));
+        env->CallVoidMethod(basic_list_view, m, static_cast<jint>(idx));
         if (env->ExceptionCheck()) env->ExceptionClear();
     }
     env->DeleteLocalRef(cls);
@@ -116,7 +116,7 @@ list_view_handler<platform::android>::list_view_handler() {
     native_ = make_list_view(env, ctx);
     // OnItemClickListener wiring to set selected_index + emit
     // item_tapped is deferred to M-05 polish — consistent with the
-    // navigation_page and shell tab-button click wiring.
+    // basic_navigation_page and basic_shell tab-basic_button click wiring.
 }
 
 list_view_handler<platform::android>::~list_view_handler() {
@@ -142,10 +142,10 @@ void list_view_handler<platform::android>::apply_selection(int idx) {
 
 namespace {
 
-// Install MppItemClickRouter(list_view*, kind=0) on the ListView's
+// Install MppItemClickRouter(basic_list_view*, kind=0) on the ListView's
 // OnItemClickListener slot — user taps then update selected_index +
 // emit item_tapped.
-void install_item_click_router(JNIEnv* env, jobject list_view_obj, list_view* lv) {
+void install_item_click_router(JNIEnv* env, jobject list_view_obj, basic_list_view* lv) {
     if (env == nullptr || list_view_obj == nullptr || lv == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
@@ -155,7 +155,7 @@ void install_item_click_router(JNIEnv* env, jobject list_view_obj, list_view* lv
     if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
     jobject router = env->NewObject(router_cls, ctor,
                                     reinterpret_cast<jlong>(lv),
-                                    static_cast<jint>(0 /* list_view kind */));
+                                    static_cast<jint>(0 /* basic_list_view kind */));
     if (env->ExceptionCheck() || router == nullptr) {
         env->ExceptionClear();
         env->DeleteLocalRef(router_cls);
@@ -179,28 +179,27 @@ void install_item_click_router(JNIEnv* env, jobject list_view_obj, list_view* lv
 
 } // namespace
 
-void list_view_handler<platform::android>::map_items_source(list_view& lv) {
+void list_view_handler<platform::android>::map_items_source(basic_list_view& lv) {
     bound_ = &lv;
     rebuild_items(lv.items_source.get());
     lv.items_source.changed.subscribe(items_slot_, items_cb_);
-    // Wire the item-click router now that we know which list_view to
+    // Wire the item-click router now that we know which basic_list_view to
     // forward tap events to.
     JNIEnv* env = detail::attach_current_thread();
     if (env != nullptr) install_item_click_router(env, native_, &lv);
 }
 
-void list_view_handler<platform::android>::map_selected_index(list_view& lv) {
+void list_view_handler<platform::android>::map_selected_index(basic_list_view& lv) {
     apply_selection(lv.selected_index.get());
     lv.selected_index.changed.subscribe(sel_slot_, sel_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_list_view(::mpapp::view* v) {
-    if (auto* l = dynamic_cast<::mpapp::list_view*>(v); l && l->has_lv_handler()) {
+    if (auto* l = dynamic_cast<::mpapp::internal::basic_list_view*>(v); l && l->has_lv_handler()) {
         return l->lv_handler().native();
     }
     return nullptr;

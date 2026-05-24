@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 view_cell handler implementation.
+// GTK4 basic_view_cell handler implementation.
 
 #include "mpapp/handlers/linux/view_cell_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 view_cell_handler<platform::linux_>::view_cell_handler() {
     native_ = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
@@ -35,18 +35,17 @@ void view_cell_handler<platform::linux_>::apply_content(view* v) {
     }
 }
 
-void view_cell_handler<platform::linux_>::map_content(view_cell& c) {
+void view_cell_handler<platform::linux_>::map_content(basic_view_cell& c) {
     apply_content(c.content.get());
     c.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_view_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::view_cell*>(v); c && c->has_vc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_view_cell*>(v); c && c->has_vc_handler()) {
         return GTK_WIDGET(c->vc_handler().native());
     }
     return nullptr;

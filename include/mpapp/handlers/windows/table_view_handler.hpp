@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 table_view handler. Wraps mux::Controls::ListView and
+// WinUI 3 basic_table_view handler. Wraps mux::Controls::ListView and
 // renders one of two surfaces:
 //
 //   1. typed_sections (preferred when non-empty) — each cell's native
@@ -17,14 +17,14 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../table_view.hpp"
+#include "../../internal/basic_table_view.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class table_view_handler<platform::windows> {
@@ -37,9 +37,9 @@ public:
     table_view_handler(table_view_handler&&)                 = delete;
     table_view_handler& operator=(table_view_handler&&)      = delete;
 
-    void map_sections(table_view& tv);
-    void map_typed_sections(table_view& tv);
-    void map_row_height(table_view& tv);
+    void map_sections(basic_table_view& tv);
+    void map_typed_sections(basic_table_view& tv);
+    void map_row_height(basic_table_view& tv);
 
     winrt::Microsoft::UI::Xaml::Controls::ListView&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::ListView& native() const noexcept { return native_; }
@@ -64,7 +64,7 @@ private:
     };
 
     winrt::Microsoft::UI::Xaml::Controls::ListView native_{nullptr};
-    table_view* bound_ = nullptr;
+    basic_table_view* bound_ = nullptr;
 
     sec_cb_t   sec_cb_{this};
     typed_cb_t typed_cb_{this};
@@ -74,7 +74,6 @@ private:
     signal_slot<const int&>                              rh_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_TABLE_VIEW_HANDLER_HPP

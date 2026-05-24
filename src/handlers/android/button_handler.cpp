@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — Android button handler implementation.
+// Part of MPAPP. T-0011 — Android basic_button handler implementation.
 
 #include "mpapp/handlers/android/button_handler.hpp"
 
@@ -7,7 +7,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -43,15 +43,15 @@ void button_set_text(JNIEnv* env, jobject btn, const std::string& text) {
 } // namespace
 
 button_handler<platform::android>::button_handler() {
-    JNIEnv* env = detail::attach_current_thread();
+    JNIEnv* env = ::mpapp::detail::attach_current_thread();
     if (env != nullptr) {
-        native_ = make_button(env, detail::get_activity());
+        native_ = make_button(env, ::mpapp::detail::get_activity());
     }
 }
 
 button_handler<platform::android>::~button_handler() {
     if (native_ != nullptr) {
-        if (JNIEnv* env = detail::attach_current_thread(); env != nullptr) {
+        if (JNIEnv* env = ::mpapp::detail::attach_current_thread(); env != nullptr) {
             env->DeleteGlobalRef(native_);
         }
         native_ = nullptr;
@@ -60,19 +60,19 @@ button_handler<platform::android>::~button_handler() {
 
 void button_handler<platform::android>::apply_text(const std::string& text) {
     if (native_ == nullptr) return;
-    JNIEnv* env = detail::attach_current_thread();
+    JNIEnv* env = ::mpapp::detail::attach_current_thread();
     if (env == nullptr) return;
     button_set_text(env, native_, text);
 }
 
-void button_handler<platform::android>::map_text(button& b) {
+void button_handler<platform::android>::map_text(basic_button& b) {
     apply_text(b.text.get());
     b.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void button_handler<platform::android>::map_clicked(button& b) {
+void button_handler<platform::android>::map_clicked(basic_button& b) {
     if (native_ == nullptr) return;
-    JNIEnv* env = detail::attach_current_thread();
+    JNIEnv* env = ::mpapp::detail::attach_current_thread();
     if (env == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
@@ -120,32 +120,32 @@ void button_handler<platform::android>::map_clicked(button& b) {
     env->DeleteLocalRef(router_cls);
 }
 
-void android_button_dispatch_click(button* b) {
+void android_button_dispatch_click(basic_button* b) {
     if (b != nullptr) {
         b->clicked.emit();
     }
 }
 
-} // namespace mpapp
+} // namespace mpapp::internal
 
 extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_MppClickRouter_nativeDispatchClick(
     JNIEnv* /*env*/, jclass /*cls*/, jlong button_ptr) {
-    mpapp::android_button_dispatch_click(
-        reinterpret_cast<mpapp::button*>(button_ptr));
+    mpapp::internal::android_button_dispatch_click(
+        reinterpret_cast<mpapp::internal::basic_button*>(button_ptr));
 }
 
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register button so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_button so ADR-0013 fall-through
 // dispatch can find its jobject without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/button.hpp"
+#include "mpapp/internal/basic_button.hpp"
 
 namespace {
 
 jobject dispatch_button(::mpapp::view* v) {
-    if (auto* b = dynamic_cast<::mpapp::button*>(v); b && b->has_handler()) {
+    if (auto* b = dynamic_cast<::mpapp::internal::basic_button*>(v); b && b->has_handler()) {
         return b->handler().native();
     }
     return nullptr;

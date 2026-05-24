@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — WinUI 3 window handler.
+// Part of MPAPP. T-0011 — WinUI 3 basic_window handler.
 //
 // `window_handler<platform::windows>` — wraps a `winrt::Microsoft::UI::Xaml::Window`,
 // propagates the cross-platform `title` / `content` / size / visibility
@@ -8,7 +8,7 @@
 //
 // `content` is a non-owning `view*`. When the value changes, the
 // handler walks the new view to find its native widget (currently via
-// known subclass dispatch — button / label / stack_layout) and
+// known subclass dispatch — basic_button / basic_label / basic_stack_layout) and
 // installs it as `mux::Window::Content`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_WINDOW_HANDLER_HPP
@@ -16,7 +16,7 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../window.hpp"
+#include "../../internal/basic_window.hpp"
 
 #if defined(_WIN32)
 
@@ -24,7 +24,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class window_handler<platform::windows> {
@@ -40,10 +40,10 @@ public:
     // Wires all the cross-platform properties (`title`, `content`,
     // `width`, `height`, `is_visible`) and signal forwarders in one
     // call — convenient for the application handler.
-    void bind(window& w);
+    void bind(basic_window& w);
 
     // Native widget access — for the application_handler to keep the
-    // window alive during platform teardown.
+    // basic_window alive during platform teardown.
     winrt::Microsoft::UI::Xaml::Window&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Window& native() const noexcept { return native_; }
 
@@ -67,7 +67,7 @@ private:
 
     winrt::Microsoft::UI::Xaml::Window native_{nullptr};
     winrt::event_token                 closed_token_{};
-    window*                            bound_         = nullptr;
+    basic_window*                            bound_         = nullptr;
     bool                               was_activated_ = false;
 
     title_cb_t                         title_cb_{this};
@@ -78,7 +78,6 @@ private:
     signal_slot<const bool&>           visible_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_WINDOW_HANDLER_HPP

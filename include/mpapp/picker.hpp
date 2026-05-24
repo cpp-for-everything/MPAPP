@@ -1,43 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Picker.md
 //
-// `mpapp::picker` — dropdown / single-selection from a list of strings.
-// The cross-platform surface keeps the items as `std::vector<std::string>`
-// for now; richer item-template binding lands when the binding-layer work
-// in M-04 wraps the data-template surface.
+// `mpapp::picker` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_picker` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::picker x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_picker x;
+//     mpapp::picker_handler<mpapp::platform::mock> h;
+//     h.map_items(x);
 
 #ifndef MPAPP_PICKER_HPP
 #define MPAPP_PICKER_HPP
 
-#include <string>
-#include <vector>
+#include "internal/basic_picker.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "signal.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_picker` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/picker_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class picker_handler;
-
-class picker : public view {
+class picker : public internal::basic_picker {
 public:
-    picker() = default;
+    picker() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_items(*this);
+        embedded_handler_.map_selected_index(*this);
+        embedded_handler_.map_title(*this);
+    }
 
-    Observable<std::vector<std::string>> items{};
-    Observable<int>                      selected_index{-1};   // -1 = nothing selected
-    Observable<std::string>              title{};              // shown in the popup header on some platforms
-
-    picker_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const picker_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                     has_handler() const noexcept { return handler_ != nullptr; }
-    void                                     set_handler(picker_handler<platform::current>& h) noexcept { handler_ = &h; }
+    picker(const picker&)            = delete;
+    picker& operator=(const picker&) = delete;
+    picker(picker&&)                 = delete;
+    picker& operator=(picker&&)      = delete;
 
 private:
-    picker_handler<platform::current>* handler_ = nullptr;
+    internal::picker_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::picker_handler<>` (host-current) and
+// `mpapp::picker_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using picker_handler = internal::picker_handler<Platform>;
 
 } // namespace mpapp
 

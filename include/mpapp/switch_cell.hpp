@@ -1,54 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. See vault/20_ADRs/ADR-0021-tableview-cell-types.md
+// Part of MPAPP. See vault/10_Architecture/Components/SwitchCell.md
 //
-// `mpapp::switch_cell` — TableView row with a `text` label + a native
-// toggle switch bound to `on`. Two-way; emits `on_changed` after each
-// flip.
+// `mpapp::switch_cell` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_switch_cell` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::switch_cell x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_switch_cell x;
+//     mpapp::switch_cell_handler<mpapp::platform::mock> h;
+//     h.map_text(x);
 
 #ifndef MPAPP_SWITCH_CELL_HPP
 #define MPAPP_SWITCH_CELL_HPP
 
-#include <string>
+#include "internal/basic_switch_cell.hpp"
 
-#include "cell.hpp"
-#include "observable.hpp"
-#include "platform.hpp"
-#include "signal.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_switch_cell` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/switch_cell_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class switch_cell_handler;
-
-class switch_cell : public cell {
+class switch_cell : public internal::basic_switch_cell {
 public:
-    switch_cell() = default;
-    ~switch_cell() override = default;
+    switch_cell() {
+        set_sc_handler(embedded_handler_);
+        embedded_handler_.map_text(*this);
+        embedded_handler_.map_on(*this);
+    }
 
     switch_cell(const switch_cell&)            = delete;
     switch_cell& operator=(const switch_cell&) = delete;
     switch_cell(switch_cell&&)                 = delete;
     switch_cell& operator=(switch_cell&&)      = delete;
 
-    Observable<std::string> text{""};
-    Observable<bool>        on{false};
-
-    signal<bool> on_changed{};
-
-    void toggle() {
-        const bool v = !on.get();
-        on.set(v);
-        on_changed.emit(v);
-    }
-
-    switch_cell_handler<platform::current>&       sc_handler() noexcept       { return *sc_handler_; }
-    const switch_cell_handler<platform::current>& sc_handler() const noexcept { return *sc_handler_; }
-    bool                                          has_sc_handler() const noexcept { return sc_handler_ != nullptr; }
-    void                                          set_sc_handler(switch_cell_handler<platform::current>& h) noexcept { sc_handler_ = &h; }
-
 private:
-    switch_cell_handler<platform::current>* sc_handler_ = nullptr;
+    internal::switch_cell_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::switch_cell_handler<>` (host-current) and
+// `mpapp::switch_cell_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using switch_cell_handler = internal::switch_cell_handler<Platform>;
 
 } // namespace mpapp
 

@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 frame handler — wraps `mux::Controls::Border`,
+// Part of MPAPP. WinUI 3 basic_frame handler — wraps `mux::Controls::Border`,
 // which natively exposes Background, BorderBrush, BorderThickness,
 // CornerRadius, Padding, and Child.
 //
-// `mpapp::frame` is `[[deprecated]]` (MAUI .NET 9 parity); this handler
+// `mpapp::basic_frame` is `[[deprecated]]` (MAUI .NET 9 parity); this handler
 // IS the legacy path, so it suppresses the diagnostic locally.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_FRAME_HANDLER_HPP
@@ -19,7 +19,7 @@
 #  pragma warning(disable: 4996)
 #endif
 
-#include "../../frame.hpp"
+#include "../../internal/basic_frame.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -28,7 +28,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Windows.Foundation.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class frame_handler<platform::windows> {
@@ -41,13 +41,13 @@ public:
     frame_handler(frame_handler&&)                 = delete;
     frame_handler& operator=(frame_handler&&)      = delete;
 
-    void map_content(frame& f);
-    void map_border_color(frame& f);
-    void map_has_shadow(frame& f);
-    void map_corner_radius(frame& f);
-    void map_padding(frame& f);
+    void map_content(basic_frame& f);
+    void map_border_color(basic_frame& f);
+    void map_has_shadow(basic_frame& f);
+    void map_corner_radius(basic_frame& f);
+    void map_padding(basic_frame& f);
 
-    void bind_content(frame& f, view& child);
+    void bind_content(basic_frame& f, view& child);
 
     winrt::Microsoft::UI::Xaml::Controls::Border&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Border& native() const noexcept { return native_; }
@@ -79,8 +79,7 @@ private:
     signal_slot<const thickness&>             padding_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 
 #if defined(__GNUC__) || defined(__clang__)

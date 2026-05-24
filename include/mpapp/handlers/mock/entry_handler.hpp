@@ -6,12 +6,12 @@
 
 #include <string>
 
-#include "../../entry.hpp"
+#include "../../internal/basic_entry.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class entry_handler<platform::mock> : public mock_handler_base {
@@ -24,32 +24,32 @@ public:
     entry_handler(entry_handler&&)                 = delete;
     entry_handler& operator=(entry_handler&&)      = delete;
 
-    void map_text(entry& e) {
+    void map_text(basic_entry& e) {
         record_change("text", e.text.get());
         e.text.changed.subscribe(text_slot_, text_cb_);
     }
 
-    void map_placeholder(entry& e) {
+    void map_placeholder(basic_entry& e) {
         record_change("placeholder", e.placeholder.get());
         e.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
     }
 
-    void map_is_password(entry& e) {
+    void map_is_password(basic_entry& e) {
         record_change("is_password", e.is_password.get());
         e.is_password.changed.subscribe(is_password_slot_, is_password_cb_);
     }
 
-    void map_is_read_only(entry& e) {
+    void map_is_read_only(basic_entry& e) {
         record_change("is_read_only", e.is_read_only.get());
         e.is_read_only.changed.subscribe(is_read_only_slot_, is_read_only_cb_);
     }
 
-    void map_max_length(entry& e) {
+    void map_max_length(basic_entry& e) {
         record_change("max_length", e.max_length.get());
         e.max_length.changed.subscribe(max_length_slot_, max_length_cb_);
     }
 
-    void map_cursor_position(entry& e) {
+    void map_cursor_position(basic_entry& e) {
         record_change("cursor_position", e.cursor_position.get());
         e.cursor_position.changed.subscribe(cursor_position_slot_,
                                             cursor_position_cb_);
@@ -82,6 +82,5 @@ private:
     signal_slot<const int&>                     cursor_position_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_ENTRY_HANDLER_HPP

@@ -1,63 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Toolbar.md
 //
-// `mpapp::toolbar` — page-scoped horizontal action bar with a title and a
-// collection of `toolbar_item`s. Mirrors MAUI's `IToolbar` surface but
-// stripped to the M-04b cross-platform subset (title + items collection).
-// The richer MAUI surface (back-button affordance, drawer toggle,
-// bar_background, bar_text_color, …) lands incrementally alongside the
-// real handlers in M-05 / M-06.
+// `mpapp::toolbar` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_toolbar` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::toolbar x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// `items` is held as `Observable<std::vector<toolbar_item>>` rather than
-// an observable collection because the M-04 binding-layer work hasn't
-// landed the per-element child-template surface yet. Real handlers rebuild
-// the native item list whenever the collection changes — see
-// `vault/10_Architecture/Components/Picker.md` for the same pattern.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_toolbar x;
+//     mpapp::toolbar_handler<mpapp::platform::mock> h;
+//     h.map_items(x);
 
 #ifndef MPAPP_TOOLBAR_HPP
 #define MPAPP_TOOLBAR_HPP
 
-#include <string>
-#include <vector>
+#include "internal/basic_toolbar.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "signal.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_toolbar` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/toolbar_handler.hpp"
 
 namespace mpapp {
 
-// A single action in a toolbar. `icon` is a free-form string that real
-// handlers interpret as a platform-specific resource (file path on
-// Linux/Android, symbol name or path on Windows). An empty `icon`
-// disables the icon slot. Equality is value-based — needed so Observable
-// suppresses redundant change notifications when callers swap in an
-// identical vector.
-struct toolbar_item {
-    std::string text;
-    std::string icon;
-
-    bool operator==(const toolbar_item&) const = default;
-};
-
-template <class Platform = platform::current>
-class toolbar_handler;
-
-class toolbar : public view {
+class toolbar : public internal::basic_toolbar {
 public:
-    toolbar() = default;
+    toolbar() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_items(*this);
+        embedded_handler_.map_title(*this);
+    }
 
-    Observable<std::vector<toolbar_item>>  items{};
-    Observable<std::string>                title{};
-
-    toolbar_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const toolbar_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                      has_handler() const noexcept { return handler_ != nullptr; }
-    void                                      set_handler(toolbar_handler<platform::current>& h) noexcept { handler_ = &h; }
+    toolbar(const toolbar&)            = delete;
+    toolbar& operator=(const toolbar&) = delete;
+    toolbar(toolbar&&)                 = delete;
+    toolbar& operator=(toolbar&&)      = delete;
 
 private:
-    toolbar_handler<platform::current>* handler_ = nullptr;
+    internal::toolbar_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::toolbar_handler<>` (host-current) and
+// `mpapp::toolbar_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using toolbar_handler = internal::toolbar_handler<Platform>;
 
 } // namespace mpapp
 

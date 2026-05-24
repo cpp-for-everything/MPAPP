@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android title_bar handler — wraps
+// Part of MPAPP. Android basic_title_bar handler — wraps
 // `android.widget.Toolbar` (platform jar, API 21+) configured as a
-// titlebar. Surfaces the toolbar's title + subtitle text slots.
+// titlebar. Surfaces the basic_toolbar's title + subtitle text slots.
 
 #ifndef MPAPP_HANDLERS_ANDROID_TITLE_BAR_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_TITLE_BAR_HANDLER_HPP
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../title_bar.hpp"
+#include "../../internal/basic_title_bar.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class title_bar_handler<platform::android> {
@@ -28,8 +28,8 @@ public:
     title_bar_handler(title_bar_handler&&)                 = delete;
     title_bar_handler& operator=(title_bar_handler&&)      = delete;
 
-    void map_title(title_bar& t);
-    void map_subtitle(title_bar& t);
+    void map_title(basic_title_bar& t);
+    void map_subtitle(basic_title_bar& t);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -49,7 +49,6 @@ private:
     signal_slot<const std::string&>  subtitle_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_TITLE_BAR_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::title_bar`.
+// Mock-handler tests for `mpapp::internal::basic_title_bar`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("title_bar mock records initial values on bind",
           "[mock][title_bar]") {
-    title_bar t;
+    internal::basic_title_bar t;
     title_bar_handler<platform::mock> h;
 
     h.map_title(t);
@@ -25,7 +25,7 @@ TEST_CASE("title_bar mock records initial values on bind",
 
 TEST_CASE("title_bar records title and subtitle changes",
           "[mock][title_bar]") {
-    title_bar t;
+    internal::basic_title_bar t;
     title_bar_handler<platform::mock> h;
 
     h.map_title(t);

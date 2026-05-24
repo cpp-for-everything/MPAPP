@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 content_view handler — wraps `GtkBox` as a single-child container.
+// GTK4 basic_content_view handler — wraps `GtkBox` as a single-child container.
 
 #ifndef MPAPP_HANDLERS_LINUX_CONTENT_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_CONTENT_VIEW_HANDLER_HPP
 
 #include <memory>
 
-#include "../../content_view.hpp"
+#include "../../internal/basic_content_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class content_view_handler<platform::linux_> {
@@ -22,8 +22,8 @@ public:
     content_view_handler(const content_view_handler&)            = delete;
     content_view_handler& operator=(const content_view_handler&) = delete;
 
-    void map_content(content_view& c);
-    void bind_content(content_view& c, view& child);
+    void map_content(basic_content_view& c);
+    void bind_content(basic_content_view& c, view& child);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -40,7 +40,6 @@ private:
     signal_slot<std::shared_ptr<view> const&> content_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_CONTENT_VIEW_HANDLER_HPP

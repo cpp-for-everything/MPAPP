@@ -1,45 +1,53 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Label.md
 //
-// `mpapp::label` — text-display widget. T-0003 spike status: a thin
-// cross-platform surface with a `text` Observable. The Windows handler
-// wraps a `winrt::Microsoft::UI::Xaml::Controls::TextBlock`. The full
-// MAUI Label surface lands in M-03.
+// `mpapp::label` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_label` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::label x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_label x;
+//     mpapp::label_handler<mpapp::platform::mock> h;
+//     h.map_text(x);
 
 #ifndef MPAPP_LABEL_HPP
 #define MPAPP_LABEL_HPP
 
-#include <string>
+#include "internal/basic_label.hpp"
 
-#include "control.hpp"
-#include "observable.hpp"
-#include "platform.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_label` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/label_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class label_handler;
-
-class label : public control<label> {
+class label : public internal::basic_label {
 public:
-    label() = default;
+    label() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_text(*this);
+    }
 
     label(const label&)            = delete;
     label& operator=(const label&) = delete;
     label(label&&)                 = delete;
     label& operator=(label&&)      = delete;
 
-    Observable<std::string> text{""};
-
-    label_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const label_handler<platform::current>& handler() const noexcept { return *handler_; }
-
-    bool has_handler() const noexcept { return handler_ != nullptr; }
-    void set_handler(label_handler<platform::current>& h) noexcept { handler_ = &h; }
-
 private:
-    label_handler<platform::current>* handler_ = nullptr;
+    internal::label_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::label_handler<>` (host-current) and
+// `mpapp::label_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using label_handler = internal::label_handler<Platform>;
 
 } // namespace mpapp
 

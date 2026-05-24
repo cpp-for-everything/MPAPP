@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 list_view handler implementation.
+// WinUI 3 basic_list_view handler implementation.
 
 #include "mpapp/handlers/windows/list_view_handler.hpp"
 
@@ -16,7 +16,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -67,24 +67,23 @@ void list_view_handler<platform::windows>::apply_selection(int idx) {
     suppress_selection_event_ = false;
 }
 
-void list_view_handler<platform::windows>::map_items_source(list_view& lv) {
+void list_view_handler<platform::windows>::map_items_source(basic_list_view& lv) {
     bound_ = &lv;
     rebuild_items(lv.items_source.get());
     lv.items_source.changed.subscribe(items_slot_, items_cb_);
 }
 
-void list_view_handler<platform::windows>::map_selected_index(list_view& lv) {
+void list_view_handler<platform::windows>::map_selected_index(basic_list_view& lv) {
     apply_selection(lv.selected_index.get());
     lv.selected_index.changed.subscribe(sel_slot_, sel_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_list_view(::mpapp::view* v) {
-    if (auto* l = dynamic_cast<::mpapp::list_view*>(v); l && l->has_lv_handler()) {
+    if (auto* l = dynamic_cast<::mpapp::internal::basic_list_view*>(v); l && l->has_lv_handler()) {
         return l->lv_handler().native();
     }
     return nullptr;

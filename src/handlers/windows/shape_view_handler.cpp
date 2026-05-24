@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 shape_view handler implementation. See header for the
+// WinUI 3 basic_shape_view handler implementation. See header for the
 // design — Image + WriteableBitmap fed by the shared
 // detail::graphics::render_shape_view helper (T-0031 phase 2).
 
@@ -23,7 +23,7 @@
 #include "mpapp/detail/graphics/shape_renderer.hpp"
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -52,7 +52,7 @@ shape_view_handler<platform::windows>::shape_view_handler() {
     // SizeChanged (see repaint), so 1:1 pixel display is what we want.
     // (Uniform / Fill would scale the rasterized output and blur it.)
     native_.Stretch(muxm::Stretch::None);
-    // Give the Image a sensible default size so a shape_view in a
+    // Give the Image a sensible default size so a basic_shape_view in a
     // layout that doesn't override sizing gets a non-zero allocation.
     // The same 200x80 default the legacy XAML-Shape handler used.
     native_.Width(200.0);
@@ -117,11 +117,11 @@ void shape_view_handler<platform::windows>::repaint() {
     // the render_shape_view helper already multiplies opacity into the
     // fill/stroke alpha, but setting it on the Image as well preserves
     // the legacy behavior where users could fade the whole control via
-    // shape_view.opacity even when fill/stroke are opaque.
+    // basic_shape_view.opacity even when fill/stroke are opaque.
     native_.Opacity(bound_->opacity.get());
 }
 
-void shape_view_handler<platform::windows>::map_kind(shape_view& s) {
+void shape_view_handler<platform::windows>::map_kind(basic_shape_view& s) {
     bound_ = &s;
     // Subscribe to SizeChanged once (when the surface first binds) so
     // the canvas reallocates to the layout-assigned dimensions.
@@ -136,35 +136,34 @@ void shape_view_handler<platform::windows>::map_kind(shape_view& s) {
     repaint();
     s.kind.changed.subscribe(kind_slot_, cb_);
 }
-void shape_view_handler<platform::windows>::map_data(shape_view& s) {
+void shape_view_handler<platform::windows>::map_data(basic_shape_view& s) {
     bound_ = &s;
     s.data.changed.subscribe(data_slot_, cb_);
 }
-void shape_view_handler<platform::windows>::map_fill(shape_view& s) {
+void shape_view_handler<platform::windows>::map_fill(basic_shape_view& s) {
     bound_ = &s;
     s.fill.changed.subscribe(fill_slot_, cb_);
 }
-void shape_view_handler<platform::windows>::map_stroke(shape_view& s) {
+void shape_view_handler<platform::windows>::map_stroke(basic_shape_view& s) {
     bound_ = &s;
     s.stroke.changed.subscribe(stroke_slot_, cb_);
 }
-void shape_view_handler<platform::windows>::map_stroke_thickness(shape_view& s) {
+void shape_view_handler<platform::windows>::map_stroke_thickness(basic_shape_view& s) {
     bound_ = &s;
     s.stroke_thickness.changed.subscribe(stroke_thick_slot_, cb_);
 }
-void shape_view_handler<platform::windows>::map_opacity(shape_view& s) {
+void shape_view_handler<platform::windows>::map_opacity(basic_shape_view& s) {
     bound_ = &s;
     if (native_ != nullptr) native_.Opacity(s.opacity.get());
     s.opacity.changed.subscribe(opacity_slot_, cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_shape_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::shape_view*>(v); w && w->has_sv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_shape_view*>(v); w && w->has_sv_handler()) {
         return w->sv_handler().native();
     }
     return nullptr;

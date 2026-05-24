@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock swipe_item_menu_item handler.
+// Part of MPAPP. Mock basic_swipe_item_menu_item handler.
 //
 // Records `text`, `icon_uri` via the standard `bind()` plumbing and
 // `invoked` as a bare-event row whenever the signal fires.
@@ -10,10 +10,10 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../swipe_item_menu_item.hpp"
+#include "../../internal/basic_swipe_item_menu_item.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class swipe_item_menu_item_handler<platform::mock>
@@ -21,15 +21,15 @@ class swipe_item_menu_item_handler<platform::mock>
 public:
     swipe_item_menu_item_handler() = default;
 
-    void map_text(swipe_item_menu_item& m) {
+    void map_text(basic_swipe_item_menu_item& m) {
         bind("text", m.text, binding_text_);
     }
 
-    void map_icon_uri(swipe_item_menu_item& m) {
+    void map_icon_uri(basic_swipe_item_menu_item& m) {
         bind("icon_uri", m.icon_uri, binding_icon_uri_);
     }
 
-    void map_invoked(swipe_item_menu_item& m) {
+    void map_invoked(basic_swipe_item_menu_item& m) {
         m.invoked.subscribe(invoked_slot_, invoked_cb_);
     }
 
@@ -48,6 +48,5 @@ private:
     signal_slot<>                          invoked_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_SWIPE_ITEM_MENU_ITEM_HANDLER_HPP

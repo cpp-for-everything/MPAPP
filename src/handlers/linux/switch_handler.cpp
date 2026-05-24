@@ -7,12 +7,12 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct state_set_ctx {
-    switch_*                          target;
+    basic_switch_*                          target;
     switch_handler<platform::linux_>* handler;
 };
 
@@ -57,7 +57,7 @@ void switch_handler<platform::linux_>::apply_is_on(bool on) {
     suppress_echo_ = false;
 }
 
-void switch_handler<platform::linux_>::map_is_on(switch_& s) {
+void switch_handler<platform::linux_>::map_is_on(basic_switch_& s) {
     apply_is_on(s.is_on.get());
     s.is_on.changed.subscribe(is_on_slot_, is_on_cb_);
 
@@ -76,20 +76,18 @@ void switch_handler<platform::linux_>::map_is_on(switch_& s) {
         static_cast<GConnectFlags>(0));
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register switch_ so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_switch_ so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
 namespace {
 
 GtkWidget* dispatch_switch(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::switch_*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_switch_*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

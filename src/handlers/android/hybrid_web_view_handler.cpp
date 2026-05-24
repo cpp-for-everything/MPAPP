@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android hybrid_web_view handler implementation.
+// Android basic_hybrid_web_view handler implementation.
 
 #include "mpapp/handlers/android/hybrid_web_view_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -95,19 +95,19 @@ jobject install_js_bridge(JNIEnv* env, jobject wv, jlong handler_ptr) {
 // WebView.loadUrl rather than evaluateJavascript.
 constexpr const char* kBridgeShim =
     "javascript:(function(){"
-    "  if (window.mpapp && window.mpapp.__mpapp) return;"
+    "  if (basic_window.mpapp && basic_window.mpapp.__mpapp) return;"
     "  var listeners = [];"
     "  var methods   = {};"
     "  var nextId    = 0;"
-    "  window.mpapp = {"
+    "  basic_window.mpapp = {"
     "    __mpapp: true,"
-    "    send: function(p) { if (window.mpapp_native) window.mpapp_native.send(String(p)); },"
+    "    send: function(p) { if (basic_window.mpapp_native) basic_window.mpapp_native.send(String(p)); },"
     "    on:   function(fn) { listeners.push(fn); },"
     "    register: function(name, fn) { methods[name] = fn; },"
     "    call: function(name) {"
     "      var id = ++nextId;"
     "      var args = Array.prototype.slice.call(arguments, 1);"
-    "      window.mpapp.send(JSON.stringify({id: id, method: name, args: args}));"
+    "      basic_window.mpapp.send(JSON.stringify({id: id, method: name, args: args}));"
     "      return id;"
     "    },"
     "    _receive: function(p) {"
@@ -118,10 +118,10 @@ constexpr const char* kBridgeShim =
     "        var ret;"
     "        try { ret = methods[env.method].apply(null, env.args || []); }"
     "        catch (e) {"
-    "          window.mpapp.send(JSON.stringify({id: env.id, error: String(e)}));"
+    "          basic_window.mpapp.send(JSON.stringify({id: env.id, error: String(e)}));"
     "          return;"
     "        }"
-    "        window.mpapp.send(JSON.stringify({"
+    "        basic_window.mpapp.send(JSON.stringify({"
     "          id: env.id,"
     "          result: ret === undefined ? null : ret"
     "        }));"
@@ -209,19 +209,19 @@ void hybrid_web_view_handler<platform::android>::send_outbound(const std::string
     if (native_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
-    const std::string js = "window.mpapp && window.mpapp._receive(" + json_escape(payload) + ");";
+    const std::string js = "window.mpapp && basic_window.mpapp._receive(" + json_escape(payload) + ");";
     evaluate_js(env, native_, js);
 }
 
 void hybrid_web_view_handler<platform::android>::on_native_inbound(const std::string& payload) {
     if (bound_ == nullptr) return;
-    // Single choke point — hybrid_web_view::process_inbound decides
+    // Single choke point — basic_hybrid_web_view::process_inbound decides
     // whether to route through an attached bridge or fall through to
     // the raw message_received signal.
     bound_->process_inbound(payload);
 }
 
-void hybrid_web_view_handler<platform::android>::map_messages(hybrid_web_view& h) {
+void hybrid_web_view_handler<platform::android>::map_messages(basic_hybrid_web_view& h) {
     bound_ = &h;
     h.message_sent.subscribe(sent_slot_, sent_cb_);
 
@@ -241,13 +241,12 @@ void android_hybrid_web_view_dispatch_inbound(hybrid_web_view_handler<platform::
     if (h != nullptr) h->on_native_inbound(payload);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_hybrid_web_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::hybrid_web_view*>(v); w && w->has_hwv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_hybrid_web_view*>(v); w && w->has_hwv_handler()) {
         return w->hwv_handler().native();
     }
     return nullptr;

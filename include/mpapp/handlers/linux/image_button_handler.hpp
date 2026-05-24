@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 image_button handler — GtkButton with a GtkPicture child.
+// GTK4 basic_image_button handler — GtkButton with a GtkPicture child.
 
 #ifndef MPAPP_HANDLERS_LINUX_IMAGE_BUTTON_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_IMAGE_BUTTON_HANDLER_HPP
 
-#include "../../image_button.hpp"
+#include "../../internal/basic_image_button.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_button_handler<platform::linux_> {
@@ -20,8 +20,8 @@ public:
     image_button_handler(const image_button_handler&)            = delete;
     image_button_handler& operator=(const image_button_handler&) = delete;
 
-    void map_source(image_button& b);
-    void map_aspect(image_button& b);
+    void map_source(basic_image_button& b);
+    void map_aspect(basic_image_button& b);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -42,7 +42,6 @@ private:
     signal_slot<const aspect_mode&>    aspect_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_IMAGE_BUTTON_HANDLER_HPP

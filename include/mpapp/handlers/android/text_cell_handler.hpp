@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android text_cell handler — vertical LinearLayout of two TextViews.
+// Android basic_text_cell handler — vertical LinearLayout of two TextViews.
 
 #ifndef MPAPP_HANDLERS_ANDROID_TEXT_CELL_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_TEXT_CELL_HANDLER_HPP
@@ -8,13 +8,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../text_cell.hpp"
+#include "../../internal/basic_text_cell.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class text_cell_handler<platform::android> {
@@ -27,8 +27,8 @@ public:
     text_cell_handler(text_cell_handler&&)                 = delete;
     text_cell_handler& operator=(text_cell_handler&&)      = delete;
 
-    void map_text(text_cell& c);
-    void map_detail(text_cell& c);
+    void map_text(basic_text_cell& c);
+    void map_detail(basic_text_cell& c);
 
     jobject native() const noexcept { return native_; }
 
@@ -55,7 +55,6 @@ private:
     signal_slot<const std::string&> detail_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_TEXT_CELL_HANDLER_HPP

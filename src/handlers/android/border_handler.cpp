@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android border handler implementation.
+// Part of MPAPP. Android basic_border handler implementation.
 
 #include "mpapp/handlers/android/border_handler.hpp"
 
@@ -8,11 +8,11 @@
 #include <cstdlib>
 #include <string>
 
-#include "mpapp/box_view.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/android/box_view_handler.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
 #include "mpapp/handlers/android/check_box_handler.hpp"
@@ -26,14 +26,14 @@
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
 #include "mpapp/handlers/android/stepper_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stack_layout.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -238,23 +238,22 @@ void border_handler<platform::android>::apply_stroke(const brush_ref& b)        
 void border_handler<platform::android>::apply_stroke_thickness(double t)              { cached_stroke_thickness_ = t; rebuild_background(); }
 void border_handler<platform::android>::apply_stroke_shape(const stroke_shape_desc& s){ cached_stroke_shape_ = s; rebuild_background(); }
 
-void border_handler<platform::android>::map_content(border& b)          { apply_content(b.content.get()); b.content.changed.subscribe(content_slot_, content_cb_); }
-void border_handler<platform::android>::map_padding(border& b)          { apply_padding(b.padding.get()); b.padding.changed.subscribe(padding_slot_, padding_cb_); }
-void border_handler<platform::android>::map_stroke(border& b)           { apply_stroke(b.stroke.get()); b.stroke.changed.subscribe(stroke_slot_, stroke_cb_); }
-void border_handler<platform::android>::map_stroke_thickness(border& b) { apply_stroke_thickness(b.stroke_thickness.get()); b.stroke_thickness.changed.subscribe(stroke_thick_slot_, stroke_thick_cb_); }
-void border_handler<platform::android>::map_stroke_shape(border& b)     { apply_stroke_shape(b.stroke_shape.get()); b.stroke_shape.changed.subscribe(stroke_shape_slot_, stroke_shape_cb_); }
+void border_handler<platform::android>::map_content(basic_border& b)          { apply_content(b.content.get()); b.content.changed.subscribe(content_slot_, content_cb_); }
+void border_handler<platform::android>::map_padding(basic_border& b)          { apply_padding(b.padding.get()); b.padding.changed.subscribe(padding_slot_, padding_cb_); }
+void border_handler<platform::android>::map_stroke(basic_border& b)           { apply_stroke(b.stroke.get()); b.stroke.changed.subscribe(stroke_slot_, stroke_cb_); }
+void border_handler<platform::android>::map_stroke_thickness(basic_border& b) { apply_stroke_thickness(b.stroke_thickness.get()); b.stroke_thickness.changed.subscribe(stroke_thick_slot_, stroke_thick_cb_); }
+void border_handler<platform::android>::map_stroke_shape(basic_border& b)     { apply_stroke_shape(b.stroke_shape.get()); b.stroke_shape.changed.subscribe(stroke_shape_slot_, stroke_shape_cb_); }
 
-void border_handler<platform::android>::bind_content(border& b, view& child) {
+void border_handler<platform::android>::bind_content(basic_border& b, view& child) {
     b.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 namespace {
 
 jobject dispatch_border(::mpapp::view* v) {
-    if (auto* b = dynamic_cast<::mpapp::border*>(v); b && b->has_handler()) {
+    if (auto* b = dynamic_cast<::mpapp::internal::basic_border*>(v); b && b->has_handler()) {
         return b->handler().native();
     }
     return nullptr;

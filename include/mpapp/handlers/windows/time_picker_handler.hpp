@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 time_picker handler — wraps `mux::Controls::TimePicker`.
+// Part of MPAPP. WinUI 3 basic_time_picker handler — wraps `mux::Controls::TimePicker`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_TIME_PICKER_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_TIME_PICKER_HANDLER_HPP
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../time_picker.hpp"
+#include "../../internal/basic_time_picker.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class time_picker_handler<platform::windows> {
@@ -22,8 +22,8 @@ public:
     time_picker_handler(const time_picker_handler&)            = delete;
     time_picker_handler& operator=(const time_picker_handler&) = delete;
 
-    void map_time(time_picker& p);
-    void map_format(time_picker& p);
+    void map_time(basic_time_picker& p);
+    void map_format(basic_time_picker& p);
 
     winrt::Microsoft::UI::Xaml::Controls::TimePicker&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::TimePicker& native() const noexcept { return native_; }
@@ -43,7 +43,6 @@ private:
     signal_slot<const std::string&>    format_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_TIME_PICKER_HANDLER_HPP

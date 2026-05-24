@@ -6,14 +6,14 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../switch_.hpp"
+#include "../../internal/basic_switch_.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Windows.Foundation.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class switch_handler<platform::windows> {
@@ -26,7 +26,7 @@ public:
     switch_handler(switch_handler&&)                 = delete;
     switch_handler& operator=(switch_handler&&)      = delete;
 
-    void map_is_on(switch_& s);
+    void map_is_on(basic_switch_& s);
 
     winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch& native() const noexcept { return native_; }
@@ -41,13 +41,12 @@ private:
 
     winrt::Microsoft::UI::Xaml::Controls::ToggleSwitch native_{nullptr};
     winrt::event_token                                 toggled_token_{};
-    switch_*                                           bound_         = nullptr;
+    basic_switch_*                                           bound_         = nullptr;
     bool                                               suppress_echo_ = false;
     is_on_callback                                     is_on_cb_{this};
     signal_slot<const bool&>                           is_on_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_SWITCH_HANDLER_HPP

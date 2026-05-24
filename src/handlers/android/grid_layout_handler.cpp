@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android grid_layout handler implementation.
+// Android basic_grid_layout handler implementation.
 
 #include "mpapp/handlers/android/grid_layout_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -152,7 +152,7 @@ void grid_layout_handler<platform::android>::apply_column_spacing(double /*s*/) 
     // Same as apply_row_spacing.
 }
 
-void grid_layout_handler<platform::android>::add_child(grid_layout& g, view& child) {
+void grid_layout_handler<platform::android>::add_child(basic_grid_layout& g, view& child) {
     if (native_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
@@ -166,33 +166,32 @@ void grid_layout_handler<platform::android>::add_child(grid_layout& g, view& chi
     env->DeleteLocalRef(lp);
 }
 
-void grid_layout_handler<platform::android>::map_row_definitions(grid_layout& g) {
+void grid_layout_handler<platform::android>::map_row_definitions(basic_grid_layout& g) {
     apply_row_count(static_cast<int>(g.row_definitions.get().size()));
     g.row_definitions.changed.subscribe(rows_slot_, rows_cb_);
 }
 
-void grid_layout_handler<platform::android>::map_column_definitions(grid_layout& g) {
+void grid_layout_handler<platform::android>::map_column_definitions(basic_grid_layout& g) {
     apply_column_count(static_cast<int>(g.column_definitions.get().size()));
     g.column_definitions.changed.subscribe(cols_slot_, cols_cb_);
 }
 
-void grid_layout_handler<platform::android>::map_row_spacing(grid_layout& g) {
+void grid_layout_handler<platform::android>::map_row_spacing(basic_grid_layout& g) {
     apply_row_spacing(g.row_spacing.get());
     g.row_spacing.changed.subscribe(rsp_slot_, rsp_cb_);
 }
 
-void grid_layout_handler<platform::android>::map_column_spacing(grid_layout& g) {
+void grid_layout_handler<platform::android>::map_column_spacing(basic_grid_layout& g) {
     apply_column_spacing(g.column_spacing.get());
     g.column_spacing.changed.subscribe(csp_slot_, csp_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_grid_layout(::mpapp::view* v) {
-    if (auto* g = dynamic_cast<::mpapp::grid_layout*>(v); g && g->has_handler()) {
+    if (auto* g = dynamic_cast<::mpapp::internal::basic_grid_layout*>(v); g && g->has_handler()) {
         return g->handler().native();
     }
     return nullptr;

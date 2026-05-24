@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android content_page handler — wraps a vertical
+// Part of MPAPP. Android basic_content_page handler — wraps a vertical
 // `android.widget.LinearLayout`:
 //   - first child: a `TextView` carrying `title`
 //   - second child: a `FrameLayout` host for `content`
@@ -11,7 +11,7 @@
 #include <memory>
 #include <string>
 
-#include "../../content_page.hpp"
+#include "../../internal/basic_content_page.hpp"
 #include "../../layout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
@@ -20,7 +20,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class content_page_handler<platform::android> {
@@ -33,11 +33,11 @@ public:
     content_page_handler(content_page_handler&&)                 = delete;
     content_page_handler& operator=(content_page_handler&&)      = delete;
 
-    void map_title(content_page& p);
-    void map_content(content_page& p);
-    void map_padding(content_page& p);
+    void map_title(basic_content_page& p);
+    void map_content(basic_content_page& p);
+    void map_padding(basic_content_page& p);
 
-    void bind_content(content_page& p, view& child);
+    void bind_content(basic_content_page& p, view& child);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -63,7 +63,6 @@ private:
     signal_slot<const thickness&>             padding_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_CONTENT_PAGE_HANDLER_HPP

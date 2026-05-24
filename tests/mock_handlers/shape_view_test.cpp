@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::shape_view`.
+// Mock-handler tests for `mpapp::internal::basic_shape_view`.
 
 #include <string>
 
@@ -12,7 +12,7 @@ using namespace mpapp;
 
 TEST_CASE("shape_view defaults",
           "[mock][shape_view]") {
-    shape_view sv;
+    internal::basic_shape_view sv;
     CHECK(sv.kind.get()             == shape_kind::rectangle);
     CHECK(sv.data.get().empty());
     CHECK(sv.fill.get().empty());
@@ -23,7 +23,7 @@ TEST_CASE("shape_view defaults",
 
 TEST_CASE("shape_view mock records kind + data + fill changes",
           "[mock][shape_view]") {
-    shape_view sv;
+    internal::basic_shape_view sv;
     shape_view_handler<platform::mock> h;
     h.map_kind(sv);
     h.map_data(sv);

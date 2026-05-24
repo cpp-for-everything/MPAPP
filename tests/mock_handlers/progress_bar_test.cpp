@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::progress_bar`.
+// Mock-handler tests for `mpapp::internal::basic_progress_bar`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("progress_bar mock records initial values on bind",
           "[mock][progress_bar]") {
-    progress_bar p;
+    internal::basic_progress_bar p;
     progress_bar_handler<platform::mock> h;
 
     h.map_progress(p);
@@ -26,7 +26,7 @@ TEST_CASE("progress_bar mock records initial values on bind",
 
 TEST_CASE("progress_bar records progress changes",
           "[mock][progress_bar]") {
-    progress_bar p;
+    internal::basic_progress_bar p;
     progress_bar_handler<platform::mock> h;
 
     h.map_progress(p);

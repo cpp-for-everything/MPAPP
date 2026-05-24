@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 text_cell handler implementation.
+// WinUI 3 basic_text_cell handler implementation.
 
 #include "mpapp/handlers/windows/text_cell_handler.hpp"
 
@@ -15,7 +15,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -50,23 +50,22 @@ void text_cell_handler<platform::windows>::apply_detail(const std::string& v) {
     detail_block_.Visibility(v.empty() ? mux::Visibility::Collapsed : mux::Visibility::Visible);
 }
 
-void text_cell_handler<platform::windows>::map_text(text_cell& c) {
+void text_cell_handler<platform::windows>::map_text(basic_text_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void text_cell_handler<platform::windows>::map_detail(text_cell& c) {
+void text_cell_handler<platform::windows>::map_detail(basic_text_cell& c) {
     apply_detail(c.detail.get());
     c.detail.changed.subscribe(detail_slot_, detail_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_text_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::text_cell*>(v); c && c->has_tc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_text_cell*>(v); c && c->has_tc_handler()) {
         return c->tc_handler().native();
     }
     return nullptr;

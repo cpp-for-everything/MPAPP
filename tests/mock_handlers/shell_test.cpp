@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::shell`.
+// Mock-handler tests for `mpapp::internal::basic_shell`.
 
 #include <string>
 
@@ -12,7 +12,7 @@ using namespace mpapp;
 
 TEST_CASE("shell defaults",
           "[mock][shell]") {
-    shell s;
+    internal::basic_shell s;
     CHECK(s.current_route.get()       == "//");
     CHECK(s.current_tab_index.get()   == 0);
     CHECK(s.is_flyout_open.get()      == false);
@@ -22,7 +22,7 @@ TEST_CASE("shell defaults",
 
 TEST_CASE("register_route deduplicates",
           "[mock][shell]") {
-    shell s;
+    internal::basic_shell s;
     s.register_route("home");
     s.register_route("settings");
     s.register_route("home");     // duplicate, ignored
@@ -33,7 +33,7 @@ TEST_CASE("register_route deduplicates",
 
 TEST_CASE("go_to(//tab_name) updates current_tab_index by label match",
           "[mock][shell]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("library");
     s.add_tab("settings");
@@ -53,7 +53,7 @@ TEST_CASE("go_to(//tab_name) updates current_tab_index by label match",
 
 TEST_CASE("navigated signal fires after each go_to",
           "[mock][shell]") {
-    shell s;
+    internal::basic_shell s;
     int hits = 0;
     std::string last;
     struct cb_t { int* hits; std::string* last;
@@ -70,7 +70,7 @@ TEST_CASE("navigated signal fires after each go_to",
 
 TEST_CASE("flyout helpers + flyout_toggled signal",
           "[mock][shell]") {
-    shell s;
+    internal::basic_shell s;
     int hits = 0;
     bool last = false;
     struct cb_t { int* hits; bool* last;
@@ -95,7 +95,7 @@ TEST_CASE("flyout helpers + flyout_toggled signal",
 
 TEST_CASE("mock handler records route + tab + flyout changes",
           "[mock][shell]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("library");
 
@@ -117,8 +117,8 @@ TEST_CASE("mock handler records route + tab + flyout changes",
 
 TEST_CASE("shell.current_content tracks page swaps",
           "[mock][shell]") {
-    page home, library;
-    shell s;
+    internal::basic_page home, library;
+    internal::basic_shell s;
 
     CHECK(s.current_content.get() == nullptr);
 
@@ -134,7 +134,7 @@ TEST_CASE("shell.current_content tracks page swaps",
 
 TEST_CASE("can_activate guard blocks navigation when false",
           "[mock][shell][guard]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("settings");
     s.go_to("//home");
@@ -171,7 +171,7 @@ TEST_CASE("can_activate guard blocks navigation when false",
 
 TEST_CASE("can_activate returning true lets navigation proceed",
           "[mock][shell][guard]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("settings");
 
@@ -198,7 +198,7 @@ TEST_CASE("can_activate guard applies to typed go_to too",
               param<"id", int>>{},
     };
 
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.can_activate = [](std::string_view target) {
         // Block anything with a query string.
@@ -215,7 +215,7 @@ TEST_CASE("can_activate guard applies to typed go_to too",
 
 TEST_CASE("can_deactivate guard receives current + target",
           "[mock][shell][guard]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("settings");
     s.go_to("//home");
@@ -236,7 +236,7 @@ TEST_CASE("can_deactivate guard receives current + target",
 
 TEST_CASE("can_deactivate returning false blocks navigation",
           "[mock][shell][guard]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("settings");
     s.go_to("//home");
@@ -259,7 +259,7 @@ TEST_CASE("can_deactivate returning false blocks navigation",
 
 TEST_CASE("deactivate fires before activate guard",
           "[mock][shell][guard]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("settings");
     s.go_to("//home");
@@ -282,7 +282,7 @@ TEST_CASE("deactivate fires before activate guard",
 
 TEST_CASE("activate is skipped if deactivate rejects",
           "[mock][shell][guard]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("settings");
     s.go_to("//home");
@@ -301,8 +301,8 @@ TEST_CASE("activate is skipped if deactivate rejects",
 
 TEST_CASE("navigated_to fires on the current page after go_to",
           "[mock][shell][lifecycle]") {
-    page p;
-    shell s;
+    internal::basic_page p;
+    internal::basic_shell s;
     s.current_content = &p;
 
     std::vector<std::string> seen;
@@ -323,8 +323,8 @@ TEST_CASE("navigated_to fires on the current page after go_to",
 
 TEST_CASE("navigated_from fires on the outgoing page with previous URI",
           "[mock][shell][lifecycle]") {
-    page p;
-    shell s;
+    internal::basic_page p;
+    internal::basic_shell s;
     s.current_content = &p;
     s.go_to("//home");  // p is current; sees navigated_to("//home")
 
@@ -346,8 +346,8 @@ TEST_CASE("navigated_from fires on the outgoing page with previous URI",
 
 TEST_CASE("navigated_to/from do NOT fire when guards block",
           "[mock][shell][lifecycle]") {
-    page p;
-    shell s;
+    internal::basic_page p;
+    internal::basic_shell s;
     s.current_content = &p;
     s.go_to("//home");  // initial enter
 

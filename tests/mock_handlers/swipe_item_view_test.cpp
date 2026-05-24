@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::swipe_item_view`.
+// Mock-handler tests for `mpapp::internal::basic_swipe_item_view`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -17,7 +17,7 @@ class plain_view : public view {};
 
 TEST_CASE("swipe_item_view mock records initial values on bind",
           "[mock][swipe_item_view]") {
-    swipe_item_view iv;
+    internal::basic_swipe_item_view iv;
     swipe_item_view_handler<platform::mock> h;
 
     h.map_content(iv);
@@ -30,7 +30,7 @@ TEST_CASE("swipe_item_view mock records initial values on bind",
 TEST_CASE("swipe_item_view mock tracks content presence transitions",
           "[mock][swipe_item_view]") {
     plain_view child;
-    swipe_item_view iv;
+    internal::basic_swipe_item_view iv;
     swipe_item_view_handler<platform::mock> h;
 
     h.map_content(iv);

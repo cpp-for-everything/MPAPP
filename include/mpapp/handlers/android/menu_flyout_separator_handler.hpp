@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android `menu_flyout_separator` handler — wraps a
+// Part of MPAPP. Android `basic_menu_flyout_separator` handler — wraps a
 // thin `android.view.View` styled as a horizontal divider. Android's
 // `Menu` API doesn't render dividers between menu items by default,
-// so the handler injects a 1-px-tall plain view; the parent menu_flyout
+// so the handler injects a 1-px-tall plain view; the parent basic_menu_flyout
 // packs it between sibling items.
 
 #ifndef MPAPP_HANDLERS_ANDROID_MENU_FLYOUT_SEPARATOR_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_MENU_FLYOUT_SEPARATOR_HANDLER_HPP
 
-#include "../../menu_flyout_separator.hpp"
+#include "../../internal/basic_menu_flyout_separator.hpp"
 #include "../../platform.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_separator_handler<platform::android> {
@@ -34,7 +34,6 @@ private:
     jobject native_ = nullptr;  // android.view.View (global ref)
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_MENU_FLYOUT_SEPARATOR_HANDLER_HPP

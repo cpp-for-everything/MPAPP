@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::tabbed_page`.
+// Mock-handler tests for `mpapp::internal::basic_tabbed_page`.
 
 #include <vector>
 
@@ -13,7 +13,7 @@ using namespace mpapp;
 
 TEST_CASE("tabbed_page starts empty",
           "[mock][tabbed_page]") {
-    tabbed_page tp;
+    internal::basic_tabbed_page tp;
     CHECK(tp.children.get().empty());
     CHECK(tp.selected_index.get() == 0);
     CHECK(tp.current_page.get()   == nullptr);
@@ -21,8 +21,8 @@ TEST_CASE("tabbed_page starts empty",
 
 TEST_CASE("add_tab appends and selects first by default",
           "[mock][tabbed_page]") {
-    page a, b;
-    tabbed_page tp;
+    internal::basic_page a, b;
+    internal::basic_tabbed_page tp;
 
     tp.add_tab(&a);
     CHECK(tp.children.get().size() == 1);
@@ -37,8 +37,8 @@ TEST_CASE("add_tab appends and selects first by default",
 
 TEST_CASE("select() clamps and updates current_page",
           "[mock][tabbed_page]") {
-    page a, b, c;
-    tabbed_page tp;
+    internal::basic_page a, b, c;
+    internal::basic_tabbed_page tp;
     tp.add_tab(&a);
     tp.add_tab(&b);
     tp.add_tab(&c);
@@ -57,8 +57,8 @@ TEST_CASE("select() clamps and updates current_page",
 
 TEST_CASE("remove_tab clamps the selection",
           "[mock][tabbed_page]") {
-    page a, b, c;
-    tabbed_page tp;
+    internal::basic_page a, b, c;
+    internal::basic_tabbed_page tp;
     tp.add_tab(&a);
     tp.add_tab(&b);
     tp.add_tab(&c);
@@ -72,8 +72,8 @@ TEST_CASE("remove_tab clamps the selection",
 
 TEST_CASE("mock handler records lifecycle on tab switch",
           "[mock][tabbed_page]") {
-    page a, b;
-    tabbed_page tp;
+    internal::basic_page a, b;
+    internal::basic_tabbed_page tp;
     tp.add_tab(&a);
     tp.add_tab(&b);
 

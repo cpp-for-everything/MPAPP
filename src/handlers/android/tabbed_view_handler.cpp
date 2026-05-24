@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android tabbed_view handler implementation.
+// Part of MPAPP. Android basic_tabbed_view handler implementation.
 //
 // See the corresponding header for layout shape and why we deliberately
 // avoid TabLayout/ViewPager2 (androidx) and TabHost (heavyweight setup).
 // The native handle is a vertical LinearLayout whose first child is a
 // horizontal tab strip (one Button per title) and whose second child is
-// a FrameLayout (the page host) whose children's visibility tracks
+// a FrameLayout (the basic_page host) whose children's visibility tracks
 // `selected_index`.
 
 #include "mpapp/handlers/android/tabbed_view_handler.hpp"
@@ -18,7 +18,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -95,7 +95,7 @@ jobject make_button(JNIEnv* env, jobject context, const std::string& text) {
         env->DeleteLocalRef(cls);
         return nullptr;
     }
-    // Button extends TextView — use TextView.setText for the label.
+    // Button extends TextView — use TextView.setText for the basic_label.
     jclass tv_cls = env->FindClass("android/widget/TextView");
     if (tv_cls != nullptr) {
         jmethodID set_text = env->GetMethodID(
@@ -183,7 +183,7 @@ tabbed_view_handler<platform::android>::tabbed_view_handler() {
     if (env == nullptr) return;
     jobject context = detail::get_activity();
 
-    // Outer host: vertical LinearLayout (tab strip on top, page area
+    // Outer host: vertical LinearLayout (tab strip on top, basic_page area
     // below). We deliberately avoid `android.widget.TabHost` here —
     // setting up TabHost requires either inflating a layout resource
     // (we have none in `android_hello`) or programmatically resolving
@@ -249,15 +249,15 @@ void tabbed_view_handler<platform::android>::apply_tab_titles(const std::vector<
     if (content_frame_ != nullptr) {
         view_group_remove_all(env, content_frame_);
         for (size_t i = 0; i < v.size(); ++i) {
-            jobject page = make_frame_layout(env, context);
-            if (page != nullptr) {
+            jobject basic_page = make_frame_layout(env, context);
+            if (basic_page != nullptr) {
                 // The first placeholder stays visible by default; the
                 // rest are GONE until apply_selected_index reveals one
-                // of them. This matches the "single visible page at
+                // of them. This matches the "single visible basic_page at
                 // a time" cross-platform contract.
-                view_set_visibility(env, page, (i == 0) ? VIEW_VISIBLE : VIEW_GONE);
-                view_group_add(env, content_frame_, page);
-                env->DeleteGlobalRef(page);
+                view_set_visibility(env, basic_page, (i == 0) ? VIEW_VISIBLE : VIEW_GONE);
+                view_group_add(env, content_frame_, basic_page);
+                env->DeleteGlobalRef(basic_page);
             }
         }
     }
@@ -267,7 +267,7 @@ void tabbed_view_handler<platform::android>::apply_tab_titles(const std::vector<
 
 void tabbed_view_handler<platform::android>::apply_selected_index(int v) {
     if (native_ == nullptr || content_frame_ == nullptr) return;
-    if (v < 0) return;  // -1 ⇒ leave the current page visible
+    if (v < 0) return;  // -1 ⇒ leave the current basic_page visible
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
@@ -275,7 +275,7 @@ void tabbed_view_handler<platform::android>::apply_selected_index(int v) {
     const jint count = view_group_get_child_count(env, content_frame_);
     if (v >= count) return;
 
-    // Set GONE on every page, then VISIBLE on the chosen one. Each
+    // Set GONE on every basic_page, then VISIBLE on the chosen one. Each
     // child ref is local — we release it after toggling.
     for (jint i = 0; i < count; ++i) {
         jobject child = view_group_get_child_at(env, content_frame_, i);
@@ -285,12 +285,12 @@ void tabbed_view_handler<platform::android>::apply_selected_index(int v) {
     }
 }
 
-void tabbed_view_handler<platform::android>::map_tab_titles(tabbed_view& t) {
+void tabbed_view_handler<platform::android>::map_tab_titles(basic_tabbed_view& t) {
     apply_tab_titles(t.tab_titles.get());
     t.tab_titles.changed.subscribe(tab_titles_slot_, tab_titles_cb_);
 }
 
-void tabbed_view_handler<platform::android>::map_selected_index(tabbed_view& t) {
+void tabbed_view_handler<platform::android>::map_selected_index(basic_tabbed_view& t) {
     apply_selected_index(t.selected_index.get());
     t.selected_index.changed.subscribe(selected_index_slot_, selected_index_cb_);
 }
@@ -300,7 +300,7 @@ void tabbed_view_handler<platform::android>::map_selected_index(tabbed_view& t) 
 namespace {
 
 jobject dispatch_tabbed_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::tabbed_view*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_tabbed_view*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;
@@ -316,6 +316,5 @@ struct registrar {
 
 } // namespace
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 radio_button handler implementation.
+// Part of MPAPP. WinUI 3 basic_radio_button handler implementation.
 
 #include "mpapp/handlers/windows/radio_button_handler.hpp"
 
@@ -13,7 +13,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -44,7 +44,7 @@ void radio_button_handler<platform::windows>::apply_group_name(const std::string
     native_.GroupName(detail::to_hstring_utf8(v));
 }
 
-void radio_button_handler<platform::windows>::map_is_checked(radio_button& r) {
+void radio_button_handler<platform::windows>::map_is_checked(basic_radio_button& r) {
     bound_ = &r;
     apply_is_checked(r.is_checked.get());
     r.is_checked.changed.subscribe(is_checked_slot_, is_checked_cb_);
@@ -53,7 +53,7 @@ void radio_button_handler<platform::windows>::map_is_checked(radio_button& r) {
     if (checked_token_.value   != 0) { native_.Checked(checked_token_); checked_token_ = {}; }
     if (unchecked_token_.value != 0) { native_.Unchecked(unchecked_token_); unchecked_token_ = {}; }
 
-    radio_button* target = &r;
+    basic_radio_button* target = &r;
     auto* self = this;
     auto handler_set = [target, self](bool value) {
         if (self->suppress_echo_) return;
@@ -69,25 +69,23 @@ void radio_button_handler<platform::windows>::map_is_checked(radio_button& r) {
                       mux::RoutedEventArgs const&) { handler_set(false); });
 }
 
-void radio_button_handler<platform::windows>::map_group_name(radio_button& r) {
+void radio_button_handler<platform::windows>::map_group_name(basic_radio_button& r) {
     apply_group_name(r.group_name.get());
     r.group_name.changed.subscribe(group_name_slot_, group_name_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register radio_button so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_radio_button so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/radio_button.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_radio_button(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::radio_button*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_radio_button*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

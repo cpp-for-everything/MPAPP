@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — UIKit label handler implementation.
+// Part of MPAPP. T-0011 — UIKit basic_label handler implementation.
 
 #include "mpapp/handlers/ios/label_handler.hpp"
 
@@ -7,7 +7,7 @@
 
 #import <UIKit/UIKit.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 label_handler<platform::ios>::label_handler() {
     @autoreleasepool {
@@ -30,11 +30,10 @@ void label_handler<platform::ios>::apply_text(const std::string& text) {
     lbl.text = [NSString stringWithUTF8String:text.c_str()];
 }
 
-void label_handler<platform::ios>::map_text(label& l) {
+void label_handler<platform::ios>::map_text(basic_label& l) {
     apply_text(l.text.get());
     l.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __APPLE__ && TARGET_OS_IPHONE

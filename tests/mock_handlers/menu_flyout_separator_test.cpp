@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler smoke test for `mpapp::menu_flyout_separator`
+// Part of MPAPP. Mock-handler smoke test for `mpapp::internal::basic_menu_flyout_separator`
 // (M-04b). The separator has no observable properties — this test
 // exists to satisfy the per-widget test-file glob and to verify the
 // handler can bind without throwing.
@@ -13,7 +13,7 @@ using namespace mpapp;
 
 TEST_CASE("menu_flyout_separator mock handler records the bare bind event",
           "[mock][menu_flyout_separator]") {
-    menu_flyout_separator s;
+    internal::basic_menu_flyout_separator s;
     menu_flyout_separator_handler<platform::mock> h;
 
     h.map_bind(s);

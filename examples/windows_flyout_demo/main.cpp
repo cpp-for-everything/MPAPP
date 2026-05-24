@@ -15,7 +15,6 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/flyout_page_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/page_handler.hpp>
@@ -66,7 +65,6 @@ struct detail_page_with_button {
     mpapp::page_handler<wp>          page_handler_{};
     mpapp::stack_layout_handler<wp>  layout_handler_{};
     mpapp::label_handler<wp>         label_handler_{};
-    mpapp::button_handler<wp>        toggle_btn_handler_{};
 
     void build(const std::string& title, const std::string& body,
                const std::string& btn_text) {
@@ -75,13 +73,10 @@ struct detail_page_with_button {
         toggle_btn_.text = btn_text;
 
         label_.set_handler(label_handler_);
-        toggle_btn_.set_handler(toggle_btn_handler_);
         layout_.set_handler(layout_handler_);
         page_.set_handler(page_handler_);
 
         label_handler_.map_text(label_);
-        toggle_btn_handler_.map_text(toggle_btn_);
-        toggle_btn_handler_.map_clicked(toggle_btn_);
 
         layout_.stack_orientation = mpapp::orientation::vertical;
         layout_.spacing = 12.0;

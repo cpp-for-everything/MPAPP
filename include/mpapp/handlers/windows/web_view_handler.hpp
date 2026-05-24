@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 web_view handler — wraps muxc::WebView2 (Chromium / Edge).
+// WinUI 3 basic_web_view handler — wraps muxc::WebView2 (Chromium / Edge).
 // url -> Source(Uri); html_source -> NavigateToString.
 // NavigationStarting / NavigationCompleted update is_loading +
 // can_go_back/forward and emit navigating / navigated.
@@ -11,14 +11,14 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../web_view.hpp"
+#include "../../internal/basic_web_view.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class web_view_handler<platform::windows> {
@@ -31,8 +31,8 @@ public:
     web_view_handler(web_view_handler&&)                 = delete;
     web_view_handler& operator=(web_view_handler&&)      = delete;
 
-    void map_url(web_view& wv);
-    void map_html(web_view& wv);
+    void map_url(basic_web_view& wv);
+    void map_html(basic_web_view& wv);
 
     winrt::Microsoft::UI::Xaml::Controls::WebView2&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::WebView2& native() const noexcept { return native_; }
@@ -53,7 +53,7 @@ private:
     winrt::Microsoft::UI::Xaml::Controls::WebView2 native_{nullptr};
     winrt::event_token nav_starting_token_{};
     winrt::event_token nav_completed_token_{};
-    web_view*          bound_         = nullptr;
+    basic_web_view*          bound_         = nullptr;
     bool               suppress_echo_ = false;
 
     url_cb_t                        url_cb_{this};
@@ -62,7 +62,6 @@ private:
     signal_slot<const std::string&> html_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_WEB_VIEW_HANDLER_HPP

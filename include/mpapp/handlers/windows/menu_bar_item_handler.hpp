@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 menu_bar_item handler — wraps
+// Part of MPAPP. WinUI 3 basic_menu_bar_item handler — wraps
 // `mux::Controls::MenuBarItem`.
 //
-// `title` maps onto `MenuBarItem::Title`. `items` rebuilds the entry's
+// `title` maps onto `MenuBarItem::Title`. `items` rebuilds the basic_entry's
 // `Items` collection from its child views resolved via the ADR-0013
 // dispatch registry; concrete `MenuFlyoutItem*` types from the M-04c
-// menu_flyout family will slot in there. For now the rebuild silently
+// basic_menu_flyout family will slot in there. For now the rebuild silently
 // drops unsupported child types.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_MENU_BAR_ITEM_HANDLER_HPP
@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "../../menu_bar_item.hpp"
+#include "../../internal/basic_menu_bar_item.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
@@ -23,7 +23,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_bar_item_handler<platform::windows> {
@@ -33,8 +33,8 @@ public:
     menu_bar_item_handler(const menu_bar_item_handler&)            = delete;
     menu_bar_item_handler& operator=(const menu_bar_item_handler&) = delete;
 
-    void map_title(menu_bar_item& m);
-    void map_items(menu_bar_item& m);
+    void map_title(basic_menu_bar_item& m);
+    void map_items(basic_menu_bar_item& m);
 
     winrt::Microsoft::UI::Xaml::Controls::MenuBarItem&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::MenuBarItem& native() const noexcept { return native_; }
@@ -60,7 +60,6 @@ private:
     signal_slot<std::vector<view*> const&>  items_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_MENU_BAR_ITEM_HANDLER_HPP

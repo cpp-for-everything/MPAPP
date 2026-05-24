@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android border handler — wraps `android.widget.FrameLayout`
+// Part of MPAPP. Android basic_border handler — wraps `android.widget.FrameLayout`
 // with a `GradientDrawable` background carrying the stroke + corner radii.
 
 #ifndef MPAPP_HANDLERS_ANDROID_BORDER_HANDLER_HPP
@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include "../../border.hpp"
+#include "../../internal/basic_border.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -15,7 +15,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class border_handler<platform::android> {
@@ -28,13 +28,13 @@ public:
     border_handler(border_handler&&)                 = delete;
     border_handler& operator=(border_handler&&)      = delete;
 
-    void map_content(border& b);
-    void map_padding(border& b);
-    void map_stroke(border& b);
-    void map_stroke_thickness(border& b);
-    void map_stroke_shape(border& b);
+    void map_content(basic_border& b);
+    void map_padding(basic_border& b);
+    void map_stroke(basic_border& b);
+    void map_stroke_thickness(basic_border& b);
+    void map_stroke_shape(basic_border& b);
 
-    void bind_content(border& b, view& child);
+    void bind_content(basic_border& b, view& child);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -71,7 +71,6 @@ private:
     signal_slot<const stroke_shape_desc&>     stroke_shape_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_BORDER_HANDLER_HPP

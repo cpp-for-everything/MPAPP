@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 menu_bar handler implementation.
+// Part of MPAPP. GTK4 basic_menu_bar handler implementation.
 
 #include "mpapp/handlers/linux/menu_bar_handler.hpp"
 
@@ -11,9 +11,9 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 #include "mpapp/handlers/linux/menu_bar_item_handler.hpp"
-#include "mpapp/menu_bar_item.hpp"
+#include "mpapp/internal/basic_menu_bar_item.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -45,10 +45,10 @@ void menu_bar_handler<platform::linux_>::apply_items(const std::vector<view*>& v
     for (view* child : v) {
         if (child == nullptr) continue;
         // Resolve via direct dynamic_cast to the strongly-typed
-        // menu_bar_item — the ADR-0013 registry would also work, but
+        // basic_menu_bar_item — the ADR-0013 registry would also work, but
         // calling it here would force every other widget's dispatcher
         // to run during a hot rebuild. The strongly-typed cast is O(1).
-        if (auto* mbi = dynamic_cast<menu_bar_item*>(child); mbi && mbi->has_handler()) {
+        if (auto* mbi = dynamic_cast<basic_menu_bar_item*>(child); mbi && mbi->has_handler()) {
             if (GtkWidget* w = static_cast<GtkWidget*>(mbi->handler().native()); w != nullptr) {
                 gtk_box_append(box, w);
             }
@@ -56,19 +56,18 @@ void menu_bar_handler<platform::linux_>::apply_items(const std::vector<view*>& v
     }
 }
 
-void menu_bar_handler<platform::linux_>::map_items(menu_bar& b) {
+void menu_bar_handler<platform::linux_>::map_items(basic_menu_bar& b) {
     apply_items(b.items.get());
     b.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // --- ADR-0013 self-registration --------------------------------------------
 
 namespace {
 
 GtkWidget* dispatch_menu_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::menu_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_menu_bar*>(v); w && w->has_handler()) {
         return static_cast<GtkWidget*>(w->handler().native());
     }
     return nullptr;

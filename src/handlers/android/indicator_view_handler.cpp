@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android indicator_view handler implementation.
+// Part of MPAPP. Android basic_indicator_view handler implementation.
 
 #include "mpapp/handlers/android/indicator_view_handler.hpp"
 
@@ -11,7 +11,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -250,30 +250,29 @@ void indicator_view_handler<platform::android>::apply_selected_indicator_color(c
     recolor_dots();
 }
 
-void indicator_view_handler<platform::android>::map_count(indicator_view& iv) {
+void indicator_view_handler<platform::android>::map_count(basic_indicator_view& iv) {
     apply_count(iv.count.get());
     iv.count.changed.subscribe(count_slot_, count_cb_);
 }
-void indicator_view_handler<platform::android>::map_position(indicator_view& iv) {
+void indicator_view_handler<platform::android>::map_position(basic_indicator_view& iv) {
     apply_position(iv.position.get());
     iv.position.changed.subscribe(position_slot_, position_cb_);
 }
-void indicator_view_handler<platform::android>::map_indicator_color(indicator_view& iv) {
+void indicator_view_handler<platform::android>::map_indicator_color(basic_indicator_view& iv) {
     apply_indicator_color(iv.indicator_color.get());
     iv.indicator_color.changed.subscribe(color_slot_, color_cb_);
 }
-void indicator_view_handler<platform::android>::map_selected_indicator_color(indicator_view& iv) {
+void indicator_view_handler<platform::android>::map_selected_indicator_color(basic_indicator_view& iv) {
     apply_selected_indicator_color(iv.selected_indicator_color.get());
     iv.selected_indicator_color.changed.subscribe(sel_color_slot_, sel_color_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------------
 
 namespace {
 jobject dispatch_indicator_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::indicator_view*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_indicator_view*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

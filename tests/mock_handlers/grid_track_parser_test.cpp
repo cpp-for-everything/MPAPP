@@ -63,7 +63,7 @@ TEST_CASE("track_def::parse defaults invalid star weight to 1.0",
 
 TEST_CASE("grid_layout exposes set_rows_from_spec helper",
           "[grid][grid_layout]") {
-    grid_layout g;
+    internal::basic_grid_layout g;
     g.set_rows_from_spec("Auto, *");
     g.set_columns_from_spec("100, 100");
 

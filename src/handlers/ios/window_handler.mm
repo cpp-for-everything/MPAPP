@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — UIKit window handler implementation.
+// Part of MPAPP. T-0011 — UIKit basic_window handler implementation.
 
 #include "mpapp/handlers/ios/window_handler.hpp"
 
@@ -7,14 +7,14 @@
 
 #import <UIKit/UIKit.h>
 
-#include "mpapp/button.hpp"
+#include "mpapp/internal/basic_button.hpp"
 #include "mpapp/handlers/ios/button_handler.hpp"
 #include "mpapp/handlers/ios/label_handler.hpp"
 #include "mpapp/handlers/ios/stack_layout_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/stack_layout.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 window_handler<platform::ios>::window_handler() {
     @autoreleasepool {
@@ -57,11 +57,11 @@ void window_handler<platform::ios>::apply_content(view* v) {
     if (v == nullptr) return;
 
     UIView* native_child = nil;
-    if (auto* sl = dynamic_cast<stack_layout*>(v); sl && sl->has_handler()) {
+    if (auto* sl = dynamic_cast<basic_stack_layout*>(v); sl && sl->has_handler()) {
         native_child = (__bridge UIView*)sl->handler().native();
-    } else if (auto* b = dynamic_cast<button*>(v); b && b->has_handler()) {
+    } else if (auto* b = dynamic_cast<basic_button*>(v); b && b->has_handler()) {
         native_child = (__bridge UIView*)b->handler().native();
-    } else if (auto* l = dynamic_cast<label*>(v); l && l->has_handler()) {
+    } else if (auto* l = dynamic_cast<basic_label*>(v); l && l->has_handler()) {
         native_child = (__bridge UIView*)l->handler().native();
     }
     if (native_child) {
@@ -84,7 +84,7 @@ void window_handler<platform::ios>::apply_is_visible(bool v) {
     }
 }
 
-void window_handler<platform::ios>::bind(window& w) {
+void window_handler<platform::ios>::bind(basic_window& w) {
     bound_ = &w;
 
     apply_title(w.title.get());
@@ -97,6 +97,5 @@ void window_handler<platform::ios>::bind(window& w) {
     w.is_visible.changed.subscribe(visible_slot_, visible_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __APPLE__ && TARGET_OS_IPHONE

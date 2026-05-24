@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock toolbar handler. The `items` Observable holds a
+// Mock basic_toolbar handler. The `items` Observable holds a
 // `vector<toolbar_item>` (which std::format can't format), so we record
-// the count instead of the contents — same pattern picker uses for its
+// the count instead of the contents — same pattern basic_picker uses for its
 // items vector.
 
 #ifndef MPAPP_HANDLERS_MOCK_TOOLBAR_HANDLER_HPP
@@ -13,10 +13,10 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../toolbar.hpp"
+#include "../../internal/basic_toolbar.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class toolbar_handler<platform::mock>
@@ -24,11 +24,11 @@ class toolbar_handler<platform::mock>
 public:
     toolbar_handler() = default;
 
-    void map_items(toolbar& t) {
+    void map_items(basic_toolbar& t) {
         record("items.count", t.items.get().size());
         t.items.changed.subscribe(items_slot_, items_cb_);
     }
-    void map_title(toolbar& t) { bind("title", t.title, binding_title_); }
+    void map_title(basic_toolbar& t) { bind("title", t.title, binding_title_); }
 
 private:
     struct items_cb_t {
@@ -43,6 +43,5 @@ private:
     detail::property_binding<std::string>            binding_title_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_TOOLBAR_HANDLER_HPP

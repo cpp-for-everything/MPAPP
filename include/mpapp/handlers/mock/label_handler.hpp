@@ -6,12 +6,12 @@
 
 #include <string>
 
-#include "../../label.hpp"
+#include "../../internal/basic_label.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class label_handler<platform::mock> : public mock_handler_base {
@@ -24,7 +24,7 @@ public:
     label_handler(label_handler&&)                 = delete;
     label_handler& operator=(label_handler&&)      = delete;
 
-    void map_text(label& l) {
+    void map_text(basic_label& l) {
         record_change("text", l.text.get());
         l.text.changed.subscribe(text_slot_, text_cb_);
     }
@@ -35,6 +35,5 @@ private:
     signal_slot<const std::string&> text_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_LABEL_HANDLER_HPP

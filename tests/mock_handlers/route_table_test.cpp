@@ -107,7 +107,7 @@ TEST_CASE("build_uri assembles paths with multiple typed params",
 
 TEST_CASE("shell::go_to<Path, &Table>(args...) routes through string go_to",
           "[mock][shell][route]") {
-    shell s;
+    internal::basic_shell s;
     s.add_tab("home");
     s.add_tab("settings");
     s.add_tab("profile");
@@ -128,7 +128,7 @@ TEST_CASE("shell::go_to<Path, &Table>(args...) routes through string go_to",
 
 TEST_CASE("shell::go_to<Path, &Table>() fires navigated signal",
           "[mock][shell][route]") {
-    shell s;
+    internal::basic_shell s;
     int hits = 0;
     std::string last;
     struct cb_t {

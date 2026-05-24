@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android image handler — wraps `android.widget.ImageView`.
+// Android basic_image handler — wraps `android.widget.ImageView`.
 
 #ifndef MPAPP_HANDLERS_ANDROID_IMAGE_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_IMAGE_HANDLER_HPP
 
-#include "../../image.hpp"
+#include "../../internal/basic_image.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_handler<platform::android> {
@@ -22,8 +22,8 @@ public:
     image_handler(const image_handler&)            = delete;
     image_handler& operator=(const image_handler&) = delete;
 
-    void map_source(image& i);
-    void map_aspect(image& i);
+    void map_source(basic_image& i);
+    void map_aspect(basic_image& i);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -43,7 +43,6 @@ private:
     signal_slot<const aspect_mode&>    aspect_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_IMAGE_HANDLER_HPP

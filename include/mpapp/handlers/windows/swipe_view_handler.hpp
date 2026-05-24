@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 swipe_view handler.
+// Part of MPAPP. WinUI 3 basic_swipe_view handler.
 //
 // Wraps `muxc::SwipeControl` — the WinUI 3 native that exposes swipe
 // gestures over a single child. SwipeControl's `LeftItems` / `RightItems`
 // take a `muxc::SwipeItems` collection of `muxc::SwipeItem` instances; we
 // build that collection from the `left_items` / `right_items` vector
-// when each entry is a `swipe_item_menu_item` (the only action shape that
-// maps 1:1 onto SwipeItem's icon+text contract). Other entry types are
+// when each basic_entry is a `basic_swipe_item_menu_item` (the only action shape that
+// maps 1:1 onto SwipeItem's icon+text contract). Other basic_entry types are
 // silently skipped — they hang off the dispatch registry and can be
 // targeted by a richer composition in a follow-up batch.
 //
@@ -19,14 +19,14 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../swipe_view.hpp"
+#include "../../internal/basic_swipe_view.hpp"
 #include "../../view.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class swipe_view_handler<platform::windows> {
@@ -39,9 +39,9 @@ public:
     swipe_view_handler(swipe_view_handler&&)                 = delete;
     swipe_view_handler& operator=(swipe_view_handler&&)      = delete;
 
-    void map_content(swipe_view& sv);
-    void map_left_items(swipe_view& sv);
-    void map_right_items(swipe_view& sv);
+    void map_content(basic_swipe_view& sv);
+    void map_left_items(basic_swipe_view& sv);
+    void map_right_items(basic_swipe_view& sv);
 
     // The host SwipeControl IS the native UIElement exposed to dispatch surfaces.
     winrt::Microsoft::UI::Xaml::Controls::SwipeControl&       native() noexcept       { return native_; }
@@ -75,7 +75,6 @@ private:
     signal_slot<const std::vector<view*>&>      right_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_SWIPE_VIEW_HANDLER_HPP

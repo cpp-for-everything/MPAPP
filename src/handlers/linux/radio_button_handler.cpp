@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 radio_button handler implementation.
+// Part of MPAPP. GTK4 basic_radio_button handler implementation.
 //
 // GTK4 unifies radio buttons under GtkCheckButton with `set_group`. We
 // use a per-app group registry keyed on `group_name` so two
@@ -15,11 +15,11 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
-// Per-process group leader registry. First radio_button to bind for a
+// Per-process group leader registry. First basic_radio_button to bind for a
 // given group_name becomes the leader; subsequent ones attach to it
 // via gtk_check_button_set_group.
 std::map<std::string, GtkCheckButton*>& group_leaders() {
@@ -32,7 +32,7 @@ std::mutex& group_leaders_mutex() {
 }
 
 struct toggled_ctx {
-    radio_button*                          target;
+    basic_radio_button*                          target;
     radio_button_handler<platform::linux_>* handler;
 };
 
@@ -87,7 +87,7 @@ void radio_button_handler<platform::linux_>::apply_group_name(const std::string&
     }
 }
 
-void radio_button_handler<platform::linux_>::map_is_checked(radio_button& r) {
+void radio_button_handler<platform::linux_>::map_is_checked(basic_radio_button& r) {
     apply_is_checked(r.is_checked.get());
     r.is_checked.changed.subscribe(is_checked_slot_, is_checked_cb_);
 
@@ -106,25 +106,23 @@ void radio_button_handler<platform::linux_>::map_is_checked(radio_button& r) {
         static_cast<GConnectFlags>(0));
 }
 
-void radio_button_handler<platform::linux_>::map_group_name(radio_button& r) {
+void radio_button_handler<platform::linux_>::map_group_name(basic_radio_button& r) {
     apply_group_name(r.group_name.get());
     r.group_name.changed.subscribe(group_name_slot_, group_name_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register radio_button so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_radio_button so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/radio_button.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
 
 namespace {
 
 GtkWidget* dispatch_radio_button(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::radio_button*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_radio_button*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

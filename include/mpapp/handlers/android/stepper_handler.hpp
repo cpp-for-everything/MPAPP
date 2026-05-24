@@ -1,23 +1,23 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android stepper handler — wraps android.widget.NumberPicker.
+// Part of MPAPP. Android basic_stepper handler — wraps android.widget.NumberPicker.
 //
 // NumberPicker uses int values. The handler scales the cross-platform
 // double [minimum, maximum, interval] surface onto an int range via
 // `step_index = round((value - minimum) / interval)` so the user gets
-// discrete steps consistent with mpapp::stepper::interval.
+// discrete steps consistent with mpapp::basic_stepper::interval.
 
 #ifndef MPAPP_HANDLERS_ANDROID_STEPPER_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_STEPPER_HANDLER_HPP
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../stepper.hpp"
+#include "../../internal/basic_stepper.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class stepper_handler<platform::android> {
@@ -30,10 +30,10 @@ public:
     stepper_handler(stepper_handler&&)                 = delete;
     stepper_handler& operator=(stepper_handler&&)      = delete;
 
-    void map_value(stepper& s);
-    void map_minimum(stepper& s);
-    void map_maximum(stepper& s);
-    void map_interval(stepper& s);
+    void map_value(basic_stepper& s);
+    void map_minimum(basic_stepper& s);
+    void map_maximum(basic_stepper& s);
+    void map_interval(basic_stepper& s);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -50,7 +50,7 @@ private:
 
     jobject     native_   = nullptr;  // global ref to NumberPicker
     jobject     listener_ = nullptr;
-    stepper*    bound_    = nullptr;
+    basic_stepper*    bound_    = nullptr;
     bool        suppress_echo_ = false;
 
     value_cb_t                   value_cb_{this};
@@ -65,7 +65,6 @@ private:
 
 void android_stepper_dispatch_value(stepper_handler<platform::android>* h, int step_index);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_STEPPER_HANDLER_HPP

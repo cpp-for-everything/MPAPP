@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android `menu_flyout_sub_item` handler — wraps a
-// vertical `LinearLayout` containing a `TextView` label (the sub-menu
+// Part of MPAPP. Android `basic_menu_flyout_sub_item` handler — wraps a
+// vertical `LinearLayout` containing a `TextView` basic_label (the sub-menu
 // header) followed by an inner vertical `LinearLayout` host for the
-// submenu items. `text` flows to the label's `setText`; `items`
+// submenu items. `text` flows to the basic_label's `setText`; `items`
 // rebuilds the inner host from the ADR-0013 dispatch registry.
 
 #ifndef MPAPP_HANDLERS_ANDROID_MENU_FLYOUT_SUB_ITEM_HANDLER_HPP
@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#include "../../menu_flyout_sub_item.hpp"
+#include "../../internal/basic_menu_flyout_sub_item.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
@@ -20,7 +20,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_sub_item_handler<platform::android> {
@@ -32,8 +32,8 @@ public:
     menu_flyout_sub_item_handler(menu_flyout_sub_item_handler&&)                 = delete;
     menu_flyout_sub_item_handler& operator=(menu_flyout_sub_item_handler&&)      = delete;
 
-    void map_text(menu_flyout_sub_item& s);
-    void map_items(menu_flyout_sub_item& s);
+    void map_text(basic_menu_flyout_sub_item& s);
+    void map_items(basic_menu_flyout_sub_item& s);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -55,7 +55,6 @@ private:
     signal_slot<std::vector<view*> const&>     items_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_MENU_FLYOUT_SUB_ITEM_HANDLER_HPP

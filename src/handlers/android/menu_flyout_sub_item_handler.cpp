@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android menu_flyout_sub_item handler implementation.
+// Part of MPAPP. Android basic_menu_flyout_sub_item handler implementation.
 
 #include "mpapp/handlers/android/menu_flyout_sub_item_handler.hpp"
 
@@ -10,10 +10,10 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/menu_flyout_sub_item.hpp"
+#include "mpapp/internal/basic_menu_flyout_sub_item.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -146,24 +146,23 @@ void menu_flyout_sub_item_handler<platform::android>::apply_items(const std::vec
     }
 }
 
-void menu_flyout_sub_item_handler<platform::android>::map_text(menu_flyout_sub_item& s) {
+void menu_flyout_sub_item_handler<platform::android>::map_text(basic_menu_flyout_sub_item& s) {
     apply_text(s.text.get());
     s.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void menu_flyout_sub_item_handler<platform::android>::map_items(menu_flyout_sub_item& s) {
+void menu_flyout_sub_item_handler<platform::android>::map_items(basic_menu_flyout_sub_item& s) {
     apply_items(s.items.get());
     s.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 jobject dispatch_menu_flyout_sub_item(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::menu_flyout_sub_item*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_menu_flyout_sub_item*>(v); s && s->has_handler()) {
         return s->handler().native();
     }
     return nullptr;

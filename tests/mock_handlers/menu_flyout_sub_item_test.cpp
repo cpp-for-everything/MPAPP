@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::menu_flyout_sub_item`
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_menu_flyout_sub_item`
 // (M-04b).
 
 #include <vector>
@@ -15,7 +15,7 @@ using namespace mpapp;
 
 TEST_CASE("menu_flyout_sub_item mock records initial property values on bind",
           "[mock][menu_flyout_sub_item]") {
-    menu_flyout_sub_item s;
+    internal::basic_menu_flyout_sub_item s;
     menu_flyout_sub_item_handler<platform::mock> h;
 
     h.map_text(s);
@@ -30,14 +30,14 @@ TEST_CASE("menu_flyout_sub_item mock records initial property values on bind",
 
 TEST_CASE("menu_flyout_sub_item mock tracks text + items changes",
           "[mock][menu_flyout_sub_item]") {
-    menu_flyout_sub_item s;
+    internal::basic_menu_flyout_sub_item s;
     menu_flyout_sub_item_handler<platform::mock> h;
 
     h.map_text(s);
     h.map_items(s);
     h.clear_calls();
 
-    menu_flyout_item a, b, c;
+    internal::basic_menu_flyout_item a, b, c;
     s.text  = "Open with";
     s.items = std::vector<view*>{&a, &b, &c};
     s.items = std::vector<view*>{&a};

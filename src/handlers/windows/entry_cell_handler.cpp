@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 entry_cell handler implementation.
+// WinUI 3 basic_entry_cell handler implementation.
 
 #include "mpapp/handlers/windows/entry_cell_handler.hpp"
 
@@ -17,7 +17,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux   = ::winrt::Microsoft::UI::Xaml;
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -48,7 +48,7 @@ entry_cell_handler<platform::windows>::entry_cell_handler() {
     label_block_ = muxc::TextBlock{};
     text_box_    = muxc::TextBox{};
 
-    // 2-col layout: label (auto) + text box (star).
+    // 2-col layout: basic_label (auto) + text box (star).
     muxc::ColumnDefinition col_label{};
     col_label.Width(mux::GridLengthHelper::FromValueAndType(1.0, mux::GridUnitType::Auto));
     muxc::ColumnDefinition col_text{};
@@ -107,12 +107,12 @@ void entry_cell_handler<platform::windows>::apply_keyboard(keyboard_kind k) {
     text_box_.InputScope(scope);
 }
 
-void entry_cell_handler<platform::windows>::map_label(entry_cell& c) {
+void entry_cell_handler<platform::windows>::map_label(basic_entry_cell& c) {
     apply_label(c.label.get());
     c.label.changed.subscribe(label_slot_, label_cb_);
 }
 
-void entry_cell_handler<platform::windows>::map_text(entry_cell& c) {
+void entry_cell_handler<platform::windows>::map_text(basic_entry_cell& c) {
     bound_ = &c;
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
@@ -122,7 +122,7 @@ void entry_cell_handler<platform::windows>::map_text(entry_cell& c) {
         text_box_.TextChanged(text_changed_token_);
         text_changed_token_ = {};
     }
-    entry_cell* target = &c;
+    basic_entry_cell* target = &c;
     auto* self = this;
     text_changed_token_ = text_box_.TextChanged(
         [target, self](winrt::Windows::Foundation::IInspectable const& sender,
@@ -149,23 +149,22 @@ void entry_cell_handler<platform::windows>::map_text(entry_cell& c) {
         });
 }
 
-void entry_cell_handler<platform::windows>::map_placeholder(entry_cell& c) {
+void entry_cell_handler<platform::windows>::map_placeholder(basic_entry_cell& c) {
     apply_placeholder(c.placeholder.get());
     c.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
 }
 
-void entry_cell_handler<platform::windows>::map_keyboard(entry_cell& c) {
+void entry_cell_handler<platform::windows>::map_keyboard(basic_entry_cell& c) {
     apply_keyboard(c.keyboard.get());
     c.keyboard.changed.subscribe(keyboard_slot_, keyboard_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_entry_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::entry_cell*>(v); c && c->has_ec_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_entry_cell*>(v); c && c->has_ec_handler()) {
         return c->ec_handler().native();
     }
     return nullptr;

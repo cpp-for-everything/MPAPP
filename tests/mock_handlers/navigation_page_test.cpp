@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::navigation_page` and the page_stack engine.
+// Mock-handler tests for `mpapp::internal::basic_navigation_page` and the page_stack engine.
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@ using namespace mpapp;
 
 TEST_CASE("navigation_page starts empty when default-constructed",
           "[mock][navigation_page]") {
-    navigation_page nav;
+    internal::basic_navigation_page nav;
     CHECK(nav.stack().depth()  == 0);
     CHECK(nav.stack().top()    == nullptr);
     CHECK(nav.stack().root()   == nullptr);
@@ -27,8 +27,8 @@ TEST_CASE("navigation_page starts empty when default-constructed",
 
 TEST_CASE("navigation_page sets root from ctor argument",
           "[mock][navigation_page]") {
-    page home;
-    navigation_page nav(&home);
+    internal::basic_page home;
+    internal::basic_navigation_page nav(&home);
     CHECK(nav.stack().depth()    == 1);
     CHECK(nav.stack().top()      == static_cast<view*>(&home));
     CHECK(nav.stack().root()     == static_cast<view*>(&home));
@@ -39,16 +39,16 @@ TEST_CASE("navigation_page sets root from ctor argument",
 
 TEST_CASE("push / pop adjusts stack and current_page",
           "[mock][navigation_page]") {
-    page home;
-    page details;
-    navigation_page nav(&home);
+    internal::basic_page home;
+    internal::basic_page details;
+    internal::basic_navigation_page nav(&home);
 
     nav.push(&details);
     CHECK(nav.stack_depth.get()  == 2);
     CHECK(nav.current_page.get() == &details);
     CHECK(nav.root_page.get()    == &home);
 
-    page* popped = nav.pop();
+    internal::basic_page* popped = nav.pop();
     CHECK(popped == &details);
     CHECK(nav.stack_depth.get()  == 1);
     CHECK(nav.current_page.get() == &home);
@@ -56,8 +56,8 @@ TEST_CASE("push / pop adjusts stack and current_page",
 
 TEST_CASE("pop_to_root collapses all intermediate pages",
           "[mock][navigation_page]") {
-    page a, b, c, d;
-    navigation_page nav(&a);
+    internal::basic_page a, b, c, d;
+    internal::basic_navigation_page nav(&a);
     nav.push(&b);
     nav.push(&c);
     nav.push(&d);
@@ -70,8 +70,8 @@ TEST_CASE("pop_to_root collapses all intermediate pages",
 
 TEST_CASE("attached property store keys on child page",
           "[mock][navigation_page]") {
-    page home, settings;
-    navigation_page nav(&home);
+    internal::basic_page home, settings;
+    internal::basic_navigation_page nav(&home);
     nav.push(&settings);
 
     // Default for both pages: has_back_button=true, has_navigation_bar=true.
@@ -90,8 +90,8 @@ TEST_CASE("attached property store keys on child page",
 
 TEST_CASE("mock handler records lifecycle signals around push/pop",
           "[mock][navigation_page]") {
-    page home, details;
-    navigation_page nav(&home);
+    internal::basic_page home, details;
+    internal::basic_navigation_page nav(&home);
     navigation_page_handler<platform::mock> h;
 
     h.map_stack(nav);
@@ -110,8 +110,8 @@ TEST_CASE("mock handler records lifecycle signals around push/pop",
 
 TEST_CASE("insert_page_before places a page below the top",
           "[mock][navigation_page]") {
-    page a, b, inserted;
-    navigation_page nav(&a);
+    internal::basic_page a, b, inserted;
+    internal::basic_navigation_page nav(&a);
     nav.push(&b);
     nav.insert_page_before(&b, &inserted);
 
@@ -128,8 +128,8 @@ TEST_CASE("insert_page_before places a page below the top",
 
 TEST_CASE("remove_page removes top as pop and middle without changing top",
           "[mock][navigation_page]") {
-    page a, b, c;
-    navigation_page nav(&a);
+    internal::basic_page a, b, c;
+    internal::basic_navigation_page nav(&a);
     nav.push(&b);
     nav.push(&c);
 
@@ -148,8 +148,8 @@ TEST_CASE("remove_page removes top as pop and middle without changing top",
 
 TEST_CASE("push_async completes synchronously in the mock build",
           "[mock][navigation_page][async]") {
-    page home, details;
-    navigation_page nav(&home);
+    internal::basic_page home, details;
+    internal::basic_navigation_page nav(&home);
 
     auto t = nav.push_async(&details);
     // The coroutine body just calls push() — no suspension point —
@@ -163,13 +163,13 @@ TEST_CASE("push_async completes synchronously in the mock build",
 
 TEST_CASE("pop_async returns the popped page",
           "[mock][navigation_page][async]") {
-    page home, details;
-    navigation_page nav(&home);
+    internal::basic_page home, details;
+    internal::basic_navigation_page nav(&home);
     nav.push(&details);
 
     auto t = nav.pop_async();
     REQUIRE(t.is_ready());
-    page* popped = t.await_resume();
+    internal::basic_page* popped = t.await_resume();
 
     CHECK(popped == &details);
     CHECK(nav.stack_depth.get()  == 1);
@@ -178,8 +178,8 @@ TEST_CASE("pop_async returns the popped page",
 
 TEST_CASE("pop_to_root_async collapses the stack",
           "[mock][navigation_page][async]") {
-    page a, b, c, d;
-    navigation_page nav(&a);
+    internal::basic_page a, b, c, d;
+    internal::basic_navigation_page nav(&a);
     nav.push(&b);
     nav.push(&c);
     nav.push(&d);
@@ -195,10 +195,12 @@ TEST_CASE("pop_to_root_async collapses the stack",
 
 TEST_CASE("async wrappers compose under co_await",
           "[mock][navigation_page][async]") {
-    page a, b, c;
-    navigation_page nav(&a);
+    internal::basic_page a, b, c;
+    internal::basic_navigation_page nav(&a);
 
-    auto scenario = [](navigation_page& n, page* x, page* y) -> task<int> {
+    auto scenario = [](internal::basic_navigation_page& n,
+                       internal::basic_page* x,
+                       internal::basic_page* y) -> task<int> {
         co_await n.push_async(x);
         co_await n.push_async(y);
         auto* popped = co_await n.pop_async();

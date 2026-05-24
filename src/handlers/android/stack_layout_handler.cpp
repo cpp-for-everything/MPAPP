@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — Android stack_layout handler implementation.
+// Part of MPAPP. T-0011 — Android basic_stack_layout handler implementation.
 
 #include "mpapp/handlers/android/stack_layout_handler.hpp"
 
@@ -8,20 +8,20 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 #include "mpapp/border.hpp"
-#include "mpapp/box_view.hpp"
-#include "mpapp/date_picker.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_date_picker.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/image.hpp"
-#include "mpapp/image_button.hpp"
-#include "mpapp/time_picker.hpp"
-#include "mpapp/picker.hpp"
-#include "mpapp/progress_bar.hpp"
-#include "mpapp/search_bar.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_image.hpp"
+#include "mpapp/internal/basic_image_button.hpp"
+#include "mpapp/internal/basic_time_picker.hpp"
+#include "mpapp/internal/basic_picker.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/android/button_handler.hpp"
 #include "mpapp/handlers/android/check_box_handler.hpp"
 #include "mpapp/handlers/android/activity_indicator_handler.hpp"
@@ -41,13 +41,13 @@
 #include "mpapp/handlers/android/slider_handler.hpp"
 #include "mpapp/handlers/android/stepper_handler.hpp"
 #include "mpapp/handlers/android/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -199,7 +199,7 @@ void stack_layout_handler<platform::android>::apply_vertical_alignment(v_align a
     view_set_gravity(env, native_, g);
 }
 
-void stack_layout_handler<platform::android>::bind(stack_layout& s) {
+void stack_layout_handler<platform::android>::bind(basic_stack_layout& s) {
     bound_ = &s;
 
     apply_orientation(s.stack_orientation.get());
@@ -247,13 +247,12 @@ void stack_layout_handler<platform::android>::add_child(view& child) {
     env->DeleteLocalRef(cls);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 namespace {
 
 jobject dispatch_stack_layout(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::stack_layout*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_stack_layout*>(v); s && s->has_handler()) {
         return s->handler().native();
     }
     return nullptr;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 collection_view handler implementation.
+// WinUI 3 basic_collection_view handler implementation.
 //
 // native_ is a stable outer mux::Border so the ADR-0013 dispatch
 // handle doesn't move when we swap layouts at runtime. inner_ is the
@@ -31,7 +31,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxm = ::winrt::Microsoft::UI::Xaml::Markup;
@@ -259,13 +259,13 @@ void collection_view_handler<platform::windows>::apply_layout(collection_layout 
     }
 }
 
-void collection_view_handler<platform::windows>::map_items_source(collection_view& cv) {
+void collection_view_handler<platform::windows>::map_items_source(basic_collection_view& cv) {
     bound_ = &cv;
     rebuild_active();
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
 }
 
-void collection_view_handler<platform::windows>::map_typed_items(collection_view& cv) {
+void collection_view_handler<platform::windows>::map_typed_items(basic_collection_view& cv) {
     bound_ = &cv;
     rebuild_active();
     cv.typed_items.changed.subscribe(typed_slot_, typed_cb_);
@@ -275,28 +275,27 @@ void collection_view_handler<platform::windows>::map_typed_items(collection_view
     cv.materialized_changed.subscribe(materialized_slot_, materialized_cb_);
 }
 
-void collection_view_handler<platform::windows>::map_selected_index(collection_view& cv) {
+void collection_view_handler<platform::windows>::map_selected_index(basic_collection_view& cv) {
     apply_selection(cv.selected_index.get());
     cv.selected_index.changed.subscribe(sel_slot_, sel_cb_);
 }
 
-void collection_view_handler<platform::windows>::map_selection_mode(collection_view& cv) {
+void collection_view_handler<platform::windows>::map_selection_mode(basic_collection_view& cv) {
     apply_selection_mode(cv.selection_mode.get());
     cv.selection_mode.changed.subscribe(mode_slot_, mode_cb_);
 }
 
-void collection_view_handler<platform::windows>::map_layout(collection_view& cv) {
+void collection_view_handler<platform::windows>::map_layout(basic_collection_view& cv) {
     apply_layout(cv.layout.get());
     cv.layout.changed.subscribe(layout_slot_, layout_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_collection_view(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::collection_view*>(v); c && c->has_cv_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_collection_view*>(v); c && c->has_cv_handler()) {
         return c->cv_handler().native();
     }
     return nullptr;

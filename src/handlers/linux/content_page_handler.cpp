@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 content_page handler implementation.
+// Part of MPAPP. GTK4 basic_content_page handler implementation.
 
 #include "mpapp/handlers/linux/content_page_handler.hpp"
 
@@ -9,19 +9,19 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-#include "mpapp/content_page.hpp"
+#include "mpapp/internal/basic_content_page.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 content_page_handler<platform::linux_>::content_page_handler() {
     GtkWidget* box   = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    GtkWidget* label = gtk_label_new("");
-    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
-    gtk_box_append(GTK_BOX(box), label);
+    GtkWidget* basic_label = gtk_label_new("");
+    gtk_label_set_xalign(GTK_LABEL(basic_label), 0.0f);
+    gtk_box_append(GTK_BOX(box), basic_label);
 
     native_      = box;
-    title_label_ = label;
+    title_label_ = basic_label;
 }
 
 content_page_handler<platform::linux_>::~content_page_handler() = default;
@@ -54,33 +54,32 @@ void content_page_handler<platform::linux_>::apply_padding(const thickness& t) {
     gtk_widget_set_margin_bottom(w, static_cast<int>(t.bottom + 0.5));
 }
 
-void content_page_handler<platform::linux_>::map_title(content_page& p) {
+void content_page_handler<platform::linux_>::map_title(basic_content_page& p) {
     apply_title(p.title.get());
     p.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-void content_page_handler<platform::linux_>::map_content(content_page& p) {
+void content_page_handler<platform::linux_>::map_content(basic_content_page& p) {
     apply_content(p.content.get());
     p.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void content_page_handler<platform::linux_>::map_padding(content_page& p) {
+void content_page_handler<platform::linux_>::map_padding(basic_content_page& p) {
     apply_padding(p.padding.get());
     p.padding.changed.subscribe(padding_slot_, padding_cb_);
 }
 
-void content_page_handler<platform::linux_>::bind_content(content_page& p, view& child) {
+void content_page_handler<platform::linux_>::bind_content(basic_content_page& p, view& child) {
     p.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 GtkWidget* dispatch_content_page(::mpapp::view* v) {
-    if (auto* cp = dynamic_cast<::mpapp::content_page*>(v); cp && cp->has_handler()) {
+    if (auto* cp = dynamic_cast<::mpapp::internal::basic_content_page*>(v); cp && cp->has_handler()) {
         return GTK_WIDGET(cp->handler().native());
     }
     return nullptr;

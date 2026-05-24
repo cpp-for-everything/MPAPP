@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 image handler implementation.
+// WinUI 3 basic_image handler implementation.
 
 #include "mpapp/handlers/windows/image_handler.hpp"
 
@@ -13,7 +13,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxmi = ::winrt::Microsoft::UI::Xaml::Media::Imaging;
@@ -56,29 +56,27 @@ void image_handler<platform::windows>::apply_aspect(aspect_mode v) {
     }
 }
 
-void image_handler<platform::windows>::map_source(image& i) {
+void image_handler<platform::windows>::map_source(basic_image& i) {
     apply_source(i.source.get());
     i.source.changed.subscribe(source_slot_, source_cb_);
 }
-void image_handler<platform::windows>::map_aspect(image& i) {
+void image_handler<platform::windows>::map_aspect(basic_image& i) {
     apply_aspect(i.aspect.get());
     i.aspect.changed.subscribe(aspect_slot_, aspect_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register image so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_image so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/image.hpp"
+#include "mpapp/internal/basic_image.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_image(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::image*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_image*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

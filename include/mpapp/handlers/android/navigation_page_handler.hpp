@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android navigation_page handler.
+// Part of MPAPP. Android basic_navigation_page handler.
 //
 // Wraps a vertical LinearLayout with:
 //   - row 0: a horizontal LinearLayout bar (Button "<" + TextView title)
@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <string>
 
-#include "../../navigation_page.hpp"
+#include "../../internal/basic_navigation_page.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -19,7 +19,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class navigation_page_handler<platform::android> {
@@ -32,7 +32,7 @@ public:
     navigation_page_handler(navigation_page_handler&&)                 = delete;
     navigation_page_handler& operator=(navigation_page_handler&&)      = delete;
 
-    void map_stack(navigation_page& np);
+    void map_stack(basic_navigation_page& np);
 
     jobject native() const noexcept { return native_; }
 
@@ -56,7 +56,7 @@ private:
     jobject title_view_   = nullptr;   // TextView
     jobject content_host_ = nullptr;   // FrameLayout
 
-    navigation_page* bound_ = nullptr;
+    basic_navigation_page* bound_ = nullptr;
 
     did_appear_cb                   did_appear_cb_{this};
     depth_cb                        depth_cb_{this};
@@ -64,7 +64,6 @@ private:
     signal_slot<const std::size_t&> depth_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_NAVIGATION_PAGE_HANDLER_HPP

@@ -6,10 +6,10 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../slider.hpp"
+#include "../../internal/basic_slider.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class slider_handler<platform::mock> : public mock_handler_base {
@@ -22,17 +22,17 @@ public:
     slider_handler(slider_handler&&)                 = delete;
     slider_handler& operator=(slider_handler&&)      = delete;
 
-    void map_value(slider& s) {
+    void map_value(basic_slider& s) {
         record_change("value", s.value.get());
         s.value.changed.subscribe(value_slot_, value_cb_);
     }
 
-    void map_minimum(slider& s) {
+    void map_minimum(basic_slider& s) {
         record_change("minimum", s.minimum.get());
         s.minimum.changed.subscribe(minimum_slot_, minimum_cb_);
     }
 
-    void map_maximum(slider& s) {
+    void map_maximum(basic_slider& s) {
         record_change("maximum", s.maximum.get());
         s.maximum.changed.subscribe(maximum_slot_, maximum_cb_);
     }
@@ -50,6 +50,5 @@ private:
     signal_slot<const double&>             maximum_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_SLIDER_HANDLER_HPP

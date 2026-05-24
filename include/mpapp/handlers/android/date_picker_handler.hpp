@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android date_picker handler — wraps
+// Part of MPAPP. Android basic_date_picker handler — wraps
 // `android.widget.DatePicker` (the inline calendar/spinner variant,
 // not the dialog).
 
 #ifndef MPAPP_HANDLERS_ANDROID_DATE_PICKER_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_DATE_PICKER_HANDLER_HPP
 
-#include "../../date_picker.hpp"
+#include "../../internal/basic_date_picker.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -14,7 +14,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class date_picker_handler<platform::android> {
@@ -24,8 +24,8 @@ public:
     date_picker_handler(const date_picker_handler&)            = delete;
     date_picker_handler& operator=(const date_picker_handler&) = delete;
 
-    void map_date(date_picker& p);
-    void map_format(date_picker& /*p*/) { /* Android DatePicker has no first-class format slot. */ }
+    void map_date(basic_date_picker& p);
+    void map_format(basic_date_picker& /*p*/) { /* Android DatePicker has no first-class format slot. */ }
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -41,7 +41,6 @@ private:
     signal_slot<const date_value&>     date_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_DATE_PICKER_HANDLER_HPP

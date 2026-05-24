@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — Android label handler implementation.
+// Part of MPAPP. T-0011 — Android basic_label handler implementation.
 
 #include "mpapp/handlers/android/label_handler.hpp"
 
@@ -7,7 +7,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -65,25 +65,23 @@ void label_handler<platform::android>::apply_text(const std::string& text) {
     text_view_set_text(env, native_, text);
 }
 
-void label_handler<platform::android>::map_text(label& l) {
+void label_handler<platform::android>::map_text(basic_label& l) {
     apply_text(l.text.get());
     l.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register label so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_label so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/label.hpp"
+#include "mpapp/internal/basic_label.hpp"
 
 namespace {
 
 jobject dispatch_label(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::label*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_label*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

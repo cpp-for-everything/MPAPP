@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::menu_bar_item`.
+// Mock-handler tests for `mpapp::internal::basic_menu_bar_item`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -19,7 +19,7 @@ class plain_view : public view {};
 
 TEST_CASE("menu_bar_item mock records initial values on bind",
           "[mock][menu_bar_item]") {
-    menu_bar_item m;
+    internal::basic_menu_bar_item m;
     menu_bar_item_handler<platform::mock> h;
 
     h.map_title(m);
@@ -34,7 +34,7 @@ TEST_CASE("menu_bar_item mock records initial values on bind",
 
 TEST_CASE("menu_bar_item records title and items changes",
           "[mock][menu_bar_item]") {
-    menu_bar_item m;
+    internal::basic_menu_bar_item m;
     menu_bar_item_handler<platform::mock> h;
 
     h.map_title(m);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 collection_view handler implementation.
+// GTK4 basic_collection_view handler implementation.
 
 #include "mpapp/handlers/linux/collection_view_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -28,7 +28,7 @@ bool is_suppressed(void* inner) {
 // --- GtkListBox row events ----------------------------------------------
 
 void on_row_selected(GtkListBox* box, GtkListBoxRow* row, gpointer user_data) {
-    auto* cv = static_cast<collection_view*>(user_data);
+    auto* cv = static_cast<basic_collection_view*>(user_data);
     if (cv == nullptr) return;
     if (is_suppressed(box)) return;
     int idx = (row != nullptr) ? gtk_list_box_row_get_index(row) : -1;
@@ -37,7 +37,7 @@ void on_row_selected(GtkListBox* box, GtkListBoxRow* row, gpointer user_data) {
 }
 
 void on_selected_rows_changed(GtkListBox* box, gpointer user_data) {
-    auto* cv = static_cast<collection_view*>(user_data);
+    auto* cv = static_cast<basic_collection_view*>(user_data);
     if (cv == nullptr) return;
     if (is_suppressed(box)) return;
     if (cv->selection_mode.get() != collection_selection_mode::multiple) return;
@@ -57,7 +57,7 @@ void on_selected_rows_changed(GtkListBox* box, gpointer user_data) {
 // --- GtkFlowBox child events --------------------------------------------
 
 void on_child_activated(GtkFlowBox* box, GtkFlowBoxChild* child, gpointer user_data) {
-    auto* cv = static_cast<collection_view*>(user_data);
+    auto* cv = static_cast<basic_collection_view*>(user_data);
     if (cv == nullptr || child == nullptr) return;
     if (is_suppressed(box)) return;
     const int idx = gtk_flow_box_child_get_index(child);
@@ -66,7 +66,7 @@ void on_child_activated(GtkFlowBox* box, GtkFlowBoxChild* child, gpointer user_d
 }
 
 void on_selected_children_changed(GtkFlowBox* box, gpointer user_data) {
-    auto* cv = static_cast<collection_view*>(user_data);
+    auto* cv = static_cast<basic_collection_view*>(user_data);
     if (cv == nullptr) return;
     if (is_suppressed(box)) return;
     if (cv->selection_mode.get() != collection_selection_mode::multiple) return;
@@ -154,7 +154,7 @@ void clear_inner_box(GtkBox* box) {
 void on_hbox_child_pressed(GtkGestureClick* gesture,
                            gint /*n_press*/, gdouble /*x*/, gdouble /*y*/,
                            gpointer user_data) {
-    auto* cv = static_cast<collection_view*>(user_data);
+    auto* cv = static_cast<basic_collection_view*>(user_data);
     if (cv == nullptr) return;
     GtkWidget* w = gtk_event_controller_get_widget(GTK_EVENT_CONTROLLER(gesture));
     if (w == nullptr) return;
@@ -166,8 +166,8 @@ void on_hbox_child_pressed(GtkGestureClick* gesture,
 
 // Append a widget into an hbox-mode container, stamping it with the
 // next item index and wiring a GtkGestureClick that routes taps back
-// to the bound collection_view.
-void append_hbox_child(GtkBox* box, GtkWidget* child, int idx, collection_view* cv) {
+// to the bound basic_collection_view.
+void append_hbox_child(GtkBox* box, GtkWidget* child, int idx, basic_collection_view* cv) {
     g_object_set_data(G_OBJECT(child), "mpapp_idx", GINT_TO_POINTER(idx));
     GtkGesture* g = gtk_gesture_click_new();
     gtk_widget_add_controller(child, GTK_EVENT_CONTROLLER(g));
@@ -413,14 +413,14 @@ void collection_view_handler<platform::linux_>::apply_layout(collection_layout l
     }
 }
 
-void collection_view_handler<platform::linux_>::map_items_source(collection_view& cv) {
+void collection_view_handler<platform::linux_>::map_items_source(basic_collection_view& cv) {
     bound_ = &cv;
     wire_tap_signals();
     rebuild_active();
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
 }
 
-void collection_view_handler<platform::linux_>::map_typed_items(collection_view& cv) {
+void collection_view_handler<platform::linux_>::map_typed_items(basic_collection_view& cv) {
     bound_ = &cv;
     wire_tap_signals();
     rebuild_active();
@@ -428,28 +428,27 @@ void collection_view_handler<platform::linux_>::map_typed_items(collection_view&
     cv.materialized_changed.subscribe(materialized_slot_, materialized_cb_);
 }
 
-void collection_view_handler<platform::linux_>::map_selected_index(collection_view& cv) {
+void collection_view_handler<platform::linux_>::map_selected_index(basic_collection_view& cv) {
     apply_selection(cv.selected_index.get());
     cv.selected_index.changed.subscribe(sel_slot_, sel_cb_);
 }
 
-void collection_view_handler<platform::linux_>::map_selection_mode(collection_view& cv) {
+void collection_view_handler<platform::linux_>::map_selection_mode(basic_collection_view& cv) {
     apply_selection_mode(cv.selection_mode.get());
     cv.selection_mode.changed.subscribe(mode_slot_, mode_cb_);
 }
 
-void collection_view_handler<platform::linux_>::map_layout(collection_view& cv) {
+void collection_view_handler<platform::linux_>::map_layout(basic_collection_view& cv) {
     apply_layout(cv.layout.get());
     cv.layout.changed.subscribe(layout_slot_, layout_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_collection_view(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::collection_view*>(v); c && c->has_cv_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_collection_view*>(v); c && c->has_cv_handler()) {
         return GTK_WIDGET(c->cv_handler().native());
     }
     return nullptr;

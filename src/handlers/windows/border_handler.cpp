@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 border handler implementation.
+// Part of MPAPP. WinUI 3 basic_border handler implementation.
 
 #include "mpapp/handlers/windows/border_handler.hpp"
 
@@ -19,11 +19,11 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-#include "mpapp/box_view.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
 #include "mpapp/handlers/windows/button_handler.hpp"
 #include "mpapp/handlers/windows/check_box_handler.hpp"
@@ -35,14 +35,14 @@
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
 #include "mpapp/handlers/windows/stepper_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stack_layout.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxm  = ::winrt::Microsoft::UI::Xaml::Media;
@@ -118,7 +118,7 @@ muxui::Color parse_color(const std::string& name) {
 
 border_handler<platform::windows>::border_handler() {
     native_ = muxc::Border{};
-    // Default border (1 px) so it's visible even before stroke is set.
+    // Default basic_border (1 px) so it's visible even before stroke is set.
     native_.BorderThickness({1.0, 1.0, 1.0, 1.0});
 }
 
@@ -157,23 +157,22 @@ void border_handler<platform::windows>::apply_stroke_shape(const stroke_shape_de
     native_.CornerRadius(parse_corners(s.descriptor));
 }
 
-void border_handler<platform::windows>::map_content(border& b)          { apply_content(b.content.get()); b.content.changed.subscribe(content_slot_, content_cb_); }
-void border_handler<platform::windows>::map_padding(border& b)          { apply_padding(b.padding.get()); b.padding.changed.subscribe(padding_slot_, padding_cb_); }
-void border_handler<platform::windows>::map_stroke(border& b)           { apply_stroke(b.stroke.get()); b.stroke.changed.subscribe(stroke_slot_, stroke_cb_); }
-void border_handler<platform::windows>::map_stroke_thickness(border& b) { apply_stroke_thickness(b.stroke_thickness.get()); b.stroke_thickness.changed.subscribe(stroke_thick_slot_, stroke_thick_cb_); }
-void border_handler<platform::windows>::map_stroke_shape(border& b)     { apply_stroke_shape(b.stroke_shape.get()); b.stroke_shape.changed.subscribe(stroke_shape_slot_, stroke_shape_cb_); }
+void border_handler<platform::windows>::map_content(basic_border& b)          { apply_content(b.content.get()); b.content.changed.subscribe(content_slot_, content_cb_); }
+void border_handler<platform::windows>::map_padding(basic_border& b)          { apply_padding(b.padding.get()); b.padding.changed.subscribe(padding_slot_, padding_cb_); }
+void border_handler<platform::windows>::map_stroke(basic_border& b)           { apply_stroke(b.stroke.get()); b.stroke.changed.subscribe(stroke_slot_, stroke_cb_); }
+void border_handler<platform::windows>::map_stroke_thickness(basic_border& b) { apply_stroke_thickness(b.stroke_thickness.get()); b.stroke_thickness.changed.subscribe(stroke_thick_slot_, stroke_thick_cb_); }
+void border_handler<platform::windows>::map_stroke_shape(basic_border& b)     { apply_stroke_shape(b.stroke_shape.get()); b.stroke_shape.changed.subscribe(stroke_shape_slot_, stroke_shape_cb_); }
 
-void border_handler<platform::windows>::bind_content(border& b, view& child) {
+void border_handler<platform::windows>::bind_content(basic_border& b, view& child) {
     b.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_border(::mpapp::view* v) {
-    if (auto* b = dynamic_cast<::mpapp::border*>(v); b && b->has_handler()) {
+    if (auto* b = dynamic_cast<::mpapp::internal::basic_border*>(v); b && b->has_handler()) {
         return b->handler().native();
     }
     return nullptr;

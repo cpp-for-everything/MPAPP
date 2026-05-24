@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 refresh_view handler.
+// Part of MPAPP. GTK4 basic_refresh_view handler.
 //
 // GTK4 has no native pull-to-refresh widget. The handler emulates one
 // with a vertical `GtkBox` holding two children:
@@ -17,12 +17,12 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../refresh_view.hpp"
+#include "../../internal/basic_refresh_view.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class refresh_view_handler<platform::linux_> {
@@ -35,11 +35,11 @@ public:
     refresh_view_handler(refresh_view_handler&&)                 = delete;
     refresh_view_handler& operator=(refresh_view_handler&&)      = delete;
 
-    void map_content(refresh_view& r);
-    void map_is_refreshing(refresh_view& r);
-    void map_refresh_color(refresh_view& r);
+    void map_content(basic_refresh_view& r);
+    void map_is_refreshing(basic_refresh_view& r);
+    void map_refresh_color(basic_refresh_view& r);
 
-    void bind_content(refresh_view& r, view& child);
+    void bind_content(basic_refresh_view& r, view& child);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -68,7 +68,6 @@ private:
     signal_slot<const brush_ref&>             refresh_color_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_REFRESH_VIEW_HANDLER_HPP

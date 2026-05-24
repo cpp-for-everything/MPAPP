@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 toolbar handler — wraps `mux::Controls::CommandBar`.
+// Part of MPAPP. WinUI 3 basic_toolbar handler — wraps `mux::Controls::CommandBar`.
 //
 // Each `toolbar_item` becomes a `mux::Controls::AppBarButton` packed into
 // the CommandBar's `PrimaryCommands` collection. The collection is rebuilt
@@ -15,13 +15,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../toolbar.hpp"
+#include "../../internal/basic_toolbar.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class toolbar_handler<platform::windows> {
@@ -31,8 +31,8 @@ public:
     toolbar_handler(const toolbar_handler&)            = delete;
     toolbar_handler& operator=(const toolbar_handler&) = delete;
 
-    void map_items(toolbar& t);
-    void map_title(toolbar& t);
+    void map_items(basic_toolbar& t);
+    void map_title(basic_toolbar& t);
 
     winrt::Microsoft::UI::Xaml::Controls::CommandBar&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::CommandBar& native() const noexcept { return native_; }
@@ -52,7 +52,6 @@ private:
     signal_slot<const std::string&>                     title_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_TOOLBAR_HANDLER_HPP

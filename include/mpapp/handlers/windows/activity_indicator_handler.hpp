@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 activity_indicator handler — wraps
+// Part of MPAPP. WinUI 3 basic_activity_indicator handler — wraps
 // `mux::Controls::ProgressRing`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_ACTIVITY_INDICATOR_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_ACTIVITY_INDICATOR_HANDLER_HPP
 
-#include "../../activity_indicator.hpp"
+#include "../../internal/basic_activity_indicator.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -13,7 +13,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class activity_indicator_handler<platform::windows> {
@@ -26,8 +26,8 @@ public:
     activity_indicator_handler(activity_indicator_handler&&)                 = delete;
     activity_indicator_handler& operator=(activity_indicator_handler&&)      = delete;
 
-    void map_is_running(activity_indicator& a);
-    void map_color(activity_indicator& a);
+    void map_is_running(basic_activity_indicator& a);
+    void map_color(basic_activity_indicator& a);
 
     winrt::Microsoft::UI::Xaml::Controls::ProgressRing&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::ProgressRing& native() const noexcept { return native_; }
@@ -47,7 +47,6 @@ private:
     signal_slot<const brush_ref&>         color_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_ACTIVITY_INDICATOR_HANDLER_HPP

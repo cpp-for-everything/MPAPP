@@ -1,51 +1,53 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/SwipeItemView.md
 //
-// `mpapp::swipe_item_view` — a custom-content swipe action. Lives inside
-// a `swipe_view`'s `left_items` / `right_items` collection. Hosts an
-// arbitrary `view*` child so callers can build fully bespoke action pills
-// (tinted panel + progress ring, multi-button clusters, etc.) instead of
-// the fixed icon+text shape of `swipe_item_menu_item`.
+// `mpapp::swipe_item_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_swipe_item_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::swipe_item_view x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// Mock surface (M-04b): the single `content` slot. The richer
-// `command` / `command_parameter` / `automation_id` / `invoked` surface
-// described in the component doc lands alongside the gesture-event
-// plumbing in a follow-up batch.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_swipe_item_view x;
+//     mpapp::swipe_item_view_handler<mpapp::platform::mock> h;
+//     h.map_content(x);
 
 #ifndef MPAPP_SWIPE_ITEM_VIEW_HPP
 #define MPAPP_SWIPE_ITEM_VIEW_HPP
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+#include "internal/basic_swipe_item_view.hpp"
+
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_swipe_item_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/swipe_item_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class swipe_item_view_handler;
-
-class swipe_item_view : public view {
+class swipe_item_view : public internal::basic_swipe_item_view {
 public:
-    swipe_item_view() = default;
-    ~swipe_item_view() override = default;
+    swipe_item_view() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_content(*this);
+    }
 
     swipe_item_view(const swipe_item_view&)            = delete;
     swipe_item_view& operator=(const swipe_item_view&) = delete;
     swipe_item_view(swipe_item_view&&)                 = delete;
     swipe_item_view& operator=(swipe_item_view&&)      = delete;
 
-    // The custom content hosted inside the action pill. Non-owning,
-    // matching `swipe_view::content`.
-    Observable<view*>  content{nullptr};
-
-    swipe_item_view_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const swipe_item_view_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                              has_handler() const noexcept { return handler_ != nullptr; }
-    void                                              set_handler(swipe_item_view_handler<platform::current>& h) noexcept { handler_ = &h; }
-
 private:
-    swipe_item_view_handler<platform::current>* handler_ = nullptr;
+    internal::swipe_item_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::swipe_item_view_handler<>` (host-current) and
+// `mpapp::swipe_item_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using swipe_item_view_handler = internal::swipe_item_view_handler<Platform>;
 
 } // namespace mpapp
 

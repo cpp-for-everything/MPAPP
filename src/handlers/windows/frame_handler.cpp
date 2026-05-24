@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 frame handler implementation. `mpapp::frame` is
+// Part of MPAPP. WinUI 3 basic_frame handler implementation. `mpapp::internal::basic_frame` is
 // the deprecated MAUI-9 alias for `Border` — same native control, same
 // surface, kept for one-to-one XAML migration parity.
 
@@ -28,10 +28,10 @@
 #include <winrt/Microsoft.UI.Xaml.Media.h>
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/frame.hpp"
+#include "mpapp/internal/basic_frame.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxm  = ::winrt::Microsoft::UI::Xaml::Media;
@@ -59,7 +59,7 @@ muxui::Color to_wuc(const color& c) {
 
 frame_handler<platform::windows>::frame_handler() {
     native_ = muxc::Border{};
-    // MAUI defaults: 1px border, padding 20.
+    // MAUI defaults: 1px basic_border, padding 20.
     native_.BorderThickness({1.0, 1.0, 1.0, 1.0});
     native_.Padding({20.0, 20.0, 20.0, 20.0});
 }
@@ -106,43 +106,42 @@ void frame_handler<platform::windows>::apply_padding(const thickness& t) {
     native_.Padding(wt);
 }
 
-void frame_handler<platform::windows>::map_content(frame& f) {
+void frame_handler<platform::windows>::map_content(basic_frame& f) {
     apply_content(f.content.get());
     f.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void frame_handler<platform::windows>::map_border_color(frame& f) {
+void frame_handler<platform::windows>::map_border_color(basic_frame& f) {
     apply_border_color(f.border_color.get());
     f.border_color.changed.subscribe(border_color_slot_, border_color_cb_);
 }
 
-void frame_handler<platform::windows>::map_has_shadow(frame& f) {
+void frame_handler<platform::windows>::map_has_shadow(basic_frame& f) {
     apply_has_shadow(f.has_shadow.get());
     f.has_shadow.changed.subscribe(has_shadow_slot_, has_shadow_cb_);
 }
 
-void frame_handler<platform::windows>::map_corner_radius(frame& f) {
+void frame_handler<platform::windows>::map_corner_radius(basic_frame& f) {
     apply_corner_radius(f.corner_radius.get());
     f.corner_radius.changed.subscribe(corner_radius_slot_, corner_radius_cb_);
 }
 
-void frame_handler<platform::windows>::map_padding(frame& f) {
+void frame_handler<platform::windows>::map_padding(basic_frame& f) {
     apply_padding(f.padding.get());
     f.padding.changed.subscribe(padding_slot_, padding_cb_);
 }
 
-void frame_handler<platform::windows>::bind_content(frame& f, view& child) {
+void frame_handler<platform::windows>::bind_content(basic_frame& f, view& child) {
     f.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_frame(::mpapp::view* v) {
-    if (auto* fr = dynamic_cast<::mpapp::frame*>(v); fr && fr->has_handler()) {
+    if (auto* fr = dynamic_cast<::mpapp::internal::basic_frame*>(v); fr && fr->has_handler()) {
         return fr->handler().native();
     }
     return nullptr;

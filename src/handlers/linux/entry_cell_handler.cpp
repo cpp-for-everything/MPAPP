@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 entry_cell handler implementation.
+// GTK4 basic_entry_cell handler implementation.
 
 #include "mpapp/handlers/linux/entry_cell_handler.hpp"
 
@@ -9,12 +9,12 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct entry_ctx {
-    entry_cell*                            target;
+    basic_entry_cell*                            target;
     entry_cell_handler<platform::linux_>*  handler;
 };
 
@@ -29,7 +29,7 @@ void on_changed(GtkEditable* editable, gpointer user_data) {
     }
 }
 
-void on_activate(GtkEntry* /*entry*/, gpointer user_data) {
+void on_activate(GtkEntry* /*basic_entry*/, gpointer user_data) {
     auto* ctx = static_cast<entry_ctx*>(user_data);
     if (ctx == nullptr || ctx->target == nullptr) return;
     ctx->target->completed.emit(ctx->target->text.get());
@@ -110,12 +110,12 @@ void entry_cell_handler<platform::linux_>::apply_keyboard(keyboard_kind k) {
                                 keyboard_to_purpose(k));
 }
 
-void entry_cell_handler<platform::linux_>::map_label(entry_cell& c) {
+void entry_cell_handler<platform::linux_>::map_label(basic_entry_cell& c) {
     apply_label(c.label.get());
     c.label.changed.subscribe(label_slot_, label_cb_);
 }
 
-void entry_cell_handler<platform::linux_>::map_text(entry_cell& c) {
+void entry_cell_handler<platform::linux_>::map_text(basic_entry_cell& c) {
     bound_ = &c;
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
@@ -150,23 +150,22 @@ void entry_cell_handler<platform::linux_>::map_text(entry_cell& c) {
         static_cast<GConnectFlags>(0));
 }
 
-void entry_cell_handler<platform::linux_>::map_placeholder(entry_cell& c) {
+void entry_cell_handler<platform::linux_>::map_placeholder(basic_entry_cell& c) {
     apply_placeholder(c.placeholder.get());
     c.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
 }
 
-void entry_cell_handler<platform::linux_>::map_keyboard(entry_cell& c) {
+void entry_cell_handler<platform::linux_>::map_keyboard(basic_entry_cell& c) {
     apply_keyboard(c.keyboard.get());
     c.keyboard.changed.subscribe(keyboard_slot_, keyboard_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_entry_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::entry_cell*>(v); c && c->has_ec_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_entry_cell*>(v); c && c->has_ec_handler()) {
         return GTK_WIDGET(c->ec_handler().native());
     }
     return nullptr;

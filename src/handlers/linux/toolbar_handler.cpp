@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 toolbar handler implementation.
+// Part of MPAPP. GTK4 basic_toolbar handler implementation.
 
 #include "mpapp/handlers/linux/toolbar_handler.hpp"
 
@@ -11,7 +11,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -25,7 +25,7 @@ void action_bar_clear_pack_start(GtkActionBar* bar) {
         // Only remove widgets we packed via pack_start; the center widget is
         // a sibling at the same level. We tag our buttons with a CSS class
         // so we can identify them safely.
-        if (gtk_widget_has_css_class(w, "mpapp-toolbar-item")) {
+        if (gtk_widget_has_css_class(w, "mpapp-basic_toolbar-item")) {
             to_remove.push_back(w);
         }
         w = gtk_widget_get_next_sibling(w);
@@ -40,7 +40,7 @@ void action_bar_clear_pack_start(GtkActionBar* bar) {
 toolbar_handler<platform::linux_>::toolbar_handler() {
     GtkWidget* bar = gtk_action_bar_new();
     native_ = bar;
-    // Empty center label by default — apply_title fills it in.
+    // Empty center basic_label by default — apply_title fills it in.
     GtkWidget* lbl = gtk_label_new("");
     title_label_ = lbl;
     gtk_action_bar_set_center_widget(GTK_ACTION_BAR(bar), lbl);
@@ -55,11 +55,11 @@ void toolbar_handler<platform::linux_>::apply_items(const std::vector<toolbar_it
     action_bar_clear_pack_start(bar);
     for (const auto& item : v) {
         GtkWidget* btn = gtk_button_new_with_label(item.text.c_str());
-        gtk_widget_add_css_class(btn, "mpapp-toolbar-item");
+        gtk_widget_add_css_class(btn, "mpapp-basic_toolbar-item");
         // `icon` is interpreted as a themed icon name when non-empty.
         if (!item.icon.empty()) {
-            GtkWidget* image = gtk_image_new_from_icon_name(item.icon.c_str());
-            gtk_button_set_child(GTK_BUTTON(btn), image);
+            GtkWidget* basic_image = gtk_image_new_from_icon_name(item.icon.c_str());
+            gtk_button_set_child(GTK_BUTTON(btn), basic_image);
         }
         gtk_action_bar_pack_start(bar, btn);
     }
@@ -70,23 +70,22 @@ void toolbar_handler<platform::linux_>::apply_title(const std::string& v) {
     gtk_label_set_text(GTK_LABEL(static_cast<GtkWidget*>(title_label_)), v.c_str());
 }
 
-void toolbar_handler<platform::linux_>::map_items(toolbar& t) {
+void toolbar_handler<platform::linux_>::map_items(basic_toolbar& t) {
     apply_items(t.items.get());
     t.items.changed.subscribe(items_slot_, items_cb_);
 }
-void toolbar_handler<platform::linux_>::map_title(toolbar& t) {
+void toolbar_handler<platform::linux_>::map_title(basic_toolbar& t) {
     apply_title(t.title.get());
     t.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 namespace {
 
 // Per ADR-0013 — self-register so container dispatch sites resolve
 // `mpapp::view*` → `GtkWidget*` without a per-widget dynamic_cast branch.
 GtkWidget* dispatch_toolbar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::toolbar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_toolbar*>(v); w && w->has_handler()) {
         return static_cast<GtkWidget*>(w->handler().native());
     }
     return nullptr;

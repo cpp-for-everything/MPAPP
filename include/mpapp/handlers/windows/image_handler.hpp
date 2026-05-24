@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 image handler — wraps `mux::Controls::Image` + `BitmapImage`.
+// WinUI 3 basic_image handler — wraps `mux::Controls::Image` + `BitmapImage`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_IMAGE_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_IMAGE_HANDLER_HPP
 
-#include "../../image.hpp"
+#include "../../internal/basic_image.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class image_handler<platform::windows> {
@@ -22,8 +22,8 @@ public:
     image_handler(const image_handler&)            = delete;
     image_handler& operator=(const image_handler&) = delete;
 
-    void map_source(image& i);
-    void map_aspect(image& i);
+    void map_source(basic_image& i);
+    void map_aspect(basic_image& i);
 
     winrt::Microsoft::UI::Xaml::Controls::Image&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Image& native() const noexcept { return native_; }
@@ -43,7 +43,6 @@ private:
     signal_slot<const aspect_mode&>    aspect_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_IMAGE_HANDLER_HPP

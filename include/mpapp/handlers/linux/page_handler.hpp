@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 page handler — wraps a vertical `GtkBox`:
+// Part of MPAPP. GTK4 basic_page handler — wraps a vertical `GtkBox`:
 //   - top child: a `GtkLabel` carrying `title`
 //   - middle child: a single-child host for `content`
 //   - overlay: a `GtkSpinner` toggled by `is_busy`
@@ -11,13 +11,13 @@
 
 #include <string>
 
-#include "../../page.hpp"
+#include "../../internal/basic_page.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class page_handler<platform::linux_> {
@@ -30,11 +30,11 @@ public:
     page_handler(page_handler&&)                 = delete;
     page_handler& operator=(page_handler&&)      = delete;
 
-    void map_title(page& p);
-    void map_content(page& p);
-    void map_is_busy(page& p);
+    void map_title(basic_page& p);
+    void map_content(basic_page& p);
+    void map_is_busy(basic_page& p);
 
-    void bind_content(page& p, view& child);
+    void bind_content(basic_page& p, view& child);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -61,7 +61,6 @@ private:
     signal_slot<const bool&>         busy_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_PAGE_HANDLER_HPP

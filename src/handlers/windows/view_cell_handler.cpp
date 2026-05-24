@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 view_cell handler implementation.
+// WinUI 3 basic_view_cell handler implementation.
 
 #include "mpapp/handlers/windows/view_cell_handler.hpp"
 
@@ -12,7 +12,7 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -33,18 +33,17 @@ void view_cell_handler<platform::windows>::apply_content(view* v) {
     }
 }
 
-void view_cell_handler<platform::windows>::map_content(view_cell& c) {
+void view_cell_handler<platform::windows>::map_content(basic_view_cell& c) {
     apply_content(c.content.get());
     c.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_view_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::view_cell*>(v); c && c->has_vc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_view_cell*>(v); c && c->has_vc_handler()) {
         return c->vc_handler().native();
     }
     return nullptr;

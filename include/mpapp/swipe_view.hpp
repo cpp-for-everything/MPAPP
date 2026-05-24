@@ -1,70 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/SwipeView.md
 //
-// `mpapp::swipe_view` — gesture-revealed action container. Wraps a single
-// content child and reveals contextual action panels (`left_items` /
-// `right_items`) when the user swipes horizontally on the content.
+// `mpapp::swipe_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_swipe_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::swipe_view x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// This is the M-04b "real handlers on three platforms" landing of the
-// SwipeView family — paired with `swipe_item_view` and `swipe_item_menu_item`.
-// The mock surface is intentionally narrow: a `content` slot plus
-// `left_items` / `right_items` vectors of `view*` action children. The
-// richer top/bottom-items / `swipe_mode` / `is_open` / threshold surfaces
-// described in the component doc land in a follow-up alongside the
-// gesture-event plumbing.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
 //
-// Degradation contract (per ADR-0006 + worker prompt): real handlers
-// host the content + the action children but the GTK4 and Android paths
-// do not implement actual swipe gestures yet — Windows alone uses the
-// native `mux::Controls::SwipeControl`. Treat the Linux / Android
-// renderings as "content-only" with the action items hidden until a
-// follow-up batch wires their gesture recognisers.
+//     mpapp::internal::basic_swipe_view x;
+//     mpapp::swipe_view_handler<mpapp::platform::mock> h;
+//     h.map_content(x);
 
 #ifndef MPAPP_SWIPE_VIEW_HPP
 #define MPAPP_SWIPE_VIEW_HPP
 
-#include <vector>
+#include "internal/basic_swipe_view.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_swipe_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/swipe_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class swipe_view_handler;
-
-class swipe_view : public view {
+class swipe_view : public internal::basic_swipe_view {
 public:
-    swipe_view() = default;
-    ~swipe_view() override = default;
+    swipe_view() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_content(*this);
+        embedded_handler_.map_left_items(*this);
+        embedded_handler_.map_right_items(*this);
+    }
 
     swipe_view(const swipe_view&)            = delete;
     swipe_view& operator=(const swipe_view&) = delete;
     swipe_view(swipe_view&&)                 = delete;
     swipe_view& operator=(swipe_view&&)      = delete;
 
-    // The single wrapped content view that the user swipes over.
-    // Non-owning raw pointer (caller owns the lifetime), matching `page`
-    // / `window` rather than `refresh_view` / `flyout_view`. The worker
-    // prompt specifies this shape.
-    Observable<view*>                  content{nullptr};
-
-    // Action collections revealed when the user swipes right / left.
-    // Each entry is a non-owning `view*` (typically a
-    // `swipe_item_view` or `swipe_item_menu_item`, but any `view`
-    // subclass that registers with the ADR-0013 dispatch surface works).
-    Observable<std::vector<view*>>     left_items{};
-    Observable<std::vector<view*>>     right_items{};
-
-    swipe_view_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const swipe_view_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                         has_handler() const noexcept { return handler_ != nullptr; }
-    void                                         set_handler(swipe_view_handler<platform::current>& h) noexcept { handler_ = &h; }
-
 private:
-    swipe_view_handler<platform::current>* handler_ = nullptr;
+    internal::swipe_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::swipe_view_handler<>` (host-current) and
+// `mpapp::swipe_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using swipe_view_handler = internal::swipe_view_handler<Platform>;
 
 } // namespace mpapp
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::activity_indicator`.
+// Mock-handler tests for `mpapp::internal::basic_activity_indicator`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("activity_indicator mock records initial values on bind",
           "[mock][activity_indicator]") {
-    activity_indicator a;
+    internal::basic_activity_indicator a;
     activity_indicator_handler<platform::mock> h;
 
     h.map_is_running(a);
@@ -24,7 +24,7 @@ TEST_CASE("activity_indicator mock records initial values on bind",
 
 TEST_CASE("activity_indicator records start/stop transitions",
           "[mock][activity_indicator]") {
-    activity_indicator a;
+    internal::basic_activity_indicator a;
     activity_indicator_handler<platform::mock> h;
 
     h.map_is_running(a);

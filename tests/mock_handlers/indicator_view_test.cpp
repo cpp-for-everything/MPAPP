@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::indicator_view`.
+// Mock-handler tests for `mpapp::internal::basic_indicator_view`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -10,7 +10,7 @@ using namespace mpapp;
 
 TEST_CASE("indicator_view mock records initial values on bind",
           "[mock][indicator_view]") {
-    indicator_view iv;
+    internal::basic_indicator_view iv;
     indicator_view_handler<platform::mock> h;
 
     h.map_count(iv);
@@ -29,7 +29,7 @@ TEST_CASE("indicator_view mock records initial values on bind",
 
 TEST_CASE("indicator_view records count changes",
           "[mock][indicator_view]") {
-    indicator_view iv;
+    internal::basic_indicator_view iv;
     indicator_view_handler<platform::mock> h;
 
     h.map_count(iv);

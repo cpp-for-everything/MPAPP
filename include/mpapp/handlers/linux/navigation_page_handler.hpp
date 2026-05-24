@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 navigation_page handler.
+// Part of MPAPP. GTK4 basic_navigation_page handler.
 //
 // Wraps a vertical `GtkBox` with:
-//   - top child: a horizontal GtkBox bar (back button + GtkLabel title)
+//   - top child: a horizontal GtkBox bar (back basic_button + GtkLabel title)
 //   - second child: a GtkBox content host swapped on each page_did_appear
 //
 // Same pattern as content_page_handler<linux_> but driven by the
@@ -14,13 +14,13 @@
 #include <cstddef>
 #include <string>
 
-#include "../../navigation_page.hpp"
+#include "../../internal/basic_navigation_page.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class navigation_page_handler<platform::linux_> {
@@ -33,7 +33,7 @@ public:
     navigation_page_handler(navigation_page_handler&&)                 = delete;
     navigation_page_handler& operator=(navigation_page_handler&&)      = delete;
 
-    void map_stack(navigation_page& np);
+    void map_stack(basic_navigation_page& np);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -59,7 +59,7 @@ private:
     void* content_host_  = nullptr;  // GtkBox* (single-child wrapper)
     void* current_child_ = nullptr;  // GtkWidget* current top's native
 
-    navigation_page* bound_ = nullptr;
+    basic_navigation_page* bound_ = nullptr;
 
     did_appear_cb                   did_appear_cb_{this};
     depth_cb                        depth_cb_{this};
@@ -67,7 +67,6 @@ private:
     signal_slot<const std::size_t&> depth_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_NAVIGATION_PAGE_HANDLER_HPP

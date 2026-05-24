@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 menu_flyout_sub_item handler implementation.
+// Part of MPAPP. WinUI 3 basic_menu_flyout_sub_item handler implementation.
 
 #include "mpapp/handlers/windows/menu_flyout_sub_item_handler.hpp"
 
@@ -15,10 +15,10 @@
 
 #include "winrt_strings.hpp"
 
-#include "mpapp/menu_flyout_sub_item.hpp"
+#include "mpapp/internal/basic_menu_flyout_sub_item.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -52,24 +52,23 @@ void menu_flyout_sub_item_handler<platform::windows>::apply_items(const std::vec
     } catch (...) {}
 }
 
-void menu_flyout_sub_item_handler<platform::windows>::map_text(menu_flyout_sub_item& s) {
+void menu_flyout_sub_item_handler<platform::windows>::map_text(basic_menu_flyout_sub_item& s) {
     apply_text(s.text.get());
     s.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void menu_flyout_sub_item_handler<platform::windows>::map_items(menu_flyout_sub_item& s) {
+void menu_flyout_sub_item_handler<platform::windows>::map_items(basic_menu_flyout_sub_item& s) {
     apply_items(s.items.get());
     s.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_menu_flyout_sub_item(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::menu_flyout_sub_item*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_menu_flyout_sub_item*>(v); s && s->has_handler()) {
         return s->handler().native();
     }
     return nullptr;

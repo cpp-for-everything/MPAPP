@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0003 — WinUI 3 button spike.
+// Part of MPAPP. T-0003 — WinUI 3 basic_button spike.
 //
-// Implementation of `button_handler<platform::windows>` against C++/WinRT
-// WinUI 3. The handler:
+// Implementation of `internal::button_handler<platform::windows>` against
+// C++/WinRT WinUI 3. The handler:
 //   1. Constructs a native `Microsoft.UI.Xaml.Controls.Button`.
 //   2. `map_text` pushes the current `text` value into `Content` and
 //      subscribes a slot so future `text.set(...)` calls propagate.
@@ -27,11 +27,11 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 void button_handler<platform::windows>::apply_text(std::string_view text) {
     if (native_ != nullptr) {
-        native_.Content(winrt::box_value(detail::to_hstring_utf8(text)));
+        native_.Content(winrt::box_value(::mpapp::detail::to_hstring_utf8(text)));
     }
 }
 
@@ -52,13 +52,13 @@ button_handler<platform::windows>::~button_handler() {
     }
 }
 
-void button_handler<platform::windows>::map_text(button& b) {
+void button_handler<platform::windows>::map_text(basic_button& b) {
     apply_text(b.text.get());
     // signal::subscribe calls disconnect first, so this is idempotent.
     b.text.changed.subscribe(text_slot_, text_callback_);
 }
 
-void button_handler<platform::windows>::map_clicked(button& b) {
+void button_handler<platform::windows>::map_clicked(basic_button& b) {
     if (native_ == nullptr) {
         return;
     }
@@ -67,7 +67,7 @@ void button_handler<platform::windows>::map_clicked(button& b) {
         click_token_ = {};
     }
     // `b`'s address is stable for the handler's lifetime.
-    button* target = &b;
+    basic_button* target = &b;
     click_token_ = native_.Click([target](
         winrt::Windows::Foundation::IInspectable const&,
         winrt::Microsoft::UI::Xaml::RoutedEventArgs const&) {
@@ -75,20 +75,20 @@ void button_handler<platform::windows>::map_clicked(button& b) {
     });
 }
 
-} // namespace mpapp
+} // namespace mpapp::internal
 
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register button so the ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_button so the ADR-0013 fall-through
 // dispatch can find its native UIElement without the legacy dynamic_cast
-// chain in stack_layout/window/scroll_view/border/content_view handlers.
+// chain in basic_stack_layout/window/basic_scroll_view/border/basic_content_view handlers.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/button.hpp"
+#include "mpapp/internal/basic_button.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_button(::mpapp::view* v) {
-    if (auto* b = dynamic_cast<::mpapp::button*>(v); b && b->has_handler()) {
+    if (auto* b = dynamic_cast<::mpapp::internal::basic_button*>(v); b && b->has_handler()) {
         return b->handler().native();
     }
     return nullptr;

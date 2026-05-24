@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — WinUI 3 window handler implementation.
+// Part of MPAPP. T-0011 — WinUI 3 basic_window handler implementation.
 
 #include "mpapp/handlers/windows/window_handler.hpp"
 
@@ -11,20 +11,20 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 #include "mpapp/border.hpp"
-#include "mpapp/box_view.hpp"
-#include "mpapp/date_picker.hpp"
-#include "mpapp/image.hpp"
-#include "mpapp/image_button.hpp"
-#include "mpapp/picker.hpp"
-#include "mpapp/time_picker.hpp"
-#include "mpapp/progress_bar.hpp"
-#include "mpapp/search_bar.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_date_picker.hpp"
+#include "mpapp/internal/basic_image.hpp"
+#include "mpapp/internal/basic_image_button.hpp"
+#include "mpapp/internal/basic_picker.hpp"
+#include "mpapp/internal/basic_time_picker.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/windows/activity_indicator_handler.hpp"
 #include "mpapp/handlers/windows/border_handler.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
@@ -46,17 +46,17 @@
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
 #include "mpapp/handlers/windows/stepper_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/scroll_view.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stack_layout.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_scroll_view.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -66,8 +66,8 @@ window_handler<platform::windows>::window_handler() {
 }
 
 window_handler<platform::windows>::~window_handler() {
-    // The `Closed` event handler captures `bound_` (a window*); if the
-    // user's window outlives the handler we'd be left with a dangling
+    // The `Closed` event handler captures `bound_` (a basic_window*); if the
+    // user's basic_window outlives the handler we'd be left with a dangling
     // pointer. Unregister explicitly.
     if (native_ != nullptr && closed_token_.value != 0) {
         try {
@@ -110,14 +110,14 @@ void window_handler<platform::windows>::apply_is_visible(bool v) {
         native_.Activate();
         was_activated_ = true;
     } else if (was_activated_) {
-        // Only call Close() if the window has been shown at least once.
+        // Only call Close() if the basic_window has been shown at least once.
         // Calling Close() on a never-activated mux::Window throws
         // 0x800710DD.
         native_.Close();
     }
 }
 
-void window_handler<platform::windows>::bind(window& w) {
+void window_handler<platform::windows>::bind(basic_window& w) {
     bound_ = &w;
 
     apply_title(w.title.get());
@@ -130,7 +130,7 @@ void window_handler<platform::windows>::bind(window& w) {
     w.is_visible.changed.subscribe(visible_slot_, visible_cb_);
 
     if (closed_token_.value == 0 && native_ != nullptr) {
-        window* target = &w;
+        basic_window* target = &w;
         closed_token_ = native_.Closed(
             [target](winrt::Windows::Foundation::IInspectable const&,
                      mux::WindowEventArgs const&) {
@@ -139,6 +139,5 @@ void window_handler<platform::windows>::bind(window& w) {
     }
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32

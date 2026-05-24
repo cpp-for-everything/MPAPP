@@ -1,71 +1,55 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Page.md
 //
-// `mpapp::page` — navigable content host. Mirrors MAUI's `ContentPage`:
-// a title-carrying wrapper around a single content view. Useful as the
-// `window.content` for a single-page app and as the leaf node for the
-// future `navigation_page`/`tabbed_page` containers.
+// `mpapp::page` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_page` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::page x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// Like `window`, `content` is a non-owning `view*` reference. The user
-// owns the view's lifetime.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_page x;
+//     mpapp::page_handler<mpapp::platform::mock> h;
+//     h.map_title(x);
 
 #ifndef MPAPP_PAGE_HPP
 #define MPAPP_PAGE_HPP
 
-#include <string>
-#include <string_view>
+#include "internal/basic_page.hpp"
 
-#include "control.hpp"
-#include "observable.hpp"
-#include "platform.hpp"
-#include "signal.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_page` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/page_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class page_handler;
-
-class page : public view {
+class page : public internal::basic_page {
 public:
-    page() = default;
-    ~page() override = default;
+    page() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_title(*this);
+        embedded_handler_.map_content(*this);
+        embedded_handler_.map_is_busy(*this);
+    }
 
     page(const page&)            = delete;
     page& operator=(const page&) = delete;
     page(page&&)                 = delete;
     page& operator=(page&&)      = delete;
 
-    // ----- Properties ----------------------------------------------------
-    Observable<std::string> title{""};
-    Observable<view*>       content{nullptr};
-    Observable<bool>        is_busy{false};
-
-    // ----- Lifecycle signals ---------------------------------------------
-    //
-    // `shell` fires `navigated_to` on the page that becomes current_content
-    // after a successful `go_to(uri)` (or typed go_to). It fires
-    // `navigated_from` on the previously-current page just before swapping
-    // it out. Both carry the relevant URI (the new route for navigated_to;
-    // the previous route for navigated_from).
-    //
-    // Mirrors MAUI's `OnNavigatedTo` / `OnNavigatedFrom` overrides. Pages
-    // typically subscribe in their constructor and use the URI to refresh
-    // query-string-dependent state or persist data on leave.
-    signal<const std::string& /*uri*/> navigated_to{};
-    signal<const std::string& /*previous_uri*/> navigated_from{};
-
-    // ----- Handler -------------------------------------------------------
-    page_handler<platform::current>&       handler() noexcept       { return *page_handler_; }
-    const page_handler<platform::current>& handler() const noexcept { return *page_handler_; }
-    bool                                   has_handler() const noexcept { return page_handler_ != nullptr; }
-    void                                   set_handler(page_handler<platform::current>& h) noexcept { page_handler_ = &h; }
-
 private:
-    // Distinct from `view::handler_` (the view_handler<>) — pages have a
-    // dedicated page_handler<> that drives title / navigation chrome.
-    page_handler<platform::current>* page_handler_ = nullptr;
+    internal::page_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::page_handler<>` (host-current) and
+// `mpapp::page_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using page_handler = internal::page_handler<Platform>;
 
 } // namespace mpapp
 

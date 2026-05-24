@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android time_picker handler implementation.
+// Part of MPAPP. Android basic_time_picker handler implementation.
 
 #include "mpapp/handlers/android/time_picker_handler.hpp"
 
@@ -7,7 +7,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -79,25 +79,23 @@ void time_picker_handler<platform::android>::apply_time(const time_value& v) {
     env->DeleteLocalRef(cls);
 }
 
-void time_picker_handler<platform::android>::map_time(time_picker& p) {
+void time_picker_handler<platform::android>::map_time(basic_time_picker& p) {
     apply_time(p.time.get());
     p.time.changed.subscribe(time_slot_, time_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register time_picker so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_time_picker so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/time_picker.hpp"
+#include "mpapp/internal/basic_time_picker.hpp"
 
 namespace {
 
 jobject dispatch_time_picker(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::time_picker*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_time_picker*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

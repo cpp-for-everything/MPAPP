@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — AppKit stack_layout handler implementation.
+// Part of MPAPP. T-0011 — AppKit basic_stack_layout handler implementation.
 
 #include "mpapp/handlers/macos/stack_layout_handler.hpp"
 
@@ -7,12 +7,12 @@
 
 #import <AppKit/AppKit.h>
 
-#include "mpapp/button.hpp"
+#include "mpapp/internal/basic_button.hpp"
 #include "mpapp/handlers/macos/button_handler.hpp"
 #include "mpapp/handlers/macos/label_handler.hpp"
-#include "mpapp/label.hpp"
+#include "mpapp/internal/basic_label.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -87,7 +87,7 @@ void stack_layout_handler<platform::macos>::apply_vertical_alignment(v_align a) 
     sv.alignment = to_native_align_y(a);
 }
 
-void stack_layout_handler<platform::macos>::bind(stack_layout& s) {
+void stack_layout_handler<platform::macos>::bind(basic_stack_layout& s) {
     bound_ = &s;
 
     apply_orientation(s.stack_orientation.get());
@@ -116,11 +116,11 @@ void stack_layout_handler<platform::macos>::add_child(view& child) {
     if (!native_) return;
     NSStackView* sv = (__bridge NSStackView*)native_;
     NSView* native_child = nil;
-    if (auto* b = dynamic_cast<button*>(&child); b && b->has_handler()) {
+    if (auto* b = dynamic_cast<basic_button*>(&child); b && b->has_handler()) {
         native_child = (__bridge NSView*)b->handler().native();
-    } else if (auto* l = dynamic_cast<label*>(&child); l && l->has_handler()) {
+    } else if (auto* l = dynamic_cast<basic_label*>(&child); l && l->has_handler()) {
         native_child = (__bridge NSView*)l->handler().native();
-    } else if (auto* sl = dynamic_cast<stack_layout*>(&child); sl && sl->has_handler()) {
+    } else if (auto* sl = dynamic_cast<basic_stack_layout*>(&child); sl && sl->has_handler()) {
         native_child = (__bridge NSView*)sl->handler().native();
     }
     if (native_child) {
@@ -128,6 +128,5 @@ void stack_layout_handler<platform::macos>::add_child(view& child) {
     }
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __APPLE__ && !TARGET_OS_IPHONE

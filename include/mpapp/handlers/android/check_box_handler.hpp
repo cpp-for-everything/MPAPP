@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android check_box handler — wraps android.widget.CheckBox.
+// Part of MPAPP. Android basic_check_box handler — wraps android.widget.CheckBox.
 
 #ifndef MPAPP_HANDLERS_ANDROID_CHECK_BOX_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_CHECK_BOX_HANDLER_HPP
 
-#include "../../check_box.hpp"
+#include "../../internal/basic_check_box.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class check_box_handler<platform::android> {
@@ -25,7 +25,7 @@ public:
     check_box_handler(check_box_handler&&)                 = delete;
     check_box_handler& operator=(check_box_handler&&)      = delete;
 
-    void map_is_checked(check_box& c);
+    void map_is_checked(basic_check_box& c);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -46,7 +46,7 @@ private:
 
     jobject                  native_   = nullptr;
     jobject                  listener_ = nullptr;
-    check_box*               bound_    = nullptr;
+    basic_check_box*               bound_    = nullptr;
     bool                     suppress_echo_ = false;
     cb_t                     cb_{this};
     signal_slot<const bool&> slot_{};
@@ -54,7 +54,6 @@ private:
 
 void android_check_box_dispatch_checked_changed(check_box_handler<platform::android>* h, bool checked);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_CHECK_BOX_HANDLER_HPP

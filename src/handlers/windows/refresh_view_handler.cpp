@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 refresh_view handler implementation.
+// Part of MPAPP. WinUI 3 basic_refresh_view handler implementation.
 
 #include "mpapp/handlers/windows/refresh_view_handler.hpp"
 
@@ -19,7 +19,7 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxm  = ::winrt::Microsoft::UI::Xaml::Media;
@@ -100,22 +100,22 @@ void refresh_view_handler<platform::windows>::apply_refresh_color(const brush_re
     spinner_.Foreground(brush);
 }
 
-void refresh_view_handler<platform::windows>::map_content(refresh_view& r) {
+void refresh_view_handler<platform::windows>::map_content(basic_refresh_view& r) {
     apply_content(r.content.get());
     r.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void refresh_view_handler<platform::windows>::map_is_refreshing(refresh_view& r) {
+void refresh_view_handler<platform::windows>::map_is_refreshing(basic_refresh_view& r) {
     apply_is_refreshing(r.is_refreshing.get());
     r.is_refreshing.changed.subscribe(is_refreshing_slot_, is_refreshing_cb_);
 }
 
-void refresh_view_handler<platform::windows>::map_refresh_color(refresh_view& r) {
+void refresh_view_handler<platform::windows>::map_refresh_color(basic_refresh_view& r) {
     apply_refresh_color(r.refresh_color.get());
     r.refresh_color.changed.subscribe(refresh_color_slot_, refresh_color_cb_);
 }
 
-void refresh_view_handler<platform::windows>::bind_content(refresh_view& r, view& child) {
+void refresh_view_handler<platform::windows>::bind_content(basic_refresh_view& r, view& child) {
     r.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
@@ -124,7 +124,7 @@ void refresh_view_handler<platform::windows>::bind_content(refresh_view& r, view
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_refresh_view(::mpapp::view* v) {
-    if (auto* r = dynamic_cast<::mpapp::refresh_view*>(v); r && r->has_handler()) {
+    if (auto* r = dynamic_cast<::mpapp::internal::basic_refresh_view*>(v); r && r->has_handler()) {
         return r->handler().native();
     }
     return nullptr;
@@ -140,6 +140,5 @@ struct registrar {
 
 } // namespace
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32

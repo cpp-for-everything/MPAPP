@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::content_page` (M-04b).
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_content_page` (M-04b).
 
 #include <memory>
 #include <string>
@@ -22,7 +22,7 @@ class plain_view : public view {};
 
 TEST_CASE("content_page mock handler records initial property values on bind",
           "[mock][content_page]") {
-    content_page p;
+    internal::basic_content_page p;
     content_page_handler<platform::mock> h;
 
     h.map_title(p);
@@ -40,7 +40,7 @@ TEST_CASE("content_page mock handler records initial property values on bind",
 
 TEST_CASE("content_page mock handler tracks title + content + padding changes",
           "[mock][content_page]") {
-    content_page p;
+    internal::basic_content_page p;
     content_page_handler<platform::mock> h;
 
     h.map_title(p);
@@ -64,7 +64,7 @@ TEST_CASE("content_page mock handler tracks title + content + padding changes",
 
 TEST_CASE("content_page mock handler records single call per property change",
           "[mock][content_page]") {
-    content_page p;
+    internal::basic_content_page p;
     content_page_handler<platform::mock> h;
 
     h.map_padding(p);

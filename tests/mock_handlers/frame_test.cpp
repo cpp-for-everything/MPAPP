@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Frame.md
 //
-// Mock-handler tests for the **deprecated** `mpapp::frame` control.
+// Mock-handler tests for the **deprecated** `mpapp::internal::basic_frame` control.
 // (CLAUDE Rule 6 / ADR-0008.) The deprecation diagnostic is suppressed
 // locally so the test target compiles with `-Werror`. New code should
-// use `mpapp::border` — Frame is retained for one-to-one XAML
+// use `mpapp::internal::basic_border` — Frame is retained for one-to-one XAML
 // compatibility with Forms / early MAUI codebases.
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -33,7 +33,7 @@ class plain_view : public view {};
 
 TEST_CASE("frame mock handler records initial values on bind",
           "[mock][frame][deprecated]") {
-    frame f;
+    internal::basic_frame f;
     frame_handler<platform::mock> h;
 
     h.map_has_shadow(f);
@@ -48,7 +48,7 @@ TEST_CASE("frame mock handler records initial values on bind",
 
 TEST_CASE("frame mock handler records single call per property change",
           "[mock][frame]") {
-    frame f;
+    internal::basic_frame f;
     frame_handler<platform::mock> h;
 
     h.map_has_shadow(f);
@@ -68,7 +68,7 @@ TEST_CASE("frame mock handler records single call per property change",
 
 TEST_CASE("frame mock handler tracks content presence",
           "[mock][frame]") {
-    frame f;
+    internal::basic_frame f;
     frame_handler<platform::mock> h;
 
     h.map_content(f);
@@ -82,7 +82,7 @@ TEST_CASE("frame mock handler tracks content presence",
 
 TEST_CASE("frame default padding mirrors MAUI's 20-dip default",
           "[mock][frame][padding]") {
-    frame f;
+    internal::basic_frame f;
     frame_handler<platform::mock> h;
 
     h.map_padding(f);

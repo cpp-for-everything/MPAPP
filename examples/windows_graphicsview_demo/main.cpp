@@ -14,7 +14,6 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/graphics_view_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
@@ -36,9 +35,6 @@ public:
         gv_.draw_requested.subscribe(req_slot_, req_cb_);
         gv_.draw_count.changed.subscribe(count_slot_, count_cb_);
 
-        invalidate_btn_.set_handler(invalidate_btn_handler_);
-        invalidate_btn_handler_.map_text(invalidate_btn_);
-        invalidate_btn_handler_.map_clicked(invalidate_btn_);
         invalidate_btn_.text = "gv.invalidate()";
         invalidate_btn_.clicked.subscribe(invalidate_slot_, invalidate_cb_);
 
@@ -91,7 +87,6 @@ private:
     mpapp::graphics_view_handler<wp>     gv_handler_{};
 
     mpapp::button                        invalidate_btn_{};
-    mpapp::button_handler<wp>            invalidate_btn_handler_{};
 
     mpapp::label                         status_label_{};
     mpapp::label_handler<wp>             status_label_handler_{};

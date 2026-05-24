@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 time_picker handler — wraps a horizontal `GtkBox`
+// Part of MPAPP. GTK4 basic_time_picker handler — wraps a horizontal `GtkBox`
 // containing two `GtkSpinButton`s (hour 0..23, minute 0..59). GTK4 has no
-// dedicated time-picker widget; the spin pair is the conventional
+// dedicated time-basic_picker widget; the spin pair is the conventional
 // alternative.
 
 #ifndef MPAPP_HANDLERS_LINUX_TIME_PICKER_HANDLER_HPP
@@ -9,11 +9,11 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../time_picker.hpp"
+#include "../../internal/basic_time_picker.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class time_picker_handler<platform::linux_> {
@@ -23,8 +23,8 @@ public:
     time_picker_handler(const time_picker_handler&)            = delete;
     time_picker_handler& operator=(const time_picker_handler&) = delete;
 
-    void map_time(time_picker& p);
-    void map_format(time_picker& /*p*/) { /* GTK4 spin-pair has no format slot. */ }
+    void map_time(basic_time_picker& p);
+    void map_format(basic_time_picker& /*p*/) { /* GTK4 spin-pair has no format slot. */ }
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -42,7 +42,6 @@ private:
     signal_slot<const time_value&>     time_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_TIME_PICKER_HANDLER_HPP

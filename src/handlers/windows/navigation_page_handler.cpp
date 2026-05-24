@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 navigation_page handler implementation. Per ADR-0014, the
+// WinUI 3 basic_navigation_page handler implementation. Per ADR-0014, the
 // `page_stack` engine fires page_did_appear when the top of the stack
 // changes; we subscribe and swap the content host's child to the new
 // top, resolved via the ADR-0013 dispatch registry.
@@ -19,9 +19,9 @@
 
 #include "winrt_strings.hpp"
 
-#include "mpapp/page.hpp"
+#include "mpapp/internal/basic_page.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux  = ::winrt::Microsoft::UI::Xaml;
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -49,7 +49,7 @@ navigation_page_handler<platform::windows>::navigation_page_handler() {
         native_.RowDefinitions().Append(r1);
     }
 
-    // Bar: horizontal stack of [back button, title]
+    // Bar: horizontal stack of [back basic_button, title]
     bar_.Orientation(muxc::Orientation::Horizontal);
     back_button_.Content(winrt::box_value(detail::to_hstring_utf8(std::string{"<"})));
     back_button_.Visibility(mux::Visibility::Collapsed); // hidden when depth <= 1
@@ -78,8 +78,8 @@ void navigation_page_handler<platform::windows>::apply_top(view* new_top) {
     } else {
         content_host_.Content(nullptr);
     }
-    // Pull title from the new top page.
-    if (auto* p = dynamic_cast<page*>(new_top); p != nullptr) {
+    // Pull title from the new top basic_page.
+    if (auto* p = dynamic_cast<basic_page*>(new_top); p != nullptr) {
         apply_title(p->title.get());
     }
 }
@@ -94,7 +94,7 @@ void navigation_page_handler<platform::windows>::apply_back_visibility(std::size
     back_button_.Visibility(depth > 1 ? mux::Visibility::Visible : mux::Visibility::Collapsed);
 }
 
-void navigation_page_handler<platform::windows>::map_stack(navigation_page& np) {
+void navigation_page_handler<platform::windows>::map_stack(basic_navigation_page& np) {
     bound_ = &np;
 
     // Seed: render whatever is currently on top.
@@ -106,11 +106,11 @@ void navigation_page_handler<platform::windows>::map_stack(navigation_page& np) 
     // can resolve the new top.
     np.stack().page_did_appear.subscribe(did_appear_slot_, did_appear_cb_);
 
-    // Track depth changes for the back-button visibility.
+    // Track depth changes for the back-basic_button visibility.
     np.stack_depth.changed.subscribe(depth_slot_, depth_cb_);
 
-    // Wire the back button to pop().
-    navigation_page* npp = &np;
+    // Wire the back basic_button to pop().
+    basic_navigation_page* npp = &np;
     back_button_.Click([npp](
         winrt::Windows::Foundation::IInspectable const&,
         winrt::Microsoft::UI::Xaml::RoutedEventArgs const&) {
@@ -118,16 +118,15 @@ void navigation_page_handler<platform::windows>::map_stack(navigation_page& np) 
     });
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/navigation_page.hpp"
+#include "mpapp/internal/basic_navigation_page.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_navigation_page(::mpapp::view* v) {
-    if (auto* n = dynamic_cast<::mpapp::navigation_page*>(v); n && n->has_np_handler()) {
+    if (auto* n = dynamic_cast<::mpapp::internal::basic_navigation_page*>(v); n && n->has_np_handler()) {
         return n->np_handler().native();
     }
     return nullptr;

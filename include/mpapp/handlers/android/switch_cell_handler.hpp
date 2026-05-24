@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android switch_cell handler — horizontal LinearLayout: TextView on
+// Android basic_switch_cell handler — horizontal LinearLayout: TextView on
 // the left (weight=1), android.widget.Switch on the right. Reuses
-// MppCheckedChangeListener with kind=4 (switch_cell) to bounce user
+// MppCheckedChangeListener with kind=4 (basic_switch_cell) to bounce user
 // flips back into the cell's `on` Observable through the shared
-// compound-button dispatcher.
+// compound-basic_button dispatcher.
 
 #ifndef MPAPP_HANDLERS_ANDROID_SWITCH_CELL_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_SWITCH_CELL_HANDLER_HPP
@@ -12,13 +12,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../switch_cell.hpp"
+#include "../../internal/basic_switch_cell.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class switch_cell_handler<platform::android> {
@@ -31,8 +31,8 @@ public:
     switch_cell_handler(switch_cell_handler&&)                 = delete;
     switch_cell_handler& operator=(switch_cell_handler&&)      = delete;
 
-    void map_text(switch_cell& c);
-    void map_on(switch_cell& c);
+    void map_text(basic_switch_cell& c);
+    void map_on(basic_switch_cell& c);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -59,7 +59,7 @@ private:
     jobject       switch_obj_  = nullptr;  // global ref Switch
     jobject       listener_    = nullptr;  // global ref MppCheckedChangeListener
     bool          suppress_echo_ = false;
-    switch_cell*  bound_         = nullptr;
+    basic_switch_cell*  bound_         = nullptr;
 
     text_cb_t                       text_cb_{this};
     on_cb_t                         on_cb_{this};
@@ -70,7 +70,6 @@ private:
 void android_switch_cell_dispatch_checked_changed(switch_cell_handler<platform::android>* h,
                                                   bool checked);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SWITCH_CELL_HANDLER_HPP

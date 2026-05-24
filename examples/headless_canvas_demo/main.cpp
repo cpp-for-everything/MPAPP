@@ -33,7 +33,11 @@
 
 #include "mpapp/detail/graphics/canvas.hpp"
 #include "mpapp/detail/graphics/shape_renderer.hpp"
-#include "mpapp/shape_view.hpp"
+// Headless demo links only mpapp-core (not the per-platform handler
+// library), so use the surface `internal::basic_shape_view` directly
+// rather than the auto-binding `mpapp::shape_view` wrapper — the
+// wrapper would force a link against the platform handler symbols.
+#include "mpapp/internal/basic_shape_view.hpp"
 
 using namespace mpapp;
 using namespace mpapp::detail::graphics;
@@ -89,7 +93,7 @@ void render_shape_kind(const std::string& out_dir,
                        const std::string& data,
                        const std::string& filename,
                        int w = 240, int h = 160) {
-    shape_view sv;
+    internal::basic_shape_view sv;
     sv.kind             = kind;
     sv.data             = data;
     sv.fill             = "#264653";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android graphics_view handler — wraps an android.widget.ImageView
+// Android basic_graphics_view handler — wraps an android.widget.ImageView
 // whose ImageBitmap is repainted from the user's `drawable` callback
 // via the ADR-0015 canvas facade. Each paint cycle:
 //
@@ -14,7 +14,7 @@
 //   4. AndroidBitmap_unlockPixels + ImageView.setImageBitmap.
 //
 // The byte swap is the cost of the format difference. For typical
-// graphics_view sizes (a few hundred px square) it's negligible
+// basic_graphics_view sizes (a few hundred px square) it's negligible
 // relative to the actual draw cost.
 
 #ifndef MPAPP_HANDLERS_ANDROID_GRAPHICS_VIEW_HANDLER_HPP
@@ -22,7 +22,7 @@
 
 #include <cstddef>
 
-#include "../../graphics_view.hpp"
+#include "../../internal/basic_graphics_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -30,7 +30,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class graphics_view_handler<platform::android> {
@@ -43,9 +43,9 @@ public:
     graphics_view_handler(graphics_view_handler&&)                 = delete;
     graphics_view_handler& operator=(graphics_view_handler&&)      = delete;
 
-    void map_size(graphics_view& gv);
-    void map_draw_count(graphics_view& gv);
-    void map_drawable(graphics_view& gv);
+    void map_size(basic_graphics_view& gv);
+    void map_draw_count(basic_graphics_view& gv);
+    void map_drawable(basic_graphics_view& gv);
 
     jobject native() const noexcept { return native_; }
 
@@ -69,14 +69,14 @@ private:
     };
     struct drawable_cb_t {
         graphics_view_handler<platform::android>* self;
-        void operator()(const graphics_view::draw_callback_t& /*f*/) const { self->repaint(); }
+        void operator()(const basic_graphics_view::draw_callback_t& /*f*/) const { self->repaint(); }
     };
 
     jobject        native_   = nullptr;   // ImageView
     jobject        bitmap_   = nullptr;   // android.graphics.Bitmap (global ref)
     int            bitmap_w_ = 0;
     int            bitmap_h_ = 0;
-    graphics_view* bound_    = nullptr;
+    basic_graphics_view* bound_    = nullptr;
 
     w_cb_t        w_cb_{this};
     h_cb_t        h_cb_{this};
@@ -85,10 +85,9 @@ private:
     signal_slot<const int&>                            w_slot_{};
     signal_slot<const int&>                            h_slot_{};
     signal_slot<const std::size_t&>                    count_slot_{};
-    signal_slot<const graphics_view::draw_callback_t&> drawable_slot_{};
+    signal_slot<const basic_graphics_view::draw_callback_t&> drawable_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_GRAPHICS_VIEW_HANDLER_HPP

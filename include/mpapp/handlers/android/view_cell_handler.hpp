@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android view_cell handler — FrameLayout host with row padding; child
+// Android basic_view_cell handler — FrameLayout host with row padding; child
 // resolved via ADR-0013 dispatch.
 
 #ifndef MPAPP_HANDLERS_ANDROID_VIEW_CELL_HANDLER_HPP
@@ -7,13 +7,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../view_cell.hpp"
+#include "../../internal/basic_view_cell.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class view_cell_handler<platform::android> {
@@ -26,7 +26,7 @@ public:
     view_cell_handler(view_cell_handler&&)                 = delete;
     view_cell_handler& operator=(view_cell_handler&&)      = delete;
 
-    void map_content(view_cell& c);
+    void map_content(basic_view_cell& c);
 
     jobject native() const noexcept { return native_; }
 
@@ -44,7 +44,6 @@ private:
     signal_slot<view* const&> content_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_VIEW_CELL_HANDLER_HPP

@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::radio_button`.
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_radio_button`.
 
 #include <string>
 #include <vector>
@@ -17,7 +17,7 @@ using radio_button_mock = mpapp::radio_button_handler<mpapp::platform::mock>;
 
 TEST_CASE("radio_button mock handler logs initial checked and group",
           "[mock][radio_button]") {
-    mpapp::radio_button r;
+    mpapp::internal::basic_radio_button r;
     radio_button_mock   h;
 
     r.group_name = "size";
@@ -33,7 +33,7 @@ TEST_CASE("radio_button mock handler logs initial checked and group",
 
 TEST_CASE("radio_button mock handler fires once per checked change",
           "[mock][radio_button]") {
-    mpapp::radio_button r;
+    mpapp::internal::basic_radio_button r;
     radio_button_mock   h;
 
     h.map_is_checked(r);
@@ -51,7 +51,7 @@ TEST_CASE("radio_button mock handler fires once per checked change",
 
 TEST_CASE("radio_button mock handler tracks group reassignment",
           "[mock][radio_button]") {
-    mpapp::radio_button r;
+    mpapp::internal::basic_radio_button r;
     radio_button_mock   h;
 
     h.map_group_name(r);

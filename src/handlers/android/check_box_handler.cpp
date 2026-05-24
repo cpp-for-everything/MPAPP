@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android check_box handler implementation.
+// Part of MPAPP. Android basic_check_box handler implementation.
 
 #include "mpapp/handlers/android/check_box_handler.hpp"
 
@@ -7,7 +7,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -90,8 +90,8 @@ check_box_handler<platform::android>::check_box_handler() {
     if (env != nullptr) {
         native_ = make_check_box(env, detail::get_activity());
         if (native_ != nullptr) {
-            // Default to no text label — user code controls the
-            // label content via a sibling mpapp::label if needed.
+            // Default to no text basic_label — user code controls the
+            // basic_label content via a sibling mpapp::basic_label if needed.
             check_box_set_text(env, native_, "");
         }
     }
@@ -113,7 +113,7 @@ void check_box_handler<platform::android>::apply_is_checked(bool v) {
     suppress_echo_ = false;
 }
 
-void check_box_handler<platform::android>::map_is_checked(check_box& c) {
+void check_box_handler<platform::android>::map_is_checked(basic_check_box& c) {
     bound_ = &c;
     apply_is_checked(c.is_checked.get());
     c.is_checked.changed.subscribe(slot_, cb_);
@@ -138,20 +138,18 @@ void android_check_box_dispatch_checked_changed(check_box_handler<platform::andr
     if (h != nullptr) h->on_native_checked_changed(checked);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register check_box so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_check_box so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 
 namespace {
 
 jobject dispatch_check_box(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::check_box*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_check_box*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

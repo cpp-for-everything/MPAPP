@@ -9,13 +9,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../switch_.hpp"
+#include "../../internal/basic_switch_.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class switch_handler<platform::android> {
@@ -28,7 +28,7 @@ public:
     switch_handler(switch_handler&&)                 = delete;
     switch_handler& operator=(switch_handler&&)      = delete;
 
-    void map_is_on(switch_& s);
+    void map_is_on(basic_switch_& s);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -45,7 +45,7 @@ private:
 
     jobject                  native_   = nullptr;  // global ref to Switch
     jobject                  listener_ = nullptr;  // global ref to MppCheckedChangeListener
-    switch_*                 bound_    = nullptr;
+    basic_switch_*                 bound_    = nullptr;
     bool                     suppress_echo_ = false;
     is_on_callback           is_on_cb_{this};
     signal_slot<const bool&> is_on_slot_{};
@@ -53,7 +53,6 @@ private:
 
 void android_switch_dispatch_checked_changed(switch_handler<platform::android>* h, bool checked);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SWITCH_HANDLER_HPP

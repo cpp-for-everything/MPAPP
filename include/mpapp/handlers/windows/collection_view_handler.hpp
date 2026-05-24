@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 collection_view handler. Same wrap-platform-recycler shape
-// as list_view per ADR-0020. Honors:
+// WinUI 3 basic_collection_view handler. Same wrap-platform-recycler shape
+// as basic_list_view per ADR-0020. Honors:
 //   * selection_mode (None/Single/Multiple)
 //   * layout (vertical_list = mux::ListView,
 //             vertical_grid = mux::GridView)
@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "../../collection_view.hpp"
+#include "../../internal/basic_collection_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -25,7 +25,7 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class collection_view_handler<platform::windows> {
@@ -38,11 +38,11 @@ public:
     collection_view_handler(collection_view_handler&&)                 = delete;
     collection_view_handler& operator=(collection_view_handler&&)      = delete;
 
-    void map_items_source(collection_view& cv);
-    void map_typed_items(collection_view& cv);
-    void map_selected_index(collection_view& cv);
-    void map_selection_mode(collection_view& cv);
-    void map_layout(collection_view& cv);
+    void map_items_source(basic_collection_view& cv);
+    void map_typed_items(basic_collection_view& cv);
+    void map_selected_index(basic_collection_view& cv);
+    void map_selection_mode(basic_collection_view& cv);
+    void map_layout(basic_collection_view& cv);
 
     winrt::Microsoft::UI::Xaml::Controls::Border&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Border& native() const noexcept { return native_; }
@@ -84,7 +84,7 @@ private:
     winrt::Microsoft::UI::Xaml::Controls::Border       native_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::ListViewBase inner_{nullptr};
     winrt::event_token                                 selection_token_{};
-    collection_view* bound_ = nullptr;
+    basic_collection_view* bound_ = nullptr;
     bool             suppress_selection_event_ = false;
 
     items_cb_t        items_cb_{this};
@@ -101,7 +101,6 @@ private:
     signal_slot<>                                          materialized_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_COLLECTION_VIEW_HANDLER_HPP

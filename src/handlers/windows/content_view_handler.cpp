@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 content_view handler implementation.
+// WinUI 3 basic_content_view handler implementation.
 
 #include "mpapp/handlers/windows/content_view_handler.hpp"
 
@@ -12,7 +12,7 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -37,27 +37,26 @@ void content_view_handler<platform::windows>::apply_content(const std::shared_pt
     }
 }
 
-void content_view_handler<platform::windows>::map_content(content_view& c) {
+void content_view_handler<platform::windows>::map_content(basic_content_view& c) {
     apply_content(c.content.get());
     c.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void content_view_handler<platform::windows>::bind_content(content_view& c, view& child) {
+void content_view_handler<platform::windows>::bind_content(basic_content_view& c, view& child) {
     c.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 // ContentView can host any widget AND can be hosted as a widget. The
-// self-registrar lets parent containers (stack_layout, scroll_view, etc.)
-// place a content_view as their child via the same ADR-0013 path.
-#include "mpapp/content_view.hpp"
+// self-registrar lets parent containers (basic_stack_layout, basic_scroll_view, etc.)
+// place a basic_content_view as their child via the same ADR-0013 path.
+#include "mpapp/internal/basic_content_view.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_content_view(::mpapp::view* v) {
-    if (auto* cv = dynamic_cast<::mpapp::content_view*>(v); cv && cv->has_handler()) {
+    if (auto* cv = dynamic_cast<::mpapp::internal::basic_content_view*>(v); cv && cv->has_handler()) {
         return cv->handler().native();
     }
     return nullptr;

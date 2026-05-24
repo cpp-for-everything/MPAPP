@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 image_cell handler implementation.
+// WinUI 3 basic_image_cell handler implementation.
 
 #include "mpapp/handlers/windows/image_cell_handler.hpp"
 
@@ -17,7 +17,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux   = ::winrt::Microsoft::UI::Xaml;
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -33,7 +33,7 @@ image_cell_handler<platform::windows>::image_cell_handler() {
     text_block_   = muxc::TextBlock{};
     detail_block_ = muxc::TextBlock{};
 
-    // Two-column horizontal layout: image (auto) + label stack (star).
+    // Two-column horizontal layout: basic_image (auto) + basic_label stack (star).
     muxc::ColumnDefinition col_img{};
     col_img.Width(mux::GridLengthHelper::FromValueAndType(1.0, mux::GridUnitType::Auto));
     muxc::ColumnDefinition col_text{};
@@ -41,7 +41,7 @@ image_cell_handler<platform::windows>::image_cell_handler() {
     grid_.ColumnDefinitions().Append(col_img);
     grid_.ColumnDefinitions().Append(col_text);
 
-    // Small leading icon-size image; trimmed for cell rows.
+    // Small leading icon-size basic_image; trimmed for cell rows.
     image_.Width(40.0);
     image_.Height(40.0);
     image_.Stretch(muxm::Stretch::Uniform);
@@ -93,28 +93,27 @@ void image_cell_handler<platform::windows>::apply_image_uri(const std::string& v
     } catch (...) {}
 }
 
-void image_cell_handler<platform::windows>::map_text(image_cell& c) {
+void image_cell_handler<platform::windows>::map_text(basic_image_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void image_cell_handler<platform::windows>::map_detail(image_cell& c) {
+void image_cell_handler<platform::windows>::map_detail(basic_image_cell& c) {
     apply_detail(c.detail.get());
     c.detail.changed.subscribe(detail_slot_, detail_cb_);
 }
 
-void image_cell_handler<platform::windows>::map_image_uri(image_cell& c) {
+void image_cell_handler<platform::windows>::map_image_uri(basic_image_cell& c) {
     apply_image_uri(c.image_uri.get());
     c.image_uri.changed.subscribe(uri_slot_, uri_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_image_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::image_cell*>(v); c && c->has_ic_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_image_cell*>(v); c && c->has_ic_handler()) {
         return c->ic_handler().native();
     }
     return nullptr;

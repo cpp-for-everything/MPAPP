@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — GTK4 label handler.
+// Part of MPAPP. T-0011 — GTK4 basic_label handler.
 
 #ifndef MPAPP_HANDLERS_LINUX_LABEL_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_LABEL_HANDLER_HPP
 
-#include "../../label.hpp"
+#include "../../internal/basic_label.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class label_handler<platform::linux_> {
@@ -25,7 +25,7 @@ public:
     label_handler(label_handler&&)                 = delete;
     label_handler& operator=(label_handler&&)      = delete;
 
-    void map_text(label& l);
+    void map_text(basic_label& l);
 
     // GtkWidget* (GtkLabel), type-erased.
     void*       native() noexcept       { return native_; }
@@ -44,7 +44,6 @@ private:
     signal_slot<const std::string&>  text_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_LABEL_HANDLER_HPP

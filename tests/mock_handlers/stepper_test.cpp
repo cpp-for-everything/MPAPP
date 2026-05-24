@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::stepper`.
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_stepper`.
 
 #include <string>
 #include <vector>
@@ -17,7 +17,7 @@ using stepper_mock = mpapp::stepper_handler<mpapp::platform::mock>;
 
 TEST_CASE("stepper mock handler logs initial value and interval",
           "[mock][stepper]") {
-    mpapp::stepper s;
+    mpapp::internal::basic_stepper s;
     stepper_mock   h;
 
     s.interval = 0.5;
@@ -34,7 +34,7 @@ TEST_CASE("stepper mock handler logs initial value and interval",
 
 TEST_CASE("stepper mock handler fires once per real value change",
           "[mock][stepper]") {
-    mpapp::stepper s;
+    mpapp::internal::basic_stepper s;
     stepper_mock   h;
 
     h.map_value(s);
@@ -52,7 +52,7 @@ TEST_CASE("stepper mock handler fires once per real value change",
 
 TEST_CASE("stepper mock handler tracks interval changes",
           "[mock][stepper]") {
-    mpapp::stepper s;
+    mpapp::internal::basic_stepper s;
     stepper_mock   h;
 
     h.map_interval(s);

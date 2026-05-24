@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::list_view`.
+// Mock-handler tests for `mpapp::internal::basic_list_view`.
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ using namespace mpapp;
 
 TEST_CASE("list_view mock records initial values on bind",
           "[mock][list_view]") {
-    list_view lv;
+    internal::basic_list_view lv;
     list_view_handler<platform::mock> h;
     h.map_items_source(lv);
     h.map_selected_index(lv);
@@ -27,7 +27,7 @@ TEST_CASE("list_view mock records initial values on bind",
 
 TEST_CASE("list_view records collection + selection changes",
           "[mock][list_view]") {
-    list_view lv;
+    internal::basic_list_view lv;
     list_view_handler<platform::mock> h;
     h.map_items_source(lv);
     h.map_selected_index(lv);

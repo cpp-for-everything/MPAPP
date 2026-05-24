@@ -12,10 +12,10 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../templated_view.hpp"
+#include "../../internal/basic_templated_view.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class templated_view_handler<platform::mock>
@@ -23,12 +23,12 @@ class templated_view_handler<platform::mock>
 public:
     templated_view_handler() = default;
 
-    void map_content(templated_view& t) {
+    void map_content(basic_templated_view& t) {
         record("content", t.content.get() ? std::string("set") : std::string("null"));
         t.content.changed.subscribe(content_slot_, content_cb_);
     }
 
-    void map_template_id(templated_view& t) {
+    void map_template_id(basic_templated_view& t) {
         record("template_id", t.template_id.get());
         t.template_id.changed.subscribe(template_id_slot_, template_id_cb_);
     }
@@ -53,6 +53,5 @@ private:
     signal_slot<const std::string&>           template_id_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_TEMPLATED_VIEW_HANDLER_HPP

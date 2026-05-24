@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 follow-up — GTK4 entry handler.
+// Part of MPAPP. T-0011 follow-up — GTK4 basic_entry handler.
 
 #ifndef MPAPP_HANDLERS_LINUX_ENTRY_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_ENTRY_HANDLER_HPP
 
-#include "../../entry.hpp"
+#include "../../internal/basic_entry.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class entry_handler<platform::linux_> {
@@ -25,9 +25,9 @@ public:
     entry_handler(entry_handler&&)                 = delete;
     entry_handler& operator=(entry_handler&&)      = delete;
 
-    void map_text(entry& e);
-    void map_placeholder(entry& e);
-    void map_is_read_only(entry& e);
+    void map_text(basic_entry& e);
+    void map_placeholder(basic_entry& e);
+    void map_is_read_only(basic_entry& e);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -61,7 +61,6 @@ private:
     signal_slot<const bool&>         readonly_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_ENTRY_HANDLER_HPP

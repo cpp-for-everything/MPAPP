@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 tabbed_view handler.
+// Part of MPAPP. GTK4 basic_tabbed_view handler.
 //
-// Wraps a `GtkNotebook`. Each entry in `tab_titles` becomes a page
-// whose tab is a `GtkLabel` with that text and whose page body is a
-// trivial empty `GtkBox` placeholder (real page content lands when the
-// `TabbedPage` page-level wiring arrives). `selected_index` maps
+// Wraps a `GtkNotebook`. Each basic_entry in `tab_titles` becomes a basic_page
+// whose tab is a `GtkLabel` with that text and whose basic_page body is a
+// trivial empty `GtkBox` placeholder (real basic_page content lands when the
+// `TabbedPage` basic_page-level wiring arrives). `selected_index` maps
 // directly to `gtk_notebook_set_current_page` (with -1 treated as "no
 // selection" by clamping to no-op).
 //
@@ -21,11 +21,11 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../tabbed_view.hpp"
+#include "../../internal/basic_tabbed_view.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class tabbed_view_handler<platform::linux_> {
@@ -38,8 +38,8 @@ public:
     tabbed_view_handler(tabbed_view_handler&&)                 = delete;
     tabbed_view_handler& operator=(tabbed_view_handler&&)      = delete;
 
-    void map_tab_titles(tabbed_view& t);
-    void map_selected_index(tabbed_view& t);
+    void map_tab_titles(basic_tabbed_view& t);
+    void map_selected_index(basic_tabbed_view& t);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -60,7 +60,6 @@ private:
     signal_slot<const int&>                      selected_index_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_TABBED_VIEW_HANDLER_HPP

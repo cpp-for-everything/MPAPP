@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 progress_bar handler implementation.
+// Part of MPAPP. GTK4 basic_progress_bar handler implementation.
 
 #include "mpapp/handlers/linux/progress_bar_handler.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -85,8 +85,8 @@ void progress_bar_handler<platform::linux_>::reload_css() {
     // GtkProgressBar: the `progress` subnode is the filled portion;
     // the `trough` subnode is the unfilled track.
     std::snprintf(buf, sizeof(buf),
-        ".%s > trough > progress { background-color: rgba(%d,%d,%d,%.3f); background-image: none; } "
-        ".%s > trough { background-color: rgba(%d,%d,%d,%.3f); background-image: none; }",
+        ".%s > trough > progress { background-color: rgba(%d,%d,%d,%.3f); background-basic_image: none; } "
+        ".%s > trough { background-color: rgba(%d,%d,%d,%.3f); background-basic_image: none; }",
         class_name_.c_str(),
         to255(fg.r), to255(fg.g), to255(fg.b), fg.a,
         class_name_.c_str(),
@@ -104,33 +104,31 @@ void progress_bar_handler<platform::linux_>::apply_progress(double v) {
 void progress_bar_handler<platform::linux_>::apply_color(const brush_ref& b)            { cached_color_ = b; reload_css(); }
 void progress_bar_handler<platform::linux_>::apply_background_color(const brush_ref& b) { cached_bg_    = b; reload_css(); }
 
-void progress_bar_handler<platform::linux_>::map_progress(progress_bar& p) {
+void progress_bar_handler<platform::linux_>::map_progress(basic_progress_bar& p) {
     apply_progress(p.progress.get());
     p.progress.changed.subscribe(progress_slot_, progress_cb_);
 }
-void progress_bar_handler<platform::linux_>::map_color(progress_bar& p) {
+void progress_bar_handler<platform::linux_>::map_color(basic_progress_bar& p) {
     apply_color(p.color.get());
     p.color.changed.subscribe(color_slot_, color_cb_);
 }
-void progress_bar_handler<platform::linux_>::map_background_color(progress_bar& p) {
+void progress_bar_handler<platform::linux_>::map_background_color(basic_progress_bar& p) {
     apply_background_color(p.background_color.get());
     p.background_color.changed.subscribe(bg_slot_, bg_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register progress_bar so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_progress_bar so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/progress_bar.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
 
 namespace {
 
 GtkWidget* dispatch_progress_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::progress_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_progress_bar*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

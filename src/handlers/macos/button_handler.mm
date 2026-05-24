@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — AppKit button handler implementation.
+// Part of MPAPP. T-0011 — AppKit basic_button handler implementation.
 
 #include "mpapp/handlers/macos/button_handler.hpp"
 
@@ -8,7 +8,7 @@
 #import <AppKit/AppKit.h>
 
 @interface MppButtonTarget : NSObject
-@property (nonatomic, assign) mpapp::button* boundButton;
+@property (nonatomic, assign) mpapp::internal::basic_button* boundButton;
 - (void)onClicked:(id)sender;
 @end
 
@@ -21,7 +21,7 @@
 }
 @end
 
-namespace mpapp {
+namespace mpapp::internal {
 
 button_handler<platform::macos>::button_handler() {
     @autoreleasepool {
@@ -51,12 +51,12 @@ void button_handler<platform::macos>::apply_text(const std::string& text) {
     [btn setTitle:[NSString stringWithUTF8String:text.c_str()]];
 }
 
-void button_handler<platform::macos>::map_text(button& b) {
+void button_handler<platform::macos>::map_text(basic_button& b) {
     apply_text(b.text.get());
     b.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void button_handler<platform::macos>::map_clicked(button& b) {
+void button_handler<platform::macos>::map_clicked(basic_button& b) {
     if (!native_) return;
     NSButton* btn = (__bridge NSButton*)native_;
 
@@ -68,6 +68,6 @@ void button_handler<platform::macos>::map_clicked(button& b) {
     [btn setAction:@selector(onClicked:)];
 }
 
-} // namespace mpapp
+} // namespace mpapp::internal
 
 #endif // __APPLE__ && !TARGET_OS_IPHONE

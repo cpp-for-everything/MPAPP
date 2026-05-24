@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/BoxView.md
 //
-// Mock-handler tests for `mpapp::box_view` (CLAUDE Rule 6 / ADR-0008).
+// Mock-handler tests for `mpapp::internal::basic_box_view` (CLAUDE Rule 6 / ADR-0008).
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -12,7 +12,7 @@ using namespace mpapp;
 
 TEST_CASE("box_view mock handler records initial values on bind",
           "[mock][box_view]") {
-    box_view b;
+    internal::basic_box_view b;
     box_view_handler<platform::mock> h;
 
     h.map_fill(b);
@@ -27,7 +27,7 @@ TEST_CASE("box_view mock handler records initial values on bind",
 
 TEST_CASE("box_view mock handler records single call per fill change",
           "[mock][box_view]") {
-    box_view b;
+    internal::basic_box_view b;
     box_view_handler<platform::mock> h;
 
     h.map_fill(b);
@@ -47,7 +47,7 @@ TEST_CASE("box_view mock handler records single call per fill change",
 
 TEST_CASE("box_view mock handler records asymmetric corners",
           "[mock][box_view][corners]") {
-    box_view b;
+    internal::basic_box_view b;
     box_view_handler<platform::mock> h;
 
     h.map_corners(b);
@@ -60,7 +60,7 @@ TEST_CASE("box_view mock handler records asymmetric corners",
 
 TEST_CASE("box_view sequence: fill then corners then fill back",
           "[mock][box_view][sequence]") {
-    box_view b;
+    internal::basic_box_view b;
     box_view_handler<platform::mock> h;
 
     h.map_fill(b);

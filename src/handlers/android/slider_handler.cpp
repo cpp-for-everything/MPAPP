@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android slider handler implementation.
+// Part of MPAPP. Android basic_slider handler implementation.
 
 #include "mpapp/handlers/android/slider_handler.hpp"
 
@@ -10,7 +10,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -132,7 +132,7 @@ void slider_handler<platform::android>::apply_maximum(double /*v*/) {
     update_native_progress_from_value();
 }
 
-void slider_handler<platform::android>::map_value(slider& s) {
+void slider_handler<platform::android>::map_value(basic_slider& s) {
     bound_ = &s;
     update_native_progress_from_value();
     s.value.changed.subscribe(value_slot_, value_cb_);
@@ -146,13 +146,13 @@ void slider_handler<platform::android>::map_value(slider& s) {
     }
 }
 
-void slider_handler<platform::android>::map_minimum(slider& s) {
+void slider_handler<platform::android>::map_minimum(basic_slider& s) {
     bound_ = &s;
     update_native_progress_from_value();
     s.minimum.changed.subscribe(minimum_slot_, minimum_cb_);
 }
 
-void slider_handler<platform::android>::map_maximum(slider& s) {
+void slider_handler<platform::android>::map_maximum(basic_slider& s) {
     bound_ = &s;
     update_native_progress_from_value();
     s.maximum.changed.subscribe(maximum_slot_, maximum_cb_);
@@ -174,8 +174,7 @@ void android_slider_dispatch_progress(slider_handler<platform::android>* h, int 
     if (h != nullptr) h->on_native_progress_changed(progress, max);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_MppSeekBarChangeListener_nativeDispatchProgress(
     JNIEnv* /*env*/, jclass /*cls*/, jlong handler_ptr, jint progress, jint max) {
@@ -187,16 +186,16 @@ Java_io_mpapp_MppSeekBarChangeListener_nativeDispatchProgress(
 
 
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register slider so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_slider so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/slider.hpp"
+#include "mpapp/internal/basic_slider.hpp"
 
 namespace {
 
 jobject dispatch_slider(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::slider*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_slider*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

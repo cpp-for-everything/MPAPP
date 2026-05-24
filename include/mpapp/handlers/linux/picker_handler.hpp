@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 picker handler — wraps `GtkDropDown` + `GtkStringList`.
+// Part of MPAPP. GTK4 basic_picker handler — wraps `GtkDropDown` + `GtkStringList`.
 
 #ifndef MPAPP_HANDLERS_LINUX_PICKER_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_PICKER_HANDLER_HPP
@@ -7,13 +7,13 @@
 #include <string>
 #include <vector>
 
-#include "../../picker.hpp"
+#include "../../internal/basic_picker.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class picker_handler<platform::linux_> {
@@ -23,9 +23,9 @@ public:
     picker_handler(const picker_handler&)            = delete;
     picker_handler& operator=(const picker_handler&) = delete;
 
-    void map_items(picker& p);
-    void map_selected_index(picker& p);
-    void map_title(picker& p);
+    void map_items(basic_picker& p);
+    void map_selected_index(basic_picker& p);
+    void map_title(basic_picker& p);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -51,7 +51,6 @@ private:
     signal_slot<const std::string&>                     title_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_PICKER_HANDLER_HPP

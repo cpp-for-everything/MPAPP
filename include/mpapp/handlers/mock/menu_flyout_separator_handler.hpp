@@ -1,19 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock menu_flyout_separator handler.
+// Part of MPAPP. Mock basic_menu_flyout_separator handler.
 //
 // The separator type has no observable properties. The mock handler
 // exists so the layout-test plumbing has a uniform shape across the
-// four menu_flyout-family widgets. It records a single `"separator"`
+// four basic_menu_flyout-family widgets. It records a single `"separator"`
 // event when the framework asks for a bind-time snapshot.
 
 #ifndef MPAPP_HANDLERS_MOCK_MENU_FLYOUT_SEPARATOR_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_MENU_FLYOUT_SEPARATOR_HANDLER_HPP
 
-#include "../../menu_flyout_separator.hpp"
+#include "../../internal/basic_menu_flyout_separator.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_separator_handler<platform::mock>
@@ -22,13 +22,12 @@ public:
     menu_flyout_separator_handler() = default;
 
     // No observable properties on the separator — this mapper records a
-    // single bare-event entry so tests can verify the handler was
+    // single bare-event basic_entry so tests can verify the handler was
     // wired. Real handlers don't expose this mapper.
-    void map_bind(menu_flyout_separator& /*s*/) {
+    void map_bind(basic_menu_flyout_separator& /*s*/) {
         record_event("separator");
     }
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_MENU_FLYOUT_SEPARATOR_HANDLER_HPP

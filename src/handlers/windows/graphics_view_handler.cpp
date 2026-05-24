@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 graphics_view handler implementation.
+// WinUI 3 basic_graphics_view handler implementation.
 //
-// The handler renders graphics_view::drawable through the ADR-0015
+// The handler renders basic_graphics_view::drawable through the ADR-0015
 // canvas facade and blits the resulting pixel buffer into a
 // muxc::Image's Source via a WriteableBitmap. WriteableBitmap stores
 // pixels as BGRA8 premultiplied — matching the abstract canvas
@@ -25,7 +25,7 @@
 #include "mpapp/detail/graphics/canvas.hpp"
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace mxmi = ::winrt::Microsoft::UI::Xaml::Media::Imaging;
@@ -51,7 +51,7 @@ uint8_t* get_pixel_buffer_data(mxmi::WriteableBitmap const& wb) {
 graphics_view_handler<platform::windows>::graphics_view_handler() {
     native_ = muxc::Image{};
     // Stretch=None so the bitmap renders at its native pixel size.
-    // Apps that want stretching can wrap the graphics_view in a layout
+    // Apps that want stretching can wrap the basic_graphics_view in a layout
     // that resizes — at the canvas-facade level we honor the user's
     // width/height exactly.
     native_.Stretch(::winrt::Microsoft::UI::Xaml::Media::Stretch::None);
@@ -131,7 +131,7 @@ void graphics_view_handler<platform::windows>::repaint() {
     bitmap_.Invalidate();
 }
 
-void graphics_view_handler<platform::windows>::map_size(graphics_view& gv) {
+void graphics_view_handler<platform::windows>::map_size(basic_graphics_view& gv) {
     bound_ = &gv;
     apply_width(gv.width.get());
     apply_height(gv.height.get());
@@ -139,14 +139,14 @@ void graphics_view_handler<platform::windows>::map_size(graphics_view& gv) {
     gv.height.changed.subscribe(h_slot_, h_cb_);
 }
 
-void graphics_view_handler<platform::windows>::map_draw_count(graphics_view& gv) {
+void graphics_view_handler<platform::windows>::map_draw_count(basic_graphics_view& gv) {
     // draw_count bumps each time the user calls gv.invalidate() — that's
     // our cue to repaint.
     bound_ = &gv;
     gv.draw_count.changed.subscribe(count_slot_, count_cb_);
 }
 
-void graphics_view_handler<platform::windows>::map_drawable(graphics_view& gv) {
+void graphics_view_handler<platform::windows>::map_drawable(basic_graphics_view& gv) {
     bound_ = &gv;
     gv.drawable.changed.subscribe(drawable_slot_, drawable_cb_);
     // Initial paint with the currently-installed callback so the
@@ -155,13 +155,12 @@ void graphics_view_handler<platform::windows>::map_drawable(graphics_view& gv) {
     repaint();
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_graphics_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::graphics_view*>(v); w && w->has_gv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_graphics_view*>(v); w && w->has_gv_handler()) {
         return w->gv_handler().native();
     }
     return nullptr;

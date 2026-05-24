@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android templated_view handler implementation.
+// Part of MPAPP. Android basic_templated_view handler implementation.
 
 #include "mpapp/handlers/android/templated_view_handler.hpp"
 
@@ -8,10 +8,10 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/templated_view.hpp"
+#include "mpapp/internal/basic_templated_view.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -83,7 +83,7 @@ void templated_view_handler<platform::android>::apply_content(const std::shared_
 
     // ADR-0013 registry first; if no widget is registered for the child
     // type, leave content empty (legacy widgets that haven't migrated
-    // yet are not rendered by templated_view).
+    // yet are not rendered by basic_templated_view).
     jobject child = v ? detail::android_dispatch::dispatch(v.get()) : nullptr;
     if (child != nullptr) view_group_add(env, native_, child);
 }
@@ -93,28 +93,27 @@ void templated_view_handler<platform::android>::apply_template_id(const std::str
     template_id_ = v;
 }
 
-void templated_view_handler<platform::android>::map_content(templated_view& t) {
+void templated_view_handler<platform::android>::map_content(basic_templated_view& t) {
     apply_content(t.content.get());
     t.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void templated_view_handler<platform::android>::map_template_id(templated_view& t) {
+void templated_view_handler<platform::android>::map_template_id(basic_templated_view& t) {
     apply_template_id(t.template_id.get());
     t.template_id.changed.subscribe(template_id_slot_, template_id_cb_);
 }
 
-void templated_view_handler<platform::android>::bind_content(templated_view& t, view& child) {
+void templated_view_handler<platform::android>::bind_content(basic_templated_view& t, view& child) {
     t.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 jobject dispatch_templated_view(::mpapp::view* v) {
-    if (auto* t = dynamic_cast<::mpapp::templated_view*>(v); t && t->has_handler()) {
+    if (auto* t = dynamic_cast<::mpapp::internal::basic_templated_view*>(v); t && t->has_handler()) {
         return t->handler().native();
     }
     return nullptr;

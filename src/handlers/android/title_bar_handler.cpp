@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android title_bar handler implementation.
+// Part of MPAPP. Android basic_title_bar handler implementation.
 
 #include "mpapp/handlers/android/title_bar_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -30,7 +30,7 @@ jobject make_toolbar(JNIEnv* env, jobject context) {
     return global;
 }
 
-void toolbar_set_text(JNIEnv* env, jobject toolbar,
+void toolbar_set_text(JNIEnv* env, jobject basic_toolbar,
                       const char* setter, const std::string& v) {
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass cls = env->FindClass("android/widget/Toolbar");
@@ -38,7 +38,7 @@ void toolbar_set_text(JNIEnv* env, jobject toolbar,
     jmethodID m = env->GetMethodID(cls, setter, "(Ljava/lang/CharSequence;)V");
     if (m != nullptr) {
         jstring jstr = env->NewStringUTF(v.c_str());
-        env->CallVoidMethod(toolbar, m, jstr);
+        env->CallVoidMethod(basic_toolbar, m, jstr);
         if (env->ExceptionCheck()) env->ExceptionClear();
         env->DeleteLocalRef(jstr);
     }
@@ -77,23 +77,22 @@ void title_bar_handler<platform::android>::apply_subtitle(const std::string& v) 
     toolbar_set_text(env, native_, "setSubtitle", v);
 }
 
-void title_bar_handler<platform::android>::map_title(title_bar& t) {
+void title_bar_handler<platform::android>::map_title(basic_title_bar& t) {
     apply_title(t.title.get());
     t.title.changed.subscribe(title_slot_, title_cb_);
 }
-void title_bar_handler<platform::android>::map_subtitle(title_bar& t) {
+void title_bar_handler<platform::android>::map_subtitle(basic_title_bar& t) {
     apply_subtitle(t.subtitle.get());
     t.subtitle.changed.subscribe(subtitle_slot_, subtitle_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // --- ADR-0013 self-registration --------------------------------------------
 
 namespace {
 
 jobject dispatch_title_bar(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::title_bar*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_title_bar*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

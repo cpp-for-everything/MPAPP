@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — UIKit button handler. Wraps UIButton.
+// Part of MPAPP. T-0011 — UIKit basic_button handler. Wraps UIButton.
 
 #ifndef MPAPP_HANDLERS_IOS_BUTTON_HANDLER_HPP
 #define MPAPP_HANDLERS_IOS_BUTTON_HANDLER_HPP
 
-#include "../../button.hpp"
+#include "../../internal/basic_button.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -14,7 +14,7 @@
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class button_handler<platform::ios> {
@@ -27,8 +27,8 @@ public:
     button_handler(button_handler&&)                 = delete;
     button_handler& operator=(button_handler&&)      = delete;
 
-    void map_text(button& b);
-    void map_clicked(button& b);
+    void map_text(basic_button& b);
+    void map_clicked(basic_button& b);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -47,7 +47,7 @@ private:
     signal_slot<const std::string&>  text_slot_{};
 };
 
-} // namespace mpapp
+} // namespace mpapp::internal
 
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__

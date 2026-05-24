@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android refresh_view handler.
+// Part of MPAPP. Android basic_refresh_view handler.
 //
 // Tries `androidx.swiperefreshlayout.widget.SwipeRefreshLayout` first
 // via `FindClass`. If that class is not on the runtime classpath (the
@@ -17,14 +17,14 @@
 #include <memory>
 
 #include "../../platform.hpp"
-#include "../../refresh_view.hpp"
+#include "../../internal/basic_refresh_view.hpp"
 #include "../../signal.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class refresh_view_handler<platform::android> {
@@ -37,11 +37,11 @@ public:
     refresh_view_handler(refresh_view_handler&&)                 = delete;
     refresh_view_handler& operator=(refresh_view_handler&&)      = delete;
 
-    void map_content(refresh_view& r);
-    void map_is_refreshing(refresh_view& r);
-    void map_refresh_color(refresh_view& r);
+    void map_content(basic_refresh_view& r);
+    void map_is_refreshing(basic_refresh_view& r);
+    void map_refresh_color(basic_refresh_view& r);
 
-    void bind_content(refresh_view& r, view& child);
+    void bind_content(basic_refresh_view& r, view& child);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -72,7 +72,6 @@ private:
     signal_slot<const brush_ref&>             refresh_color_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_REFRESH_VIEW_HANDLER_HPP

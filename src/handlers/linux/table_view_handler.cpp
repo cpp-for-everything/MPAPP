@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 table_view handler implementation.
+// GTK4 basic_table_view handler implementation.
 
 #include "mpapp/handlers/linux/table_view_handler.hpp"
 
@@ -10,7 +10,7 @@
 #include "mpapp/cell.hpp"
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -39,7 +39,7 @@ bool decode_position(const SectionVec& sections,
 
 void on_row_selected(GtkListBox* box, GtkListBoxRow* row, gpointer user_data) {
     if (row == nullptr) return;
-    auto* tv = static_cast<table_view*>(user_data);
+    auto* tv = static_cast<basic_table_view*>(user_data);
     if (tv == nullptr) return;
     const int flat = gtk_list_box_row_get_index(row);
     int section = 0, data_row = 0;
@@ -135,7 +135,7 @@ void table_view_handler<platform::linux_>::apply_row_height(int /*h*/) {
     // not wired in v1.
 }
 
-void table_view_handler<platform::linux_>::map_sections(table_view& tv) {
+void table_view_handler<platform::linux_>::map_sections(basic_table_view& tv) {
     bound_ = &tv;
     rebuild_active();
     tv.sections.changed.subscribe(sec_slot_, sec_cb_);
@@ -148,7 +148,7 @@ void table_view_handler<platform::linux_>::map_sections(table_view& tv) {
     }
 }
 
-void table_view_handler<platform::linux_>::map_typed_sections(table_view& tv) {
+void table_view_handler<platform::linux_>::map_typed_sections(basic_table_view& tv) {
     bound_ = &tv;
     rebuild_active();
     tv.typed_sections.changed.subscribe(typed_slot_, typed_cb_);
@@ -159,18 +159,17 @@ void table_view_handler<platform::linux_>::map_typed_sections(table_view& tv) {
     }
 }
 
-void table_view_handler<platform::linux_>::map_row_height(table_view& tv) {
+void table_view_handler<platform::linux_>::map_row_height(basic_table_view& tv) {
     apply_row_height(tv.row_height.get());
     tv.row_height.changed.subscribe(rh_slot_, rh_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_table_view(::mpapp::view* v) {
-    if (auto* t = dynamic_cast<::mpapp::table_view*>(v); t && t->has_tv_handler()) {
+    if (auto* t = dynamic_cast<::mpapp::internal::basic_table_view*>(v); t && t->has_tv_handler()) {
         return GTK_WIDGET(t->tv_handler().native());
     }
     return nullptr;

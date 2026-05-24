@@ -23,7 +23,6 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/navigation_page_handler.hpp>
 #include <mpapp/handlers/page_handler.hpp>
@@ -43,7 +42,6 @@ struct screen {
     mpapp::page_handler<>            page_handler_{};
     mpapp::stack_layout_handler<>    layout_handler_{};
     mpapp::label_handler<>           title_handler_{};
-    mpapp::button_handler<>          action_handler_{};
 
     void build(const std::string& page_title,
                const std::string& body,
@@ -53,13 +51,10 @@ struct screen {
         action_.text = button_text;
 
         title_.set_handler(title_handler_);
-        action_.set_handler(action_handler_);
         layout_.set_handler(layout_handler_);
         page_.set_handler(page_handler_);
 
         title_handler_.map_text(title_);
-        action_handler_.map_text(action_);
-        action_handler_.map_clicked(action_);
 
         layout_.stack_orientation    = mpapp::orientation::vertical;
         layout_.spacing              = 12.0;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 progress_bar handler — wraps `GtkProgressBar`.
+// Part of MPAPP. GTK4 basic_progress_bar handler — wraps `GtkProgressBar`.
 
 #ifndef MPAPP_HANDLERS_LINUX_PROGRESS_BAR_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_PROGRESS_BAR_HANDLER_HPP
@@ -7,12 +7,12 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../progress_bar.hpp"
+#include "../../internal/basic_progress_bar.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class progress_bar_handler<platform::linux_> {
@@ -22,9 +22,9 @@ public:
     progress_bar_handler(const progress_bar_handler&)            = delete;
     progress_bar_handler& operator=(const progress_bar_handler&) = delete;
 
-    void map_progress(progress_bar& p);
-    void map_color(progress_bar& p);
-    void map_background_color(progress_bar& p);
+    void map_progress(basic_progress_bar& p);
+    void map_color(basic_progress_bar& p);
+    void map_background_color(basic_progress_bar& p);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -54,7 +54,6 @@ private:
     signal_slot<const brush_ref&> bg_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_PROGRESS_BAR_HANDLER_HPP

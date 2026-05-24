@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 date_picker handler — wraps `mux::Controls::CalendarDatePicker`.
+// Part of MPAPP. WinUI 3 basic_date_picker handler — wraps `mux::Controls::CalendarDatePicker`.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_DATE_PICKER_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_DATE_PICKER_HANDLER_HPP
 
-#include "../../date_picker.hpp"
+#include "../../internal/basic_date_picker.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -12,7 +12,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class date_picker_handler<platform::windows> {
@@ -22,8 +22,8 @@ public:
     date_picker_handler(const date_picker_handler&)            = delete;
     date_picker_handler& operator=(const date_picker_handler&) = delete;
 
-    void map_date(date_picker& p);
-    void map_format(date_picker& p);
+    void map_date(basic_date_picker& p);
+    void map_format(basic_date_picker& p);
 
     winrt::Microsoft::UI::Xaml::Controls::CalendarDatePicker&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::CalendarDatePicker& native() const noexcept { return native_; }
@@ -44,7 +44,6 @@ private:
     signal_slot<const std::string&>    format_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_DATE_PICKER_HANDLER_HPP

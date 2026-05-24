@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android shell handler implementation.
+// Android basic_shell handler implementation.
 
 #include "mpapp/handlers/android/shell_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -133,7 +133,7 @@ void tv_set_typeface(JNIEnv* env, jobject tv, jobject typeface) {
     env->DeleteLocalRef(cls);
 }
 
-// Mirrors the tabbed_page color palette: primary-blue for active,
+// Mirrors the basic_tabbed_page color palette: primary-blue for active,
 // grey for inactive. Keep these in sync.
 constexpr jint COLOR_SELECTED   = static_cast<jint>(0xFF1976D2u);
 constexpr jint COLOR_UNSELECTED = static_cast<jint>(0xFF606060u);
@@ -183,10 +183,10 @@ shell_handler<platform::android>::~shell_handler() {
 
 namespace {
 
-// Install an MppActionRouter(shell*, kind=1, payload=tab_index) as the
-// tab button's OnClickListener so user taps set current_tab_index.
-void install_tab_router(JNIEnv* env, jobject button, shell* s, int tab_index) {
-    if (env == nullptr || button == nullptr || s == nullptr) return;
+// Install an MppActionRouter(basic_shell*, kind=1, payload=tab_index) as the
+// tab basic_button's OnClickListener so user taps set current_tab_index.
+void install_tab_router(JNIEnv* env, jobject basic_button, basic_shell* s, int tab_index) {
+    if (env == nullptr || basic_button == nullptr || s == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass router_cls = env->FindClass("io/mpapp/MppActionRouter");
     if (router_cls == nullptr) { env->ExceptionClear(); return; }
@@ -209,7 +209,7 @@ void install_tab_router(JNIEnv* env, jobject button, shell* s, int tab_index) {
         jmethodID set_listener = env->GetMethodID(view_cls, "setOnClickListener",
             "(Landroid/view/View$OnClickListener;)V");
         if (set_listener != nullptr) {
-            env->CallVoidMethod(button, set_listener, router);
+            env->CallVoidMethod(basic_button, set_listener, router);
             if (env->ExceptionCheck()) env->ExceptionClear();
         }
         env->DeleteLocalRef(view_cls);
@@ -224,7 +224,7 @@ void shell_handler<platform::android>::rebuild_tab_strip(const std::vector<std::
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
 
-    // Release any previous tab-button global refs.
+    // Release any previous tab-basic_button global refs.
     for (jobject b : tab_buttons_) {
         if (b != nullptr) env->DeleteGlobalRef(b);
     }
@@ -274,7 +274,7 @@ void shell_handler<platform::android>::apply_is_flyout_open(bool v) {
     view_set_visibility(env, flyout_host_, v ? VIEW_VISIBLE : VIEW_GONE);
 }
 
-void shell_handler<platform::android>::apply_flyout_content(page* p) {
+void shell_handler<platform::android>::apply_flyout_content(basic_page* p) {
     if (flyout_host_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
@@ -286,7 +286,7 @@ void shell_handler<platform::android>::apply_flyout_content(page* p) {
     }
 }
 
-void shell_handler<platform::android>::apply_current_content(page* p) {
+void shell_handler<platform::android>::apply_current_content(basic_page* p) {
     if (content_host_ == nullptr) return;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
@@ -298,39 +298,38 @@ void shell_handler<platform::android>::apply_current_content(page* p) {
     }
 }
 
-void shell_handler<platform::android>::map_tabs(shell& s) {
+void shell_handler<platform::android>::map_tabs(basic_shell& s) {
     bound_ = &s;
     rebuild_tab_strip(s.tabs.get());
     s.tabs.changed.subscribe(tabs_slot_, tabs_cb_);
 }
 
-void shell_handler<platform::android>::map_current_tab_index(shell& s) {
+void shell_handler<platform::android>::map_current_tab_index(basic_shell& s) {
     apply_selection(s.current_tab_index.get());
     s.current_tab_index.changed.subscribe(sel_slot_, sel_cb_);
 }
 
-void shell_handler<platform::android>::map_is_flyout_open(shell& s) {
+void shell_handler<platform::android>::map_is_flyout_open(basic_shell& s) {
     apply_is_flyout_open(s.is_flyout_open.get());
     s.is_flyout_open.changed.subscribe(flyout_open_slot_, flyout_open_cb_);
 }
 
-void shell_handler<platform::android>::map_flyout_content(shell& s) {
+void shell_handler<platform::android>::map_flyout_content(basic_shell& s) {
     apply_flyout_content(s.flyout_content.get());
     s.flyout_content.changed.subscribe(flyout_content_slot_, flyout_content_cb_);
 }
 
-void shell_handler<platform::android>::map_current_content(shell& s) {
+void shell_handler<platform::android>::map_current_content(basic_shell& s) {
     apply_current_content(s.current_content.get());
     s.current_content.changed.subscribe(content_slot_, content_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_shell(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::shell*>(v); s && s->has_shell_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_shell*>(v); s && s->has_shell_handler()) {
         return s->shell_handler_ref().native();
     }
     return nullptr;

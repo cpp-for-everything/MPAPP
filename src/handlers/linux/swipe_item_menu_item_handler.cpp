@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 swipe_item_menu_item handler implementation.
+// Part of MPAPP. GTK4 basic_swipe_item_menu_item handler implementation.
 
 #include "mpapp/handlers/linux/swipe_item_menu_item_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -45,21 +45,21 @@ void swipe_item_menu_item_handler<platform::linux_>::apply_icon_uri(const std::s
         return;
     }
     // Treat the URI as a theme icon name on this path (the richer
-    // file-image + bitmap-decode plumbing lands with image-source).
+    // file-basic_image + bitmap-decode plumbing lands with basic_image-source).
     gtk_button_set_icon_name(GTK_BUTTON(static_cast<GtkWidget*>(native_)), v.c_str());
 }
 
-void swipe_item_menu_item_handler<platform::linux_>::map_text(swipe_item_menu_item& m) {
+void swipe_item_menu_item_handler<platform::linux_>::map_text(basic_swipe_item_menu_item& m) {
     apply_text(m.text.get());
     m.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void swipe_item_menu_item_handler<platform::linux_>::map_icon_uri(swipe_item_menu_item& m) {
+void swipe_item_menu_item_handler<platform::linux_>::map_icon_uri(basic_swipe_item_menu_item& m) {
     apply_icon_uri(m.icon_uri.get());
     m.icon_uri.changed.subscribe(icon_slot_, icon_cb_);
 }
 
-void swipe_item_menu_item_handler<platform::linux_>::map_invoked(swipe_item_menu_item& m) {
+void swipe_item_menu_item_handler<platform::linux_>::map_invoked(basic_swipe_item_menu_item& m) {
     if (native_ == nullptr) return;
     invoked_signal_ = &m.invoked;
     if (clicked_handler_id_ != 0) {
@@ -74,14 +74,13 @@ void swipe_item_menu_item_handler<platform::linux_>::map_invoked(swipe_item_menu
         invoked_signal_));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------
 
 namespace {
 
 GtkWidget* dispatch_swipe_item_menu_item(::mpapp::view* v) {
-    if (auto* m = dynamic_cast<::mpapp::swipe_item_menu_item*>(v); m && m->has_handler()) {
+    if (auto* m = dynamic_cast<::mpapp::internal::basic_swipe_item_menu_item*>(v); m && m->has_handler()) {
         return GTK_WIDGET(m->handler().native());
     }
     return nullptr;

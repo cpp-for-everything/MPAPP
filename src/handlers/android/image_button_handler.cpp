@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android image_button handler implementation.
+// Android basic_image_button handler implementation.
 
 #include "mpapp/handlers/android/image_button_handler.hpp"
 
@@ -7,7 +7,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -108,29 +108,27 @@ void image_button_handler<platform::android>::apply_aspect(aspect_mode v) {
     env->DeleteLocalRef(cls);
 }
 
-void image_button_handler<platform::android>::map_source(image_button& b) {
+void image_button_handler<platform::android>::map_source(basic_image_button& b) {
     apply_source(b.source.get());
     b.source.changed.subscribe(source_slot_, source_cb_);
 }
-void image_button_handler<platform::android>::map_aspect(image_button& b) {
+void image_button_handler<platform::android>::map_aspect(basic_image_button& b) {
     apply_aspect(b.aspect.get());
     b.aspect.changed.subscribe(aspect_slot_, aspect_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register image_button so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_image_button so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/image_button.hpp"
+#include "mpapp/internal/basic_image_button.hpp"
 
 namespace {
 
 jobject dispatch_image_button(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::image_button*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_image_button*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

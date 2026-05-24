@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 search_bar handler — wraps
+// Part of MPAPP. WinUI 3 basic_search_bar handler — wraps
 // `mux::Controls::AutoSuggestBox`. Provides search-affordance styling
 // without the suggestions popup (we don't expose IsSuggestionListOpen
 // on the cross-platform surface yet).
@@ -8,14 +8,14 @@
 #define MPAPP_HANDLERS_WINDOWS_SEARCH_BAR_HANDLER_HPP
 
 #include "../../platform.hpp"
-#include "../../search_bar.hpp"
+#include "../../internal/basic_search_bar.hpp"
 #include "../../signal.hpp"
 
 #if defined(_WIN32)
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class search_bar_handler<platform::windows> {
@@ -25,8 +25,8 @@ public:
     search_bar_handler(const search_bar_handler&)            = delete;
     search_bar_handler& operator=(const search_bar_handler&) = delete;
 
-    void map_text(search_bar& s);
-    void map_placeholder(search_bar& s);
+    void map_text(basic_search_bar& s);
+    void map_placeholder(basic_search_bar& s);
 
     winrt::Microsoft::UI::Xaml::Controls::AutoSuggestBox&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::AutoSuggestBox& native() const noexcept { return native_; }
@@ -47,7 +47,6 @@ private:
     signal_slot<const std::string&>    placeholder_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_SEARCH_BAR_HANDLER_HPP

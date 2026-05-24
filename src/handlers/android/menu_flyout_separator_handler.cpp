@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android menu_flyout_separator handler implementation.
+// Part of MPAPP. Android basic_menu_flyout_separator handler implementation.
 
 #include "mpapp/handlers/android/menu_flyout_separator_handler.hpp"
 
@@ -8,9 +8,9 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/menu_flyout_separator.hpp"
+#include "mpapp/internal/basic_menu_flyout_separator.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -56,14 +56,13 @@ menu_flyout_separator_handler<platform::android>::~menu_flyout_separator_handler
     }
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 jobject dispatch_menu_flyout_separator(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::menu_flyout_separator*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_menu_flyout_separator*>(v); s && s->has_handler()) {
         return s->handler().native();
     }
     return nullptr;

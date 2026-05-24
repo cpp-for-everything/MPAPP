@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 toolbar handler — wraps `GtkActionBar`.
+// Part of MPAPP. GTK4 basic_toolbar handler — wraps `GtkActionBar`.
 //
 // Each `toolbar_item` becomes a leading-side `GtkButton` packed via
 // `gtk_action_bar_pack_start`; on rebuild, the existing children are
@@ -14,11 +14,11 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../toolbar.hpp"
+#include "../../internal/basic_toolbar.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class toolbar_handler<platform::linux_> {
@@ -28,8 +28,8 @@ public:
     toolbar_handler(const toolbar_handler&)            = delete;
     toolbar_handler& operator=(const toolbar_handler&) = delete;
 
-    void map_items(toolbar& t);
-    void map_title(toolbar& t);
+    void map_items(basic_toolbar& t);
+    void map_title(basic_toolbar& t);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -50,7 +50,6 @@ private:
     signal_slot<const std::string&>                     title_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_TOOLBAR_HANDLER_HPP

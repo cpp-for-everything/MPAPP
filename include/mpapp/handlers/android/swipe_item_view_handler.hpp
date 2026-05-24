@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android swipe_item_view handler.
+// Part of MPAPP. Android basic_swipe_item_view handler.
 //
 // `android.widget.FrameLayout` content host. Renders inline (no
-// gesture-revealed pill) until the parent `swipe_view` wires the
+// gesture-revealed pill) until the parent `basic_swipe_view` wires the
 // gesture plumbing.
 
 #ifndef MPAPP_HANDLERS_ANDROID_SWIPE_ITEM_VIEW_HANDLER_HPP
@@ -10,14 +10,14 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../swipe_item_view.hpp"
+#include "../../internal/basic_swipe_item_view.hpp"
 #include "../../view.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class swipe_item_view_handler<platform::android> {
@@ -30,7 +30,7 @@ public:
     swipe_item_view_handler(swipe_item_view_handler&&)                 = delete;
     swipe_item_view_handler& operator=(swipe_item_view_handler&&)      = delete;
 
-    void map_content(swipe_item_view& iv);
+    void map_content(basic_swipe_item_view& iv);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -50,7 +50,6 @@ private:
     signal_slot<view* const&> content_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SWIPE_ITEM_VIEW_HANDLER_HPP

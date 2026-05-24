@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android menu_bar_item handler implementation.
+// Part of MPAPP. Android basic_menu_bar_item handler implementation.
 
 #include "mpapp/handlers/android/menu_bar_item_handler.hpp"
 
@@ -10,7 +10,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -72,29 +72,28 @@ void menu_bar_item_handler<platform::android>::apply_title(const std::string& v)
 }
 
 void menu_bar_item_handler<platform::android>::apply_items(const std::vector<view*>& /*v*/) {
-    // Per-child rebuilds are flattened up into the parent menu_bar's
+    // Per-child rebuilds are flattened up into the parent basic_menu_bar's
     // Menu in `menu_bar_handler::apply_items`. The handler still wires
     // the signal so future granular updates have a hook.
 }
 
-void menu_bar_item_handler<platform::android>::map_title(menu_bar_item& m) {
+void menu_bar_item_handler<platform::android>::map_title(basic_menu_bar_item& m) {
     apply_title(m.title.get());
     m.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-void menu_bar_item_handler<platform::android>::map_items(menu_bar_item& m) {
+void menu_bar_item_handler<platform::android>::map_items(basic_menu_bar_item& m) {
     apply_items(m.items.get());
     m.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // --- ADR-0013 self-registration --------------------------------------------
 
 namespace {
 
 jobject dispatch_menu_bar_item(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::menu_bar_item*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_menu_bar_item*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

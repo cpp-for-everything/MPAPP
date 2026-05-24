@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android stepper handler implementation.
+// Part of MPAPP. Android basic_stepper handler implementation.
 
 #include "mpapp/handlers/android/stepper_handler.hpp"
 
@@ -10,7 +10,7 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -129,7 +129,7 @@ void stepper_handler<platform::android>::apply_range_and_value() {
     suppress_echo_ = false;
 }
 
-void stepper_handler<platform::android>::map_value(stepper& s) {
+void stepper_handler<platform::android>::map_value(basic_stepper& s) {
     bound_ = &s;
     apply_range_and_value();
     s.value.changed.subscribe(value_slot_, value_cb_);
@@ -143,17 +143,17 @@ void stepper_handler<platform::android>::map_value(stepper& s) {
     }
 }
 
-void stepper_handler<platform::android>::map_minimum(stepper& s) {
+void stepper_handler<platform::android>::map_minimum(basic_stepper& s) {
     bound_ = &s;
     apply_range_and_value();
     s.minimum.changed.subscribe(minimum_slot_, minimum_cb_);
 }
-void stepper_handler<platform::android>::map_maximum(stepper& s) {
+void stepper_handler<platform::android>::map_maximum(basic_stepper& s) {
     bound_ = &s;
     apply_range_and_value();
     s.maximum.changed.subscribe(maximum_slot_, maximum_cb_);
 }
-void stepper_handler<platform::android>::map_interval(stepper& s) {
+void stepper_handler<platform::android>::map_interval(basic_stepper& s) {
     bound_ = &s;
     apply_range_and_value();
     s.interval.changed.subscribe(interval_slot_, interval_cb_);
@@ -174,8 +174,7 @@ void android_stepper_dispatch_value(stepper_handler<platform::android>* h, int s
     if (h != nullptr) h->on_native_value_changed(step_index);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_MppNumberPickerListener_nativeDispatchValue(
     JNIEnv* /*env*/, jclass /*cls*/, jlong handler_ptr, jint value) {
@@ -187,16 +186,16 @@ Java_io_mpapp_MppNumberPickerListener_nativeDispatchValue(
 
 
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register stepper so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_stepper so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/stepper.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
 
 namespace {
 
 jobject dispatch_stepper(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::stepper*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_stepper*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

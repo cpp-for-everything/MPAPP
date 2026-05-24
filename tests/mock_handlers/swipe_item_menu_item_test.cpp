@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::swipe_item_menu_item`.
+// Mock-handler tests for `mpapp::internal::basic_swipe_item_menu_item`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -12,7 +12,7 @@ using namespace mpapp;
 
 TEST_CASE("swipe_item_menu_item mock records initial values on bind",
           "[mock][swipe_item_menu_item]") {
-    swipe_item_menu_item m;
+    internal::basic_swipe_item_menu_item m;
     swipe_item_menu_item_handler<platform::mock> h;
 
     h.map_text(m);
@@ -28,7 +28,7 @@ TEST_CASE("swipe_item_menu_item mock records initial values on bind",
 
 TEST_CASE("swipe_item_menu_item mock records text + icon_uri changes",
           "[mock][swipe_item_menu_item]") {
-    swipe_item_menu_item m;
+    internal::basic_swipe_item_menu_item m;
     swipe_item_menu_item_handler<platform::mock> h;
 
     h.map_text(m);
@@ -50,7 +50,7 @@ TEST_CASE("swipe_item_menu_item mock records text + icon_uri changes",
 
 TEST_CASE("swipe_item_menu_item mock records invoked signal emissions",
           "[mock][swipe_item_menu_item][invoked]") {
-    swipe_item_menu_item m;
+    internal::basic_swipe_item_menu_item m;
     swipe_item_menu_item_handler<platform::mock> h;
 
     h.map_invoked(m);

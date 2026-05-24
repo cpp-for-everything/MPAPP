@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android web_view handler implementation.
+// Android basic_web_view handler implementation.
 
 #include "mpapp/handlers/android/web_view_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -73,7 +73,7 @@ void web_view_load_url(JNIEnv* env, jobject wv, const std::string& url) {
 
 void web_view_load_html(JNIEnv* env, jobject wv, const std::string& html) {
     // loadDataWithBaseURL(null, html, "text/html", "utf-8", null) — gives
-    // the loaded page a stable origin for relative URL resolution.
+    // the loaded basic_page a stable origin for relative URL resolution.
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass cls = env->FindClass("android/webkit/WebView");
     if (cls == nullptr) { env->ExceptionClear(); return; }
@@ -177,7 +177,7 @@ void web_view_handler<platform::android>::refresh_can_go() {
     bound_->can_go_forward.set(web_view_can_go(env, native_, true));
 }
 
-void web_view_handler<platform::android>::map_url(web_view& wv) {
+void web_view_handler<platform::android>::map_url(basic_web_view& wv) {
     bound_ = &wv;
     apply_url(wv.url.get());
     wv.url.changed.subscribe(url_slot_, url_cb_);
@@ -191,7 +191,7 @@ void web_view_handler<platform::android>::map_url(web_view& wv) {
     }
 }
 
-void web_view_handler<platform::android>::map_html(web_view& wv) {
+void web_view_handler<platform::android>::map_html(basic_web_view& wv) {
     apply_html(wv.html_source.get());
     wv.html_source.changed.subscribe(html_slot_, html_cb_);
 }
@@ -220,13 +220,12 @@ void android_web_view_dispatch_page_finished(web_view_handler<platform::android>
     if (h != nullptr) h->on_native_page_finished(url, success);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_web_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::web_view*>(v); w && w->has_wv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_web_view*>(v); w && w->has_wv_handler()) {
         return w->wv_handler().native();
     }
     return nullptr;

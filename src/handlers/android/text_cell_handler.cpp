@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android text_cell handler implementation.
+// Android basic_text_cell handler implementation.
 
 #include "mpapp/handlers/android/text_cell_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -142,23 +142,22 @@ void text_cell_handler<platform::android>::apply_detail(const std::string& v) {
     view_set_visibility(env, detail_view_, v.empty() ? VIEW_GONE : VIEW_VISIBLE);
 }
 
-void text_cell_handler<platform::android>::map_text(text_cell& c) {
+void text_cell_handler<platform::android>::map_text(basic_text_cell& c) {
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
 }
 
-void text_cell_handler<platform::android>::map_detail(text_cell& c) {
+void text_cell_handler<platform::android>::map_detail(basic_text_cell& c) {
     apply_detail(c.detail.get());
     c.detail.changed.subscribe(detail_slot_, detail_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_text_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::text_cell*>(v); c && c->has_tc_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_text_cell*>(v); c && c->has_tc_handler()) {
         return c->tc_handler().native();
     }
     return nullptr;

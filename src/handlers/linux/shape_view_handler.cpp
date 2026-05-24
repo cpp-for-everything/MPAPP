@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 shape_view handler implementation.
+// GTK4 basic_shape_view handler implementation.
 //
 // T-0031 migration: rendering goes through the shared
 // detail::graphics::render_shape_view helper (which writes into an
 // ADR-0015 facade canvas) instead of issuing per-platform cairo calls
 // directly. The GTK draw callback wraps the facade's pixel buffer
 // via cairo_image_surface_create_for_data and blits it through GTK's
-// cairo_t* — same pattern graphics_view uses (T-0029 phase 1). Once
-// Windows + Android shape_view handlers follow in T-0031 phase 2,
+// cairo_t* — same pattern basic_graphics_view uses (T-0029 phase 1). Once
+// Windows + Android basic_shape_view handlers follow in T-0031 phase 2,
 // all three platforms render byte-for-byte identically (subject to
 // the underlying canvas backend; default is Cairo on Linux/Win/Android,
 // opt-in Skia via -DMPAPP_GRAPHICS_BACKEND=skia).
@@ -25,7 +25,7 @@
 #include "mpapp/detail/graphics/shape_renderer.hpp"
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -65,7 +65,7 @@ shape_view_handler<platform::linux_>::shape_view_handler() {
         this,
         nullptr);
     // GtkDrawingArea has no intrinsic size; give it a sensible default so
-    // a shape_view inside a stack_layout (or any container that respects
+    // a basic_shape_view inside a basic_stack_layout (or any container that respects
     // child measure) gets a non-zero allocation. Apps can override by
     // setting the view's width/height once the handlers honor those.
     gtk_drawing_area_set_content_width (GTK_DRAWING_AREA(static_cast<GtkWidget*>(native_)), 200);
@@ -80,39 +80,38 @@ void shape_view_handler<platform::linux_>::invalidate_() {
     }
 }
 
-void shape_view_handler<platform::linux_>::map_kind(shape_view& s) {
+void shape_view_handler<platform::linux_>::map_kind(basic_shape_view& s) {
     bound_ = &s;
     invalidate_();
     s.kind.changed.subscribe(kind_slot_, kind_cb_);
 }
-void shape_view_handler<platform::linux_>::map_data(shape_view& s) {
+void shape_view_handler<platform::linux_>::map_data(basic_shape_view& s) {
     invalidate_();
     s.data.changed.subscribe(data_slot_, data_cb_);
 }
-void shape_view_handler<platform::linux_>::map_fill(shape_view& s) {
+void shape_view_handler<platform::linux_>::map_fill(basic_shape_view& s) {
     invalidate_();
     s.fill.changed.subscribe(fill_slot_, fill_cb_);
 }
-void shape_view_handler<platform::linux_>::map_stroke(shape_view& s) {
+void shape_view_handler<platform::linux_>::map_stroke(basic_shape_view& s) {
     invalidate_();
     s.stroke.changed.subscribe(stroke_slot_, stroke_cb_);
 }
-void shape_view_handler<platform::linux_>::map_stroke_thickness(shape_view& s) {
+void shape_view_handler<platform::linux_>::map_stroke_thickness(basic_shape_view& s) {
     invalidate_();
     s.stroke_thickness.changed.subscribe(stroke_thick_slot_, stroke_thick_cb_);
 }
-void shape_view_handler<platform::linux_>::map_opacity(shape_view& s) {
+void shape_view_handler<platform::linux_>::map_opacity(basic_shape_view& s) {
     invalidate_();
     s.opacity.changed.subscribe(opacity_slot_, opacity_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_shape_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::shape_view*>(v); w && w->has_sv_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_shape_view*>(v); w && w->has_sv_handler()) {
         return GTK_WIDGET(w->sv_handler().native());
     }
     return nullptr;

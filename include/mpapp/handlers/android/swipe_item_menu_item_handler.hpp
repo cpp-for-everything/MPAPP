@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android swipe_item_menu_item handler.
+// Part of MPAPP. Android basic_swipe_item_menu_item handler.
 //
-// `android.widget.Button` rendering the action's text label. Icon URI
+// `android.widget.Button` rendering the action's text basic_label. Icon URI
 // plumbing is symbolic for M-04b — the value is captured on the
 // Observable but no setCompoundDrawables call is made yet (the broader
-// image-source resolver lands separately). The `invoked` signal is
+// basic_image-source resolver lands separately). The `invoked` signal is
 // declared but the OnClickListener wiring is deferred until the
-// shared MppClickRouter pattern is generalised beyond `button` — for
+// shared MppClickRouter pattern is generalised beyond `basic_button` — for
 // M-04b, programmatic `invoked.emit()` on the C++ side is the only path
 // (acceptable per the worker prompt's degradation contract).
 
@@ -17,13 +17,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../swipe_item_menu_item.hpp"
+#include "../../internal/basic_swipe_item_menu_item.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class swipe_item_menu_item_handler<platform::android> {
@@ -36,9 +36,9 @@ public:
     swipe_item_menu_item_handler(swipe_item_menu_item_handler&&)                 = delete;
     swipe_item_menu_item_handler& operator=(swipe_item_menu_item_handler&&)      = delete;
 
-    void map_text(swipe_item_menu_item& m);
-    void map_icon_uri(swipe_item_menu_item& m);
-    void map_invoked(swipe_item_menu_item& m);
+    void map_text(basic_swipe_item_menu_item& m);
+    void map_icon_uri(basic_swipe_item_menu_item& m);
+    void map_invoked(basic_swipe_item_menu_item& m);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -64,7 +64,6 @@ private:
     signal_slot<const std::string&> icon_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SWIPE_ITEM_MENU_ITEM_HANDLER_HPP

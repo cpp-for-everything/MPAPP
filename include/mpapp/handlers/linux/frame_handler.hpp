@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 frame handler — wraps `GtkBox` as a single-child
-// container, applies border color / corner radius / padding through a
+// Part of MPAPP. GTK4 basic_frame handler — wraps `GtkBox` as a single-child
+// container, applies basic_border color / corner radius / padding through a
 // per-handler CSS provider scoped via a unique class name.
 //
-// `mpapp::frame` is `[[deprecated]]` (MAUI .NET 9 parity); this handler
+// `mpapp::basic_frame` is `[[deprecated]]` (MAUI .NET 9 parity); this handler
 // IS the legacy path, so it suppresses the diagnostic locally.
 
 #ifndef MPAPP_HANDLERS_LINUX_FRAME_HANDLER_HPP
@@ -20,13 +20,13 @@
 #  pragma warning(disable: 4996)
 #endif
 
-#include "../../frame.hpp"
+#include "../../internal/basic_frame.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class frame_handler<platform::linux_> {
@@ -39,13 +39,13 @@ public:
     frame_handler(frame_handler&&)                 = delete;
     frame_handler& operator=(frame_handler&&)      = delete;
 
-    void map_content(frame& f);
-    void map_border_color(frame& f);
-    void map_has_shadow(frame& f);
-    void map_corner_radius(frame& f);
-    void map_padding(frame& f);
+    void map_content(basic_frame& f);
+    void map_border_color(basic_frame& f);
+    void map_has_shadow(basic_frame& f);
+    void map_corner_radius(basic_frame& f);
+    void map_padding(basic_frame& f);
 
-    void bind_content(frame& f, view& child);
+    void bind_content(basic_frame& f, view& child);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -86,8 +86,7 @@ private:
     signal_slot<const thickness&>             padding_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 
 #if defined(__GNUC__) || defined(__clang__)

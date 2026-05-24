@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// WinUI 3 image_button handler implementation.
+// WinUI 3 basic_image_button handler implementation.
 
 #include "mpapp/handlers/windows/image_button_handler.hpp"
 
@@ -13,7 +13,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
 namespace muxmi = ::winrt::Microsoft::UI::Xaml::Media::Imaging;
@@ -53,29 +53,27 @@ void image_button_handler<platform::windows>::apply_aspect(aspect_mode v) {
     }
 }
 
-void image_button_handler<platform::windows>::map_source(image_button& b) {
+void image_button_handler<platform::windows>::map_source(basic_image_button& b) {
     apply_source(b.source.get());
     b.source.changed.subscribe(source_slot_, source_cb_);
 }
-void image_button_handler<platform::windows>::map_aspect(image_button& b) {
+void image_button_handler<platform::windows>::map_aspect(basic_image_button& b) {
     apply_aspect(b.aspect.get());
     b.aspect.changed.subscribe(aspect_slot_, aspect_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register image_button so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_image_button so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/image_button.hpp"
+#include "mpapp/internal/basic_image_button.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_image_button(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::image_button*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_image_button*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

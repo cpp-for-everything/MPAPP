@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 scroll_view handler implementation.
+// Part of MPAPP. WinUI 3 basic_scroll_view handler implementation.
 
 #include "mpapp/handlers/windows/scroll_view_handler.hpp"
 
@@ -12,20 +12,20 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-#include "mpapp/activity_indicator.hpp"
+#include "mpapp/internal/basic_activity_indicator.hpp"
 #include "mpapp/border.hpp"
-#include "mpapp/box_view.hpp"
-#include "mpapp/date_picker.hpp"
-#include "mpapp/image.hpp"
-#include "mpapp/image_button.hpp"
-#include "mpapp/picker.hpp"
-#include "mpapp/time_picker.hpp"
-#include "mpapp/progress_bar.hpp"
-#include "mpapp/search_bar.hpp"
-#include "mpapp/button.hpp"
-#include "mpapp/check_box.hpp"
+#include "mpapp/internal/basic_box_view.hpp"
+#include "mpapp/internal/basic_date_picker.hpp"
+#include "mpapp/internal/basic_image.hpp"
+#include "mpapp/internal/basic_image_button.hpp"
+#include "mpapp/internal/basic_picker.hpp"
+#include "mpapp/internal/basic_time_picker.hpp"
+#include "mpapp/internal/basic_progress_bar.hpp"
+#include "mpapp/internal/basic_search_bar.hpp"
+#include "mpapp/internal/basic_button.hpp"
+#include "mpapp/internal/basic_check_box.hpp"
 #include "mpapp/editor.hpp"
-#include "mpapp/entry.hpp"
+#include "mpapp/internal/basic_entry.hpp"
 #include "mpapp/handlers/windows/activity_indicator_handler.hpp"
 #include "mpapp/handlers/windows/border_handler.hpp"
 #include "mpapp/handlers/windows/box_view_handler.hpp"
@@ -46,14 +46,14 @@
 #include "mpapp/handlers/windows/stack_layout_handler.hpp"
 #include "mpapp/handlers/windows/stepper_handler.hpp"
 #include "mpapp/handlers/windows/switch_handler.hpp"
-#include "mpapp/label.hpp"
-#include "mpapp/radio_button.hpp"
-#include "mpapp/slider.hpp"
-#include "mpapp/stack_layout.hpp"
-#include "mpapp/stepper.hpp"
-#include "mpapp/switch_.hpp"
+#include "mpapp/internal/basic_label.hpp"
+#include "mpapp/internal/basic_radio_button.hpp"
+#include "mpapp/internal/basic_slider.hpp"
+#include "mpapp/internal/basic_stack_layout.hpp"
+#include "mpapp/internal/basic_stepper.hpp"
+#include "mpapp/internal/basic_switch_.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -109,30 +109,29 @@ void scroll_view_handler<platform::windows>::apply_orientation(scroll_orientatio
     }
 }
 
-void scroll_view_handler<platform::windows>::map_content(scroll_view& s) {
+void scroll_view_handler<platform::windows>::map_content(basic_scroll_view& s) {
     bound_ = &s;
     apply_content(s.content.get());
     s.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void scroll_view_handler<platform::windows>::map_orientation(scroll_view& s) {
+void scroll_view_handler<platform::windows>::map_orientation(basic_scroll_view& s) {
     apply_orientation(s.orientation.get());
     s.orientation.changed.subscribe(orient_slot_, orient_cb_);
 }
 
-void scroll_view_handler<platform::windows>::bind_content(scroll_view& s, view& child) {
+void scroll_view_handler<platform::windows>::bind_content(basic_scroll_view& s, view& child) {
     // Non-owning shared_ptr — the user owns the child's storage; the
     // shared_ptr just satisfies the Observable<shared_ptr<view>> contract.
     s.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_scroll_view(::mpapp::view* v) {
-    if (auto* s = dynamic_cast<::mpapp::scroll_view*>(v); s && s->has_handler()) {
+    if (auto* s = dynamic_cast<::mpapp::internal::basic_scroll_view*>(v); s && s->has_handler()) {
         return s->handler().native();
     }
     return nullptr;

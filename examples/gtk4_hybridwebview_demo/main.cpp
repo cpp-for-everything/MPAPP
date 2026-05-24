@@ -31,7 +31,6 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/hybrid_web_view_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
@@ -94,9 +93,6 @@ public:
         });
         hwv_.html_source = kIndexHtml;
 
-        send_btn_.set_handler(send_btn_handler_);
-        send_btn_handler_.map_text(send_btn_);
-        send_btn_handler_.map_clicked(send_btn_);
         send_btn_.text = "Send 'hello from C++' to JS";
         send_btn_.clicked.subscribe(send_slot_, send_cb_);
 
@@ -151,7 +147,6 @@ private:
     mpapp::hybrid_web_view_handler<>    hwv_handler_{};
 
     mpapp::button                         send_btn_{};
-    mpapp::button_handler<>             send_btn_handler_{};
 
     mpapp::label                          status_label_{};
     mpapp::label_handler<>              status_label_handler_{};

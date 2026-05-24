@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 grid_layout handler. GtkGrid handles layout natively; mpapp
+// GTK4 basic_grid_layout handler. GtkGrid handles layout natively; mpapp
 // configures spacing + per-child attach via gtk_grid_attach.
 //
 // Note: GtkGrid track sizing is implicit (no explicit row/column
@@ -13,13 +13,13 @@
 
 #include <vector>
 
-#include "../../grid_layout.hpp"
+#include "../../internal/basic_grid_layout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class grid_layout_handler<platform::linux_> {
@@ -32,12 +32,12 @@ public:
     grid_layout_handler(grid_layout_handler&&)                 = delete;
     grid_layout_handler& operator=(grid_layout_handler&&)      = delete;
 
-    void map_row_definitions(grid_layout& g);
-    void map_column_definitions(grid_layout& g);
-    void map_row_spacing(grid_layout& g);
-    void map_column_spacing(grid_layout& g);
+    void map_row_definitions(basic_grid_layout& g);
+    void map_column_definitions(basic_grid_layout& g);
+    void map_row_spacing(basic_grid_layout& g);
+    void map_column_spacing(basic_grid_layout& g);
 
-    void add_child(grid_layout& g, view& child);
+    void add_child(basic_grid_layout& g, view& child);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -77,7 +77,6 @@ private:
     signal_slot<const double&>                  csp_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_GRID_LAYOUT_HANDLER_HPP

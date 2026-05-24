@@ -18,7 +18,6 @@
 #include <mpapp/stack_layout.hpp>
 #include <mpapp/window.hpp>
 
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/content_page_handler.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/stack_layout_handler.hpp>
@@ -34,12 +33,9 @@ public:
         button_.text = "Click me";
 
         label_.set_handler(label_handler_);
-        button_.set_handler(button_handler_);
         layout_.set_handler(layout_handler_);
 
         label_handler_.map_text(label_);
-        button_handler_.map_text(button_);
-        button_handler_.map_clicked(button_);
 
         layout_.stack_orientation = mpapp::orientation::vertical;
         layout_.spacing = 12.0;
@@ -72,7 +68,6 @@ private:
     mpapp::stack_layout                layout_{};
 
     mpapp::label_handler<>           label_handler_{};
-    mpapp::button_handler<>          button_handler_{};
     mpapp::stack_layout_handler<>    layout_handler_{};
 
     mpapp::content_page                cp_{};

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::stack_layout` (T-0011).
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_stack_layout` (T-0011).
 
 #include <string>
 #include <vector>
@@ -14,7 +14,7 @@ using namespace mpapp;
 
 TEST_CASE("stack_layout mock handler records initial property values on bind",
           "[mock][stack_layout]") {
-    stack_layout s;
+    internal::basic_stack_layout s;
     stack_layout_handler<platform::mock> h;
 
     h.map_orientation(s);
@@ -35,7 +35,7 @@ TEST_CASE("stack_layout mock handler records initial property values on bind",
 
 TEST_CASE("stack_layout mock handler fires once per real property change",
           "[mock][stack_layout]") {
-    stack_layout s;
+    internal::basic_stack_layout s;
     stack_layout_handler<platform::mock> h;
 
     h.map_orientation(s);
@@ -57,8 +57,8 @@ TEST_CASE("stack_layout mock handler fires once per real property change",
 
 TEST_CASE("stack_layout mock handler records child-mutation commands",
           "[mock][stack_layout]") {
-    button b1, b2;
-    stack_layout s;
+    internal::basic_button b1, b2;
+    internal::basic_stack_layout s;
     stack_layout_handler<platform::mock> h;
 
     h.map_add(s, b1);

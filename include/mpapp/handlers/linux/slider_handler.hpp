@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 slider handler — wraps GtkScale.
+// Part of MPAPP. GTK4 basic_slider handler — wraps GtkScale.
 
 #ifndef MPAPP_HANDLERS_LINUX_SLIDER_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_SLIDER_HANDLER_HPP
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../slider.hpp"
+#include "../../internal/basic_slider.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class slider_handler<platform::linux_> {
@@ -23,9 +23,9 @@ public:
     slider_handler(slider_handler&&)                 = delete;
     slider_handler& operator=(slider_handler&&)      = delete;
 
-    void map_value(slider& s);
-    void map_minimum(slider& s);
-    void map_maximum(slider& s);
+    void map_value(basic_slider& s);
+    void map_minimum(basic_slider& s);
+    void map_maximum(basic_slider& s);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -51,7 +51,6 @@ private:
     signal_slot<const double&>  maximum_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_SLIDER_HANDLER_HPP

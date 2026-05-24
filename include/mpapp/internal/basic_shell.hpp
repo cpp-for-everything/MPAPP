@@ -1,0 +1,230 @@
+// SPDX-License-Identifier: Apache-2.0
+// Part of MPAPP. See vault/10_Architecture/Components/Shell.md
+//                  vault/20_ADRs/ADR-0014-page-navigation-stack.md
+//
+// `mpapp::shell` — top-level app shell with URI routing + tabs +
+// flyout. Composes TabbedPage / NavigationPage / FlyoutPage at the
+// page level. The mock surface focuses on the routing-and-navigation
+// primitives:
+//   - register_route(name) → record known routes
+//   - go_to(uri)           → mock parser updates current_route +
+//                           current_tab_index for routes of the
+//                           form "//tab_name" or "//tab_name/leaf"
+// Full Shell semantics (route templates with parameters, route guards,
+// route lifecycle Aware interfaces) land with the URI routing ADR.
+
+#ifndef MPAPP_INTERNAL_BASIC_SHELL_HPP
+#define MPAPP_INTERNAL_BASIC_SHELL_HPP
+
+#include <algorithm>
+#include <cstddef>
+#include <functional>
+#include <string>
+#include <string_view>
+#include <vector>
+
+#include "../observable.hpp"
+#include "../page.hpp"
+#include "../platform.hpp"
+#include "../route.hpp"
+#include "../signal.hpp"
+
+namespace mpapp::internal {
+
+template <class Platform = platform::current>
+class shell_handler;
+
+class basic_shell : public internal::basic_page {
+public:
+    basic_shell() = default;
+    ~basic_shell() override = default;
+
+    basic_shell(const basic_shell&)            = delete;
+    basic_shell& operator=(const basic_shell&) = delete;
+    basic_shell(basic_shell&&)                 = delete;
+    basic_shell& operator=(basic_shell&&)      = delete;
+
+    // ----- Surface ------------------------------------------------------
+
+    Observable<std::string>              current_route{"//"};
+    Observable<std::vector<std::string>> tabs{};               // tab labels (top-level)
+    Observable<int>                      current_tab_index{0};
+    Observable<bool>                     is_flyout_open{false};
+    Observable<basic_page*>                    flyout_content{nullptr};
+    // Main content area. Apps swap this on tab-selection / go_to events.
+    Observable<basic_page*>                    current_content{nullptr};
+
+    // Known route names registered via register_route().
+    Observable<std::vector<std::string>> registered_routes{};
+
+    // Route guards. Two-phase: `can_deactivate` checks "am I allowed
+    // to leave the current route?" (carries both current + target).
+    // `can_activate` checks "am I allowed to enter the target route?"
+    // (carries the target). Either returning false aborts the
+    // navigation (current_route stays where it was, navigated does
+    // NOT fire, navigation_blocked DOES with the rejected target).
+    //
+    //   // "you have unsaved changes" pattern (deactivate guard):
+    //   basic_shell.can_deactivate = [&](std::string_view current,
+    //                              std::string_view target) {
+    //       (void)current; (void)target;
+    //       if (form.is_dirty()) {
+    //           show_dirty_dialog();
+    //           return false;
+    //       }
+    //       return true;
+    //   };
+    //
+    //   // "auth-required" pattern (activate guard):
+    //   basic_shell.can_activate = [&](std::string_view target) {
+    //       return !target.contains("admin") || user.is_logged_in();
+    //   };
+    //
+    // Both guards fire for the string-based `go_to(uri)` and the
+    // typed `go_to<Path, &Table>(args...)`. The deactivate guard
+    // fires first; if it passes, the activate guard runs.
+    using nav_activate_guard_t   = std::function<bool(std::string_view /*target*/)>;
+    using nav_deactivate_guard_t = std::function<bool(std::string_view /*current*/,
+                                                      std::string_view /*target*/)>;
+    Observable<nav_activate_guard_t>     can_activate{};
+    Observable<nav_deactivate_guard_t>   can_deactivate{};
+
+    // ----- Signals ------------------------------------------------------
+
+    signal<const std::string&> navigated{};            // emits the route after go_to() lands
+    signal<const std::string&> navigation_blocked{};   // emits the target uri when can_activate returns false
+    signal<bool>               flyout_toggled{};       // emits new is_flyout_open after flip
+
+    // ----- Mutators -----------------------------------------------------
+
+    void register_route(std::string_view name) {
+        auto v = registered_routes.get();
+        std::string s(name);
+        if (std::find(v.begin(), v.end(), s) == v.end()) {
+            v.push_back(std::move(s));
+            registered_routes.set(std::move(v));
+        }
+    }
+
+    void add_tab(std::string_view basic_label) {
+        auto v = tabs.get();
+        v.emplace_back(basic_label);
+        tabs.set(std::move(v));
+        if (current_tab_index.get() < 0 || current_tab_index.get() >= static_cast<int>(tabs.get().size())) {
+            current_tab_index.set(0);
+        }
+    }
+
+    // Parse the URI and update current_route / current_tab_index.
+    // Recognized shapes:
+    //   "//"               -> stay at current tab (no-op-ish, just sets route)
+    //   "//tab_name"       -> first tab whose basic_label matches becomes current
+    //   "//tab_name/leaf"  -> same as above, leaf segment ignored for mock
+    // Unrecognized routes still set current_route so observers see the change;
+    // the tab index doesn't move.
+    void go_to(std::string_view uri) {
+        // Route-guard chain. Deactivate first (we're leaving the
+        // current route), then activate (we're entering the target).
+        const std::string current_uri = current_route.get();
+        if (const auto& dg = can_deactivate.get();
+            dg && !dg(std::string_view{current_uri}, uri)) {
+            navigation_blocked.emit(std::string{uri});
+            return;
+        }
+        if (const auto& ag = can_activate.get(); ag && !ag(uri)) {
+            navigation_blocked.emit(std::string{uri});
+            return;
+        }
+        // Fire navigated_from on the outgoing basic_page BEFORE updating
+        // current_route, so the basic_page sees the previous URI.
+        if (basic_page* outgoing = current_content.get(); outgoing != nullptr) {
+            outgoing->navigated_from.emit(current_uri);
+        }
+        std::string u(uri);
+        if (u.rfind("//", 0) == 0) {
+            std::string_view tail = std::string_view{u}.substr(2);
+            std::string_view tab_name = tail;
+            // Cut at the first delimiter — either '/' (leaf path) or
+            // '?' (query string). Whichever comes first wins.
+            const auto slash = tab_name.find('/');
+            const auto qmark = tab_name.find('?');
+            const auto cut   = std::min(slash, qmark);
+            if (cut != std::string_view::npos) tab_name = tab_name.substr(0, cut);
+            if (!tab_name.empty()) {
+                const auto& v = tabs.get();
+                for (std::size_t i = 0; i < v.size(); ++i) {
+                    if (v[i] == tab_name) {
+                        current_tab_index.set(static_cast<int>(i));
+                        break;
+                    }
+                }
+            }
+        }
+        current_route.set(std::move(u));
+        navigated.emit(current_route.get());
+        // Fire navigated_to on the incoming basic_page AFTER current_route
+        // is updated, so the basic_page sees the new URI. current_content
+        // may not have been swapped to the target basic_page yet (the app
+        // typically does that in a `navigated` subscriber); whichever
+        // basic_page is current at this instant gets the signal.
+        if (basic_page* incoming = current_content.get(); incoming != nullptr) {
+            incoming->navigated_to.emit(current_route.get());
+        }
+    }
+
+    // Compile-time-checked navigation per
+    // [[ADR-0016-basic_shell-compile-time-routes]]. Path must be a route in
+    // Table; arg count + types must match the route's params. Builds
+    // the "//path?p1=v1&p2=v2" URI and delegates to the string-based
+    // go_to() — so all the runtime side effects (current_route,
+    // current_tab_index, navigated) work the same way regardless of
+    // which basic_entry point you took.
+    //
+    //   inline constexpr auto routes = mpapp::route_table{
+    //       mpapp::route<"home/details", details_page,
+    //                    mpapp::param<"id", int>>{},
+    //   };
+    //   basic_shell.go_to<"home/details", &routes>(42);
+    //
+    // Table is taken by pointer so it can be a non-type template
+    // parameter (C++20 — the pointed-to object must be a
+    // constexpr-initialized variable with linkage; `inline constexpr`
+    // covers it).
+    template <detail::fixed_string Path, auto* Table, class... Args>
+    void go_to(Args&&... args) {
+        using table_type = std::remove_pointer_t<decltype(Table)>;
+        static_assert(table_type::template has<Path>(),
+                      "basic_shell::go_to: route not in route_table");
+        using route_t = typename table_type::template route_for<Path>;
+        static_assert(std::tuple_size_v<typename route_t::params_t> == sizeof...(Args),
+                      "basic_shell::go_to: argument count doesn't match route's param count");
+        // Per-arg type checking happens inside build_uri's append_args.
+        std::string uri = table_type::template build_uri<Path>(std::forward<Args>(args)...);
+        go_to(std::string_view{uri});
+    }
+
+    void open_flyout()  { set_flyout(true);  }
+    void close_flyout() { set_flyout(false); }
+    void toggle_flyout(){ set_flyout(!is_flyout_open.get()); }
+
+    // ----- Handler ------------------------------------------------------
+
+    shell_handler<platform::current>&       shell_handler_ref() noexcept       { return *handler_; }
+    const shell_handler<platform::current>& shell_handler_ref() const noexcept { return *handler_; }
+    bool                                    has_shell_handler() const noexcept { return handler_ != nullptr; }
+    void                                    set_shell_handler(shell_handler<platform::current>& h) noexcept { handler_ = &h; }
+
+private:
+    void set_flyout(bool v) {
+        if (is_flyout_open.get() == v) return;
+        is_flyout_open.set(v);
+        flyout_toggled.emit(v);
+    }
+
+    shell_handler<platform::current>* handler_ = nullptr;
+};
+
+} // namespace mpapp::internal
+
+
+#endif // MPAPP_INTERNAL_BASIC_SHELL_HPP

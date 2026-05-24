@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 `menu_flyout` handler — wraps a `GtkPopover`
+// Part of MPAPP. GTK4 `basic_menu_flyout` handler — wraps a `GtkPopover`
 // containing a vertical `GtkBox`. Each child resolved via the
 // ADR-0013 dispatch registry is appended into the box; the popover
 // itself is the `native()` exposed to dispatch sites (but it returns
@@ -10,7 +10,7 @@
 // `GtkPopoverMenu` would be the more idiomatic choice but it requires
 // a `GMenuModel` action-backed structure that doesn't map cleanly to
 // the cross-platform `items: vector<view*>` surface. The popover-with-
-// box approach lets each menu_flyout_item / _separator / _sub_item
+// box approach lets each basic_menu_flyout_item / _separator / _sub_item
 // stay a regular widget that registers with the dispatch registry.
 
 #ifndef MPAPP_HANDLERS_LINUX_MENU_FLYOUT_HANDLER_HPP
@@ -18,14 +18,14 @@
 
 #include <vector>
 
-#include "../../menu_flyout.hpp"
+#include "../../internal/basic_menu_flyout.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_handler<platform::linux_> {
@@ -37,8 +37,8 @@ public:
     menu_flyout_handler(menu_flyout_handler&&)                 = delete;
     menu_flyout_handler& operator=(menu_flyout_handler&&)      = delete;
 
-    void map_items(menu_flyout& f);
-    void map_is_open(menu_flyout& f);
+    void map_items(basic_menu_flyout& f);
+    void map_is_open(basic_menu_flyout& f);
 
     void*       native() noexcept       { return native_; }   // GtkPopover*
     const void* native() const noexcept { return native_; }
@@ -59,7 +59,6 @@ private:
     signal_slot<const bool&>                  is_open_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_MENU_FLYOUT_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android table_view handler implementation.
+// Android basic_table_view handler implementation.
 
 #include "mpapp/handlers/android/table_view_handler.hpp"
 
@@ -9,7 +9,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -141,7 +141,7 @@ jobject make_list_view(JNIEnv* env, jobject context) {
     return make_object(env, "android/widget/ListView", context);
 }
 
-void install_string_adapter(JNIEnv* env, jobject context, jobject list_view,
+void install_string_adapter(JNIEnv* env, jobject context, jobject basic_list_view,
                              const std::vector<std::string>& items) {
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass string_cls = env->FindClass("java/lang/String");
@@ -180,7 +180,7 @@ void install_string_adapter(JNIEnv* env, jobject context, jobject list_view,
         jmethodID set_adapter = env->GetMethodID(lv_cls, "setAdapter",
             "(Landroid/widget/ListAdapter;)V");
         if (set_adapter != nullptr) {
-            env->CallVoidMethod(list_view, set_adapter, adapter);
+            env->CallVoidMethod(basic_list_view, set_adapter, adapter);
             if (env->ExceptionCheck()) env->ExceptionClear();
         }
         env->DeleteLocalRef(lv_cls);
@@ -188,10 +188,10 @@ void install_string_adapter(JNIEnv* env, jobject context, jobject list_view,
     env->DeleteLocalRef(adapter);
 }
 
-// Install MppItemClickRouter(table_view*, kind=2) on the ListView's
+// Install MppItemClickRouter(basic_table_view*, kind=2) on the ListView's
 // OnItemClickListener slot — user taps then resolve back to (section,
 // row) and emit row_tapped via item_click_router.cpp.
-void install_item_click_router(JNIEnv* env, jobject list_view_obj, table_view* tv) {
+void install_item_click_router(JNIEnv* env, jobject list_view_obj, basic_table_view* tv) {
     if (env == nullptr || list_view_obj == nullptr || tv == nullptr) return;
     if (env->ExceptionCheck()) env->ExceptionClear();
 
@@ -201,7 +201,7 @@ void install_item_click_router(JNIEnv* env, jobject list_view_obj, table_view* t
     if (ctor == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(router_cls); return; }
     jobject router = env->NewObject(router_cls, ctor,
                                     reinterpret_cast<jlong>(tv),
-                                    static_cast<jint>(2 /* table_view kind */));
+                                    static_cast<jint>(2 /* basic_table_view kind */));
     if (env->ExceptionCheck() || router == nullptr) {
         env->ExceptionClear();
         env->DeleteLocalRef(router_cls);
@@ -284,8 +284,8 @@ void table_view_handler<platform::android>::rebuild_typed(const std::vector<tabl
         // Section header — bold, primary-blue, leading "▾ ".
         jobject hdr = make_object(env, "android/widget/TextView", ctx);
         if (hdr != nullptr) {
-            const std::string label = "\xe2\x96\xbe " + sec.title;
-            tv_set_text(env, hdr, label.c_str());
+            const std::string basic_label = "\xe2\x96\xbe " + sec.title;
+            tv_set_text(env, hdr, basic_label.c_str());
             tv_set_text_color(env, hdr, COLOR_HEADER);
             if (tf_bold != nullptr) tv_set_typeface(env, hdr, tf_bold);
             view_set_padding(env, hdr, 24, 16, 24, 8);
@@ -322,19 +322,19 @@ void table_view_handler<platform::android>::apply_row_height(int /*h*/) {
     // setLayoutParams; not wired in v1.
 }
 
-void table_view_handler<platform::android>::map_sections(table_view& tv) {
+void table_view_handler<platform::android>::map_sections(basic_table_view& tv) {
     bound_ = &tv;
     rebuild_active();
     tv.sections.changed.subscribe(sec_slot_, sec_cb_);
 }
 
-void table_view_handler<platform::android>::map_typed_sections(table_view& tv) {
+void table_view_handler<platform::android>::map_typed_sections(basic_table_view& tv) {
     bound_ = &tv;
     rebuild_active();
     tv.typed_sections.changed.subscribe(typed_slot_, typed_cb_);
 }
 
-void table_view_handler<platform::android>::map_row_height(table_view& tv) {
+void table_view_handler<platform::android>::map_row_height(basic_table_view& tv) {
     apply_row_height(tv.row_height.get());
     tv.row_height.changed.subscribe(rh_slot_, rh_cb_);
 }
@@ -344,13 +344,12 @@ void table_view_handler<platform::android>::map_row_height(table_view& tv) {
 [[maybe_unused]] static constexpr int _suppress1 = MATCH_PARENT;
 [[maybe_unused]] static constexpr int _suppress2 = WRAP_CONTENT;
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_table_view(::mpapp::view* v) {
-    if (auto* t = dynamic_cast<::mpapp::table_view*>(v); t && t->has_tv_handler()) {
+    if (auto* t = dynamic_cast<::mpapp::internal::basic_table_view*>(v); t && t->has_tv_handler()) {
         return t->tv_handler().native();
     }
     return nullptr;

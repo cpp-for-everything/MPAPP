@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — UIKit window handler. Wraps UIWindow.
+// Part of MPAPP. T-0011 — UIKit basic_window handler. Wraps UIWindow.
 
 #ifndef MPAPP_HANDLERS_IOS_WINDOW_HANDLER_HPP
 #define MPAPP_HANDLERS_IOS_WINDOW_HANDLER_HPP
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../window.hpp"
+#include "../../internal/basic_window.hpp"
 
 #if defined(__APPLE__)
 #  include <TargetConditionals.h>
@@ -14,7 +14,7 @@
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class window_handler<platform::ios> {
@@ -27,7 +27,7 @@ public:
     window_handler(window_handler&&)                 = delete;
     window_handler& operator=(window_handler&&)      = delete;
 
-    void bind(window& w);
+    void bind(basic_window& w);
 
     // UIWindow*, retained.
     void*       native() noexcept       { return native_; }
@@ -44,7 +44,7 @@ private:
 
     void*   native_  = nullptr;  // retained UIWindow*
     void*   root_vc_ = nullptr;  // retained UIViewController*
-    window* bound_   = nullptr;
+    basic_window* bound_   = nullptr;
 
     title_cb_t                       title_cb_{this};
     content_cb_t                     content_cb_{this};
@@ -54,8 +54,7 @@ private:
     signal_slot<const bool&>         visible_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #  endif // TARGET_OS_IPHONE
 #endif // __APPLE__
 #endif // MPAPP_HANDLERS_IOS_WINDOW_HANDLER_HPP

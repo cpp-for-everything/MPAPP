@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::tabbed_view`.
+// Mock-handler tests for `mpapp::internal::basic_tabbed_view`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -13,7 +13,7 @@ using namespace mpapp;
 
 TEST_CASE("tabbed_view mock records initial values on bind",
           "[mock][tabbed_view]") {
-    tabbed_view tv;
+    internal::basic_tabbed_view tv;
     tabbed_view_handler<platform::mock> h;
 
     h.map_tab_titles(tv);
@@ -28,7 +28,7 @@ TEST_CASE("tabbed_view mock records initial values on bind",
 
 TEST_CASE("tabbed_view records tab_titles.count when collection changes",
           "[mock][tabbed_view]") {
-    tabbed_view tv;
+    internal::basic_tabbed_view tv;
     tabbed_view_handler<platform::mock> h;
 
     h.map_tab_titles(tv);
@@ -47,7 +47,7 @@ TEST_CASE("tabbed_view records tab_titles.count when collection changes",
 
 TEST_CASE("tabbed_view records selection changes",
           "[mock][tabbed_view]") {
-    tabbed_view tv;
+    internal::basic_tabbed_view tv;
     tabbed_view_handler<platform::mock> h;
 
     h.map_selected_index(tv);

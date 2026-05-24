@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android entry_cell handler — horizontal LinearLayout: leading
-// TextView (label) + trailing EditText (text, weight=1). TextWatcher
+// Android basic_entry_cell handler — horizontal LinearLayout: leading
+// TextView (basic_label) + trailing EditText (text, weight=1). TextWatcher
 // (kind=3) echoes user input back into `text`. EditorActionListener
 // (kind=1) emits `completed` on IME Done/Go/Send/Next/Search. Keyboard
 // kind maps to TextView InputType bits.
@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include "../../entry_cell.hpp"
+#include "../../internal/basic_entry_cell.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -18,7 +18,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class entry_cell_handler<platform::android> {
@@ -31,10 +31,10 @@ public:
     entry_cell_handler(entry_cell_handler&&)                 = delete;
     entry_cell_handler& operator=(entry_cell_handler&&)      = delete;
 
-    void map_label(entry_cell& c);
-    void map_text(entry_cell& c);
-    void map_placeholder(entry_cell& c);
-    void map_keyboard(entry_cell& c);
+    void map_label(basic_entry_cell& c);
+    void map_text(basic_entry_cell& c);
+    void map_placeholder(basic_entry_cell& c);
+    void map_keyboard(basic_entry_cell& c);
 
     jobject native() const noexcept { return native_; }
 
@@ -67,12 +67,12 @@ private:
     };
 
     jobject native_       = nullptr;  // LinearLayout horizontal
-    jobject label_view_   = nullptr;  // TextView (label)
+    jobject label_view_   = nullptr;  // TextView (basic_label)
     jobject edit_text_    = nullptr;  // EditText
     jobject watcher_      = nullptr;  // MppTextWatcher
     jobject ime_listener_ = nullptr;  // MppEditorActionListener
     bool    suppress_echo_ = false;
-    entry_cell* bound_     = nullptr;
+    basic_entry_cell* bound_     = nullptr;
 
     label_cb_t                          label_cb_{this};
     text_cb_t                           text_cb_{this};
@@ -89,7 +89,6 @@ void android_entry_cell_dispatch_text_changed(entry_cell_handler<platform::andro
 void android_entry_cell_dispatch_editor_action(entry_cell_handler<platform::android>* h,
                                                int action_id);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_ENTRY_CELL_HANDLER_HPP

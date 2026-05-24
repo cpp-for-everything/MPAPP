@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android menu_flyout_item handler implementation.
+// Part of MPAPP. Android basic_menu_flyout_item handler implementation.
 
 #include "mpapp/handlers/android/menu_flyout_item_handler.hpp"
 
@@ -10,9 +10,9 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/menu_flyout_item.hpp"
+#include "mpapp/internal/basic_menu_flyout_item.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -91,31 +91,30 @@ void menu_flyout_item_handler<platform::android>::apply_is_enabled(bool v) {
     view_set_enabled(env, native_, v);
 }
 
-void menu_flyout_item_handler<platform::android>::map_text(menu_flyout_item& i) {
+void menu_flyout_item_handler<platform::android>::map_text(basic_menu_flyout_item& i) {
     owner_ = &i;
     apply_text(i.text.get());
     i.text.changed.subscribe(text_slot_, text_cb_);
     // Click wiring deferred to M-05: the existing `MppClickRouter`
     // (used by button_handler) is hard-coded to dispatch into
-    // `mpapp::button*`. A `MppMenuItemClickRouter` lands alongside the
+    // `mpapp::basic_button*`. A `MppMenuItemClickRouter` lands alongside the
     // M-05 context-flyout work — adding new Java classes is outside
     // the M-04b worker scope.
     listener_ = false;
 }
 
-void menu_flyout_item_handler<platform::android>::map_is_enabled(menu_flyout_item& i) {
+void menu_flyout_item_handler<platform::android>::map_is_enabled(basic_menu_flyout_item& i) {
     apply_is_enabled(i.is_enabled.get());
     i.is_enabled.changed.subscribe(is_enabled_slot_, is_enabled_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 jobject dispatch_menu_flyout_item(::mpapp::view* v) {
-    if (auto* i = dynamic_cast<::mpapp::menu_flyout_item*>(v); i && i->has_handler()) {
+    if (auto* i = dynamic_cast<::mpapp::internal::basic_menu_flyout_item*>(v); i && i->has_handler()) {
         return i->handler().native();
     }
     return nullptr;

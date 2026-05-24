@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 menu_flyout_item handler implementation.
+// Part of MPAPP. WinUI 3 basic_menu_flyout_item handler implementation.
 
 #include "mpapp/handlers/windows/menu_flyout_item_handler.hpp"
 
@@ -14,9 +14,9 @@
 
 #include "winrt_strings.hpp"
 
-#include "mpapp/menu_flyout_item.hpp"
+#include "mpapp/internal/basic_menu_flyout_item.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -47,14 +47,14 @@ void menu_flyout_item_handler<platform::windows>::apply_is_enabled(bool v) {
     } catch (...) {}
 }
 
-void menu_flyout_item_handler<platform::windows>::map_text(menu_flyout_item& i) {
+void menu_flyout_item_handler<platform::windows>::map_text(basic_menu_flyout_item& i) {
     owner_ = &i;
     apply_text(i.text.get());
     i.text.changed.subscribe(text_slot_, text_cb_);
     // Wire the native Click event once — the first mapper to bind
     // owns the wiring (text is always mapped first in standard order).
     if (native_ != nullptr && click_token_.value == 0) {
-        menu_flyout_item* target = owner_;
+        basic_menu_flyout_item* target = owner_;
         click_token_ = native_.Click([target](
             ::winrt::Windows::Foundation::IInspectable const&,
             ::winrt::Microsoft::UI::Xaml::RoutedEventArgs const&) {
@@ -65,19 +65,18 @@ void menu_flyout_item_handler<platform::windows>::map_text(menu_flyout_item& i) 
     }
 }
 
-void menu_flyout_item_handler<platform::windows>::map_is_enabled(menu_flyout_item& i) {
+void menu_flyout_item_handler<platform::windows>::map_is_enabled(basic_menu_flyout_item& i) {
     apply_is_enabled(i.is_enabled.get());
     i.is_enabled.changed.subscribe(is_enabled_slot_, is_enabled_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_menu_flyout_item(::mpapp::view* v) {
-    if (auto* i = dynamic_cast<::mpapp::menu_flyout_item*>(v); i && i->has_handler()) {
+    if (auto* i = dynamic_cast<::mpapp::internal::basic_menu_flyout_item*>(v); i && i->has_handler()) {
         // MenuFlyoutItem → MenuFlyoutItemBase → Control → FrameworkElement
         // → UIElement; the implicit conversion handles the upcast.
         return i->handler().native();

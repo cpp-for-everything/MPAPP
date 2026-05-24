@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android menu_flyout handler implementation.
+// Part of MPAPP. Android basic_menu_flyout handler implementation.
 
 #include "mpapp/handlers/android/menu_flyout_handler.hpp"
 
@@ -8,10 +8,10 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-#include "mpapp/menu_flyout.hpp"
+#include "mpapp/internal/basic_menu_flyout.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -122,23 +122,22 @@ void menu_flyout_handler<platform::android>::apply_is_open(bool v) {
     view_set_visibility(env, native_, v ? VIEW_VISIBLE : VIEW_GONE);
 }
 
-void menu_flyout_handler<platform::android>::map_items(menu_flyout& f) {
+void menu_flyout_handler<platform::android>::map_items(basic_menu_flyout& f) {
     apply_items(f.items.get());
     f.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-void menu_flyout_handler<platform::android>::map_is_open(menu_flyout& f) {
+void menu_flyout_handler<platform::android>::map_is_open(basic_menu_flyout& f) {
     apply_is_open(f.is_open.get());
     f.is_open.changed.subscribe(is_open_slot_, is_open_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
-// menu_flyout is a popup surface, not a regular container child. The
+// basic_menu_flyout is a popup surface, not a regular container child. The
 // dispatcher returns nullptr so container dispatch sites skip it
 // cleanly. The registrar is still installed for ADR-0013 uniformity.
 jobject dispatch_menu_flyout(::mpapp::view* /*v*/) {

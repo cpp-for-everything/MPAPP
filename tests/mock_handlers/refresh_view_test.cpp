@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock-handler tests for `mpapp::refresh_view`.
+// Mock-handler tests for `mpapp::internal::basic_refresh_view`.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -19,7 +19,7 @@ class plain_view : public view {};
 
 TEST_CASE("refresh_view mock records initial values on bind",
           "[mock][refresh_view]") {
-    refresh_view rv;
+    internal::basic_refresh_view rv;
     refresh_view_handler<platform::mock> h;
 
     h.map_content(rv);
@@ -36,7 +36,7 @@ TEST_CASE("refresh_view mock records initial values on bind",
 
 TEST_CASE("refresh_view mock records is_refreshing transitions",
           "[mock][refresh_view]") {
-    refresh_view rv;
+    internal::basic_refresh_view rv;
     refresh_view_handler<platform::mock> h;
 
     h.map_is_refreshing(rv);
@@ -56,7 +56,7 @@ TEST_CASE("refresh_view mock records is_refreshing transitions",
 
 TEST_CASE("refresh_view mock tracks content presence and color changes",
           "[mock][refresh_view][content]") {
-    refresh_view rv;
+    internal::basic_refresh_view rv;
     refresh_view_handler<platform::mock> h;
 
     h.map_content(rv);

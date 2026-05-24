@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock handler for `mpapp::flyout_page`.
+// Part of MPAPP. Mock handler for `mpapp::basic_flyout_page`.
 
 #ifndef MPAPP_HANDLERS_MOCK_FLYOUT_PAGE_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_FLYOUT_PAGE_HANDLER_HPP
 
-#include "../../flyout_page.hpp"
+#include "../../internal/basic_flyout_page.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class flyout_page_handler<platform::mock> : public mock_handler_base {
@@ -21,17 +21,17 @@ public:
     flyout_page_handler(flyout_page_handler&&)                 = delete;
     flyout_page_handler& operator=(flyout_page_handler&&)      = delete;
 
-    void map_flyout(flyout_page& fp) {
+    void map_flyout(basic_flyout_page& fp) {
         record_change("flyout.present", fp.flyout.get() != nullptr);
         fp.flyout.changed.subscribe(slot_flyout_, flyout_cb_);
     }
 
-    void map_detail(flyout_page& fp) {
+    void map_detail(basic_flyout_page& fp) {
         record_change("detail.present", fp.detail.get() != nullptr);
         fp.detail.changed.subscribe(slot_detail_, detail_cb_);
     }
 
-    void map_is_presented(flyout_page& fp) {
+    void map_is_presented(basic_flyout_page& fp) {
         record_change("is_presented", fp.is_presented.get());
         fp.is_presented.changed.subscribe(slot_pres_, pres_cb_);
     }
@@ -42,7 +42,7 @@ private:
     struct slot_recorder {
         self_t*     self = nullptr;
         const char* tag  = "";
-        void operator()(page* p) const { self->record_change(tag, p != nullptr); }
+        void operator()(basic_page* p) const { self->record_change(tag, p != nullptr); }
     };
     struct pres_recorder {
         self_t* self = nullptr;
@@ -53,11 +53,10 @@ private:
     slot_recorder detail_cb_{this, "detail.present"};
     pres_recorder pres_cb_{this};
 
-    signal_slot<page* const&> slot_flyout_{};
-    signal_slot<page* const&> slot_detail_{};
+    signal_slot<basic_page* const&> slot_flyout_{};
+    signal_slot<basic_page* const&> slot_detail_{};
     signal_slot<const bool&>  slot_pres_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_FLYOUT_PAGE_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 menu_flyout handler implementation.
+// Part of MPAPP. GTK4 basic_menu_flyout handler implementation.
 
 #include "mpapp/handlers/linux/menu_flyout_handler.hpp"
 
@@ -9,10 +9,10 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-#include "mpapp/menu_flyout.hpp"
+#include "mpapp/internal/basic_menu_flyout.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 menu_flyout_handler<platform::linux_>::menu_flyout_handler() {
     GtkWidget* popover = gtk_popover_new();
@@ -33,7 +33,7 @@ void menu_flyout_handler<platform::linux_>::apply_items(const std::vector<view*>
     }
     for (view* child : v) {
         if (child == nullptr) continue;
-        // ADR-0013 — each menu_flyout_item / _separator / _sub_item
+        // ADR-0013 — each basic_menu_flyout_item / _separator / _sub_item
         // self-registers a dispatcher that returns its GtkWidget*.
         if (GtkWidget* w = detail::linux_dispatch::dispatch(child); w != nullptr) {
             gtk_box_append(box, w);
@@ -51,23 +51,22 @@ void menu_flyout_handler<platform::linux_>::apply_is_open(bool v) {
     }
 }
 
-void menu_flyout_handler<platform::linux_>::map_items(menu_flyout& f) {
+void menu_flyout_handler<platform::linux_>::map_items(basic_menu_flyout& f) {
     apply_items(f.items.get());
     f.items.changed.subscribe(items_slot_, items_cb_);
 }
 
-void menu_flyout_handler<platform::linux_>::map_is_open(menu_flyout& f) {
+void menu_flyout_handler<platform::linux_>::map_is_open(basic_menu_flyout& f) {
     apply_is_open(f.is_open.get());
     f.is_open.changed.subscribe(is_open_slot_, is_open_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
-// menu_flyout is a popup surface (`GtkPopover`), not a child of a
+// basic_menu_flyout is a popup surface (`GtkPopover`), not a child of a
 // regular GtkBox/GtkGrid container. Returning nullptr ensures
 // container dispatch sites skip it cleanly. The registrar is still
 // installed for ADR-0013 uniformity.

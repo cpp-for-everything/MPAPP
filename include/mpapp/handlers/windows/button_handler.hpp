@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0003 — WinUI 3 button spike.
+// Part of MPAPP. T-0003 — WinUI 3 basic_button spike.
 //
-// `button_handler<platform::windows>` — wraps a
+// `internal::button_handler<platform::windows>` — wraps a
 // `winrt::Microsoft::UI::Xaml::Controls::Button`, propagates property
-// changes from the cross-platform `button`'s Observables to the native
-// widget, and forwards the native `Click` event back into the
-// cross-platform `clicked` signal.
+// changes from the cross-platform `internal::basic_button`'s Observables
+// to the native widget, and forwards the native `Click` event back into
+// the cross-platform `clicked` signal.
 
 #ifndef MPAPP_HANDLERS_WINDOWS_BUTTON_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_BUTTON_HANDLER_HPP
 
-#include "../../button.hpp"
+#include "../../internal/basic_button.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -21,7 +21,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Windows.Foundation.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class button_handler<platform::windows> {
@@ -36,10 +36,10 @@ public:
 
     // Property-mapper hook. Pushes `b.text.get()` into the native widget
     // and wires the change-signal so subsequent sets propagate.
-    void map_text(button& b);
+    void map_text(basic_button& b);
 
     // Wires the native `Click` event into `b.clicked`. Idempotent.
-    void map_clicked(button& b);
+    void map_clicked(basic_button& b);
 
     // Native widget access — for the host to add to a Window content tree.
     winrt::Microsoft::UI::Xaml::Controls::Button&       native() noexcept       { return native_; }
@@ -62,7 +62,7 @@ private:
     text_callback                                text_callback_{this};
 };
 
-} // namespace mpapp
+} // namespace mpapp::internal
 
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_BUTTON_HANDLER_HPP

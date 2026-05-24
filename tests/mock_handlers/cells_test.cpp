@@ -23,7 +23,7 @@ using namespace mpapp;
 
 TEST_CASE("text_cell mock records text + detail changes",
           "[mock][cell][text_cell]") {
-    text_cell c;
+    internal::basic_text_cell c;
     text_cell_handler<platform::mock> h;
     h.map_text(c);
     h.map_detail(c);
@@ -40,7 +40,7 @@ TEST_CASE("text_cell mock records text + detail changes",
 
 TEST_CASE("entry_cell mock records label + text changes",
           "[mock][cell][entry_cell]") {
-    entry_cell c;
+    internal::basic_entry_cell c;
     entry_cell_handler<platform::mock> h;
     h.map_label(c);
     h.map_text(c);
@@ -57,7 +57,7 @@ TEST_CASE("entry_cell mock records label + text changes",
 
 TEST_CASE("switch_cell toggle() flips on + emits signal",
           "[mock][cell][switch_cell]") {
-    switch_cell c;
+    internal::basic_switch_cell c;
     switch_cell_handler<platform::mock> h;
     h.map_text(c);
     h.map_on(c);
@@ -86,8 +86,8 @@ TEST_CASE("switch_cell toggle() flips on + emits signal",
 
 TEST_CASE("view_cell records content.present transitions",
           "[mock][cell][view_cell]") {
-    label child;
-    view_cell c;
+    internal::basic_label child;
+    internal::basic_view_cell c;
     view_cell_handler<platform::mock> h;
     h.map_content(c);
     h.clear_calls();
@@ -103,7 +103,7 @@ TEST_CASE("view_cell records content.present transitions",
 
 TEST_CASE("image_cell carries text + image_uri",
           "[mock][cell][image_cell]") {
-    image_cell c;
+    internal::basic_image_cell c;
     image_cell_handler<platform::mock> h;
     h.map_text(c);
     h.map_image_uri(c);
@@ -120,7 +120,7 @@ TEST_CASE("image_cell carries text + image_uri",
 
 TEST_CASE("image_cell inherits text_cell so detail also exists",
           "[mock][cell][image_cell]") {
-    image_cell c;
+    internal::basic_image_cell c;
     c.text      = "Account";
     c.detail    = "user@example.com";
     c.image_uri = "file:///avatar.png";
@@ -133,7 +133,7 @@ TEST_CASE("image_cell inherits text_cell so detail also exists",
 
 TEST_CASE("cell base carries is_enabled + tapped",
           "[mock][cell]") {
-    text_cell c;
+    internal::basic_text_cell c;
     CHECK(c.is_enabled.get() == true);
 
     int hits = 0;

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android collection_view handler implementation. T-0028: migrated
+// Android basic_collection_view handler implementation. T-0028: migrated
 // from android.widget.ListView/GridView (vertical-only) to
 // androidx.recyclerview.widget.RecyclerView with a swappable
 // LayoutManager — covers all four collection_layout values:
@@ -21,7 +21,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -276,7 +276,7 @@ collection_view_handler<platform::android>::collection_view_handler() {
         }
     }
     // adapter_ is created lazily once map_items_source / map_typed_items
-    // binds a collection_view (we need its address as the ownerPtr).
+    // binds a basic_collection_view (we need its address as the ownerPtr).
 }
 
 collection_view_handler<platform::android>::~collection_view_handler() {
@@ -289,11 +289,11 @@ collection_view_handler<platform::android>::~collection_view_handler() {
 
 namespace {
 // One-time: create the adapter (needs bound_->this pointer) and attach
-// it to the RecyclerView. Re-entry is a no-op.
+// it to the RecyclerView. Re-basic_entry is a no-op.
 void ensure_adapter(JNIEnv* env,
                     jobject inner,
                     jobject& adapter_slot,
-                    collection_view* cv) {
+                    basic_collection_view* cv) {
     if (env == nullptr || inner == nullptr || cv == nullptr) return;
     if (adapter_slot != nullptr) return;
     adapter_slot = make_collection_adapter(env, reinterpret_cast<jlong>(cv));
@@ -378,41 +378,40 @@ void collection_view_handler<platform::android>::apply_layout(collection_layout 
     env->DeleteGlobalRef(lm);
 }
 
-void collection_view_handler<platform::android>::map_items_source(collection_view& cv) {
+void collection_view_handler<platform::android>::map_items_source(basic_collection_view& cv) {
     bound_ = &cv;
     rebuild_active();
     cv.items_source.changed.subscribe(items_slot_, items_cb_);
 }
 
-void collection_view_handler<platform::android>::map_typed_items(collection_view& cv) {
+void collection_view_handler<platform::android>::map_typed_items(basic_collection_view& cv) {
     bound_ = &cv;
     rebuild_active();
     cv.typed_items.changed.subscribe(typed_slot_, typed_cb_);
     cv.materialized_changed.subscribe(materialized_slot_, materialized_cb_);
 }
 
-void collection_view_handler<platform::android>::map_selected_index(collection_view& cv) {
+void collection_view_handler<platform::android>::map_selected_index(basic_collection_view& cv) {
     apply_selection(cv.selected_index.get());
     cv.selected_index.changed.subscribe(sel_slot_, sel_cb_);
 }
 
-void collection_view_handler<platform::android>::map_selection_mode(collection_view& cv) {
+void collection_view_handler<platform::android>::map_selection_mode(basic_collection_view& cv) {
     apply_selection_mode(cv.selection_mode.get());
     cv.selection_mode.changed.subscribe(mode_slot_, mode_cb_);
 }
 
-void collection_view_handler<platform::android>::map_layout(collection_view& cv) {
+void collection_view_handler<platform::android>::map_layout(basic_collection_view& cv) {
     apply_layout(cv.layout.get());
     cv.layout.changed.subscribe(layout_slot_, layout_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_collection_view(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::collection_view*>(v); c && c->has_cv_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_collection_view*>(v); c && c->has_cv_handler()) {
         return c->cv_handler().native();
     }
     return nullptr;

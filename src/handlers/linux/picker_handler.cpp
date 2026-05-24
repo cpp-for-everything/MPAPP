@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 picker handler implementation.
+// Part of MPAPP. GTK4 basic_picker handler implementation.
 
 #include "mpapp/handlers/linux/picker_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 picker_handler<platform::linux_>::picker_handler() {
     // Empty string list initially; items() populates it.
@@ -43,33 +43,31 @@ void picker_handler<platform::linux_>::apply_selected_index(int v) {
     suppress_echo_ = false;
 }
 
-void picker_handler<platform::linux_>::map_items(picker& p) {
+void picker_handler<platform::linux_>::map_items(basic_picker& p) {
     apply_items(p.items.get());
     p.items.changed.subscribe(items_slot_, items_cb_);
 }
-void picker_handler<platform::linux_>::map_selected_index(picker& p) {
+void picker_handler<platform::linux_>::map_selected_index(basic_picker& p) {
     apply_selected_index(p.selected_index.get());
     p.selected_index.changed.subscribe(selected_slot_, selected_cb_);
 }
-void picker_handler<platform::linux_>::map_title(picker& p) {
+void picker_handler<platform::linux_>::map_title(basic_picker& p) {
     apply_title(p.title.get());
     p.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register picker so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_picker so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/picker.hpp"
+#include "mpapp/internal/basic_picker.hpp"
 
 namespace {
 
 GtkWidget* dispatch_picker(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::picker*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_picker*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

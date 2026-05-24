@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Mock handler for `mpapp::text_cell`.
+// Mock handler for `mpapp::basic_text_cell`.
 
 #ifndef MPAPP_HANDLERS_MOCK_TEXT_CELL_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_TEXT_CELL_HANDLER_HPP
@@ -7,10 +7,10 @@
 #include <string>
 
 #include "../../platform.hpp"
-#include "../../text_cell.hpp"
+#include "../../internal/basic_text_cell.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class text_cell_handler<platform::mock> : public mock_handler_base {
@@ -23,11 +23,11 @@ public:
     text_cell_handler(text_cell_handler&&)                 = delete;
     text_cell_handler& operator=(text_cell_handler&&)      = delete;
 
-    void map_text(text_cell& c) {
+    void map_text(basic_text_cell& c) {
         record_change("text", c.text.get());
         c.text.changed.subscribe(text_slot_, text_cb_);
     }
-    void map_detail(text_cell& c) {
+    void map_detail(basic_text_cell& c) {
         record_change("detail", c.detail.get());
         c.detail.changed.subscribe(detail_slot_, detail_cb_);
     }
@@ -40,6 +40,5 @@ private:
     signal_slot<const std::string&>             detail_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_TEXT_CELL_HANDLER_HPP

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 indicator_view handler implementation.
+// Part of MPAPP. WinUI 3 basic_indicator_view handler implementation.
 
 #include "mpapp/handlers/windows/indicator_view_handler.hpp"
 
@@ -20,7 +20,7 @@
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace mux   = ::winrt::Microsoft::UI::Xaml;
 namespace muxc  = ::winrt::Microsoft::UI::Xaml::Controls;
@@ -121,34 +121,33 @@ void indicator_view_handler<platform::windows>::apply_selected_indicator_color(c
     recolor_dots();
 }
 
-void indicator_view_handler<platform::windows>::map_count(indicator_view& iv) {
+void indicator_view_handler<platform::windows>::map_count(basic_indicator_view& iv) {
     bound_ = &iv;
     apply_count(iv.count.get());
     iv.count.changed.subscribe(count_slot_, count_cb_);
 }
-void indicator_view_handler<platform::windows>::map_position(indicator_view& iv) {
+void indicator_view_handler<platform::windows>::map_position(basic_indicator_view& iv) {
     bound_ = &iv;
     apply_position(iv.position.get());
     iv.position.changed.subscribe(position_slot_, position_cb_);
 }
-void indicator_view_handler<platform::windows>::map_indicator_color(indicator_view& iv) {
+void indicator_view_handler<platform::windows>::map_indicator_color(basic_indicator_view& iv) {
     bound_ = &iv;
     apply_indicator_color(iv.indicator_color.get());
     iv.indicator_color.changed.subscribe(color_slot_, color_cb_);
 }
-void indicator_view_handler<platform::windows>::map_selected_indicator_color(indicator_view& iv) {
+void indicator_view_handler<platform::windows>::map_selected_indicator_color(basic_indicator_view& iv) {
     bound_ = &iv;
     apply_selected_indicator_color(iv.selected_indicator_color.get());
     iv.selected_indicator_color.changed.subscribe(sel_color_slot_, sel_color_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ----- ADR-0013 self-registration --------------------------------------------
 
 namespace {
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_indicator_view(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::indicator_view*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_indicator_view*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

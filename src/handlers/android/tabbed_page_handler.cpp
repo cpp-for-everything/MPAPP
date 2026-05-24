@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android tabbed_page handler implementation.
+// Android basic_tabbed_page handler implementation.
 
 #include "mpapp/handlers/android/tabbed_page_handler.hpp"
 
@@ -7,9 +7,9 @@
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
-#include "mpapp/page.hpp"
+#include "mpapp/internal/basic_page.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -207,7 +207,7 @@ tabbed_page_handler<platform::android>::~tabbed_page_handler() {
     }
 }
 
-void tabbed_page_handler<platform::android>::rebuild_children(const std::vector<page*>& kids) {
+void tabbed_page_handler<platform::android>::rebuild_children(const std::vector<basic_page*>& kids) {
     current_kids_ = kids;
     JNIEnv* env = detail::attach_current_thread();
     if (env == nullptr) return;
@@ -221,21 +221,21 @@ void tabbed_page_handler<platform::android>::rebuild_children(const std::vector<
     vg_remove_all(env, tab_strip_);
     jobject ctx = detail::get_activity();
     for (std::size_t i = 0; i < kids.size(); ++i) {
-        page* p = kids[i];
+        basic_page* p = kids[i];
         if (p == nullptr) {
             tab_views_.push_back(nullptr);
             continue;
         }
-        jobject label = make_object(env, "android/widget/TextView", ctx);
-        if (label != nullptr) {
-            tv_set_text(env, label, p->title.get().c_str());
-            view_set_padding(env, label, 32, 16, 32, 16);
-            install_tab_click_router(env, label,
+        jobject basic_label = make_object(env, "android/widget/TextView", ctx);
+        if (basic_label != nullptr) {
+            tv_set_text(env, basic_label, p->title.get().c_str());
+            view_set_padding(env, basic_label, 32, 16, 32, 16);
+            install_tab_click_router(env, basic_label,
                                      reinterpret_cast<jlong>(bound_),
                                      static_cast<jint>(i));
-            vg_add(env, tab_strip_, label);
+            vg_add(env, tab_strip_, basic_label);
             // Keep a strong (global) ref so apply_selection can restyle it.
-            tab_views_.push_back(label);
+            tab_views_.push_back(basic_label);
         } else {
             tab_views_.push_back(nullptr);
         }
@@ -266,31 +266,30 @@ void tabbed_page_handler<platform::android>::apply_selection(int idx) {
     // Swap content area.
     vg_remove_all(env, content_host_);
     if (idx < 0 || idx >= static_cast<int>(current_kids_.size())) return;
-    page* sel = current_kids_[static_cast<std::size_t>(idx)];
+    basic_page* sel = current_kids_[static_cast<std::size_t>(idx)];
     if (sel == nullptr) return;
     if (jobject native = detail::android_dispatch::dispatch(sel); native != nullptr) {
         vg_add(env, content_host_, native);
     }
 }
 
-void tabbed_page_handler<platform::android>::map_children(tabbed_page& tp) {
+void tabbed_page_handler<platform::android>::map_children(basic_tabbed_page& tp) {
     bound_ = &tp;
     rebuild_children(tp.children.get());
     tp.children.changed.subscribe(children_slot_, children_cb_);
 }
 
-void tabbed_page_handler<platform::android>::map_selected_index(tabbed_page& tp) {
+void tabbed_page_handler<platform::android>::map_selected_index(basic_tabbed_page& tp) {
     apply_selection(tp.selected_index.get());
     tp.selected_index.changed.subscribe(selection_slot_, selection_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_tabbed_page(::mpapp::view* v) {
-    if (auto* t = dynamic_cast<::mpapp::tabbed_page*>(v); t && t->has_tp_handler()) {
+    if (auto* t = dynamic_cast<::mpapp::internal::basic_tabbed_page*>(v); t && t->has_tp_handler()) {
         return t->tp_handler().native();
     }
     return nullptr;

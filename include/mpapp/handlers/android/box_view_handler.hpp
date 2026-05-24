@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android box_view handler — colored rectangle with
+// Part of MPAPP. Android basic_box_view handler — colored rectangle with
 // rounded corners. Implemented as `android.view.View` with a
 // `GradientDrawable` background carrying the fill color and per-corner
 // radii.
@@ -7,7 +7,7 @@
 #ifndef MPAPP_HANDLERS_ANDROID_BOX_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_BOX_VIEW_HANDLER_HPP
 
-#include "../../box_view.hpp"
+#include "../../internal/basic_box_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -15,7 +15,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class box_view_handler<platform::android> {
@@ -28,8 +28,8 @@ public:
     box_view_handler(box_view_handler&&)                 = delete;
     box_view_handler& operator=(box_view_handler&&)      = delete;
 
-    void map_fill(box_view& b);
-    void map_corners(box_view& b);
+    void map_fill(basic_box_view& b);
+    void map_corners(basic_box_view& b);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -59,7 +59,6 @@ private:
     signal_slot<const corner_radius&>    corners_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_BOX_VIEW_HANDLER_HPP

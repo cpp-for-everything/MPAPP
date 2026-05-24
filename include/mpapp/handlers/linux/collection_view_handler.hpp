@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 collection_view handler. Wraps the platform recycler inside a
+// GTK4 basic_collection_view handler. Wraps the platform recycler inside a
 // stable outer GtkScrolledWindow (native_) so the ADR-0013 dispatch
 // handle doesn't move when we swap layouts.
 //
@@ -23,13 +23,13 @@
 #include <string>
 #include <vector>
 
-#include "../../collection_view.hpp"
+#include "../../internal/basic_collection_view.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class collection_view_handler<platform::linux_> {
@@ -42,11 +42,11 @@ public:
     collection_view_handler(collection_view_handler&&)                 = delete;
     collection_view_handler& operator=(collection_view_handler&&)      = delete;
 
-    void map_items_source(collection_view& cv);
-    void map_typed_items(collection_view& cv);
-    void map_selected_index(collection_view& cv);
-    void map_selection_mode(collection_view& cv);
-    void map_layout(collection_view& cv);
+    void map_items_source(basic_collection_view& cv);
+    void map_typed_items(basic_collection_view& cv);
+    void map_selected_index(basic_collection_view& cv);
+    void map_selection_mode(basic_collection_view& cv);
+    void map_layout(basic_collection_view& cv);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -101,7 +101,7 @@ private:
     void*       inner_  = nullptr;          // active inner widget
     layout_kind kind_   = layout_kind::unset;
 
-    collection_view* bound_ = nullptr;
+    basic_collection_view* bound_ = nullptr;
 
     items_cb_t        items_cb_{this};
     typed_cb_t        typed_cb_{this};
@@ -117,7 +117,6 @@ private:
     signal_slot<>                                          materialized_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_COLLECTION_VIEW_HANDLER_HPP

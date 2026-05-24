@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. T-0011 — AppKit label handler. Wraps NSTextField in
-// label mode (`bezeled=NO`, `editable=NO`, `selectable=NO`,
+// Part of MPAPP. T-0011 — AppKit basic_label handler. Wraps NSTextField in
+// basic_label mode (`bezeled=NO`, `editable=NO`, `selectable=NO`,
 // `drawsBackground=NO`).
 
 #ifndef MPAPP_HANDLERS_MACOS_LABEL_HANDLER_HPP
 #define MPAPP_HANDLERS_MACOS_LABEL_HANDLER_HPP
 
-#include "../../label.hpp"
+#include "../../internal/basic_label.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -16,7 +16,7 @@
 
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class label_handler<platform::macos> {
@@ -29,7 +29,7 @@ public:
     label_handler(label_handler&&)                 = delete;
     label_handler& operator=(label_handler&&)      = delete;
 
-    void map_text(label& l);
+    void map_text(basic_label& l);
 
     // NSTextField*, retained, type-erased.
     void*       native() noexcept       { return native_; }
@@ -48,8 +48,7 @@ private:
     signal_slot<const std::string&>  text_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #  endif // !TARGET_OS_IPHONE
 #endif // __APPLE__
 #endif // MPAPP_HANDLERS_MACOS_LABEL_HANDLER_HPP

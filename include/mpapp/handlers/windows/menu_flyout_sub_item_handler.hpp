@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 `menu_flyout_sub_item` handler — wraps
+// Part of MPAPP. WinUI 3 `basic_menu_flyout_sub_item` handler — wraps
 // `mux::Controls::MenuFlyoutSubItem`. `text` flows to `.Text()`;
 // `items` rebuild the submenu's Items collection by resolving each
 // child `view*` through the ADR-0013 dispatch registry.
@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#include "../../menu_flyout_sub_item.hpp"
+#include "../../internal/basic_menu_flyout_sub_item.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 #include "../../view.hpp"
@@ -19,7 +19,7 @@
 
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class menu_flyout_sub_item_handler<platform::windows> {
@@ -31,8 +31,8 @@ public:
     menu_flyout_sub_item_handler(menu_flyout_sub_item_handler&&)                 = delete;
     menu_flyout_sub_item_handler& operator=(menu_flyout_sub_item_handler&&)      = delete;
 
-    void map_text(menu_flyout_sub_item& s);
-    void map_items(menu_flyout_sub_item& s);
+    void map_text(basic_menu_flyout_sub_item& s);
+    void map_items(basic_menu_flyout_sub_item& s);
 
     winrt::Microsoft::UI::Xaml::Controls::MenuFlyoutSubItem&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::MenuFlyoutSubItem& native() const noexcept { return native_; }
@@ -52,7 +52,6 @@ private:
     signal_slot<std::vector<view*> const&>     items_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_MENU_FLYOUT_SUB_ITEM_HANDLER_HPP

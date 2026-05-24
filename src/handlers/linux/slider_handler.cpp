@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 slider handler implementation.
+// Part of MPAPP. GTK4 basic_slider handler implementation.
 
 #include "mpapp/handlers/linux/slider_handler.hpp"
 
@@ -7,12 +7,12 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct value_changed_ctx {
-    slider*                            target;
+    basic_slider*                            target;
     slider_handler<platform::linux_>*  handler;
 };
 
@@ -59,7 +59,7 @@ void slider_handler<platform::linux_>::apply_maximum(double v) {
     gtk_adjustment_set_upper(adj, v);
 }
 
-void slider_handler<platform::linux_>::map_value(slider& s) {
+void slider_handler<platform::linux_>::map_value(basic_slider& s) {
     apply_value(s.value.get());
     s.value.changed.subscribe(value_slot_, value_cb_);
 
@@ -78,30 +78,28 @@ void slider_handler<platform::linux_>::map_value(slider& s) {
         static_cast<GConnectFlags>(0));
 }
 
-void slider_handler<platform::linux_>::map_minimum(slider& s) {
+void slider_handler<platform::linux_>::map_minimum(basic_slider& s) {
     apply_minimum(s.minimum.get());
     s.minimum.changed.subscribe(minimum_slot_, minimum_cb_);
 }
 
-void slider_handler<platform::linux_>::map_maximum(slider& s) {
+void slider_handler<platform::linux_>::map_maximum(basic_slider& s) {
     apply_maximum(s.maximum.get());
     s.maximum.changed.subscribe(maximum_slot_, maximum_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register slider so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_slider so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/slider.hpp"
+#include "mpapp/internal/basic_slider.hpp"
 
 namespace {
 
 GtkWidget* dispatch_slider(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::slider*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_slider*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

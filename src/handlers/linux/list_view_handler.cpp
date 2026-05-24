@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// GTK4 list_view handler implementation.
+// GTK4 basic_list_view handler implementation.
 
 #include "mpapp/handlers/linux/list_view_handler.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -18,10 +18,10 @@ namespace {
 // avoid an infinite loop with the apply_selection path, we stash a
 // transient "suppress" flag on the box object itself.
 //
-// `user_data` is the bound list_view*. Selecting before the items_source
+// `user_data` is the bound basic_list_view*. Selecting before the items_source
 // map → bound is nullptr → we no-op.
 void on_row_selected(GtkListBox* box, GtkListBoxRow* row, gpointer user_data) {
-    auto* lv = static_cast<list_view*>(user_data);
+    auto* lv = static_cast<basic_list_view*>(user_data);
     if (lv == nullptr) return;
     if (g_object_get_data(G_OBJECT(box), "mpapp_suppress") != nullptr) return;
     int idx = (row != nullptr) ? gtk_list_box_row_get_index(row) : -1;
@@ -49,7 +49,7 @@ list_view_handler<platform::linux_>::list_view_handler() {
     gtk_widget_set_vexpand(static_cast<GtkWidget*>(native_), TRUE);
     gtk_widget_set_hexpand(static_cast<GtkWidget*>(native_), TRUE);
     // The row-selected handler is connected in map_items_source once
-    // we know which list_view to forward to.
+    // we know which basic_list_view to forward to.
 }
 
 list_view_handler<platform::linux_>::~list_view_handler() = default;
@@ -94,7 +94,7 @@ void list_view_handler<platform::linux_>::apply_selection(int idx) {
     set_suppress(list_box_, false);
 }
 
-void list_view_handler<platform::linux_>::map_items_source(list_view& lv) {
+void list_view_handler<platform::linux_>::map_items_source(basic_list_view& lv) {
     bound_ = &lv;
     // Connect the row-selected signal now that we know who to forward to.
     g_signal_connect(static_cast<GtkWidget*>(list_box_), "row-selected",
@@ -103,18 +103,17 @@ void list_view_handler<platform::linux_>::map_items_source(list_view& lv) {
     lv.items_source.changed.subscribe(items_slot_, items_cb_);
 }
 
-void list_view_handler<platform::linux_>::map_selected_index(list_view& lv) {
+void list_view_handler<platform::linux_>::map_selected_index(basic_list_view& lv) {
     apply_selection(lv.selected_index.get());
     lv.selected_index.changed.subscribe(sel_slot_, sel_cb_);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 GtkWidget* dispatch_list_view(::mpapp::view* v) {
-    if (auto* l = dynamic_cast<::mpapp::list_view*>(v); l && l->has_lv_handler()) {
+    if (auto* l = dynamic_cast<::mpapp::internal::basic_list_view*>(v); l && l->has_lv_handler()) {
         return GTK_WIDGET(l->lv_handler().native());
     }
     return nullptr;

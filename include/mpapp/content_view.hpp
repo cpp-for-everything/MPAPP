@@ -1,36 +1,53 @@
 // SPDX-License-Identifier: Apache-2.0
-// `mpapp::content_view` — single-child container; equivalent to a
-// Border with no stroke. The point is to host an interchangeable child
-// via Observable<shared_ptr<view>>.
+// Part of MPAPP. See vault/10_Architecture/Components/ContentView.md
+//
+// `mpapp::content_view` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_content_view` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::content_view x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_content_view x;
+//     mpapp::content_view_handler<mpapp::platform::mock> h;
+//     h.map_content(x);
 
 #ifndef MPAPP_CONTENT_VIEW_HPP
 #define MPAPP_CONTENT_VIEW_HPP
 
-#include <memory>
+#include "internal/basic_content_view.hpp"
 
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_content_view` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/content_view_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class content_view_handler;
-
-class content_view : public view {
+class content_view : public internal::basic_content_view {
 public:
-    content_view() = default;
+    content_view() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_content(*this);
+    }
 
-    Observable<std::shared_ptr<view>>   content{};
-
-    content_view_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const content_view_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                           has_handler() const noexcept { return handler_ != nullptr; }
-    void                                           set_handler(content_view_handler<platform::current>& h) noexcept { handler_ = &h; }
+    content_view(const content_view&)            = delete;
+    content_view& operator=(const content_view&) = delete;
+    content_view(content_view&&)                 = delete;
+    content_view& operator=(content_view&&)      = delete;
 
 private:
-    content_view_handler<platform::current>* handler_ = nullptr;
+    internal::content_view_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::content_view_handler<>` (host-current) and
+// `mpapp::content_view_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using content_view_handler = internal::content_view_handler<Platform>;
 
 } // namespace mpapp
 

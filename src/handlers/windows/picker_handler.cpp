@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 picker handler implementation.
+// Part of MPAPP. WinUI 3 basic_picker handler implementation.
 
 #include "mpapp/handlers/windows/picker_handler.hpp"
 
@@ -13,7 +13,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace muxc = ::winrt::Microsoft::UI::Xaml::Controls;
 
@@ -52,33 +52,31 @@ void picker_handler<platform::windows>::apply_title(const std::string& v) {
     } catch (...) {}
 }
 
-void picker_handler<platform::windows>::map_items(picker& p) {
+void picker_handler<platform::windows>::map_items(basic_picker& p) {
     apply_items(p.items.get());
     p.items.changed.subscribe(items_slot_, items_cb_);
 }
-void picker_handler<platform::windows>::map_selected_index(picker& p) {
+void picker_handler<platform::windows>::map_selected_index(basic_picker& p) {
     apply_selected_index(p.selected_index.get());
     p.selected_index.changed.subscribe(selected_slot_, selected_cb_);
 }
-void picker_handler<platform::windows>::map_title(picker& p) {
+void picker_handler<platform::windows>::map_title(basic_picker& p) {
     apply_title(p.title.get());
     p.title.changed.subscribe(title_slot_, title_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register picker so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_picker so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/picker.hpp"
+#include "mpapp/internal/basic_picker.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_picker(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::picker*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_picker*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

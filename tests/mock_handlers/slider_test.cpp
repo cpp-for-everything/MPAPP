@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::slider`.
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_slider`.
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@ using slider_mock = mpapp::slider_handler<mpapp::platform::mock>;
 } // namespace
 
 TEST_CASE("slider mock handler logs initial range", "[mock][slider]") {
-    mpapp::slider s;
+    mpapp::internal::basic_slider s;
     slider_mock   h;
 
     s.minimum = 0.0;
@@ -36,7 +36,7 @@ TEST_CASE("slider mock handler logs initial range", "[mock][slider]") {
 
 TEST_CASE("slider mock handler fires once per real value change",
           "[mock][slider]") {
-    mpapp::slider s;
+    mpapp::internal::basic_slider s;
     slider_mock   h;
 
     h.map_value(s);
@@ -54,7 +54,7 @@ TEST_CASE("slider mock handler fires once per real value change",
 
 TEST_CASE("slider mock handler tracks min/max changes independently",
           "[mock][slider]") {
-    mpapp::slider s;
+    mpapp::internal::basic_slider s;
     slider_mock   h;
 
     h.map_minimum(s);

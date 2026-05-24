@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 page handler — wraps a `mux::Controls::Page`
+// Part of MPAPP. WinUI 3 basic_page handler — wraps a `mux::Controls::Page`
 // containing a 2-row `Grid`:
 //   - row 0 ("Auto"): a `TextBlock` carrying `title`
 //   - row 1 ("*"):    a single-child host for `content`
@@ -14,7 +14,7 @@
 
 #include <string>
 
-#include "../../page.hpp"
+#include "../../internal/basic_page.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -23,7 +23,7 @@
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class page_handler<platform::windows> {
@@ -36,12 +36,12 @@ public:
     page_handler(page_handler&&)                 = delete;
     page_handler& operator=(page_handler&&)      = delete;
 
-    void map_title(page& p);
-    void map_content(page& p);
-    void map_is_busy(page& p);
+    void map_title(basic_page& p);
+    void map_content(basic_page& p);
+    void map_is_busy(basic_page& p);
 
     // Convenience for tests / spike: assign a non-owning child.
-    void bind_content(page& p, view& child);
+    void bind_content(basic_page& p, view& child);
 
     winrt::Microsoft::UI::Xaml::Controls::Grid&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Grid& native() const noexcept { return native_; }
@@ -59,7 +59,7 @@ private:
     // `muxc::Page`. Page is designed for Frame navigation; nesting Page
     // inside another container (e.g. the navigation_page_handler's
     // ContentControl, or the shell_handler's content host) triggers a
-    // late layout-pass exception. The page's chrome (title + content
+    // late layout-pass exception. The basic_page's chrome (title + content
     // host + busy ring) lives inside this Grid directly.
     winrt::Microsoft::UI::Xaml::Controls::Grid           native_{nullptr};
     winrt::Microsoft::UI::Xaml::Controls::TextBlock      title_text_{nullptr};
@@ -74,7 +74,6 @@ private:
     signal_slot<const bool&>                  busy_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_PAGE_HANDLER_HPP

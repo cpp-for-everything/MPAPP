@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android entry_cell handler implementation.
+// Android basic_entry_cell handler implementation.
 
 #include "mpapp/handlers/android/entry_cell_handler.hpp"
 
@@ -8,7 +8,7 @@
 #include "mpapp/handlers/android/jni_bridge.hpp"
 #include "mpapp/handlers/android/widget_dispatch.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
@@ -289,12 +289,12 @@ void entry_cell_handler<platform::android>::apply_keyboard(keyboard_kind k) {
     tv_set_input_type(env, edit_text_, keyboard_to_input_type(k));
 }
 
-void entry_cell_handler<platform::android>::map_label(entry_cell& c) {
+void entry_cell_handler<platform::android>::map_label(basic_entry_cell& c) {
     apply_label(c.label.get());
     c.label.changed.subscribe(label_slot_, label_cb_);
 }
 
-void entry_cell_handler<platform::android>::map_text(entry_cell& c) {
+void entry_cell_handler<platform::android>::map_text(basic_entry_cell& c) {
     bound_ = &c;
     apply_text(c.text.get());
     c.text.changed.subscribe(text_slot_, text_cb_);
@@ -315,12 +315,12 @@ void entry_cell_handler<platform::android>::map_text(entry_cell& c) {
     }
 }
 
-void entry_cell_handler<platform::android>::map_placeholder(entry_cell& c) {
+void entry_cell_handler<platform::android>::map_placeholder(basic_entry_cell& c) {
     apply_placeholder(c.placeholder.get());
     c.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
 }
 
-void entry_cell_handler<platform::android>::map_keyboard(entry_cell& c) {
+void entry_cell_handler<platform::android>::map_keyboard(basic_entry_cell& c) {
     apply_keyboard(c.keyboard.get());
     c.keyboard.changed.subscribe(keyboard_slot_, keyboard_cb_);
 }
@@ -359,13 +359,12 @@ void android_entry_cell_dispatch_editor_action(entry_cell_handler<platform::andr
     if (h != nullptr) h->on_native_editor_action(action_id);
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
 
 jobject dispatch_entry_cell(::mpapp::view* v) {
-    if (auto* c = dynamic_cast<::mpapp::entry_cell*>(v); c && c->has_ec_handler()) {
+    if (auto* c = dynamic_cast<::mpapp::internal::basic_entry_cell*>(v); c && c->has_ec_handler()) {
         return c->ec_handler().native();
     }
     return nullptr;

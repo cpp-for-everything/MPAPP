@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 templated_view handler implementation.
+// Part of MPAPP. GTK4 basic_templated_view handler implementation.
 
 #include "mpapp/handlers/linux/templated_view_handler.hpp"
 
@@ -9,14 +9,14 @@
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
 
-#include "mpapp/templated_view.hpp"
+#include "mpapp/internal/basic_templated_view.hpp"
 #include "mpapp/view.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 templated_view_handler<platform::linux_>::templated_view_handler() {
     // Horizontal `GtkBox` used as a single-child host (GTK4 dropped
-    // `GtkBin`; the box mirrors the shape `content_view` uses).
+    // `GtkBin`; the box mirrors the shape `basic_content_view` uses).
     native_ = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 }
 
@@ -33,7 +33,7 @@ void templated_view_handler<platform::linux_>::apply_content(const std::shared_p
     // ADR-0013 registry first; if no widget is registered for the child
     // type, leave content empty (legacy widgets that haven't migrated
     // yet are rendered by their parent's existing dispatch chain only —
-    // templated_view is brand-new and goes through the registry only).
+    // basic_templated_view is brand-new and goes through the registry only).
     if (GtkWidget* child = detail::linux_dispatch::dispatch(v.get()); child != nullptr) {
         gtk_box_append(box, child);
         current_child_ = child;
@@ -45,28 +45,27 @@ void templated_view_handler<platform::linux_>::apply_template_id(const std::stri
     template_id_ = v;
 }
 
-void templated_view_handler<platform::linux_>::map_content(templated_view& t) {
+void templated_view_handler<platform::linux_>::map_content(basic_templated_view& t) {
     apply_content(t.content.get());
     t.content.changed.subscribe(content_slot_, content_cb_);
 }
 
-void templated_view_handler<platform::linux_>::map_template_id(templated_view& t) {
+void templated_view_handler<platform::linux_>::map_template_id(basic_templated_view& t) {
     apply_template_id(t.template_id.get());
     t.template_id.changed.subscribe(template_id_slot_, template_id_cb_);
 }
 
-void templated_view_handler<platform::linux_>::bind_content(templated_view& t, view& child) {
+void templated_view_handler<platform::linux_>::bind_content(basic_templated_view& t, view& child) {
     t.content.set(std::shared_ptr<view>(&child, [](view*){}));
 }
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
 
 namespace {
 
 GtkWidget* dispatch_templated_view(::mpapp::view* v) {
-    if (auto* t = dynamic_cast<::mpapp::templated_view*>(v); t && t->has_handler()) {
+    if (auto* t = dynamic_cast<::mpapp::internal::basic_templated_view*>(v); t && t->has_handler()) {
         return GTK_WIDGET(t->handler().native());
     }
     return nullptr;

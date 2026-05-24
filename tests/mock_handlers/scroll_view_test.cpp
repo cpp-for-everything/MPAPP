@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/ScrollView.md
 //
-// Mock-handler tests for `mpapp::scroll_view` (CLAUDE Rule 6 / ADR-0008).
+// Mock-handler tests for `mpapp::internal::basic_scroll_view` (CLAUDE Rule 6 / ADR-0008).
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -21,7 +21,7 @@ class plain_view : public view {};
 
 TEST_CASE("scroll_view mock handler records initial values on bind",
           "[mock][scroll_view]") {
-    scroll_view sv;
+    internal::basic_scroll_view sv;
     scroll_view_handler<platform::mock> h;
 
     h.map_orientation(sv);
@@ -37,7 +37,7 @@ TEST_CASE("scroll_view mock handler records initial values on bind",
 
 TEST_CASE("scroll_view mock handler records single call per property change",
           "[mock][scroll_view]") {
-    scroll_view sv;
+    internal::basic_scroll_view sv;
     scroll_view_handler<platform::mock> h;
 
     h.map_orientation(sv);
@@ -57,7 +57,7 @@ TEST_CASE("scroll_view mock handler records single call per property change",
 
 TEST_CASE("scroll_view mock handler tracks content presence",
           "[mock][scroll_view][content]") {
-    scroll_view sv;
+    internal::basic_scroll_view sv;
     scroll_view_handler<platform::mock> h;
 
     h.map_content(sv);
@@ -72,7 +72,7 @@ TEST_CASE("scroll_view mock handler tracks content presence",
 
 TEST_CASE("scroll_view scroll_to command records request fields",
           "[mock][scroll_view][command]") {
-    scroll_view sv;
+    internal::basic_scroll_view sv;
     scroll_view_handler<platform::mock> h;
 
     h.map_scroll_to(sv, scroll_to_request{

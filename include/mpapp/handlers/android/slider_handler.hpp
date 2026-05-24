@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android slider handler — wraps android.widget.SeekBar.
+// Part of MPAPP. Android basic_slider handler — wraps android.widget.SeekBar.
 //
 // SeekBar uses integer progress; the handler maps the cross-platform
 // double `value` into [0, kSeekResolution] for native storage. This
@@ -12,13 +12,13 @@
 
 #include "../../platform.hpp"
 #include "../../signal.hpp"
-#include "../../slider.hpp"
+#include "../../internal/basic_slider.hpp"
 
 #if defined(__ANDROID__)
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class slider_handler<platform::android> {
@@ -33,9 +33,9 @@ public:
     slider_handler(slider_handler&&)                 = delete;
     slider_handler& operator=(slider_handler&&)      = delete;
 
-    void map_value(slider& s);
-    void map_minimum(slider& s);
-    void map_maximum(slider& s);
+    void map_value(basic_slider& s);
+    void map_minimum(basic_slider& s);
+    void map_maximum(basic_slider& s);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -56,7 +56,7 @@ private:
 
     jobject     native_   = nullptr;  // global ref to SeekBar
     jobject     listener_ = nullptr;
-    slider*     bound_    = nullptr;
+    basic_slider*     bound_    = nullptr;
     bool        suppress_echo_ = false;
 
     value_cb_t                  value_cb_{this};
@@ -69,7 +69,6 @@ private:
 
 void android_slider_dispatch_progress(slider_handler<platform::android>* h, int progress, int max);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_SLIDER_HANDLER_HPP

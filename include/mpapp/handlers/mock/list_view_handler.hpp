@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock handler for `mpapp::list_view`.
+// Part of MPAPP. Mock handler for `mpapp::basic_list_view`.
 
 #ifndef MPAPP_HANDLERS_MOCK_LIST_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_LIST_VIEW_HANDLER_HPP
@@ -8,11 +8,11 @@
 #include <string>
 #include <vector>
 
-#include "../../list_view.hpp"
+#include "../../internal/basic_list_view.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class list_view_handler<platform::mock> : public mock_handler_base {
@@ -25,12 +25,12 @@ public:
     list_view_handler(list_view_handler&&)                 = delete;
     list_view_handler& operator=(list_view_handler&&)      = delete;
 
-    void map_items_source(list_view& lv) {
+    void map_items_source(basic_list_view& lv) {
         record_change("items_source.count", lv.items_source.get().size());
         lv.items_source.changed.subscribe(slot_items_, items_cb_);
     }
 
-    void map_selected_index(list_view& lv) {
+    void map_selected_index(basic_list_view& lv) {
         record_change("selected_index", lv.selected_index.get());
         lv.selected_index.changed.subscribe(slot_sel_, sel_cb_);
     }
@@ -56,6 +56,5 @@ private:
     signal_slot<const int&>                      slot_sel_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_LIST_VIEW_HANDLER_HPP

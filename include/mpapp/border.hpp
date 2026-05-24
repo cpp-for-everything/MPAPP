@@ -1,123 +1,58 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Border.md
 //
-// `mpapp::border` — single-child decorator drawing a stroke + fill +
-// optional non-rectangular outline. Supersedes `mpapp::frame` (MAUI 9
-// deprecation parity). Mock surface (P2): `stroke_shape` and the brush
-// types are placeholders (`std::string` shape descriptor, `brush_ref`
-// from view.hpp). Real types arrive in P3 with the graphics handlers.
+// `mpapp::border` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_border` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::border x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_border x;
+//     mpapp::border_handler<mpapp::platform::mock> h;
+//     h.map_content(x);
 
 #ifndef MPAPP_BORDER_HPP
 #define MPAPP_BORDER_HPP
 
-#include <cstdint>
-#include <memory>
-#include <string>
-#include <string_view>
-#include <vector>
-#if __has_include(<format>) && !defined(__ANDROID__)
-#  include <format>
-#  define MPAPP_BORDER_HAS_STD_FORMAT 1
-#endif
+#include "internal/basic_border.hpp"
 
-#include "layout.hpp"   // for `thickness`
-#include "observable.hpp"
-#include "platform.hpp"
-#include "view.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_border` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/border_handler.hpp"
 
 namespace mpapp {
 
-enum class pen_line_cap : std::uint8_t {
-    flat   = 0,
-    round  = 1,
-    square = 2,
-};
-
-enum class pen_line_join : std::uint8_t {
-    miter = 0,
-    round = 1,
-    bevel = 2,
-};
-
-// Textual shape descriptor — e.g. `"Rectangle"`, `"RoundRectangle(12)"`,
-// `"Ellipse"`. Real handlers parse the shape from a `shape` type tree.
-struct stroke_shape_desc {
-    std::string descriptor{"Rectangle"};
-
-    bool operator==(const stroke_shape_desc&) const = default;
-};
-
-template <class Platform = platform::current>
-class border_handler;
-
-class border : public view {
+class border : public internal::basic_border {
 public:
-    border() = default;
+    border() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_content(*this);
+        embedded_handler_.map_padding(*this);
+        embedded_handler_.map_stroke(*this);
+        embedded_handler_.map_stroke_thickness(*this);
+        embedded_handler_.map_stroke_shape(*this);
+    }
 
-    Observable<std::shared_ptr<view>>   content{};
-    Observable<thickness>               padding{};
-
-    Observable<stroke_shape_desc>       stroke_shape{};
-    Observable<brush_ref>               stroke{};
-    Observable<double>                  stroke_thickness{1.0};
-    Observable<std::vector<double>>     stroke_dash_array{};
-    Observable<double>                  stroke_dash_offset{0.0};
-    Observable<pen_line_cap>            stroke_line_cap{pen_line_cap::flat};
-    Observable<pen_line_join>           stroke_line_join{pen_line_join::miter};
-    Observable<double>                  stroke_miter_limit{10.0};
-
-    border_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const border_handler<platform::current>& handler() const noexcept { return *handler_; }
-    bool                                     has_handler() const noexcept { return handler_ != nullptr; }
-    void                                     set_handler(border_handler<platform::current>& h) noexcept { handler_ = &h; }
+    border(const border&)            = delete;
+    border& operator=(const border&) = delete;
+    border(border&&)                 = delete;
+    border& operator=(border&&)      = delete;
 
 private:
-    border_handler<platform::current>* handler_ = nullptr;
+    internal::border_handler<platform::current> embedded_handler_;
 };
 
-constexpr std::string_view to_string(pen_line_cap c) noexcept {
-    switch (c) {
-        case pen_line_cap::flat:   return "flat";
-        case pen_line_cap::round:  return "round";
-        case pen_line_cap::square: return "square";
-    }
-    return "?";
-}
-
-constexpr std::string_view to_string(pen_line_join j) noexcept {
-    switch (j) {
-        case pen_line_join::miter: return "miter";
-        case pen_line_join::round: return "round";
-        case pen_line_join::bevel: return "bevel";
-    }
-    return "?";
-}
+// Template alias so `mpapp::border_handler<>` (host-current) and
+// `mpapp::border_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using border_handler = internal::border_handler<Platform>;
 
 } // namespace mpapp
-
-#ifdef MPAPP_BORDER_HAS_STD_FORMAT
-
-template <>
-struct std::formatter<mpapp::pen_line_cap> : std::formatter<std::string_view> {
-    auto format(mpapp::pen_line_cap c, std::format_context& ctx) const {
-        return std::formatter<std::string_view>::format(mpapp::to_string(c), ctx);
-    }
-};
-
-template <>
-struct std::formatter<mpapp::pen_line_join> : std::formatter<std::string_view> {
-    auto format(mpapp::pen_line_join j, std::format_context& ctx) const {
-        return std::formatter<std::string_view>::format(mpapp::to_string(j), ctx);
-    }
-};
-
-template <>
-struct std::formatter<mpapp::stroke_shape_desc> : std::formatter<std::string_view> {
-    auto format(const mpapp::stroke_shape_desc& s, std::format_context& ctx) const {
-        return std::formatter<std::string_view>::format(s.descriptor, ctx);
-    }
-};
-
-#endif // MPAPP_BORDER_HAS_STD_FORMAT
 
 #endif // MPAPP_BORDER_HPP

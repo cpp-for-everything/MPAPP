@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Page.md
 //
-// `page_handler<platform::mock>` — records the page-level property
+// `page_handler<platform::mock>` — records the basic_page-level property
 // mappers (title / content / is_busy). The view-level mappers come
 // from inherited `view_handler<platform::mock>` plumbing when the
-// host wires both — page tests in this batch exercise the page surface
+// host wires both — basic_page tests in this batch exercise the basic_page surface
 // only.
 
 #ifndef MPAPP_HANDLERS_MOCK_PAGE_HANDLER_HPP
@@ -12,11 +12,11 @@
 
 #include <string>
 
-#include "../../page.hpp"
+#include "../../internal/basic_page.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class page_handler<platform::mock> : public mock_handler_base {
@@ -29,17 +29,17 @@ public:
     page_handler(page_handler&&)                 = delete;
     page_handler& operator=(page_handler&&)      = delete;
 
-    void map_title(page& p) {
+    void map_title(basic_page& p) {
         record_change("title", p.title.get());
         p.title.changed.subscribe(title_slot_, title_cb_);
     }
 
-    void map_content(page& p) {
+    void map_content(basic_page& p) {
         record_change("content.present", p.content.get() != nullptr);
         p.content.changed.subscribe(content_slot_, content_cb_);
     }
 
-    void map_is_busy(page& p) {
+    void map_is_busy(basic_page& p) {
         record_change("is_busy", p.is_busy.get());
         p.is_busy.changed.subscribe(busy_slot_, busy_cb_);
     }
@@ -62,6 +62,5 @@ private:
     signal_slot<const bool&>                    busy_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // MPAPP_HANDLERS_MOCK_PAGE_HANDLER_HPP

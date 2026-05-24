@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android activity_indicator handler — wraps
+// Part of MPAPP. Android basic_activity_indicator handler — wraps
 // `android.widget.ProgressBar` in its default indeterminate style.
 
 #ifndef MPAPP_HANDLERS_ANDROID_ACTIVITY_INDICATOR_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_ACTIVITY_INDICATOR_HANDLER_HPP
 
-#include "../../activity_indicator.hpp"
+#include "../../internal/basic_activity_indicator.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -13,7 +13,7 @@
 
 #include <jni.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class activity_indicator_handler<platform::android> {
@@ -24,8 +24,8 @@ public:
     activity_indicator_handler(const activity_indicator_handler&)            = delete;
     activity_indicator_handler& operator=(const activity_indicator_handler&) = delete;
 
-    void map_is_running(activity_indicator& a);
-    void map_color(activity_indicator& a);
+    void map_is_running(basic_activity_indicator& a);
+    void map_color(basic_activity_indicator& a);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -45,7 +45,6 @@ private:
     signal_slot<const brush_ref&>         color_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_ACTIVITY_INDICATOR_HANDLER_HPP

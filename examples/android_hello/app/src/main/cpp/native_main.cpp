@@ -48,7 +48,6 @@
 
 #include <mpapp/handlers/box_view_handler.hpp>
 #include <mpapp/handlers/shape_view_handler.hpp>
-#include <mpapp/handlers/button_handler.hpp>
 #include <mpapp/handlers/check_box_handler.hpp>
 #include <mpapp/handlers/entry_handler.hpp>
 #include <mpapp/handlers/jni_bridge.hpp>
@@ -71,7 +70,6 @@ struct view_model {
 class spike_app : public mpapp::application {
 public:
     void on_launch() override {
-        btn_.set_handler(btn_handler_);
         lbl_.set_handler(lbl_handler_);
         name_.set_handler(name_handler_);
         shout_.set_handler(shout_handler_);
@@ -141,8 +139,6 @@ public:
         shape_handler_.map_opacity(shape_);
         shape_.set_sv_handler(shape_handler_);
 
-        btn_handler_.map_text(btn_);
-        btn_handler_.map_clicked(btn_);
         lbl_handler_.map_text(lbl_);
         name_handler_.map_text(name_);
         name_handler_.map_placeholder(name_);
@@ -246,7 +242,6 @@ private:
     mpapp::switch_cell      push_cell_{};
     mpapp::window           window_{};
 
-    mpapp::button_handler<>       btn_handler_{};
     mpapp::label_handler<>        lbl_handler_{};
     mpapp::entry_handler<>        name_handler_{};
     mpapp::switch_handler<>       shout_handler_{};

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::grid_layout` (T-0011).
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_grid_layout` (T-0011).
 
 #include <string>
 #include <vector>
@@ -13,7 +13,7 @@ using namespace mpapp;
 
 TEST_CASE("grid_layout mock handler records initial property values on bind",
           "[mock][grid_layout]") {
-    grid_layout g;
+    internal::basic_grid_layout g;
     grid_layout_handler<platform::mock> h;
 
     h.map_row_count(g);
@@ -34,7 +34,7 @@ TEST_CASE("grid_layout mock handler records initial property values on bind",
 
 TEST_CASE("grid_layout mock handler fires once per real property change",
           "[mock][grid_layout]") {
-    grid_layout g;
+    internal::basic_grid_layout g;
     grid_layout_handler<platform::mock> h;
 
     h.map_row_count(g);

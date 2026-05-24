@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 activity_indicator handler — wraps `GtkSpinner`.
+// Part of MPAPP. GTK4 basic_activity_indicator handler — wraps `GtkSpinner`.
 
 #ifndef MPAPP_HANDLERS_LINUX_ACTIVITY_INDICATOR_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_ACTIVITY_INDICATOR_HANDLER_HPP
 
 #include <string>
 
-#include "../../activity_indicator.hpp"
+#include "../../internal/basic_activity_indicator.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
 #if defined(__linux__) && !defined(__ANDROID__)
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class activity_indicator_handler<platform::linux_> {
@@ -23,8 +23,8 @@ public:
     activity_indicator_handler(const activity_indicator_handler&)            = delete;
     activity_indicator_handler& operator=(const activity_indicator_handler&) = delete;
 
-    void map_is_running(activity_indicator& a);
-    void map_color(activity_indicator& a);
+    void map_is_running(basic_activity_indicator& a);
+    void map_color(basic_activity_indicator& a);
 
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
@@ -46,7 +46,6 @@ private:
     signal_slot<const brush_ref&>         color_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__
 #endif // MPAPP_HANDLERS_LINUX_ACTIVITY_INDICATOR_HANDLER_HPP

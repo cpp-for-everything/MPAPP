@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Border.md
 //
-// Mock-handler tests for `mpapp::border` (CLAUDE Rule 6 / ADR-0008).
+// Mock-handler tests for `mpapp::internal::basic_border` (CLAUDE Rule 6 / ADR-0008).
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -22,7 +22,7 @@ class plain_view : public view {};
 
 TEST_CASE("border mock handler records initial values on bind",
           "[mock][border]") {
-    border b;
+    internal::basic_border b;
     border_handler<platform::mock> h;
 
     h.map_stroke_thickness(b);
@@ -43,7 +43,7 @@ TEST_CASE("border mock handler records initial values on bind",
 
 TEST_CASE("border mock handler records single call per property change",
           "[mock][border]") {
-    border b;
+    internal::basic_border b;
     border_handler<platform::mock> h;
 
     h.map_stroke_thickness(b);
@@ -63,7 +63,7 @@ TEST_CASE("border mock handler records single call per property change",
 
 TEST_CASE("border mock handler tracks content presence and dash array size",
           "[mock][border]") {
-    border b;
+    internal::basic_border b;
     border_handler<platform::mock> h;
 
     h.map_content(b);
@@ -85,7 +85,7 @@ TEST_CASE("border mock handler tracks content presence and dash array size",
 
 TEST_CASE("border mock handler records stroke and shape mappers",
           "[mock][border][sequence]") {
-    border b;
+    internal::basic_border b;
     border_handler<platform::mock> h;
 
     h.map_stroke_shape(b);
