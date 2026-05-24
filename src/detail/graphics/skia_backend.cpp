@@ -35,6 +35,7 @@
 #include "include/core/SkColor.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
+#include "include/core/SkPathBuilder.h"
 #include "include/core/SkRect.h"
 
 #include <cmath>
@@ -64,41 +65,43 @@ SkPaint::Join to_skia_join(line_join j) noexcept {
     return SkPaint::Join::kMiter_Join;
 }
 
-// Build an SkPath from the facade's op-list `path`. The op kinds
-// were chosen to mirror SVG / Skia primitives so the translation is
-// 1:1 — no flattening or polyline approximation needed.
+// Build an SkPath from the facade's op-list `path`. Modern Skia
+// (m100+) makes SkPath immutable — construction goes through
+// SkPathBuilder, which has the same chainable moveTo/lineTo/quadTo/
+// cubicTo/close methods we expect. `detach()` finalizes into an
+// SkPath.
 SkPath to_skia_path(const path& p) {
-    SkPath sp;
+    SkPathBuilder b;
     for (const auto& op : p.ops()) {
         switch (op.kind) {
             case path_op_kind::move:
-                sp.moveTo(SkDoubleToScalar(op.x[0]),
-                          SkDoubleToScalar(op.y[0]));
+                b.moveTo(SkDoubleToScalar(op.x[0]),
+                         SkDoubleToScalar(op.y[0]));
                 break;
             case path_op_kind::line:
-                sp.lineTo(SkDoubleToScalar(op.x[0]),
-                          SkDoubleToScalar(op.y[0]));
+                b.lineTo(SkDoubleToScalar(op.x[0]),
+                         SkDoubleToScalar(op.y[0]));
                 break;
             case path_op_kind::quad:
-                sp.quadTo(SkDoubleToScalar(op.x[0]),
-                          SkDoubleToScalar(op.y[0]),
-                          SkDoubleToScalar(op.x[1]),
-                          SkDoubleToScalar(op.y[1]));
+                b.quadTo(SkDoubleToScalar(op.x[0]),
+                         SkDoubleToScalar(op.y[0]),
+                         SkDoubleToScalar(op.x[1]),
+                         SkDoubleToScalar(op.y[1]));
                 break;
             case path_op_kind::cubic:
-                sp.cubicTo(SkDoubleToScalar(op.x[0]),
-                           SkDoubleToScalar(op.y[0]),
-                           SkDoubleToScalar(op.x[1]),
-                           SkDoubleToScalar(op.y[1]),
-                           SkDoubleToScalar(op.x[2]),
-                           SkDoubleToScalar(op.y[2]));
+                b.cubicTo(SkDoubleToScalar(op.x[0]),
+                          SkDoubleToScalar(op.y[0]),
+                          SkDoubleToScalar(op.x[1]),
+                          SkDoubleToScalar(op.y[1]),
+                          SkDoubleToScalar(op.x[2]),
+                          SkDoubleToScalar(op.y[2]));
                 break;
             case path_op_kind::close:
-                sp.close();
+                b.close();
                 break;
         }
     }
-    return sp;
+    return b.detach();
 }
 
 SkRect to_skia_rect(const rect& r) noexcept {

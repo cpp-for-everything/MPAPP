@@ -2,22 +2,27 @@
 type: adr
 id: ADR-0015
 title: "Dual 2D graphics backend (Cairo + Skia, compile-time selectable)"
-status: proposed
-decisionDate: 2026-05-21
+status: accepted
+decisionDate: 2026-05-24
 deciders: []
 supersedes: ""
 supersededBy: ""
 area: handlers
 tags:
   - type/adr
-  - status/proposed
+  - status/accepted
   - area/handlers
 ---
 
 # ADR-0015 — Dual 2D graphics backend (Cairo + Skia)
 
 > [!info] Status
-> **proposed** — unblocks ShapeView and GraphicsView real handlers, and any future custom-drawing surface (e.g. canvas-based controls, decorations, ink).
+> **accepted (2026-05-24)** — both backends shipped + verified end-to-end via the abstract canvas facade:
+>
+> - **Cairo** is the default. Real on Linux (system libcairo), Windows (vcpkg cairo), Android (vcpkg cairo + NDK; minSdk 28 for bionic libiconv).
+> - **Skia** is opt-in via `-DMPAPP_GRAPHICS_BACKEND=skia` ([[T-0030]]). Verified on Linux (vcpkg `skia:x64-linux`) and Windows (vcpkg `skia:x64-windows`). Same canvas-facade pipeline; Skia + Cairo produce visually identical output across `examples/headless_canvas_demo`'s 6 test renders. Android Skia install failed on Windows host in T-0030 phase 2 — root cause not investigated; Android continues with Cairo only for now.
+>
+> ShapeView ([[T-0031]]) and GraphicsView ([[T-0029]]) migrations to the facade mean swapping the backend swaps rendering on every platform at once.
 
 ## Context
 

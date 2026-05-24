@@ -26,6 +26,13 @@ Per [[CLAUDE]] rule 9 and [[RFC-0001-licensing-and-patent-strategy]], every thir
 | pugixml | v1.14 | MIT | header-only, static | ✅ permissive | XAML parsing in `mpapp-xc` skeleton (P0) |
 | Zig toolchain | TBD | MIT | external tool | ✅ permissive | cross-compilation (per RFC-0002) |
 | Android NDK | TBD | Apache 2.0 | external tool | ✅ permissive | Android targets |
+| libcairo | 1.18.x (system / vcpkg) | LGPL-2.1 | **dynamic only** | ⚠️ acceptable with rebuild path | Default canvas-facade backend ([[ADR-0015]]); Linux + Win + Android |
+| Skia | 148 (vcpkg `unofficial-skia`) | BSD-3 | static | ✅ permissive | Opt-in canvas-facade backend ([[ADR-0015]]); Linux + Win shipped, Android install pending |
+| HarfBuzz | 8.x system / 14.x via vcpkg-skia | MIT | dynamic (system) / static (vcpkg, transitive via skia) | ✅ permissive | Text shaping — transitive via Skia (vcpkg pulls 14.x) and via GTK4 (system 8.x) |
+| libpng | vcpkg (transitive via skia) | libpng | static | ✅ permissive | PNG decode — transitive via Skia |
+| libjpeg-turbo | vcpkg (transitive via skia) | BSD-3 / IJG | static | ✅ permissive | JPEG decode — transitive via Skia |
+| libwebp | vcpkg (transitive via skia) | BSD-3 | static | ✅ permissive | WebP decode — transitive via Skia |
+| expat | vcpkg (transitive via skia) | MIT | static | ✅ permissive | XML parsing — transitive via Skia |
 
 (Rows above are *planned* — added when actually integrated.)
 
