@@ -74,6 +74,15 @@ class todo_vm {
 - **CI lint** (planned T-task): a tool scans public headers (`include/mpapp/**/*.hpp`) for `#define MPAPP_*` and fails the build.
 - **Documentation:** every component note (`10_Architecture/Components/*.md`) shows the C++ API in macro-free form.
 
+## See in code
+
+- The full [`include/mpapp/`](../../include/mpapp/) tree — every public header here is macro-free by design. Sample:
+  - [`include/mpapp/observable.hpp`](../../include/mpapp/observable.hpp) — `Observable<T>` is the template wrapper that does what `MPAPP_OBSERVABLE(int, count)` would do via macro.
+  - [`include/mpapp/computed.hpp`](../../include/mpapp/computed.hpp) — `Computed<&Ptrs...>` sentinel.
+  - [`include/mpapp/command.hpp`](../../include/mpapp/command.hpp) — `Command<Args...>` sentinel.
+- Internal preprocessor guards (allowed): [`src/hot_reload/windows.cpp`](../../src/hot_reload/windows.cpp) gates `#if MPAPP_WINDOWS`-style blocks. They never leak into public headers.
+- Build-system controls (allowed): `MPAPP_GRAPHICS_BACKEND={cairo,skia,stub}` selects a graphics backend at configure time — see [`CMakeLists.txt`](../../CMakeLists.txt) and the resulting `MPAPP_GRAPHICS_HAS_*` defines surfaced to consumers via the `unofficial::skia::skia` imported target's `INTERFACE_COMPILE_DEFINITIONS`.
+
 ## Related
 
 - [[ADR-0002-no-macros-in-public-api]]

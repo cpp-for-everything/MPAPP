@@ -96,6 +96,12 @@ iOS real-device hot reload is the lone unresolved area. Options to investigate (
 
 For now, the iOS production app contract is "production builds are statically compiled; hot reload is a dev tool on Simulator only."
 
+## See in code
+
+- [`include/mpapp/hot_reload.hpp`](../../include/mpapp/hot_reload.hpp) — public surface for the daemon connection: file-watch handle, swap callbacks, the `Hot<T>` registration tag.
+- [`src/hot_reload/windows.cpp`](../../src/hot_reload/windows.cpp) — Windows host implementation (LoadLibrary/FreeLibrary cycle). Linux + macOS bodies land per the M-09 tooling milestone.
+- [`vault/50_Tasks/_Archive/T-0010-hot-reload-spike/`](../50_Tasks/_Archive/T-0010-hot-reload-spike/) — the original feasibility spike: LLVM live-edit + XAML re-emit cycle proven end-to-end.
+
 ## See also
 
 - [[Build System]]

@@ -72,6 +72,12 @@ Per [[Interop Parity]] (CLAUDE rule 2), platform-conditional code in the **publi
 | `#if MPAPP_PLATFORM_*` | Internal implementation differences in framework `.cpp` files |
 | Different handler specializations | Native widget creation, property mapping |
 
+## See in code
+
+- [`include/mpapp/platform.hpp`](../../include/mpapp/platform.hpp) — the six `platform::{windows,linux_,android,macos,ios,mock}` tag types + the `current_platform` constant used by `on_platform<T>{}()` and `if constexpr` chains. Note the trailing underscore on `linux_` (`linux` is a predefined toolchain macro).
+- `MPAPP_PLATFORM_*` preprocessor guards (`#if MPAPP_PLATFORM_ANDROID` etc.) — internal-only per the [[No Macros In Public API]] exemption. Used in framework `.cpp` files for block-level platform code; appear in (for example) [`src/hot_reload/windows.cpp`](../../src/hot_reload/windows.cpp) and the per-platform handlers under [`src/handlers/`](../../src/handlers/).
+- Handler partial-specialization is the most common platform-conditional mechanism — one `<component>_handler<platform::tag>` specialization per platform. Examples: [`src/handlers/windows/button_handler.cpp`](../../src/handlers/windows/button_handler.cpp) vs [`src/handlers/linux/button_handler.cpp`](../../src/handlers/linux/button_handler.cpp) vs [`src/handlers/android/button_handler.cpp`](../../src/handlers/android/button_handler.cpp).
+
 ## See also
 
 - [[Interop Parity]]

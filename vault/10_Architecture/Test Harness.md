@@ -125,6 +125,17 @@ TEST_CASE("Async chain") {
 
 The mock dispatcher drives time deterministically — no real sleeps, no flaky tests.
 
+## See in code
+
+- [`tests/CMakeLists.txt`](../../tests/CMakeLists.txt) — Catch2 fetch + `mock_handlers_test` executable that glob-includes every `tests/mock_handlers/*_test.cpp` via `CONFIGURE_DEPENDS`. Adding a test = drop a file in the dir, no CMake edit.
+- [`tests/mock_handlers/`](../../tests/mock_handlers/) — Layer 1 mock unit tests. 66 per-component test files exercising the surface contract. Examples:
+  - [`button_test.cpp`](../../tests/mock_handlers/button_test.cpp) — mock-handler recording: mapper-on-attach, no-emit-on-same-value, click forwarding.
+  - [`graphics_skia_test.cpp`](../../tests/mock_handlers/graphics_skia_test.cpp) — backend-conditional via `#if MPAPP_GRAPHICS_HAS_SKIA`; reads pixels back through `canvas::pixel_data()`.
+- [`tests/smoke_test.cpp`](../../tests/smoke_test.cpp) — minimum-viable smoke for the mpapp-core link.
+- [`tests/executor_test.cpp`](../../tests/executor_test.cpp) — async executor + `test_dispatcher` deterministic-time exercises (the "no real sleeps, no flaky tests" pattern).
+- [`tests/template_type_spike/`](../../tests/template_type_spike/) — Layer 0 type-system invariant tests (Observable / Computed / Command compile-time checks).
+- Layer 2 (conformance) + Layer 3 (per-platform UI automation) — described in this doc but not yet implemented; lands with M-09 tooling-DX milestone.
+
 ## See also
 
 - [[ADR-0008-mock-first-implementation]]

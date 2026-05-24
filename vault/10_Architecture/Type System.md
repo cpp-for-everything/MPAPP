@@ -62,6 +62,21 @@ This is the key divergence from a Qt-style approach (`moc` reads headers and emi
 
 Per [[ADR-0001-cpp-standard-baseline]], when [P2996](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2024/p2996r1.html) ships in production toolchains, the *internal* implementation of `Observable<T>` / `Computed<...>` can use `std::meta::reflect_of<...>` to simplify dependency tracking. The public API does not change.
 
+## See in code
+
+The three pillars, each in one file:
+
+- **Template wrapper types**
+  - [`include/mpapp/observable.hpp`](../../include/mpapp/observable.hpp) — `Observable<T>` with `get()/set()/operator T()/operator=` + embedded `changed` signal.
+  - [`include/mpapp/computed.hpp`](../../include/mpapp/computed.hpp) — `Computed<&Ptrs...>` sentinel tag for computed-property declaration.
+  - [`include/mpapp/command.hpp`](../../include/mpapp/command.hpp) — `Command<Args...>` sentinel tag for bindable methods.
+  - [`include/mpapp/signal.hpp`](../../include/mpapp/signal.hpp) — the intrusive `signal<Args...>` / `signal_slot<Args...>` pair backing `changed`.
+- **CRTP control bases + platform-tag dispatch**
+  - [`include/mpapp/platform.hpp`](../../include/mpapp/platform.hpp) — the six `platform::{windows,linux_,android,macos,ios,mock}` tag types. Note the trailing underscore on `linux_` because `linux` is a predefined toolchain macro.
+  - [`include/mpapp/handlers/`](../../include/mpapp/handlers/) — handler templates partial-specialized on platform tags. The compiler picks one specialization per component per platform; missing one is a link error, not a runtime fallback.
+- **Compile-time binding paths**
+  - [`tests/template_type_spike/test.cpp`](../../tests/template_type_spike/test.cpp) — exercises the type-system invariants the binding-path machinery rests on (Observable / Computed / Command compile-time properties).
+
 ## See also
 
 - [[No Macros In Public API]] — Rule 1

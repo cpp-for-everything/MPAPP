@@ -54,6 +54,12 @@ These functions:
 3. **Per-component "Known Differences" table.** Any documented divergence is reviewed; if it can be eliminated, it's a bug.
 4. **The component porting state machine.** A control only reaches `parity-complete` after all five platforms pass the same conformance tests.
 
+## See in code
+
+- Canonical Rule-2-in-action: a single [`include/mpapp/button.hpp`](../../include/mpapp/button.hpp) surface backed by three platform handlers — [`src/handlers/windows/button_handler.cpp`](../../src/handlers/windows/button_handler.cpp) (WinUI 3 `muxc::Button`), [`src/handlers/linux/button_handler.cpp`](../../src/handlers/linux/button_handler.cpp) (GTK4 `GtkButton`), [`src/handlers/android/button_handler.cpp`](../../src/handlers/android/button_handler.cpp) (JNI to `android.widget.Button`). All three observe the same `text` / `clicked` contract.
+- Platform-only namespace pattern: declared in [`include/mpapp/platform.hpp`](../../include/mpapp/platform.hpp) (the six platform tags) and used as `namespace mpapp::platform::<name>` for the divergent surface. See per-component "Platform Notes" sections in [`vault/10_Architecture/Components/`](Components/) for documented divergences.
+- Enforcement at compile time: handlers are partial-specializations of `<component>_handler<platform::tag>`; missing a specialization for a platform is a link error, not a runtime fallback to mock.
+
 ## Related
 
 - [[ADR-0006-interop-parity]]

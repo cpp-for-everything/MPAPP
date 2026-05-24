@@ -74,6 +74,14 @@ All native UI calls happen on the platform's main thread. See [[Async Executor a
 
 Native callbacks (event handlers, signal callbacks) **must not** let C++ exceptions escape into native runtime stacks. Every interop boundary uses a `try/catch` adapter that routes exceptions to `mpapp::error_reporter` and converts them to platform-appropriate error signals.
 
+## See in code
+
+- **Windows** — [`src/handlers/windows/`](../../src/handlers/windows/) — 62 `.cpp` handlers using C++/WinRT (`winrt::com_ptr<T>` for RAII; types like `muxc::Button`). Canonical example: [`button_handler.cpp`](../../src/handlers/windows/button_handler.cpp). WinUI 3 runtime DLLs deployed via [`cmake/WindowsAppSDK.cmake`](../../cmake/WindowsAppSDK.cmake)'s `mpapp_add_winappsdk_runtime()` helper.
+- **Linux** — [`src/handlers/linux/`](../../src/handlers/linux/) — 62 `.cpp` handlers against GTK4's C ABI. Canonical example: [`button_handler.cpp`](../../src/handlers/linux/button_handler.cpp). LGPL dynamic linkage (Rule 9).
+- **Android** — [`src/handlers/android/`](../../src/handlers/android/) — 69 `.cpp` handlers using JNI. Canonical example: [`button_handler.cpp`](../../src/handlers/android/button_handler.cpp); plus the kind-discriminated event routers ([`item_click_router.cpp`](../../src/handlers/android/item_click_router.cpp), [`widget_dispatch.cpp`](../../src/handlers/android/widget_dispatch.cpp), etc.) per [[ADR-0022-android-kind-discriminated-routers]]. Java glue lives at [`examples/android_hello/app/src/main/java/io/mpapp/`](../../examples/android_hello/app/src/main/java/io/mpapp/) — `MppClickRouter.java`, `MppCollectionAdapter.java`, etc.
+- **macOS** — [`src/handlers/macos/`](../../src/handlers/macos/) — Objective-C++ `.mm` files. App-shell seed set today (`application`, `button`, `label`, `window`); fill-in pending an Apple host (M-07).
+- **iOS** — [`src/handlers/ios/`](../../src/handlers/ios/) — same seed shape as macOS but UIKit-backed; fill-in pending M-08.
+
 ## See also
 
 - [[Handlers]] — the handler pattern itself

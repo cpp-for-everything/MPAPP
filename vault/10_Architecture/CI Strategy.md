@@ -94,6 +94,12 @@ Estimated minutes (target: free-tier 2000/mo with overflow):
 
 → Total cloud minutes: ~3200/mo. Plan to reduce via aggressive caching + shard skipping (no-op PRs that touch only docs skip C++ jobs entirely).
 
+## See in code
+
+- [`.github/workflows/`](../../.github/workflows/) — current workflows: `pr.yml` (per-PR build + ctest matrix), `release.yml` (tagged-release full matrix), `build-skia-md-windows.yml` (manual-trigger: produces the Windows /MD Skia prebuilt MPAPP hosts for the auto-fetch path — see [[_Archive/T-0030-skia-backend]]).
+- [`cmake/toolchains/`](../../cmake/toolchains/) — per-target toolchain files the cross-build jobs use: `windows-x64.cmake`, `linux-{x64,arm64}.cmake`, `android-arm64.cmake`, `macos-arm64.cmake`, `ios-arm64.cmake`. `zig.cmake` is the cross-compiler frontend.
+- [`tools/mpapp/`](../../tools/mpapp/) — the developer CLI runners install on first use; pins the Zig version per [[ADR-0011-cross-compilation-toolchain]].
+
 ## See also
 
 - [[ADR-0008-mock-first-implementation]]

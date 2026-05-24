@@ -80,6 +80,12 @@ XAML hot reload is simpler than C++ hot reload (see [[Hot Reload]]). On save:
 
 Works on every dev surface that runs MPAPP — desktop and emulators alike.
 
+## See in code
+
+- [`tools/mpapp-xc/`](../../tools/mpapp-xc/) — the XAML compiler binary. Reads `.xaml`, emits `consteval` C++ that calls into the public component API.
+- [`tools/mpapp/`](../../tools/mpapp/) — the `mpapp` developer CLI wrapping the XAML compiler invocation and other developer commands. Cross-platform per Rule 12.
+- The emit target — every `mpapp::<component>` type in [`include/mpapp/`](../../include/mpapp/) — is the same public C++ surface a hand-written UI uses; the generated `consteval` tree imports no codegen-private headers.
+
 ## See also
 
 - [[ADR-0003-xaml-only-no-custom-dsl]]

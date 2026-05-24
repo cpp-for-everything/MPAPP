@@ -102,6 +102,24 @@ Lookup is a flat-array linear scan over ~10–30 entries — faster than `Dictio
 4. **Bidirectional binding.** Native events (e.g. `UIButton` touch up) call back into `button`'s observable, which propagates to bound view-models.
 5. **Destruction.** RAII releases the native ref (`global_ref` on Android, `ns_retain_ptr` on Apple, smart pointers on Windows/Linux).
 
+## See in code
+
+The handler pattern in three concrete views, all keyed on `mpapp::button`:
+
+- **Surface** (cross-platform, zero handler awareness):
+  [`include/mpapp/button.hpp`](../../include/mpapp/button.hpp)
+  — `Observable<std::string> text{}`, `signal<> clicked`, `set_handler(...)`.
+- **Mock handler** (`button_handler<platform::mock>`):
+  [`include/mpapp/handlers/mock/button_handler.hpp`](../../include/mpapp/handlers/mock/button_handler.hpp)
+  — records `map_text(text)` invocations and `clicked` emissions into a vector for assertion. The shape every component's mock follows.
+- **Real handlers** (`button_handler<platform::windows>` etc.):
+  [`src/handlers/windows/button_handler.cpp`](../../src/handlers/windows/button_handler.cpp) (WinUI 3 `muxc::Button`)
+  · [`src/handlers/linux/button_handler.cpp`](../../src/handlers/linux/button_handler.cpp) (GTK4 `GtkButton`)
+  · [`src/handlers/android/button_handler.cpp`](../../src/handlers/android/button_handler.cpp) (JNI to `android.widget.Button`).
+  Same `map_text` / `map_clicked` signatures as the mock — body differs.
+
+Platform-tag dispatch lives in [`include/mpapp/platform.hpp`](../../include/mpapp/platform.hpp). Every component repeats this trio (66 mock + ~62 per real platform); the full matrix is in [[Controls Inventory]].
+
 ## See also
 
 - [[Type System]] — the CRTP machinery

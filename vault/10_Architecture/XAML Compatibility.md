@@ -244,6 +244,12 @@ Per [[ADR-0004-maui-xaml-superset-compat]] MPAPP aims for a *superset* — XAML 
 
 The matrix is normative: any markup feature in MAUI but missing from this page is a bug in this page. When in doubt, open the file under `references/maui/src/Controls/src/Xaml/` and add a row.
 
+## See in code
+
+- [`tools/mpapp-xc/`](../../tools/mpapp-xc/) — the XAML compiler that lowers each MAUI XAML construct in the matrix above to a `consteval` C++ tree. Per-construct emit handlers map directly to the public component API in [`include/mpapp/`](../../include/mpapp/).
+- [`tools/mpapp/`](../../tools/mpapp/) — developer CLI wrapping `mpapp-xc` invocation alongside other commands. Cross-platform per Rule 12.
+- The component surface every XAML element ends up calling: every header in [`include/mpapp/`](../../include/mpapp/) — see [[Controls Inventory]] for the full mapping (XAML element name → MPAPP type).
+
 ## See also
 
 - [[Markup]] — markup subsystem architecture.

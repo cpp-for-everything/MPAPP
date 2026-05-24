@@ -115,6 +115,15 @@ class todo_view_model {
 
 The presence of `Validates<&member, predicate>` makes `email` reflect validation state via `email.validation` (an observable `error_state`).
 
+## See in code
+
+- [`include/mpapp/observable.hpp`](../../include/mpapp/observable.hpp) — `Observable<T>` itself: `get()`, `set(...)`, `operator T()`, `operator=(T)`, the embedded `changed` signal handle. Same-value-set short-circuit (no emit).
+- [`include/mpapp/signal.hpp`](../../include/mpapp/signal.hpp) — `signal<Args...>` + `signal_slot<Args...>` pair backing every Observable's `changed`. Intrusive subscription model (no allocation on subscribe/unsubscribe).
+- [`include/mpapp/computed.hpp`](../../include/mpapp/computed.hpp) — `Computed<&Ptrs...>` tag for computed properties. The framework picks the dependency pack out of the function signature at template-instantiation time.
+- [`include/mpapp/command.hpp`](../../include/mpapp/command.hpp) — `Command<Args...>` tag for bindable methods.
+- Usage at the component layer: every header in [`include/mpapp/`](../../include/mpapp/) follows the `Observable<T> property{}` pattern — e.g. [`button.hpp`](../../include/mpapp/button.hpp)'s `Observable<std::string> text{}`.
+- Handler integration: [`include/mpapp/handlers/mock/button_handler.hpp`](../../include/mpapp/handlers/mock/button_handler.hpp) — `map_text(button&)` subscribes to `text.changed` and threads the new value into either the recording (mock) or the native widget (real handlers).
+
 ## See also
 
 - [[Type System]]

@@ -97,6 +97,14 @@ When a control reaches a new status:
 3. The [[_Bases/Components.base]] live view will reflect the change automatically.
 4. The static snapshot above is updated by hand when a milestone closes.
 
+## See in code
+
+- [`include/mpapp/`](../../include/mpapp/) — one header per component (`button.hpp`, `label.hpp`, `collection_view.hpp`, etc.). The cross-platform surface — same source compiles unchanged on every supported platform.
+- [`include/mpapp/handlers/mock/`](../../include/mpapp/handlers/mock/) — 66 mock handlers, one per component, each recording calls into a test-observable vector.
+- [`src/handlers/windows/`](../../src/handlers/windows/) · [`src/handlers/linux/`](../../src/handlers/linux/) · [`src/handlers/android/`](../../src/handlers/android/) — 62 + 62 + 69 real platform handlers respectively. Each is the `<component>_handler` partial specialization on the matching platform tag.
+- [`src/handlers/macos/`](../../src/handlers/macos/) · [`src/handlers/ios/`](../../src/handlers/ios/) — Objective-C++ `.mm` handlers for the app-shell layer (application / button / label / window — the seed set). Per-component fill-in pending an Apple host (M-07 / M-08).
+- [`tests/mock_handlers/`](../../tests/mock_handlers/) — 66 `<component>_test.cpp` files exercising the surface contract; `CONFIGURE_DEPENDS` glob means adding a new component's tests doesn't require touching the test CMakeLists.
+
 ## See also
 
 - [[XAML Compatibility]]
