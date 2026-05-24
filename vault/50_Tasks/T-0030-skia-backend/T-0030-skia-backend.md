@@ -158,19 +158,44 @@ the existing `cairo_render_demo` is the closure step.
     `screenshots/t0031_{rectangle,ellipse,line,polygon,path}_skia_linux.png`
     from the earlier vcpkg m148 verification. Skia m143 (HumbleUI)
     and m148 (vcpkg) produce bit-identical output for the
-    facade's primitives — confirmation the API contract held across
-    milestones and the auto-fetch path renders correctly, not just
-    links.
-  - Android x64 (NDK clang via Windows host) — same pattern with
-    `--toolchain <ndk>/build/cmake/android.toolchain.cmake
-    -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-28` —
-    auto-fetched the android-x64 zip, built a 16 MB
-    `libandroid_hello.so` with `_ZN8SkCanvas*` / `_ZN13SkPathBuilder*`
-    / `_ZN8SkBitmap*` linked (`llvm-nm` verified).
-  - Windows MSVC — auto-fetch step succeeds; full MSVC build needs
-    the usual Developer Command Prompt env (INCLUDE/LIB).
+    facade's primitives.
+  - Cairo control: same demo built with `-DMPAPP_GRAPHICS_BACKEND=cairo`
+    produces different output for `ellipse/line/polygon/path` (different
+    AA algorithms) but identical for `rectangle` (trivial axis-aligned
+    case). Skia build outputs match Skia references; Cairo build outputs
+    match Cairo references; no cross-contamination.
+  - Symbol-level: `nm libmpapp-core.a` on the Skia build shows
+    `skia_canvas::*` + SkBitmap symbols and zero `cairo_canvas`
+    references; the Cairo build is the inverse. Confirms compile-time
+    backend selection, no runtime fallback.
+  - **Android x64 (Pixel emulator)** — Gradle assembleDebug
+    (`-PmpappGraphicsBackend=skia`) produced a 13 MB APK with
+    Skia-linked .so; installed + launched on `coroute_test` AVD;
+    `adb screencap` shows the `shape_view` (kind=ellipse, fill=#E63946,
+    stroke=#1D3557) rendering with **correct colors after the
+    `kBGRA_8888_SkColorType` fix below**.
+  - Windows MSVC: in progress — `windows_shapeview_demo` build under
+    a `vcvarsall x64` shell, computer-use screenshot pending.
   - Override path: `-DMPAPP_SKIA_PREFIX=$HOME/vcpkg/installed/x64-linux`
     reports `skia (vcpkg)` — backward-compat preserved.
+
+- [x] **Android-only colorspace bug caught by the visual test.**
+  `skia_canvas::skia_canvas(int,int)` previously used
+  `bitmap_.allocN32Pixels(w, h, false)`. Skia's `kN32_SkColorType` is
+  platform-dependent — BGRA on desktop builds (where the Linux
+  byte-equality test was happy) but **RGBA on Android/iOS Skia
+  builds**. The abstract canvas API documents `pixel_data()` as
+  premultiplied BGRA32 little-endian, so on Android we were silently
+  returning RGBA while the `shape_view_handler<android>::blit_bgra_to_rgba`
+  step swapped channels as if it were BGRA — producing pixel data
+  with R↔B inverted. The Linux pixel-equality test could not catch
+  this: it compared BGRA-as-rendered against BGRA-as-rendered, both
+  wrong-but-consistent under the Android terms.
+  Fix: switch to explicit `kBGRA_8888_SkColorType` in
+  `SkImageInfo::Make(w, h, kBGRA_8888_SkColorType, kPremul_SkAlphaType)`,
+  re-verify on the emulator — fill renders as the configured
+  `#E63946` red, stroke as `#1D3557` navy. Linux + Windows builds
+  unaffected (those toolchains already had `kN32 == kBGRA_8888`).
 
   Required follow-up after first integration attempt: HumbleUI's
   Linux prebuilt is built with `skia_use_system_freetype2=true`, so

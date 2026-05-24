@@ -185,6 +185,30 @@ macro(_mpapp_skia_apply_prebuilt_layout _mpapp_skia_prefix)
             _mpapp_skia_defs_list "${_mpapp_skia_defs_text}")
         list(TRANSFORM _mpapp_skia_defs_list REPLACE "^-D" "")
 
+        # Drop defines that collide with what MPAPP consumer code
+        # (especially src/hot_reload/windows.cpp + anything pulling
+        # in <windows.h>) sets for itself. Skia's static libs are
+        # already compiled with these on; what matters at the
+        # consumer side is just that <Windows.h> + Skia's public
+        # headers see consistent values. We keep our own and drop
+        # Skia's — otherwise MSVC's /WX promotes the C4005
+        # macro-redefinition warning into a build break. These
+        # tokens are convenience defines (don't change Skia's ABI
+        # or its public-header behavior), not the SK_* feature
+        # flags that gate API surface.
+        set(_mpapp_skia_drops
+            NOMINMAX
+            WIN32_LEAN_AND_MEAN
+            _CRT_SECURE_NO_WARNINGS
+            _CRT_NONSTDC_NO_DEPRECATE
+            UNICODE
+            _UNICODE
+            NDEBUG)
+        foreach(_drop IN LISTS _mpapp_skia_drops)
+            list(FILTER _mpapp_skia_defs_list EXCLUDE REGEX
+                 "^${_drop}(=.*)?$")
+        endforeach()
+
         # Platform system libs the prebuilt expects on the link line.
         # HumbleUI's Linux build sets `skia_use_system_freetype2=true`
         # — so freetype/fontconfig must come from the system. The other
@@ -254,7 +278,33 @@ macro(mpapp_find_skia)
     endif()
 
     # Path 2: auto-download the pinned prebuilt for the current target.
-    if(NOT MPAPP_SKIA_FOUND)
+    # Windows /MT vs /MD compatibility check first. HumbleUI's Windows
+    # Skia prebuilt is compiled with /MT (static CRT) because that's
+    # Skia's `is_official_build=true` Windows default. Linking /MT
+    # static libs into a /MD consumer triggers MSVC LNK2038
+    # ("RuntimeLibrary mismatch") and breaks the build. Most MPAPP
+    # consumers — WinUI 3 / WindowsAppSDK / WebView2 apps — are /MD.
+    # So on Windows, only auto-fetch when the project has explicitly
+    # opted into /MT via CMAKE_MSVC_RUNTIME_LIBRARY; otherwise emit a
+    # clear message + skip the fetch (caller falls through to stub).
+    set(_mpapp_skia_msvc_crt_ok TRUE)
+    if(MSVC AND CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT MPAPP_SKIA_FOUND)
+        if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY
+            OR NOT CMAKE_MSVC_RUNTIME_LIBRARY MATCHES "^MultiThreaded(Debug)?$")
+            set(_mpapp_skia_msvc_crt_ok FALSE)
+            message(STATUS
+                "MPAPP Skia auto-fetch skipped on Windows: the pinned "
+                "HumbleUI/SkiaBuild prebuilt is /MT (static CRT), but "
+                "this project uses /MD (dynamic CRT, the default and "
+                "what WinUI 3 / WindowsAppSDK require). To use Skia "
+                "on Windows pass one of:\n"
+                "  -DMPAPP_SKIA_PREFIX=<vcpkg-installed-dir>  (vcpkg builds /MD by default)\n"
+                "  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$<$<CONFIG:Debug>:Debug>  (switch project to /MT; breaks WinAppSDK)\n"
+                "Falling through to stub backend in the meantime.")
+        endif()
+    endif()
+
+    if(NOT MPAPP_SKIA_FOUND AND _mpapp_skia_msvc_crt_ok)
         _mpapp_skia_select_release(_mpapp_skia_platform _mpapp_skia_arch
                                    _mpapp_skia_url _mpapp_skia_hash)
         if(DEFINED _mpapp_skia_url AND NOT _mpapp_skia_url STREQUAL "")

@@ -10,11 +10,14 @@
 // only compiles when Skia headers + libs are present.
 //
 // Implementation notes:
-//   * The backing surface is an `SkBitmap` of type `kN32_SkColorType`,
-//     which is the platform-native 32-bit format. On the little-endian
-//     platforms MPAPP targets this is BGRA premultiplied — matching
-//     Cairo's CAIRO_FORMAT_ARGB32 byte ordering and the format
-//     documented on the abstract canvas API for pixel_data() readback.
+//   * The backing surface is an `SkBitmap` of type
+//     `kBGRA_8888_SkColorType` — explicit choice, not `kN32_SkColorType`,
+//     because kN32 is platform-dependent (BGRA on desktop, RGBA on
+//     Android/iOS). The abstract canvas API documents pixel_data() as
+//     premultiplied BGRA32 little-endian (matching Cairo's
+//     CAIRO_FORMAT_ARGB32 byte ordering); forcing kBGRA_8888 makes
+//     that contract hold uniformly across every platform regardless of
+//     how the Skia build's SK_R32_SHIFT is set.
 //   * SkPaint is rebuilt fresh on each draw op so the stored fill /
 //     stroke / cap / join / opacity state always reflects what the
 //     caller asked for, without us tracking dirty bits.
@@ -30,9 +33,12 @@
 // that layout (adding `<vcpkg>/installed/<triplet>/include/skia/` to
 // the include path). Looks unusual but is the upstream-Skia
 // convention.
+#include "include/core/SkAlphaType.h"
 #include "include/core/SkBitmap.h"
 #include "include/core/SkCanvas.h"
 #include "include/core/SkColor.h"
+#include "include/core/SkColorType.h"
+#include "include/core/SkImageInfo.h"
 #include "include/core/SkPaint.h"
 #include "include/core/SkPath.h"
 #include "include/core/SkPathBuilder.h"
@@ -116,9 +122,16 @@ SkRect to_skia_rect(const rect& r) noexcept {
 class skia_canvas final : public canvas {
 public:
     skia_canvas(int w, int h) : w_{w}, h_{h} {
-        // kN32_SkColorType on little-endian is BGRA premultiplied —
-        // matching what pixel_data() promises to return.
-        bitmap_.allocN32Pixels(w, h, /*isOpaque=*/false);
+        // Explicit kBGRA_8888_SkColorType, NOT kN32_SkColorType.
+        // kN32 maps to BGRA on most desktop Skia builds but to RGBA
+        // on Android/iOS — so allocN32Pixels would silently change
+        // pixel_data()'s byte order across platforms and break the
+        // abstract canvas contract (BGRA premultiplied, matching
+        // Cairo). Forcing kBGRA_8888 keeps the contract uniform.
+        bitmap_.allocPixels(
+            SkImageInfo::Make(w, h,
+                              kBGRA_8888_SkColorType,
+                              kPremul_SkAlphaType));
         bitmap_.eraseColor(SK_ColorTRANSPARENT);
         canvas_ = std::make_unique<SkCanvas>(bitmap_);
     }

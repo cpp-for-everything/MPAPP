@@ -47,6 +47,7 @@
 #include <mpapp/window.hpp>
 
 #include <mpapp/handlers/android/box_view_handler.hpp>
+#include <mpapp/handlers/android/shape_view_handler.hpp>
 #include <mpapp/handlers/android/button_handler.hpp>
 #include <mpapp/handlers/android/check_box_handler.hpp>
 #include <mpapp/handlers/android/entry_handler.hpp>
@@ -119,6 +120,27 @@ public:
         box_.fill         = mpapp::color{0.0, 0.6, 0.65, 1.0};   // teal
         box_.corners      = mpapp::corner_radius{4.0, 4.0, 4.0, 4.0};
 
+        // ShapeView (canvas-facade) demo — mirrors what
+        // windows_shapeview_demo and gtk4_shapeview_demo show on those
+        // platforms. Exercises the shape_view → canvas → backend → Bitmap
+        // pipeline end-to-end so the chosen graphics backend
+        // (cairo by default, skia when `-PmpappGraphicsBackend=skia`)
+        // actually paints pixels on screen. set_sv_handler is the typed
+        // binding for shape_view, since shape_view_handler doesn't
+        // inherit from view_handler (different branch of the hierarchy).
+        shape_.kind             = mpapp::shape_kind::ellipse;
+        shape_.fill             = "#E63946";
+        shape_.stroke           = "#1D3557";
+        shape_.stroke_thickness = 4.0;
+        shape_.opacity          = 1.0;
+        shape_handler_.map_kind(shape_);
+        shape_handler_.map_data(shape_);
+        shape_handler_.map_fill(shape_);
+        shape_handler_.map_stroke(shape_);
+        shape_handler_.map_stroke_thickness(shape_);
+        shape_handler_.map_opacity(shape_);
+        shape_.set_sv_handler(shape_handler_);
+
         btn_handler_.map_text(btn_);
         btn_handler_.map_clicked(btn_);
         lbl_handler_.map_text(lbl_);
@@ -148,6 +170,7 @@ public:
         layout_.horizontal_alignment = mpapp::h_align::center;
         layout_.vertical_alignment   = mpapp::v_align::center;
         layout_.add(box_);
+        layout_.add(shape_);  // canvas-facade demo
         layout_.add(lbl_);
         layout_.add(name_);
         layout_.add(shout_);
@@ -217,6 +240,7 @@ private:
     mpapp::stack_layout     layout_{};
     mpapp::scroll_view      scroll_{};
     mpapp::box_view         box_{};
+    mpapp::shape_view       shape_{};   // canvas-facade demo (T-0031 / T-0030)
     mpapp::table_view       tv_{};
     mpapp::text_cell        profile_cell_{};
     mpapp::switch_cell      push_cell_{};
@@ -231,6 +255,7 @@ private:
     mpapp::stack_layout_handler<mpapp::platform::android> layout_handler_{};
     mpapp::scroll_view_handler<mpapp::platform::android>  scroll_handler_{};
     mpapp::box_view_handler<mpapp::platform::android>     box_handler_{};
+    mpapp::shape_view_handler<mpapp::platform::android>   shape_handler_{};   // canvas-facade demo
     mpapp::table_view_handler<mpapp::platform::android>   tv_handler_{};
     mpapp::text_cell_handler<mpapp::platform::android>    profile_cell_handler_{};
     mpapp::switch_cell_handler<mpapp::platform::android>  push_cell_handler_{};
