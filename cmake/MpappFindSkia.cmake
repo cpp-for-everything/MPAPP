@@ -47,25 +47,63 @@ set(MPAPP_SKIA_PREBUILT_BASE_URL
     "https://github.com/HumbleUI/SkiaBuild/releases/download/${MPAPP_SKIA_PREBUILT_VERSION}"
     CACHE STRING "Base URL for the auto-fetched Skia prebuilt zips.")
 
-# Per-target SHA-256 hashes for the Release zips. CMake doesn't have
-# proper maps; flat _MPAPP_SKIA_SHA256_<platform>-<arch> variables work
-# fine and the variable-name dispatch is contained in the selector
-# function below. Hashes computed from the m143-da51f0d60e-4 release
-# at https://github.com/HumbleUI/SkiaBuild/releases/tag/m143-da51f0d60e-4 .
+# Per-target URL + SHA-256 hash table. CMake doesn't have proper maps;
+# flat `_MPAPP_SKIA_{URL,SHA256}_<platform>-<arch>` variables work fine
+# and the variable-name dispatch is contained in the selector function
+# below.
+#
+# Most platforms point at HumbleUI/SkiaBuild's m143-da51f0d60e-4
+# release. Windows is the exception: HumbleUI's Windows Skia is /MT
+# (static CRT, Skia's `is_official_build=true` Windows default), but
+# MPAPP's Windows apps are /MD because WinUI 3 / WindowsAppSDK /
+# WebView2 all require it — mixing /MT static libs into a /MD consumer
+# triggers LNK2038 ("RuntimeLibrary mismatch") and breaks the build.
+#
+# For Windows we host our own /MD prebuilt on cpp-for-everything/MPAPP
+# releases, produced by `.github/workflows/build-skia-md-windows.yml`
+# which installs `skia:x64-windows-static-md` via vcpkg (the triplet
+# combines static lib linkage + dynamic CRT) and zips the result.
+# Layout differs from HumbleUI's (vcpkg's `share/unofficial-skia/...`
+# CMake config instead of `out/<config>/skia.lib + defines.cmake`);
+# the macro handles both shapes after FetchContent extracts.
+
+set(_MPAPP_SKIA_URL_android-arm64
+    "${MPAPP_SKIA_PREBUILT_BASE_URL}/Skia-${MPAPP_SKIA_PREBUILT_VERSION}-android-Release-arm64.zip")
 set(_MPAPP_SKIA_SHA256_android-arm64
     "5e82b29f132d9265d25f947ac62f83d2a7d524195d568839547be4427b0a9855")
+
+set(_MPAPP_SKIA_URL_android-x64
+    "${MPAPP_SKIA_PREBUILT_BASE_URL}/Skia-${MPAPP_SKIA_PREBUILT_VERSION}-android-Release-x64.zip")
 set(_MPAPP_SKIA_SHA256_android-x64
     "aee1cfdb12e0e004f5d3f4d98e970e9e7755360372945387bf186752dd99cd5d")
+
+set(_MPAPP_SKIA_URL_linux-x64
+    "${MPAPP_SKIA_PREBUILT_BASE_URL}/Skia-${MPAPP_SKIA_PREBUILT_VERSION}-linux-Release-x64.zip")
 set(_MPAPP_SKIA_SHA256_linux-x64
     "06a0a7390d82e33c4998c5482c580d58bb692606ea20f061a37912d93ad5106f")
+
+set(_MPAPP_SKIA_URL_macos-arm64
+    "${MPAPP_SKIA_PREBUILT_BASE_URL}/Skia-${MPAPP_SKIA_PREBUILT_VERSION}-macos-Release-arm64.zip")
 set(_MPAPP_SKIA_SHA256_macos-arm64
     "d34aa6fadf641987046ab7bb48839060826fa439964c8fb741bf98fbb240ff37")
+
+set(_MPAPP_SKIA_URL_macos-x64
+    "${MPAPP_SKIA_PREBUILT_BASE_URL}/Skia-${MPAPP_SKIA_PREBUILT_VERSION}-macos-Release-x64.zip")
 set(_MPAPP_SKIA_SHA256_macos-x64
     "64bf1636ee32432c015dc25a7d796b3f46acd14606473af5d3b5593fa81b724c")
+
+# Windows: MPAPP-hosted /MD prebuilt (see comment block above). The
+# SHA-256 is filled in after the workflow's first successful run uploads
+# the zip to the `skia-md-${VERSION}` release tag — until then, fetches
+# on Windows fail with a clear "hash mismatch" message that names the
+# expected URL, and the user can fall back to MPAPP_SKIA_PREFIX with a
+# local vcpkg install.
+set(_MPAPP_SKIA_URL_windows-x64
+    "https://github.com/cpp-for-everything/MPAPP/releases/download/skia-md-${MPAPP_SKIA_PREBUILT_VERSION}/Skia-mpapp-md-${MPAPP_SKIA_PREBUILT_VERSION}-windows-Release-x64.zip")
 set(_MPAPP_SKIA_SHA256_windows-x64
-    "c828ff9458cfae12bf695a0ee0b37fda3da8d5584f36b96f2df74a06730dd174")
-# Add windows-arm64 / linux-arm64 rows when those become MPAPP targets;
-# HumbleUI ships them in the same release tag.
+    "TBD-after-workflow-runs")
+
+# Add windows-arm64 / linux-arm64 rows when those become MPAPP targets.
 
 # Map (CMAKE_SYSTEM_NAME, target arch) → (platform-key, arch-key) used
 # in the URL + hash lookup. Returns empty url when the current platform
@@ -119,16 +157,14 @@ function(_mpapp_skia_select_release out_platform out_arch out_url out_hash)
     endif()
 
     set(_key "${_platform}-${_arch}")
-    if(NOT DEFINED _MPAPP_SKIA_SHA256_${_key})
+    if(NOT DEFINED _MPAPP_SKIA_URL_${_key} OR NOT DEFINED _MPAPP_SKIA_SHA256_${_key})
         return()
     endif()
 
-    set(${out_platform} "${_platform}" PARENT_SCOPE)
-    set(${out_arch}     "${_arch}"     PARENT_SCOPE)
-    set(${out_url}
-        "${MPAPP_SKIA_PREBUILT_BASE_URL}/Skia-${MPAPP_SKIA_PREBUILT_VERSION}-${_platform}-Release-${_arch}.zip"
-        PARENT_SCOPE)
-    set(${out_hash} "${_MPAPP_SKIA_SHA256_${_key}}" PARENT_SCOPE)
+    set(${out_platform} "${_platform}"                      PARENT_SCOPE)
+    set(${out_arch}     "${_arch}"                          PARENT_SCOPE)
+    set(${out_url}      "${_MPAPP_SKIA_URL_${_key}}"        PARENT_SCOPE)
+    set(${out_hash}     "${_MPAPP_SKIA_SHA256_${_key}}"     PARENT_SCOPE)
 endfunction()
 
 # Build the imported `unofficial::skia::skia` target from a prebuilt
@@ -278,33 +314,29 @@ macro(mpapp_find_skia)
     endif()
 
     # Path 2: auto-download the pinned prebuilt for the current target.
-    # Windows /MT vs /MD compatibility check first. HumbleUI's Windows
-    # Skia prebuilt is compiled with /MT (static CRT) because that's
-    # Skia's `is_official_build=true` Windows default. Linking /MT
-    # static libs into a /MD consumer triggers MSVC LNK2038
-    # ("RuntimeLibrary mismatch") and breaks the build. Most MPAPP
-    # consumers — WinUI 3 / WindowsAppSDK / WebView2 apps — are /MD.
-    # So on Windows, only auto-fetch when the project has explicitly
-    # opted into /MT via CMAKE_MSVC_RUNTIME_LIBRARY; otherwise emit a
-    # clear message + skip the fetch (caller falls through to stub).
-    set(_mpapp_skia_msvc_crt_ok TRUE)
-    if(MSVC AND CMAKE_SYSTEM_NAME STREQUAL "Windows" AND NOT MPAPP_SKIA_FOUND)
-        if(NOT DEFINED CMAKE_MSVC_RUNTIME_LIBRARY
-            OR NOT CMAKE_MSVC_RUNTIME_LIBRARY MATCHES "^MultiThreaded(Debug)?$")
-            set(_mpapp_skia_msvc_crt_ok FALSE)
-            message(STATUS
-                "MPAPP Skia auto-fetch skipped on Windows: the pinned "
-                "HumbleUI/SkiaBuild prebuilt is /MT (static CRT), but "
-                "this project uses /MD (dynamic CRT, the default and "
-                "what WinUI 3 / WindowsAppSDK require). To use Skia "
-                "on Windows pass one of:\n"
-                "  -DMPAPP_SKIA_PREFIX=<vcpkg-installed-dir>  (vcpkg builds /MD by default)\n"
-                "  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded$<$<CONFIG:Debug>:Debug>  (switch project to /MT; breaks WinAppSDK)\n"
-                "Falling through to stub backend in the meantime.")
-        endif()
-    endif()
-
-    if(NOT MPAPP_SKIA_FOUND AND _mpapp_skia_msvc_crt_ok)
+    # The Windows /MT-vs-/MD problem that broke earlier auto-fetch on
+    # Windows is handled at table-definition time now: the windows-x64
+    # row points at MPAPP's own `/MD` static-lib build (see the URL
+    # table at the top of this file and the workflow at
+    # `.github/workflows/build-skia-md-windows.yml`).
+    #
+    # Until the workflow has produced its first release the windows-x64
+    # SHA-256 is still the placeholder `TBD-after-workflow-runs`. In
+    # that interim state we'd rather skip the fetch (and tell the user
+    # exactly why) than have FetchContent download a tag-not-found 404
+    # page and emit a confusing hash-mismatch error.
+    if(NOT MPAPP_SKIA_FOUND
+        AND CMAKE_SYSTEM_NAME STREQUAL "Windows"
+        AND _MPAPP_SKIA_SHA256_windows-x64 STREQUAL "TBD-after-workflow-runs")
+        message(STATUS
+            "MPAPP Skia auto-fetch skipped on Windows: the MPAPP-hosted "
+            "/MD prebuilt has not been published yet (windows-x64 SHA-256 "
+            "is still the 'TBD' placeholder in cmake/MpappFindSkia.cmake). "
+            "To use Skia on Windows right now pass:\n"
+            "  -DMPAPP_SKIA_PREFIX=<vcpkg-installed-dir>  (e.g. C:/tools/vcpkg/installed/x64-windows-static-md)\n"
+            "Once the .github/workflows/build-skia-md-windows.yml workflow "
+            "has run + published its first release this fallback goes away.")
+    elseif(NOT MPAPP_SKIA_FOUND)
         _mpapp_skia_select_release(_mpapp_skia_platform _mpapp_skia_arch
                                    _mpapp_skia_url _mpapp_skia_hash)
         if(DEFINED _mpapp_skia_url AND NOT _mpapp_skia_url STREQUAL "")
@@ -322,9 +354,22 @@ macro(mpapp_find_skia)
                 "MPAPP fetching Skia prebuilt: ${_mpapp_skia_platform}-${_mpapp_skia_arch} "
                 "(${MPAPP_SKIA_PREBUILT_VERSION})")
             FetchContent_MakeAvailable(mpapp_skia_prebuilt)
-            _mpapp_skia_apply_prebuilt_layout("${mpapp_skia_prebuilt_SOURCE_DIR}")
-            if(MPAPP_SKIA_FOUND)
-                set(MPAPP_SKIA_LAYOUT "fetched")
+            # Try vcpkg layout first: MPAPP's own Windows /MD zip ships
+            # `share/unofficial-skia/unofficial-skia-config.cmake`, so
+            # find_package() can satisfy it directly. HumbleUI's
+            # Linux/Android/macOS zips don't ship a CMake config and
+            # land at `out/<config>/skia.{a,lib}` instead, which
+            # _mpapp_skia_apply_prebuilt_layout knows how to read.
+            list(APPEND CMAKE_PREFIX_PATH "${mpapp_skia_prebuilt_SOURCE_DIR}")
+            find_package(unofficial-skia CONFIG QUIET)
+            if(TARGET unofficial::skia::skia)
+                set(MPAPP_SKIA_FOUND ON)
+                set(MPAPP_SKIA_LAYOUT "fetched-vcpkg")
+            else()
+                _mpapp_skia_apply_prebuilt_layout("${mpapp_skia_prebuilt_SOURCE_DIR}")
+                if(MPAPP_SKIA_FOUND)
+                    set(MPAPP_SKIA_LAYOUT "fetched")
+                endif()
             endif()
         endif()
     endif()

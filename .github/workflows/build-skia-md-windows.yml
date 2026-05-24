@@ -1,0 +1,138 @@
+name: Build Skia /MD (Windows)
+
+# Hosts MPAPP's own Windows Skia prebuilt for the auto-fetch path in
+# cmake/MpappFindSkia.cmake. Why we build our own instead of using
+# HumbleUI/SkiaBuild:
+#
+#   HumbleUI's Skia is built with `is_official_build=true`, which on
+#   Windows defaults `skia_enable_static_runtime=true` → static CRT (/MT).
+#   MPAPP's Windows apps use the dynamic CRT (/MD) because WinUI 3 /
+#   WindowsAppSDK / WebView2 all require it; mixing /MT static libs into
+#   a /MD consumer triggers MSVC LNK2038 ("RuntimeLibrary mismatch") and
+#   breaks the build. We need static-lib Skia compiled with /MD.
+#
+#   vcpkg's `x64-windows-static-md` triplet produces exactly that:
+#   `VCPKG_LIBRARY_LINKAGE=static` + `VCPKG_CRT_LINKAGE=dynamic`. This
+#   workflow installs the port under that triplet, captures the
+#   resulting `installed/x64-windows-static-md/` tree (headers + .lib
+#   files + unofficial-skia CMake config), and publishes it as a zip
+#   on the MPAPP release page. `mpapp_find_skia()` then auto-downloads
+#   that zip and points `find_package(unofficial-skia)` at the
+#   extracted tree.
+#
+# Triggered manually; bumping the pinned Skia milestone is a deliberate
+# act (matches the per-platform hash pinning in MpappFindSkia.cmake).
+
+on:
+  workflow_dispatch:
+    inputs:
+      skia_version:
+        description: 'Pinned Skia milestone tag (matches MpappFindSkia table)'
+        required: true
+        default: 'm143-da51f0d60e-4'
+      vcpkg_baseline:
+        description: 'vcpkg builtin-baseline commit (pins which Skia upstream the port targets — m148 at the latest baseline today)'
+        required: true
+        default: 'master'
+
+permissions:
+  contents: write
+
+jobs:
+  windows-md:
+    runs-on: windows-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Skia source clone + sync is multi-GB; cache between runs so
+      # the second invocation only rebuilds the changed bits.
+      - name: Cache vcpkg binary downloads
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:/vcpkg/installed
+            C:/vcpkg/downloads
+            C:/vcpkg/buildtrees/skia
+          key: vcpkg-skia-md-${{ inputs.vcpkg_baseline }}
+          restore-keys: |
+            vcpkg-skia-md-
+
+      - name: Bootstrap vcpkg
+        shell: cmd
+        run: |
+          if not exist C:/vcpkg (
+            git clone --depth=1 https://github.com/microsoft/vcpkg.git C:/vcpkg
+            call C:/vcpkg/bootstrap-vcpkg.bat -disableMetrics
+          )
+
+      # Real cost: ~25–35 min on a cold cache, ~2 min on a warm one.
+      # `--clean-after-build` keeps the runner's disk usage in check
+      # since the buildtrees dir bloats fast.
+      - name: Install skia:x64-windows-static-md
+        shell: cmd
+        run: C:/vcpkg/vcpkg.exe install skia:x64-windows-static-md --clean-after-build
+
+      # Pack just the files MpappFindSkia needs — the full installed
+      # tree includes debug variants + tooling that doubles the size.
+      - name: Pack zip
+        shell: pwsh
+        run: |
+          $version  = "${{ inputs.skia_version }}"
+          $stage    = "stage"
+          $zipname  = "Skia-mpapp-md-$version-windows-Release-x64.zip"
+          $src      = "C:/vcpkg/installed/x64-windows-static-md"
+          New-Item -ItemType Directory -Force -Path "$stage/include" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$stage/lib"     | Out-Null
+          New-Item -ItemType Directory -Force -Path "$stage/share"   | Out-Null
+          # Headers: full include/ tree (Skia uses `include/core/...`
+          # paths internally so the entire dir matters).
+          Copy-Item -Recurse "$src/include/*" "$stage/include/"
+          # Static libs: vcpkg ships everything Skia needs (skia +
+          # transitive expat / freetype / harfbuzz / libpng / libjpeg /
+          # libwebp / zlib / abseil ...) — copy *.lib only, skip the
+          # tooling.
+          Copy-Item "$src/lib/*.lib" "$stage/lib/"
+          # CMake config: MpappFindSkia hits find_package(unofficial-skia
+          # CONFIG) which expects share/unofficial-skia/ here.
+          Copy-Item -Recurse "$src/share/unofficial-skia" "$stage/share/"
+          # Some Skia transitives ship their own CMake configs too
+          # (abseil/expat/libjpeg-turbo/libpng/libwebp/freetype/...).
+          # Copy them all so find_package() can chase the dependency
+          # graph through them.
+          Get-ChildItem "$src/share" -Directory | ForEach-Object {
+              if (-not (Test-Path "$stage/share/$($_.Name)")) {
+                  Copy-Item -Recurse $_.FullName "$stage/share/"
+              }
+          }
+          Compress-Archive -Path "$stage/*" -DestinationPath $zipname
+          (Get-FileHash $zipname -Algorithm SHA256).Hash | Out-File -Encoding ASCII "$zipname.sha256"
+          Get-Item $zipname | Format-List Name, Length
+
+      - name: Upload artifact (for inspection)
+        uses: actions/upload-artifact@v4
+        with:
+          name: Skia-mpapp-md-windows-x64
+          path: |
+            Skia-mpapp-md-*.zip
+            Skia-mpapp-md-*.zip.sha256
+
+      # Publish to a stable release tag — MpappFindSkia's auto-fetch
+      # URL embeds this tag, so the artifact must land at a
+      # predictable location.
+      - name: Publish to GitHub release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "skia-md-${{ inputs.skia_version }}"
+          # Create the release if it doesn't already exist; ignore the
+          # "already exists" error otherwise.
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+              gh release create $tag `
+                  --title "Skia /MD prebuilt for Windows ($($tag))" `
+                  --notes "Static-lib Skia compiled with /MD CRT via vcpkg's x64-windows-static-md triplet. Consumed by cmake/MpappFindSkia.cmake on Windows. See .github/workflows/build-skia-md-windows.yml."
+          }
+          gh release upload $tag Skia-mpapp-md-*.zip --clobber
