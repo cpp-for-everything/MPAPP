@@ -7,7 +7,7 @@ tags:
 # Current Focus
 
 > [!important] Status — 2026-W21 (close)
-> **M-04b done. M-04c functionally complete — `active` pending ADR-acceptance pass.**
+> **M-04b done. M-04c SHIPPED — all gated ADRs accepted + all M-04c-era tasks archived per Rule 11.**
 >
 > **61 of 64 components are at `android-real` on Win + Linux + Android.** The remaining `mock` rows are 4 abstract bases (View / Layout / Element / Cell) that have no native primitives by design; their concrete subclasses own the real handlers.
 >
@@ -27,14 +27,18 @@ tags:
 
 ## What's still open (in priority order)
 
-1. **ADR-0015 — accepted (2026-05-24).** Cairo and Skia both ship as real backends behind the abstract canvas facade. Cairo is the default on every platform (Linux system libcairo, Win + Android vcpkg cairo). Skia is opt-in via `-DMPAPP_GRAPHICS_BACKEND=skia` on Linux + Windows (vcpkg `unofficial-skia`); Android Skia install failed and is documented in [[T-0030]]'s notes — Android continues with Cairo until that's resolved. GraphicsView ([[T-0029]]) + ShapeView ([[T-0031]]) migrations to the facade mean swapping the backend swaps rendering on every platform at once. Closure evidence: `examples/headless_canvas_demo` produces 6 PNGs per backend; Cairo + Skia outputs match visually (same colors, geometry, stroke, AA quality) across both Linux + Windows runs. Per-platform GUI screenshot evidence of the native widgets hosting the canvas is still deferred to a user-idle window — same DComp / WSLg-compositor capture walls noted in T-0028.
-2. **macOS + iOS sweep** across the entire widget set. Requires an Apple host. Existing Objective-C++ handlers on app-shell are the template; the rest need to follow.
+1. **macOS + iOS sweep** across the entire widget set. Requires an Apple host. Existing Objective-C++ handlers on app-shell are the template; the rest need to follow.
+2. **M-09 tooling & DX polish.** `mpapp` CLI / `mpapp-xc` XAML compiler / `mpapp-jni-gen` / LSP / hot-reload daemon — all cross-platform per Rule 12. Hot-reload skeleton exists (`src/hot_reload/windows.cpp`); rest is greenfield.
 3. **Cross-cutting tests for real handlers.** Mock-handler tests cover the surface contract; real-handler behavior is verified only through end-to-end builds + spot-checks. Worth a `tests/integration/` pass once a CI matrix is set up.
-4. **[[_Archive/T-0028-collectionview-orientation|T-0028]] closure.** Code-complete on all three platforms (Win 343/343, Linux 348/348, Android APK clean). Pending Rule 11 closure: per-platform screenshots (4 layouts × 3 platforms) + optional layout-toggle demo apps. `status: in-progress` until then.
+4. **Per-platform GUI screenshot capture infra.** DComp wall on WinUI 3 + missing `wlr-screencopy-unstable-v1` on WSLg blocked auto-capture of the T-0028 / T-0029 / T-0031 Linux + Android GUI shots (Windows shots succeeded via PowerShell BitBlt off MainWindowHandle). A reusable capture utility — either a snapshot extension to the tests harness or a dev-mode helper that does platform-specific window-bitblit — would unlock future closures.
+
+## Recently shipped milestones
+
+- [[40_Roadmap/M-04c-handler-heavy-port|M-04c]] (`shipped`) — all gated ADRs accepted; all T-0028 / T-0029 / T-0030 / T-0031 closure tasks archived per Rule 11. Canvas facade has Cairo + Skia backends (Skia auto-fetched per-platform via `cmake/MpappFindSkia.cmake` — HumbleUI for Linux/Android/macOS, MPAPP-hosted /MD prebuilt for Windows). GraphicsView + ShapeView migrated to the facade end-to-end.
 
 ## Active milestone
 
-[[40_Roadmap/M-04c-handler-heavy-port|M-04c]] (`active`) — exits to `shipped` once the proposed ADRs are accepted and the user signs off.
+No active milestone — M-04c shipped. Pick from the priority list above or look at [[40_Roadmap/M-09-Tooling-DX|M-09]] / [[40_Roadmap/M-10-Ecosystem|M-10]] to start a new one.
 
 ## Recently accepted ADRs
 

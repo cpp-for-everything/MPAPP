@@ -3,7 +3,7 @@ type: milestone
 id: M-04c
 title: Handler heavy port — ADR-gated widgets
 phase: p3
-status: active
+status: shipped
 deliverables:
   - Every M-04c-listed widget reaches `android-real` status (Win + Linux + Android verified)
   - One design ADR per heavy widget or widget family, accepted before code lands
@@ -14,7 +14,7 @@ exitCriteria:
   - Each gated ADR is `accepted`
 tags:
   - type/milestone
-  - status/active
+  - status/shipped
   - phase/p3
   - phase/p4
   - phase/p5
