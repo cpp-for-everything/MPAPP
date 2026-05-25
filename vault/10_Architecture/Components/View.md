@@ -60,6 +60,23 @@ tap.tapped.subscribe(slot, [&](const mpapp::tapped_event_args& a) {
 
 Per-platform `view_handler<P>::map_gestures(view&)` walks the collection at bind time and installs the matching native listener for each recognizer's `kind()` — `UITapGestureRecognizer` on iOS, `GtkGestureClick` on Linux, `UIElement.Tapped` on Windows, etc. The mock handler records `gesture.<kind>_attached` per recognizer + provides `simulate_tap(view&, …)` for tests to drive synthetic events. See [[../50_Tasks/T-0033-gesture-recognizers-tap-slice/T-0033-gesture-recognizers-tap-slice]] for the first slice (tap only) shipped today.
 
+## Resources + parent pointer
+
+Per [[RFC-0005-resource-dictionaries-and-styling]] `view` carries two new members:
+
+```cpp
+class view {
+    // ... existing Observables + gesture_recognizers ...
+
+    std::shared_ptr<resource_dictionary> resources{};   // optional local dict
+
+    view* parent() const noexcept;                       // visual-tree up-link
+    void  set_parent(view*) noexcept;                    // maintained by layout::add/remove
+};
+```
+
+`mpapp::find_in<T>(view, key)` walks `view.resources → view.parent()->resources → ... → root.resources` and returns the first typed match — same semantics as MAUI's `{StaticResource Key}`. `layout::add` / `insert` / `remove` / `clear` keep the parent pointer in sync; tests that exercise the walker directly can call `set_parent` manually. Default-null `resources` keeps the per-view memory cost at a single pointer for views that never touch styling.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\View\`

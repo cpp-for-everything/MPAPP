@@ -41,7 +41,7 @@ In:
 Out (follow-up tasks):
 
 - `mpapp::image::source` migration from `Observable<std::string>` to `Observable<image_source_ref>` — captured as T-0043.
-- Per-platform real loaders (Linux GDK-Pixbuf, Windows BitmapImage, Android BitmapFactory, macOS NSImage, iOS UIImage) — captured as T-0044 through T-0048.
+- Per-platform real loaders (Linux GDK-Pixbuf, Windows BitmapImage, Android BitmapFactory, macOS NSImage, iOS UIImage) — captured as T-0045 through T-0049 (T-0044 was used for the RFC-0005 resource-dictionary mock surface).
 - Disk cache + cache eviction policy for `uri_image_source` — needs a dedicated RFC.
 
 ## Acceptance Criteria
@@ -68,5 +68,5 @@ All tests passed (21 assertions in 8 test cases)
 
 - RFC: [[RFC-0004-image-source-family]].
 - Sibling family-RFC precedent: [[RFC-0003-gesture-recognizers]] + [[T-0033-gesture-recognizers-tap-slice]].
-- Follow-ups: T-0043 (image::source migration), T-0044/45/46/47/48 (per-platform real loaders) — to be opened.
+- Follow-ups: T-0043 (image::source migration, done), T-0045/46/47/48/49 (per-platform real loaders) — to be opened.
 - Affected components: [[Components/Image]], [[Components/ImageButton]], [[Components/ImageCell]].

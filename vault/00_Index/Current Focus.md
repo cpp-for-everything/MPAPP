@@ -13,6 +13,15 @@ tags:
 >
 > The autonomous push that landed [[40_Roadmap/M-04c-handler-heavy-port|M-04c]] covered: the page-level family (NavigationPage / TabbedPage / FlyoutPage / Shell with async push/pop + page_stack engine), the list family (ListView / CollectionView / TableView with wrap-platform-recycler per [[ADR-0020-virtualized-item-host-wrap-platform]]), the full cell tree (text/view/switch/image/entry per [[ADR-0021-tableview-cell-types]]), Grid as a real layout engine, WebView + HybridWebView (WebView2 / WebKitGTK 6.x / android.webkit.WebView + JS-bridge shim on each), and ShapeView + GraphicsView v1 (per-platform native primitives).
 
+> [!info] Foundational subsystems — recent additions (post-M-04c)
+> Three RFCs landed as mock surfaces, expanding the platform-independent foundation that the widget tree composes on:
+>
+> - [[RFC-0003-gesture-recognizers]] — `view::gesture_recognizers` + tap / pan / pinch / swipe / pointer recognizers. Linux real wire-up via GtkGesture controllers; Win / Android / macOS / iOS captured as T-0038 / T-0039 / T-0040 / T-0041.
+> - [[RFC-0004-image-source-family]] — polymorphic `image_source_ref` over file / uri / stream / font / resource sources; `image::source_object` carries the rich source alongside the legacy string `source`. Per-platform real loaders deferred to T-0044+ follow-ups.
+> - [[RFC-0005-resource-dictionaries-and-styling]] — `resource_dictionary` with merged-dictionary composition, `find_in<T>` hierarchical walker over `view::resources` + the new `view::parent_` pointer, `style` with `based_on` setter chains. Closed by [[T-0044-resource-dictionary-styling-mock]]. XAML lowering of `{StaticResource}` / `<Style TargetType=…>` deferred to mpapp-xc (M-09).
+>
+> CI test count is **395 / 395 green on Linux WSL** as of the RFC-0005 landing (up from 351 before the gesture work).
+
 ## Where we are now
 
 | Layer | Status |

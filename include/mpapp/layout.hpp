@@ -82,8 +82,15 @@ private:
 // Inline child-list mutators. Kept in-header for the mock surface so the
 // 7-component group has no .cpp files of its own — each `*_handler.cpp`
 // implementation lands with its real platform handler.
+//
+// Each mutator also maintains the child's `parent_` pointer so the
+// `find_in<T>` walker from RFC-0005 (resource lookup) — and any future
+// visual-tree consumer (focus traversal, accessibility, …) — sees a
+// consistent up-link. Clearing or removing a child detaches the link
+// rather than leaving a dangling pointer to a destroyed layout.
 inline void layout::add(view& child) {
     children_.push_back(&child);
+    child.set_parent(this);
 }
 
 inline void layout::insert(std::size_t index, view& child) {
@@ -92,11 +99,13 @@ inline void layout::insert(std::size_t index, view& child) {
     } else {
         children_.insert(children_.begin() + static_cast<std::ptrdiff_t>(index), &child);
     }
+    child.set_parent(this);
 }
 
 inline void layout::remove(view& child) {
     for (auto it = children_.begin(); it != children_.end(); ++it) {
         if (*it == &child) {
+            (*it)->set_parent(nullptr);
             children_.erase(it);
             return;
         }
@@ -104,6 +113,11 @@ inline void layout::remove(view& child) {
 }
 
 inline void layout::clear() {
+    for (view* c : children_) {
+        if (c) {
+            c->set_parent(nullptr);
+        }
+    }
     children_.clear();
 }
 

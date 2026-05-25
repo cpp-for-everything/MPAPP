@@ -39,6 +39,14 @@
 
 namespace mpapp {
 
+// Forward-declared so view can hold a `shared_ptr<resource_dictionary>`
+// without dragging in the dictionary's `<any>` / `<unordered_map>` cost
+// in headers that only touch view's primitive members. Translation
+// units that want to mutate `resources` include
+// `<mpapp/resources/resource_dictionary.hpp>` themselves (or the
+// `static_resource.hpp` walker, which transitively brings it in).
+class resource_dictionary;
+
 // Lightweight stand-ins for the rich types the full View surface will
 // carry. Defined here so every layout-group mock can use them without a
 // dedicated header per primitive. The real geometry / brush / semantics
@@ -172,6 +180,26 @@ public:
     void focus(Command<>            = {}) noexcept {}
     void unfocus(Command<>          = {}) noexcept {}
 
+    // ----- Resources (per RFC-0005) -------------------------------------
+    // Per-view resource dictionary. Optional — null means "no local
+    // resources, walk parent". `find_in<T>(view, key)` from
+    // `<mpapp/resources/static_resource.hpp>` performs the hierarchical
+    // walk (this_view.resources → parent.resources → ... → app.resources)
+    // and returns the first typed match.
+    //
+    // Held by `shared_ptr` so app code and the XAML binding layer can
+    // share a dictionary across views (theme + composition use this).
+    // Default-null keeps the per-view memory cost at a single pointer
+    // for views that never touch resources.
+    std::shared_ptr<resource_dictionary> resources{};
+
+    // ----- Visual-tree parent (used by find_in + future layout walks) --
+    // Set by `layout::add` / `layout::insert` to wire the parent chain.
+    // Tests that exercise `find_in` directly may also call `set_parent`
+    // manually to stand up a hierarchy without a layout.
+    [[nodiscard]] view* parent() const noexcept { return parent_; }
+    void               set_parent(view* p) noexcept { parent_ = p; }
+
     // ----- Handler ------------------------------------------------------
     view_handler<platform::current>&       handler() noexcept       { return *handler_; }
     const view_handler<platform::current>& handler() const noexcept { return *handler_; }
@@ -179,6 +207,7 @@ public:
     void                                   set_handler(view_handler<platform::current>& h) noexcept { handler_ = &h; }
 
 private:
+    view*                            parent_  = nullptr;
     view_handler<platform::current>* handler_ = nullptr;
 };
 
