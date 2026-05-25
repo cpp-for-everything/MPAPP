@@ -22,6 +22,38 @@ tags:
 
 `ProgressBar` is a determinate horizontal bar that fills proportionally to a `Progress` value clamped to `[0.0, 1.0]`. Unlike [[ActivityIndicator]], it expresses *how much* work has been done — useful for downloads, installers, and any task with a known total. MAUI also exposes `ProgressTo(value, length, easing)` to animate the fill; MPAPP mirrors this as an explicit coroutine-returning method on the C++ class.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_progress_bar` | [`include/mpapp/internal/basic_progress_bar.hpp`](../../../include/mpapp/internal/basic_progress_bar.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::progress_bar` | [`include/mpapp/progress_bar.hpp`](../../../include/mpapp/progress_bar.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/progress_bar.hpp>
+
+mpapp::progress_bar w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/progress_bar.hpp>
+#include <mpapp/handlers/mock/progress_bar_handler.hpp>
+
+mpapp::internal::basic_progress_bar w;
+mpapp::progress_bar_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::progress_bar_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::progress_bar_handler<>` and `mpapp::progress_bar_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ProgressBar\`

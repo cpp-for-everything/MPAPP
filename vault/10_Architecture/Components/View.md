@@ -22,6 +22,15 @@ tags:
 
 `View` is the abstract base class for every visual control in MAUI — it is the root of the visible UI hierarchy and the contract every [[Handlers|handler]] consumes. It surfaces the cross-cutting layout, transform, accessibility, and input properties that every concrete control (Label, Button, Layout, Border, etc.) inherits. In MAUI, the public `View` derives from `VisualElement` and `IView`, and the platform handler binds these abstract properties through a `PropertyMapper` to the underlying platform widget. In MPAPP it serves the same role: a single template-wrapped base type that gives every derived class a uniform observable surface.
 
+
+
+## Wrapper + Surface
+
+> [!info] Abstract base class
+> `mpapp::view` is a CRTP / abstract base inherited by concrete components — it is not a leaf component itself and does not follow the [[ADR-0024-wrapper-component-pattern]] wrapper / surface split.
+>
+> Concrete components that inherit `view` each have their own `mpapp::internal::basic_<...>` surface and `mpapp::<...>` wrapper; this base class participates in the chain as the inheritance root.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\View\`

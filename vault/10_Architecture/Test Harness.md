@@ -42,18 +42,23 @@ TEST_CASE("Observable<int> fires on change") {
 }
 ```
 
-Mock handlers (`button_handler<platform::mock>`) record calls and let tests assert against the recorded sequence:
+Mock handlers (`mpapp::button_handler<platform::mock>`, in `mpapp::internal::` and exposed via the public template alias) record calls and let tests assert against the recorded sequence. Per [[ADR-0024-wrapper-component-pattern]] tests construct the platform-agnostic *surface* (`mpapp::internal::basic_<name>`) directly — not the auto-binding wrapper — so the test target stays link-isolated from the per-platform handler library:
 
 ```cpp
-TEST_CASE("Button click invokes command") {
-    auto vm = todo_view_model{};
-    auto btn = mpapp::button{ .command = bind(&todo_view_model::increment) };
-    auto& handler = btn.handler<platform::mock>();
+TEST_CASE("button mock handler records click forwarding", "[mock][button]") {
+    mpapp::internal::basic_button b;
+    mpapp::button_handler<mpapp::platform::mock> h;
 
-    handler.simulate_click();
-    REQUIRE(vm.count.get() == 1);
+    h.map_clicked(b);
+    h.simulate_click(b);
+    h.simulate_click(b);
+
+    REQUIRE(h.calls_as_strings()
+            == std::vector<std::string>{"clicked", "clicked"});
 }
 ```
+
+The `Observable<T>` change contract (no-emit on `==`) is what the test pins via the handler boundary; the mock proves the framework doesn't drop or duplicate the mapper invocation.
 
 ## Layer 2 — Conformance tests
 

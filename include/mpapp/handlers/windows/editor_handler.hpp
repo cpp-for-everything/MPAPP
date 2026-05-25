@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 editor handler — wraps mux::Controls::TextBox
+// Part of MPAPP. WinUI 3 basic_editor handler — wraps mux::Controls::TextBox
 // configured for multi-line input (AcceptsReturn=true, TextWrapping=Wrap).
 
 #ifndef MPAPP_HANDLERS_WINDOWS_EDITOR_HANDLER_HPP
 #define MPAPP_HANDLERS_WINDOWS_EDITOR_HANDLER_HPP
 
-#include "../../editor.hpp"
+#include "../../internal/basic_editor.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -16,7 +16,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Windows.Foundation.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class editor_handler<platform::windows> {
@@ -29,9 +29,9 @@ public:
     editor_handler(editor_handler&&)                 = delete;
     editor_handler& operator=(editor_handler&&)      = delete;
 
-    void map_text(editor& e);
-    void map_placeholder(editor& e);
-    void map_is_read_only(editor& e);
+    void map_text(basic_editor& e);
+    void map_placeholder(basic_editor& e);
+    void map_is_read_only(basic_editor& e);
 
     winrt::Microsoft::UI::Xaml::Controls::TextBox&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::TextBox& native() const noexcept { return native_; }
@@ -56,7 +56,7 @@ private:
 
     winrt::Microsoft::UI::Xaml::Controls::TextBox native_{nullptr};
     winrt::event_token                            text_changed_token_{};
-    editor*                                       bound_         = nullptr;
+    basic_editor*                                       bound_         = nullptr;
     bool                                          suppress_echo_ = false;
     text_cb_t                                     text_cb_{this};
     placeholder_cb_t                              placeholder_cb_{this};
@@ -66,7 +66,6 @@ private:
     signal_slot<const bool&>                      readonly_slot_{};
 };
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // _WIN32
 #endif // MPAPP_HANDLERS_WINDOWS_EDITOR_HANDLER_HPP

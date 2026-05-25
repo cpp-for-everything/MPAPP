@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. GTK4 editor handler implementation.
+// Part of MPAPP. GTK4 basic_editor handler implementation.
 
 #include "mpapp/handlers/linux/editor_handler.hpp"
 
@@ -7,12 +7,12 @@
 
 #include <gtk/gtk.h>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 namespace {
 
 struct changed_ctx {
-    editor*                            target;
+    basic_editor*                            target;
     editor_handler<platform::linux_>*  handler;
 };
 
@@ -65,7 +65,7 @@ void editor_handler<platform::linux_>::apply_is_read_only(bool ro) {
                                ro ? FALSE : TRUE);
 }
 
-void editor_handler<platform::linux_>::map_text(editor& e) {
+void editor_handler<platform::linux_>::map_text(basic_editor& e) {
     apply_text(e.text.get());
     e.text.changed.subscribe(text_slot_, text_cb_);
 
@@ -83,25 +83,23 @@ void editor_handler<platform::linux_>::map_text(editor& e) {
         static_cast<GConnectFlags>(0));
 }
 
-void editor_handler<platform::linux_>::map_is_read_only(editor& e) {
+void editor_handler<platform::linux_>::map_is_read_only(basic_editor& e) {
     apply_is_read_only(e.is_read_only.get());
     e.is_read_only.changed.subscribe(readonly_slot_, readonly_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register editor so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_editor so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/linux/widget_dispatch.hpp"
-#include "mpapp/editor.hpp"
+#include "mpapp/internal/basic_editor.hpp"
 
 namespace {
 
 GtkWidget* dispatch_editor(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::editor*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_editor*>(v); w && w->has_handler()) {
         return GTK_WIDGET(w->handler().native());
     }
     return nullptr;

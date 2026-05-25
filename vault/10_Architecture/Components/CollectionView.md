@@ -31,6 +31,38 @@ tags:
 
 `CollectionView` is the modern MAUI replacement for `ListView` — same items-source-binding pattern, but with first-class layout switching (vertical/horizontal list, vertical/horizontal grid with span) and richer selection semantics (none / single / multiple). Item templates are deferred to the upcoming virtualized-item-host ADR; the mock holds plain `std::vector<std::string>` to make the surface compile without dragging in templating infrastructure.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_collection_view` | [`include/mpapp/internal/basic_collection_view.hpp`](../../../include/mpapp/internal/basic_collection_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::collection_view` | [`include/mpapp/collection_view.hpp`](../../../include/mpapp/collection_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_cv_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/collection_view.hpp>
+
+mpapp::collection_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/collection_view.hpp>
+#include <mpapp/handlers/mock/collection_view_handler.hpp>
+
+mpapp::internal::basic_collection_view w;
+mpapp::collection_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::collection_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::collection_view_handler<>` and `mpapp::collection_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Items\` — see `ItemsViewHandler`, `CollectionViewHandler`, and per-platform `.Windows.cs` / `.Android.cs` / `.iOS.cs` partials.

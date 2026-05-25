@@ -25,6 +25,38 @@ tags:
 
 `ListView` is a vertically-scrolling, single-column collection control that renders one cell per item with built-in pull-to-refresh, grouping, selection, and header/footer support. In MAUI it derives from `ItemsView<Cell>` and is the historical predecessor to `CollectionView`; MAUI itself flags it as obsolete with `[Obsolete("ListView is deprecated. Please use CollectionView instead.")]`. MPAPP ports it for parity and migration purposes, but new code should prefer `CollectionView` (see [[CollectionView]]).
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_list_view` | [`include/mpapp/internal/basic_list_view.hpp`](../../../include/mpapp/internal/basic_list_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::list_view` | [`include/mpapp/list_view.hpp`](../../../include/mpapp/list_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_lv_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/list_view.hpp>
+
+mpapp::list_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/list_view.hpp>
+#include <mpapp/handlers/mock/list_view_handler.hpp>
+
+mpapp::internal::basic_list_view w;
+mpapp::list_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::list_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::list_view_handler<>` and `mpapp::list_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Compatibility\Handlers\ListView\` (compat renderers; no `Microsoft.Maui.Handlers` mapper — ListView still uses the Forms-era renderer model)

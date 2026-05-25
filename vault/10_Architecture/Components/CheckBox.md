@@ -22,6 +22,38 @@ tags:
 
 `CheckBox` is a two-state binary selector — `IsChecked` is true or false — typically used in forms where each item is independently opt-in. Unlike `Switch`, the value is conventionally committed only when the surrounding form is submitted. iOS has no native check-box widget, so MAUI ships a custom `MauiCheckBox` drawn with `CoreGraphics`; MPAPP follows the same approach.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_check_box` | [`include/mpapp/internal/basic_check_box.hpp`](../../../include/mpapp/internal/basic_check_box.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::check_box` | [`include/mpapp/check_box.hpp`](../../../include/mpapp/check_box.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/check_box.hpp>
+
+mpapp::check_box w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/check_box.hpp>
+#include <mpapp/handlers/mock/check_box_handler.hpp>
+
+mpapp::internal::basic_check_box w;
+mpapp::check_box_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::check_box_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::check_box_handler<>` and `mpapp::check_box_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\CheckBox\`

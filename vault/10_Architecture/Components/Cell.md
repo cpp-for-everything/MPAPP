@@ -18,6 +18,15 @@ tags:
 > [!info] Terminal status (abstract base)
 > **mock** is the **terminal state** for `cell`. It is the abstract base every TableView cell subclass derives from; the typed subclasses (text_cell, entry_cell, switch_cell, view_cell, image_cell) own the real handlers. The base carries only the cross-cutting `is_enabled` toggle and a `tapped` signal.
 
+
+
+## Wrapper + Surface
+
+> [!info] Abstract base class
+> `mpapp::cell` is a CRTP / abstract base inherited by concrete components — it is not a leaf component itself and does not follow the [[ADR-0024-wrapper-component-pattern]] wrapper / surface split.
+>
+> Concrete components that inherit `cell` each have their own `mpapp::internal::basic_<...>` surface and `mpapp::<...>` wrapper; this base class participates in the chain as the inheritance root.
+
 ## MPAPP C++ API
 
 ```cpp

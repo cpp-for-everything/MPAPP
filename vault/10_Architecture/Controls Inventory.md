@@ -17,7 +17,16 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 > [!info] Live view
 > Open [[_Bases/Components.base]] for the live, filterable, sortable view. The table below is a static snapshot.
 
-## Snapshot (2026-05-21)
+> [!tip] Wrapper-component layering (ADR-0024)
+> Every concrete component in this inventory has been migrated to the two-layer pattern from [[ADR-0024-wrapper-component-pattern]] (commit `4754ac1`): a `mpapp::internal::basic_<name>` surface in `include/mpapp/internal/basic_<name>.hpp` + a `mpapp::<name>` wrapper in `include/mpapp/<name>.hpp` that embeds the platform handler by value and auto-binds it in its constructor. The handler classes themselves are unchanged.
+>
+> Two narrow categories opt out of the wrapper layer (documented exceptions in their per-component notes):
+> - [[Components/Application|Application]] — program-entry class; handler is created externally by `mpapp::run<App>`.
+> - [[Components/BindableLayout|BindableLayout]] — static attached-property facility; no instance to wrap.
+>
+> CRTP / abstract bases ([[Components/View|View]], [[Components/Layout|Layout]], [[Components/Cell|Cell]], [[Components/Element|Element]]) are inheritance roots, not leaf components, and do not participate in the surface / wrapper split.
+
+## Snapshot (2026-05-25)
 
 | Component | MAUI handler folder | Status |
 |---|---|---|

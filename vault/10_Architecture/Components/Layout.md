@@ -22,6 +22,15 @@ tags:
 
 `Layout` is the abstract base of every multi-child container in MAUI — `Grid`, `StackLayout`, `HorizontalStackLayout`, `VerticalStackLayout`, `AbsoluteLayout`, and `FlexLayout` all derive from it. It owns a flat `IList<IView>` of child views, surfaces `Padding`, `IsClippedToBounds`, `CascadeInputTransparent`, and `SafeAreaEdges`, and delegates measurement and arrangement to an `ILayoutManager`. The cross-platform `LayoutHandler` wires add / insert / remove / clear / update / z-index commands down to a platform-specific container (a `MauiPanel` on Windows, a `LayoutViewGroup` on Android, a `LayoutView` on iOS/macOS). In MPAPP, `layout` plays the same role: a `view` that owns a children collection and a pluggable layout-manager strategy.
 
+
+
+## Wrapper + Surface
+
+> [!info] Abstract base class
+> `mpapp::layout` is a CRTP / abstract base inherited by concrete components — it is not a leaf component itself and does not follow the [[ADR-0024-wrapper-component-pattern]] wrapper / surface split.
+>
+> Concrete components that inherit `layout` each have their own `mpapp::internal::basic_<...>` surface and `mpapp::<...>` wrapper; this base class participates in the chain as the inheritance root.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Layout\`

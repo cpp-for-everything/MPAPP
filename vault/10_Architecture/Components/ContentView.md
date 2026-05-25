@@ -24,6 +24,38 @@ tags:
 
 `Content` is the XAML `ContentProperty`, so the child can be written as a direct nested element.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_content_view` | [`include/mpapp/internal/basic_content_view.hpp`](../../../include/mpapp/internal/basic_content_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::content_view` | [`include/mpapp/content_view.hpp`](../../../include/mpapp/content_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/content_view.hpp>
+
+mpapp::content_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/content_view.hpp>
+#include <mpapp/handlers/mock/content_view_handler.hpp>
+
+mpapp::internal::basic_content_view w;
+mpapp::content_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::content_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::content_view_handler<>` and `mpapp::content_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ContentView\`

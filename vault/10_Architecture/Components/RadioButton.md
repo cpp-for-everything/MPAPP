@@ -22,6 +22,38 @@ tags:
 
 `RadioButton` is a single-selection toggle: at most one button in a named group is checked at a time. Each instance carries a text label (or content view), is grouped via a `GroupName` string, and exposes the standard text-style and stroke-style contracts so the indicator ring can be themed. Only Windows ships a native radio button; the other platforms render through `ContentView`/custom group containers, with selection mutual-exclusion enforced by the handler.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_radio_button` | [`include/mpapp/internal/basic_radio_button.hpp`](../../../include/mpapp/internal/basic_radio_button.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::radio_button` | [`include/mpapp/radio_button.hpp`](../../../include/mpapp/radio_button.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/radio_button.hpp>
+
+mpapp::radio_button w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/radio_button.hpp>
+#include <mpapp/handlers/mock/radio_button_handler.hpp>
+
+mpapp::internal::basic_radio_button w;
+mpapp::radio_button_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::radio_button_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::radio_button_handler<>` and `mpapp::radio_button_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\RadioButton\`

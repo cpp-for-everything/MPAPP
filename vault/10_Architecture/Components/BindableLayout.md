@@ -22,6 +22,16 @@ tags:
 
 `BindableLayout` is **not a control** — it is a set of attached properties (`ItemsSource`, `ItemTemplate`, `ItemTemplateSelector`, `EmptyView`, `EmptyViewTemplate`) that turn any existing [[Layout]] subclass (`Grid`, `StackLayout`, `FlexLayout`, …) into a lightweight, non-virtualizing items-control. Setting `BindableLayout.ItemsSource` instantiates one child per item using the supplied `DataTemplate` and keeps the children in sync via `INotifyCollectionChanged`. It is the simplest way to render a small, known collection without the weight of `CollectionView`. In MPAPP this surfaces as a static attached-property facility on `bindable_layout`, plus an `enable(...)` helper for purely-C++ wiring.
 
+
+## Wrapper + Surface
+
+> [!info] No wrapper layer
+> `mpapp::bindable_layout` is an **explicit exception** to [[ADR-0024-wrapper-component-pattern]] — see the ADR's *Skipped categories*.
+>
+> **Why:** Static attached-property facility: `bindable_layout()` is `delete`d, every method is static, and the handler attaches to a *layout host* (not a `bindable_layout` instance). No instance exists to wrap.
+
+The component is constructed and used as-is (no `internal::basic_bindable_layout` indirection, no embedded handler in the public class).
+
 ## MAUI Reference
 
 - **Handler:** *(none — `BindableLayout` has no dedicated handler; it composes with the host [[Layout]]'s handler)*

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. WinUI 3 editor handler implementation.
+// Part of MPAPP. WinUI 3 basic_editor handler implementation.
 
 #include "mpapp/handlers/windows/editor_handler.hpp"
 
@@ -12,7 +12,7 @@
 
 #include "winrt_strings.hpp"
 
-namespace mpapp {
+namespace mpapp::internal {
 
 editor_handler<platform::windows>::editor_handler() {
     native_ = winrt::Microsoft::UI::Xaml::Controls::TextBox{};
@@ -40,7 +40,7 @@ void editor_handler<platform::windows>::apply_is_read_only(bool ro) {
     if (native_ != nullptr) native_.IsReadOnly(ro);
 }
 
-void editor_handler<platform::windows>::map_text(editor& e) {
+void editor_handler<platform::windows>::map_text(basic_editor& e) {
     bound_ = &e;
     apply_text(e.text.get());
     e.text.changed.subscribe(text_slot_, text_cb_);
@@ -50,7 +50,7 @@ void editor_handler<platform::windows>::map_text(editor& e) {
         native_.TextChanged(text_changed_token_);
         text_changed_token_ = {};
     }
-    editor* target = &e;
+    basic_editor* target = &e;
     auto* self = this;
     text_changed_token_ = native_.TextChanged(
         [target, self](winrt::Windows::Foundation::IInspectable const& sender,
@@ -65,29 +65,27 @@ void editor_handler<platform::windows>::map_text(editor& e) {
         });
 }
 
-void editor_handler<platform::windows>::map_placeholder(editor& e) {
+void editor_handler<platform::windows>::map_placeholder(basic_editor& e) {
     apply_placeholder(e.placeholder.get());
     e.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
 }
-void editor_handler<platform::windows>::map_is_read_only(editor& e) {
+void editor_handler<platform::windows>::map_is_read_only(basic_editor& e) {
     apply_is_read_only(e.is_read_only.get());
     e.is_read_only.changed.subscribe(readonly_slot_, readonly_cb_);
 }
 
-} // namespace mpapp
-
-
+} // namespace mpapp::internal
 // ---------- Self-registration with the per-platform dispatch registry --
-// Phase 2 sweep per M-04b: register editor so ADR-0013 fall-through
+// Phase 2 sweep per M-04b: register basic_editor so ADR-0013 fall-through
 // dispatch can find its native handle without the legacy dynamic_cast chain.
 
 #include "mpapp/handlers/windows/widget_dispatch.hpp"
-#include "mpapp/editor.hpp"
+#include "mpapp/internal/basic_editor.hpp"
 
 namespace {
 
 ::winrt::Microsoft::UI::Xaml::UIElement dispatch_editor(::mpapp::view* v) {
-    if (auto* w = dynamic_cast<::mpapp::editor*>(v); w && w->has_handler()) {
+    if (auto* w = dynamic_cast<::mpapp::internal::basic_editor*>(v); w && w->has_handler()) {
         return w->handler().native();
     }
     return nullptr;

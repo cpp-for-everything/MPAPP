@@ -22,6 +22,38 @@ tags:
 
 `Image` displays a bitmap or animated picture. Sources may be a file path, a URL, an embedded resource, or a stream — encapsulated by `image_source`. The `aspect` property selects scaling behaviour: fit, fill, or center. Loading is asynchronous; `is_loading` reports progress, and `is_animation_playing` controls GIF/APNG playback.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_image` | [`include/mpapp/internal/basic_image.hpp`](../../../include/mpapp/internal/basic_image.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::image` | [`include/mpapp/image.hpp`](../../../include/mpapp/image.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/image.hpp>
+
+mpapp::image w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/image.hpp>
+#include <mpapp/handlers/mock/image_handler.hpp>
+
+mpapp::internal::basic_image w;
+mpapp::image_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::image_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::image_handler<>` and `mpapp::image_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Image\`

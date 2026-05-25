@@ -22,6 +22,38 @@ tags:
 
 `FlyoutPage` is a two-pane [[Page]] that pairs a navigation menu (the *flyout*) with the currently selected content (the *detail*). On phones the flyout slides over the detail and is dismissed by tap or swipe; on tablets and desktop it can sit beside the detail in a permanent split layout. The `FlyoutLayoutBehavior` enum (`Default`, `Split`, `Popover`, `SplitOnLandscape`, `SplitOnPortrait`) governs which mode applies, and `IsPresented` toggles flyout visibility. For routed apps with deeper hierarchies, [[Shell]] generalizes this pattern and is usually a better fit.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_flyout_page` | [`include/mpapp/internal/basic_flyout_page.hpp`](../../../include/mpapp/internal/basic_flyout_page.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::flyout_page` | [`include/mpapp/flyout_page.hpp`](../../../include/mpapp/flyout_page.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/flyout_page.hpp>
+
+mpapp::flyout_page w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/flyout_page.hpp>
+#include <mpapp/handlers/mock/flyout_page_handler.hpp>
+
+mpapp::internal::basic_flyout_page w;
+mpapp::flyout_page_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::flyout_page_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::flyout_page_handler<>` and `mpapp::flyout_page_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** No dedicated handler — `FlyoutPage` uses `PageHandler` plus the `IFlyoutView` cross-platform contract consumed by `FlyoutViewHandler`. See `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\FlyoutView\`.

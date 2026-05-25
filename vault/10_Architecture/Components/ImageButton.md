@@ -22,6 +22,38 @@ tags:
 
 `ImageButton` is a tappable button whose visual is an image rather than a text label — semantically `Button` + `Image`. It exposes the full button surface (`command`, `clicked`/`pressed`/`released` events, `is_pressed`, border, corner radius, padding) plus image-loading state. Use it for icon-only toolbars and toolbar-shelf actions.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_image_button` | [`include/mpapp/internal/basic_image_button.hpp`](../../../include/mpapp/internal/basic_image_button.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::image_button` | [`include/mpapp/image_button.hpp`](../../../include/mpapp/image_button.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/image_button.hpp>
+
+mpapp::image_button w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/image_button.hpp>
+#include <mpapp/handlers/mock/image_button_handler.hpp>
+
+mpapp::internal::basic_image_button w;
+mpapp::image_button_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::image_button_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::image_button_handler<>` and `mpapp::image_button_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ImageButton\`

@@ -22,6 +22,38 @@ tags:
 
 `Shell` is MAUI's high-level navigation primitive — a single [[Page]] that combines a flyout, tabs (top + bottom), a navigation stack, search, and URI-based routing into one declarative tree. The hierarchy is `Shell → ShellItem → ShellSection → ShellContent → Page`: `ShellItem`s appear as flyout entries; their `ShellSection`s appear as bottom tabs of the selected item; each section's `ShellContent`s appear as top tabs of the selected section; the leaf `ShellContent` produces the visible `Page`. Apps register routes (`Routing.RegisterRoute("orders/details", typeof(OrderDetailsPage))`) and call `GoToAsync("//main/orders")` or `GoToAsync("details?id=5")` to navigate — the path resolves against the shell tree, and parameters bind into the destination page via `IQueryAttributable` / `[QueryProperty]`. Shell is the largest single control in MAUI (~3,000 LOC of `Shell.cs` plus the `ShellNavigationManager`, `ShellUriHandler`, `ShellAppearance`, `SearchHandler`, and platform renderers); MPAPP's port will follow the same surface to keep MAUI XAML portable, while compile-time-checked route generation is on the table (see Known Differences).
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_shell` | [`include/mpapp/internal/basic_shell.hpp`](../../../include/mpapp/internal/basic_shell.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::shell` | [`include/mpapp/shell.hpp`](../../../include/mpapp/shell.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/shell.hpp>
+
+mpapp::shell w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/shell.hpp>
+#include <mpapp/handlers/mock/shell_handler.hpp>
+
+mpapp::internal::basic_shell w;
+mpapp::shell_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::shell_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::shell_handler<>` and `mpapp::shell_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** No top-level `ShellHandler` in `Core/src/Handlers`; rendering is done by per-platform compatibility renderers in `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Shell\` plus extension hooks (`IShellController`, `IShellAppearanceElement`).

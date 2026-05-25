@@ -22,6 +22,38 @@ tags:
 
 `TabbedPage` is a multi-page container that shows its `Children` as a row of tabs and switches the visible content as the user selects them. It derives from `MultiPage<Page>`, so children can be added directly or generated from an `ItemsSource` + `ItemTemplate`. Each tab's label and icon come from the child page's `Title` and `IconImageSource`. The bar appearance (background, text color, selected/unselected tab colors) is configurable on the parent. For nested tabs inside flyout-based routing, [[Shell]] offers a richer alternative; for a single-pane tab UI inside another page, consider `TabbedView` instead.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_tabbed_page` | [`include/mpapp/internal/basic_tabbed_page.hpp`](../../../include/mpapp/internal/basic_tabbed_page.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::tabbed_page` | [`include/mpapp/tabbed_page.hpp`](../../../include/mpapp/tabbed_page.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/tabbed_page.hpp>
+
+mpapp::tabbed_page w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/tabbed_page.hpp>
+#include <mpapp/handlers/mock/tabbed_page_handler.hpp>
+
+mpapp::internal::basic_tabbed_page w;
+mpapp::tabbed_page_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::tabbed_page_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::tabbed_page_handler<>` and `mpapp::tabbed_page_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** No dedicated handler — `TabbedPage` uses the base `PageHandler` plus per-platform partial classes in the control project (`TabbedPage.Windows.cs`, `.Android.cs`, `.iOS.cs`).

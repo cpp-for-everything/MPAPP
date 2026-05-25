@@ -31,16 +31,17 @@ platformIos: false | true
 Body sections (in order):
 
 1. **Overview** — what the control does for the user.
-2. **MAUI Reference** — links to MAUI source and docs.
-3. **MPAPP C++ API** — the public type signature.
-4. **XAML Usage** — XAML syntax (must match MAUI per [[ADR-0004-maui-xaml-superset-compat]]).
-5. **Platform Notes** — per-platform native widget mapping.
-6. **Side-by-side Examples** — MAUI XAML / MPAPP XAML / MPAPP C++.
-7. **Implementation** — links to the actual source files: surface header (`include/mpapp/<snake>.hpp`), mock handler (`include/mpapp/handlers/mock/<snake>_handler.hpp`), real per-platform handlers (`src/handlers/<plat>/<snake>_handler.cpp`), and tests (`tests/mock_handlers/<snake>_test.cpp`). Cross-link from the prose status callout when the platform-specific narrative names a native widget that lives in a specific file.
-8. **Tests** — links to test files (often folded into Implementation).
-9. **Known Differences** — documented divergences (any cell here is a candidate bug or RFC).
+2. **Wrapper + Surface** — the two-layer split from [[ADR-0024-wrapper-component-pattern]]: which class is the surface (`mpapp::internal::basic_<snake>`), which is the wrapper (`mpapp::<snake>`), app-code example (wrapper), test-code example (surface + mock handler). For the two exceptions (`Application`, `BindableLayout`) and the abstract bases (`View`, `Layout`, `Cell`, `Element`) this section instead explains why the wrapper pattern doesn't apply.
+3. **MAUI Reference** — links to MAUI source and docs.
+4. **MPAPP C++ API** — the public type signature.
+5. **XAML Usage** — XAML syntax (must match MAUI per [[ADR-0004-maui-xaml-superset-compat]]).
+6. **Platform Notes** — per-platform native widget mapping.
+7. **Side-by-side Examples** — MAUI XAML / MPAPP XAML / MPAPP C++.
+8. **Implementation** — links to the actual source files: wrapper header (`include/mpapp/<snake>.hpp`), surface header (`include/mpapp/internal/basic_<snake>.hpp`), mock handler (`include/mpapp/handlers/mock/<snake>_handler.hpp`), real per-platform handlers (`src/handlers/<plat>/<snake>_handler.cpp`), and tests (`tests/mock_handlers/<snake>_test.cpp`). Cross-link from the prose status callout when the platform-specific narrative names a native widget that lives in a specific file.
+9. **Tests** — links to test files (often folded into Implementation).
+10. **Known Differences** — documented divergences (any cell here is a candidate bug or RFC).
 
-Component-name → snake-case rule: PascalCase header name with a separator inserted before each uppercase letter (`BoxView` → `box_view`, `CollectionView` → `collection_view`). Two exceptions today: `Grid` → `grid_layout` (avoids shadowing layout API), `Layout` → `layout` (abstract base — has surface + mock + tests but no per-platform handler).
+Component-name → snake-case rule: PascalCase header name with a separator inserted before each uppercase letter (`BoxView` → `box_view`, `CollectionView` → `collection_view`). Three exceptions today: `Grid` → `grid_layout` (avoids shadowing layout API); `Switch` → `switch_` (trailing underscore avoids the C++ `switch` keyword — handler file is still `switch_handler.hpp` without the doubled underscore); `Layout` → `layout` (abstract base — has surface + mock + tests but no per-platform handler).
 
 ## Status conventions
 

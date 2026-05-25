@@ -29,6 +29,38 @@ Inherits the child-list API from [[Layout]] — call `add()`, `insert()`,
 `remove()`, `clear()`. The four stack-specific properties drive the
 per-platform native widget via `stack_layout_handler<platform::current>`.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_stack_layout` | [`include/mpapp/internal/basic_stack_layout.hpp`](../../../include/mpapp/internal/basic_stack_layout.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::stack_layout` | [`include/mpapp/stack_layout.hpp`](../../../include/mpapp/stack_layout.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/stack_layout.hpp>
+
+mpapp::stack_layout w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/stack_layout.hpp>
+#include <mpapp/handlers/mock/stack_layout_handler.hpp>
+
+mpapp::internal::basic_stack_layout w;
+mpapp::stack_layout_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::stack_layout_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::stack_layout_handler<>` and `mpapp::stack_layout_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Layout\` (shared with all layouts; stack-specific arrangement in `Layouts/StackLayoutManager.cs`)

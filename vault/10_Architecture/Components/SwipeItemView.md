@@ -22,6 +22,38 @@ tags:
 
 `SwipeItemView` is a [[SwipeView]] action that hosts arbitrary content — any [[View]] — instead of the fixed icon+text shape of [[SwipeItemMenuItem]]. It lets you build fully custom swipe actions (e.g. a tinted panel with a progress ring, or a multi-button cluster) while still participating in SwipeView's gesture, invocation, and `swipe_behavior_on_invoked` lifecycle. It implements both `IContentView` and `ISwipeItem`.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_swipe_item_view` | [`include/mpapp/internal/basic_swipe_item_view.hpp`](../../../include/mpapp/internal/basic_swipe_item_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::swipe_item_view` | [`include/mpapp/swipe_item_view.hpp`](../../../include/mpapp/swipe_item_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/swipe_item_view.hpp>
+
+mpapp::swipe_item_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/swipe_item_view.hpp>
+#include <mpapp/handlers/mock/swipe_item_view_handler.hpp>
+
+mpapp::internal::basic_swipe_item_view w;
+mpapp::swipe_item_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::swipe_item_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::swipe_item_view_handler<>` and `mpapp::swipe_item_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\SwipeItemView\SwipeItemViewHandler.cs`

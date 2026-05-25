@@ -8,7 +8,7 @@ tags:
 
 Index of all ADRs by area. The authoritative live view is [[_Bases/ADRs.base]].
 
-## Accepted (11)
+## Accepted (24)
 
 ### Type system
 
@@ -25,6 +25,22 @@ Index of all ADRs by area. The authoritative live view is [[_Bases/ADRs.base]].
 
 - [[ADR-0005-ios-macos-separate-interop]] — UIKit + AppKit (no Catalyst)
 - [[ADR-0006-interop-parity]] — Every feature on every platform
+- [[ADR-0012-application-window-handler-abstraction]] — Application / Window / Page / Layout handlers extend the widget-handler pattern
+- [[ADR-0013-data-driven-widget-dispatch]] — Data-driven widget dispatch via per-platform registries
+- [[ADR-0014-page-navigation-stack]] — Page navigation stack semantics
+- [[ADR-0015-graphics-backend-dual]] — Dual 2D graphics backend (Cairo + Skia, compile-time selectable)
+- [[ADR-0016-shell-compile-time-routes]] — Shell URI routing: compile-time route table
+- [[ADR-0017-grid-track-definitions]] — Grid track definitions: value-type with string parser
+- [[ADR-0018-hybrid-webview-typed-bridge]] — HybridWebView JS bridge: typed async method calls
+- [[ADR-0020-virtualized-item-host-wrap-platform]] — Virtualised item host: wrap platform recyclers
+- [[ADR-0021-tableview-cell-types]] — TableView cell type tree (full MAUI parity)
+- [[ADR-0022-android-kind-discriminated-routers]] — Android event routing: kind-discriminated listener family
+- [[ADR-0023-shell-route-guards-and-lifecycle]] — Shell route guards + page lifecycle hooks
+- [[ADR-0024-wrapper-component-pattern]] — Wrapper-component pattern: auto-binding wrapper around a platform-agnostic surface
+
+### Threading
+
+- [[ADR-0019-async-executor-native-dispatcher]] — Async executor: native UI dispatcher + `task<T>` adapter
 
 ### Tooling & process
 

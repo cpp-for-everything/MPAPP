@@ -22,6 +22,38 @@ tags:
 
 `Toolbar` is the top horizontal bar attached to a [[Page]] or [[NavigationPage]]. It owns a title, optional title icon, optional center `title_view`, a back-button affordance, and a collection of `ToolbarItem` actions. It is *the* surface for page-scoped navigation chrome — distinct from [[TitleBar]] (window chrome) and [[MenuBar]] (menus).
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_toolbar` | [`include/mpapp/internal/basic_toolbar.hpp`](../../../include/mpapp/internal/basic_toolbar.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::toolbar` | [`include/mpapp/toolbar.hpp`](../../../include/mpapp/toolbar.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/toolbar.hpp>
+
+mpapp::toolbar w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/toolbar.hpp>
+#include <mpapp/handlers/mock/toolbar_handler.hpp>
+
+mpapp::internal::basic_toolbar w;
+mpapp::toolbar_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::toolbar_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::toolbar_handler<>` and `mpapp::toolbar_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Toolbar\`

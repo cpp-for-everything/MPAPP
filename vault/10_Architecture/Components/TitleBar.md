@@ -22,6 +22,38 @@ tags:
 
 `TitleBar` is a custom-content replacement for the OS window title bar (Windows + macOS Catalyst). It exposes six content regions — `icon`, `leading_content`, `title`, `subtitle`, `content`, `trailing_content` — plus a foreground color and a `passthrough_elements` list of inner views that handle their own input instead of being treated as drag targets. The default 32 px height can be overridden, and hiding the title bar extends window content into the chrome region.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_title_bar` | [`include/mpapp/internal/basic_title_bar.hpp`](../../../include/mpapp/internal/basic_title_bar.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::title_bar` | [`include/mpapp/title_bar.hpp`](../../../include/mpapp/title_bar.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/title_bar.hpp>
+
+mpapp::title_bar w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/title_bar.hpp>
+#include <mpapp/handlers/mock/title_bar_handler.hpp>
+
+mpapp::internal::basic_title_bar w;
+mpapp::title_bar_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::title_bar_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::title_bar_handler<>` and `mpapp::title_bar_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** MAUI ships no dedicated `TitleBarHandler`; the control is hosted directly by `Window` and rendered via templated views.

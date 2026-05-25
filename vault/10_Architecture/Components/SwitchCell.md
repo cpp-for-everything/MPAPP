@@ -22,6 +22,38 @@ tags:
 
 `switch_cell` is a TableView row with a `text` label + a native toggle switch bound to `on`. Two-way; emits `on_changed` after each flip.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_switch_cell` | [`include/mpapp/internal/basic_switch_cell.hpp`](../../../include/mpapp/internal/basic_switch_cell.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::switch_cell` | [`include/mpapp/switch_cell.hpp`](../../../include/mpapp/switch_cell.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/switch_cell.hpp>
+
+mpapp::switch_cell w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/switch_cell.hpp>
+#include <mpapp/handlers/mock/switch_cell_handler.hpp>
+
+mpapp::internal::basic_switch_cell w;
+mpapp::switch_cell_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::switch_cell_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::switch_cell_handler<>` and `mpapp::switch_cell_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MPAPP C++ API
 
 ```cpp

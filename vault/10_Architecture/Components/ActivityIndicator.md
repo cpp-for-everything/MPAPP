@@ -22,6 +22,38 @@ tags:
 
 `ActivityIndicator` is a visual cue that "something is happening" without conveying progress — i.e., an indeterminate spinner. It is animated while `IsRunning` is `true` and is collapsed/hidden when `false` (the [[Handler]] couples `Visibility` and `IsRunning` on iOS and Android because the native controls do not respect both flags independently). It exposes exactly two bindable properties — `IsRunning` and `Color` — and inherits the rest of its surface from [[View]].
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_activity_indicator` | [`include/mpapp/internal/basic_activity_indicator.hpp`](../../../include/mpapp/internal/basic_activity_indicator.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::activity_indicator` | [`include/mpapp/activity_indicator.hpp`](../../../include/mpapp/activity_indicator.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/activity_indicator.hpp>
+
+mpapp::activity_indicator w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/activity_indicator.hpp>
+#include <mpapp/handlers/mock/activity_indicator_handler.hpp>
+
+mpapp::internal::basic_activity_indicator w;
+mpapp::activity_indicator_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::activity_indicator_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::activity_indicator_handler<>` and `mpapp::activity_indicator_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ActivityIndicator\`

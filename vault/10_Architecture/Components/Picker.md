@@ -25,6 +25,38 @@ tags:
 
 `Picker` is a single-selection drop-down list. The user taps it and the platform shows a native chooser (a popup ComboBox on Windows, a wheel on iOS, a dialog on Android) listing the items in `ItemsSource`. The picked entry is exposed through `SelectedIndex` and `SelectedItem`, both two-way bindable. A static `Title` string acts as the unselected-state caption.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_picker` | [`include/mpapp/internal/basic_picker.hpp`](../../../include/mpapp/internal/basic_picker.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::picker` | [`include/mpapp/picker.hpp`](../../../include/mpapp/picker.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/picker.hpp>
+
+mpapp::picker w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/picker.hpp>
+#include <mpapp/handlers/mock/picker_handler.hpp>
+
+mpapp::internal::basic_picker w;
+mpapp::picker_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::picker_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::picker_handler<>` and `mpapp::picker_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Picker\`

@@ -1,5 +1,5 @@
 ﻿// SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock-handler tests for `mpapp::editor`.
+// Part of MPAPP. Mock-handler tests for `mpapp::internal::basic_editor`.
 
 #include <string>
 #include <vector>
@@ -16,7 +16,7 @@ using editor_mock = mpapp::editor_handler<mpapp::platform::mock>;
 } // namespace
 
 TEST_CASE("editor mock handler logs initial text on map", "[mock][editor]") {
-    mpapp::editor e;
+    mpapp::internal::basic_editor e;
     editor_mock   h;
 
     h.map_text(e);
@@ -26,7 +26,7 @@ TEST_CASE("editor mock handler logs initial text on map", "[mock][editor]") {
 
 TEST_CASE("editor mock handler fires once per real text change",
           "[mock][editor]") {
-    mpapp::editor e;
+    mpapp::internal::basic_editor e;
     editor_mock   h;
 
     h.map_text(e);
@@ -39,7 +39,7 @@ TEST_CASE("editor mock handler fires once per real text change",
 }
 
 TEST_CASE("editor mock handler ignores same-value writes", "[mock][editor]") {
-    mpapp::editor e;
+    mpapp::internal::basic_editor e;
     editor_mock   h;
 
     e.placeholder = "Notes...";
@@ -52,7 +52,7 @@ TEST_CASE("editor mock handler ignores same-value writes", "[mock][editor]") {
 }
 
 TEST_CASE("editor mock handler tracks read-only toggle", "[mock][editor]") {
-    mpapp::editor e;
+    mpapp::internal::basic_editor e;
     editor_mock   h;
 
     h.map_is_read_only(e);
@@ -68,7 +68,7 @@ TEST_CASE("editor mock handler tracks read-only toggle", "[mock][editor]") {
 }
 
 TEST_CASE("editor mock handler tracks max length", "[mock][editor]") {
-    mpapp::editor e;
+    mpapp::internal::basic_editor e;
     editor_mock   h;
 
     e.max_length = 500;

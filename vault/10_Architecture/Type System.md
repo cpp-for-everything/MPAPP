@@ -73,7 +73,11 @@ The three pillars, each in one file:
   - [`include/mpapp/signal.hpp`](../../include/mpapp/signal.hpp) — the intrusive `signal<Args...>` / `signal_slot<Args...>` pair backing `changed`.
 - **CRTP control bases + platform-tag dispatch**
   - [`include/mpapp/platform.hpp`](../../include/mpapp/platform.hpp) — the six `platform::{windows,linux_,android,macos,ios,mock}` tag types. Note the trailing underscore on `linux_` because `linux` is a predefined toolchain macro.
-  - [`include/mpapp/handlers/`](../../include/mpapp/handlers/) — handler templates partial-specialized on platform tags. The compiler picks one specialization per component per platform; missing one is a link error, not a runtime fallback.
+  - [`include/mpapp/handlers/`](../../include/mpapp/handlers/) — handler templates partial-specialised on platform tags (under `mpapp::internal::`). The compiler picks one specialisation per component per platform; missing one is a link error, not a runtime fallback. The public `template <class P = platform::current> using <name>_handler = internal::<name>_handler<P>;` alias next to each wrapper keeps `mpapp::<name>_handler<>` and `mpapp::<name>_handler<platform::mock>` valid spellings.
+  - CRTP parameterises on the **surface** type (`control<basic_<name>>`), not the wrapper, so introspection lives on the platform-agnostic layer where the handler reads it. See [[ADR-0024-wrapper-component-pattern]] for the surface/wrapper split.
+- **Wrapper-component layering (ADR-0024)**
+  - [`include/mpapp/internal/`](../../include/mpapp/internal/) — surface classes (`internal::basic_<name>`) hold the handler by pointer; this is the type test code constructs directly.
+  - [`include/mpapp/<name>.hpp`](../../include/mpapp/) — wrapper classes inherit the surface publicly and embed the handler by value; user app code constructs these.
 - **Compile-time binding paths**
   - [`tests/template_type_spike/test.cpp`](../../tests/template_type_spike/test.cpp) — exercises the type-system invariants the binding-path machinery rests on (Observable / Computed / Command compile-time properties).
 

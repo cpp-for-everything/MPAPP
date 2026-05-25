@@ -25,6 +25,38 @@ tags:
 
 `TableView` displays a scrollable list of rows organized into named sections — typically used for settings screens, forms, and other heterogeneous layouts where each row is a `Cell` declared inline rather than driven by an `ItemTemplate`. Unlike [[ListView]], the content is built statically from a `TableRoot` containing `TableSection`s, which makes it ideal for fixed-shape UIs. MAUI flags it as obsolete in favor of `CollectionView`, and MPAPP ports it for parity with the legacy MAUI surface but does not recommend it for new code.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_table_view` | [`include/mpapp/internal/basic_table_view.hpp`](../../../include/mpapp/internal/basic_table_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::table_view` | [`include/mpapp/table_view.hpp`](../../../include/mpapp/table_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_tv_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/table_view.hpp>
+
+mpapp::table_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/table_view.hpp>
+#include <mpapp/handlers/mock/table_view_handler.hpp>
+
+mpapp::internal::basic_table_view w;
+mpapp::table_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::table_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::table_view_handler<>` and `mpapp::table_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Compatibility\Handlers\TableView\` (compat renderers; no `Microsoft.Maui.Handlers` mapper)

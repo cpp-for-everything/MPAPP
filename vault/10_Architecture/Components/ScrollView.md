@@ -25,6 +25,38 @@ tags:
 
 `ScrollView` is a single-child container that lets the user pan its content when the content is larger than the available viewport. It supports vertical, horizontal, both, or neutral orientations and exposes per-axis scrollbar-visibility policies. The control raises `Scrolled` events as the offset changes and offers an awaitable `ScrollToAsync` API that scrolls to a coordinate, an element, or a named position (Start, Center, End, MakeVisible). MAUI's `ScrollViewHandler` maps directly to a `UIScrollView` on iOS, a `MauiScrollView` on Android, and a `Microsoft.UI.Xaml.Controls.ScrollViewer` on Windows.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_scroll_view` | [`include/mpapp/internal/basic_scroll_view.hpp`](../../../include/mpapp/internal/basic_scroll_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::scroll_view` | [`include/mpapp/scroll_view.hpp`](../../../include/mpapp/scroll_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/scroll_view.hpp>
+
+mpapp::scroll_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/scroll_view.hpp>
+#include <mpapp/handlers/mock/scroll_view_handler.hpp>
+
+mpapp::internal::basic_scroll_view w;
+mpapp::scroll_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::scroll_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::scroll_view_handler<>` and `mpapp::scroll_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ScrollView\`

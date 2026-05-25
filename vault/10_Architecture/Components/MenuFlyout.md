@@ -22,6 +22,38 @@ tags:
 
 `MenuFlyout` is a context / pop-up menu attached to any [[Element]] via the `FlyoutBase.ContextFlyout` attached property. It is a collection of `IMenuElement` children that appears in response to a right-click, long-press, or programmatic `show()` call. Unlike [[MenuBar]], `MenuFlyout` is not bound to window chrome — it can decorate any control.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_menu_flyout` | [`include/mpapp/internal/basic_menu_flyout.hpp`](../../../include/mpapp/internal/basic_menu_flyout.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::menu_flyout` | [`include/mpapp/menu_flyout.hpp`](../../../include/mpapp/menu_flyout.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/menu_flyout.hpp>
+
+mpapp::menu_flyout w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/menu_flyout.hpp>
+#include <mpapp/handlers/mock/menu_flyout_handler.hpp>
+
+mpapp::internal::basic_menu_flyout w;
+mpapp::menu_flyout_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::menu_flyout_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::menu_flyout_handler<>` and `mpapp::menu_flyout_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\MenuFlyoutHandler\`

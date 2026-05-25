@@ -30,6 +30,38 @@ tags:
 
 `ShapeView` is the host element for vector shapes (rectangle, ellipse, line, polyline, polygon, path). It owns a `shape` geometry plus paint controls: `fill`, `stroke`, `stroke_thickness`, dash pattern, line cap/join, and miter limit. The geometry stretches inside the view according to `aspect`. Under the hood every concrete `Rectangle`/`Ellipse`/`Path` derives from `Shape` and renders through `ShapeView`.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_shape_view` | [`include/mpapp/internal/basic_shape_view.hpp`](../../../include/mpapp/internal/basic_shape_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::shape_view` | [`include/mpapp/shape_view.hpp`](../../../include/mpapp/shape_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_sv_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/shape_view.hpp>
+
+mpapp::shape_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/shape_view.hpp>
+#include <mpapp/handlers/mock/shape_view_handler.hpp>
+
+mpapp::internal::basic_shape_view w;
+mpapp::shape_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::shape_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::shape_view_handler<>` and `mpapp::shape_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\ShapeView\`

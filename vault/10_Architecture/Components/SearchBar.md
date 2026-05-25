@@ -22,6 +22,38 @@ tags:
 
 `SearchBar` is a specialised single-line text input optimised for queries. It carries a search glyph, a placeholder, and (on most platforms) a clear/cancel button. Submitting (tapping the keyboard's search action) raises `search_command` with the current text. It is conceptually `Entry` + "search" `return_type` + cancel affordance, and uses `AutoSuggestBox`/`UISearchBar`/`SearchView` natively.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_search_bar` | [`include/mpapp/internal/basic_search_bar.hpp`](../../../include/mpapp/internal/basic_search_bar.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::search_bar` | [`include/mpapp/search_bar.hpp`](../../../include/mpapp/search_bar.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/search_bar.hpp>
+
+mpapp::search_bar w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/search_bar.hpp>
+#include <mpapp/handlers/mock/search_bar_handler.hpp>
+
+mpapp::internal::basic_search_bar w;
+mpapp::search_bar_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::search_bar_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::search_bar_handler<>` and `mpapp::search_bar_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\SearchBar\`

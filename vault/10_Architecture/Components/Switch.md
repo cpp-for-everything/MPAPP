@@ -22,6 +22,38 @@ tags:
 
 `Switch` is a sliding toggle showing one of two states (`IsOn` true or false). It is the on-off control of choice for settings screens where the change takes effect immediately, in contrast to `CheckBox` which is conventional for opt-in selection in forms. Per MAUI's `ISwitch`, it exposes `IsOn`, `ThumbColor`, and `TrackColor`.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_switch_` | [`include/mpapp/internal/basic_switch_.hpp`](../../../include/mpapp/internal/basic_switch_.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::switch_` | [`include/mpapp/switch_.hpp`](../../../include/mpapp/switch_.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/switch_.hpp>
+
+mpapp::switch_ w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/switch_.hpp>
+#include <mpapp/handlers/mock/switch_handler.hpp>
+
+mpapp::internal::basic_switch_ w;
+mpapp::switch_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::switch_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::switch_handler<>` and `mpapp::switch_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Switch\`

@@ -22,6 +22,38 @@ tags:
 
 `TimePicker` is the time-of-day counterpart to [[DatePicker]]. The selected wall-clock time is stored as a 24-hour duration (`time`), validated to `[00:00, 24:00)`. The format string controls the displayed text (default short time `"%X"`). The native chooser is a popup clock on Windows, a wheel on iOS, and a dialog on Android.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_time_picker` | [`include/mpapp/internal/basic_time_picker.hpp`](../../../include/mpapp/internal/basic_time_picker.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::time_picker` | [`include/mpapp/time_picker.hpp`](../../../include/mpapp/time_picker.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/time_picker.hpp>
+
+mpapp::time_picker w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/time_picker.hpp>
+#include <mpapp/handlers/mock/time_picker_handler.hpp>
+
+mpapp::internal::basic_time_picker w;
+mpapp::time_picker_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::time_picker_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::time_picker_handler<>` and `mpapp::time_picker_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\TimePicker\`

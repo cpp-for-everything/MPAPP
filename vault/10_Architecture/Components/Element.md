@@ -32,6 +32,15 @@ Because every other component in MPAPP inherits from `element`, this class is th
 
 Because of its breadth, `element` is the only class with a hand-written set of platform-specific partial files in the controls assembly (`Element.Android.cs`, `Element.iOS.cs`, etc.) — each adds a minimal hook for the platform's resource/lifecycle quirks.
 
+
+
+## Wrapper + Surface
+
+> [!info] Abstract base class
+> `mpapp::element` is a CRTP / abstract base inherited by concrete components — it is not a leaf component itself and does not follow the [[ADR-0024-wrapper-component-pattern]] wrapper / surface split.
+>
+> Concrete components that inherit `element` each have their own `mpapp::internal::basic_<...>` surface and `mpapp::<...>` wrapper; this base class participates in the chain as the inheritance root.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Element\` (`ElementHandler`, `ElementHandlerOfT`)

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Android editor handler — wraps android.widget.EditText
+// Part of MPAPP. Android basic_editor handler — wraps android.widget.EditText
 // configured for multi-line input. Reuses the io.mpapp.MppTextWatcher
 // shim from Entry; the JNI trampoline routes via a kind discriminator.
 
 #ifndef MPAPP_HANDLERS_ANDROID_EDITOR_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_EDITOR_HANDLER_HPP
 
-#include "../../editor.hpp"
+#include "../../internal/basic_editor.hpp"
 #include "../../platform.hpp"
 #include "../../signal.hpp"
 
@@ -15,7 +15,7 @@
 #include <jni.h>
 #include <string>
 
-namespace mpapp {
+namespace mpapp::internal {
 
 template <>
 class editor_handler<platform::android> {
@@ -28,9 +28,9 @@ public:
     editor_handler(editor_handler&&)                 = delete;
     editor_handler& operator=(editor_handler&&)      = delete;
 
-    void map_text(editor& e);
-    void map_placeholder(editor& e);
-    void map_is_read_only(editor& e);
+    void map_text(basic_editor& e);
+    void map_placeholder(basic_editor& e);
+    void map_is_read_only(basic_editor& e);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -57,7 +57,7 @@ private:
 
     jobject                          native_   = nullptr;  // global ref to EditText
     jobject                          watcher_  = nullptr;
-    editor*                          bound_    = nullptr;
+    basic_editor*                          bound_    = nullptr;
     bool                             suppress_echo_ = false;
     text_cb_t                        text_cb_{this};
     placeholder_cb_t                 placeholder_cb_{this};
@@ -70,7 +70,6 @@ private:
 void android_editor_dispatch_text_changed(editor_handler<platform::android>* h,
                                           const std::string& text);
 
-} // namespace mpapp
-
+} // namespace mpapp::internal
 #endif // __ANDROID__
 #endif // MPAPP_HANDLERS_ANDROID_EDITOR_HANDLER_HPP

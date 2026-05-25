@@ -22,6 +22,38 @@ tags:
 
 `WebView` embeds a full web browser engine inside the app to render HTML content from a URL, an HTML string, or local files. It exposes navigation (`go_back`, `go_forward`, `reload`), JavaScript evaluation, cookie sync, and lifecycle events for navigation start/complete/failure. MPAPP wraps each platform's stock engine (WebView2 on Windows, system `WebView` on Android, WebKitGtk on Linux, `WKWebView` on macOS and iOS) — there is no shared engine.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_web_view` | [`include/mpapp/internal/basic_web_view.hpp`](../../../include/mpapp/internal/basic_web_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::web_view` | [`include/mpapp/web_view.hpp`](../../../include/mpapp/web_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_wv_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/web_view.hpp>
+
+mpapp::web_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/web_view.hpp>
+#include <mpapp/handlers/mock/web_view_handler.hpp>
+
+mpapp::internal::basic_web_view w;
+mpapp::web_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::web_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::web_view_handler<>` and `mpapp::web_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\WebView\WebViewHandler.cs`

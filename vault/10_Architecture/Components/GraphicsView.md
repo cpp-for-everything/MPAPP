@@ -28,6 +28,38 @@ tags:
 
 `GraphicsView` is an arbitrary 2D drawing surface backed by a `drawable` callback. The framework asks the drawable to render into a platform-neutral `canvas` (the [Microsoft.Maui.Graphics](https://github.com/dotnet/Microsoft.Maui.Graphics) abstraction on MAUI). It also forwards pointer/touch events as `start_interaction`, `drag_interaction`, `end_interaction`, plus hover variants. Use it when you want custom rendering without dropping to native graphics APIs per platform.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_graphics_view` | [`include/mpapp/internal/basic_graphics_view.hpp`](../../../include/mpapp/internal/basic_graphics_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::graphics_view` | [`include/mpapp/graphics_view.hpp`](../../../include/mpapp/graphics_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_gv_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/graphics_view.hpp>
+
+mpapp::graphics_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/graphics_view.hpp>
+#include <mpapp/handlers/mock/graphics_view_handler.hpp>
+
+mpapp::internal::basic_graphics_view w;
+mpapp::graphics_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::graphics_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::graphics_view_handler<>` and `mpapp::graphics_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\GraphicsView\`

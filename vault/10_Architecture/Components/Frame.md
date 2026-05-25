@@ -22,6 +22,38 @@ tags:
 
 `Frame` is a single-child container with a colored border, a corner radius, and an optional drop shadow. It is the original Xamarin.Forms decorator and is now **obsolete as of .NET 9** — Microsoft's guidance is to use [[Border]] for all new code. MPAPP ports `Frame` for one-to-one XAML compatibility and migration from Forms / early MAUI codebases, but marks it deprecated in the same way: the MPAPP control compiles, behaves identically, and emits a deprecation diagnostic suggesting `border`. `Frame` derives from `ContentView`, so it inherits a `Content` property and a default `Padding` of 20.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_frame` | [`include/mpapp/internal/basic_frame.hpp`](../../../include/mpapp/internal/basic_frame.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::frame` | [`include/mpapp/frame.hpp`](../../../include/mpapp/frame.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/frame.hpp>
+
+mpapp::frame w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/frame.hpp>
+#include <mpapp/handlers/mock/frame_handler.hpp>
+
+mpapp::internal::basic_frame w;
+mpapp::frame_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::frame_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::frame_handler<>` and `mpapp::frame_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** *(no `FrameHandler` — `Frame` is rendered through the legacy compatibility pipeline; see `D:\GitHub\MPAPP\references\maui\src\Controls\src\Core\Compatibility\Handlers\Android\FrameRenderer.cs`, `…\iOS\FrameRenderer.cs`, `…\Windows\FrameRenderer.cs`)*

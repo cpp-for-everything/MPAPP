@@ -22,6 +22,38 @@ tags:
 
 `text_cell` is a TableView row showing a primary `text` value and an optional `detail` string. On iOS / macOS this renders as the Settings-style two-line cell; on Android as a default list-item layout; on Windows / Linux as a label-pair inside the platform's list row.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_text_cell` | [`include/mpapp/internal/basic_text_cell.hpp`](../../../include/mpapp/internal/basic_text_cell.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::text_cell` | [`include/mpapp/text_cell.hpp`](../../../include/mpapp/text_cell.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/text_cell.hpp>
+
+mpapp::text_cell w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/text_cell.hpp>
+#include <mpapp/handlers/mock/text_cell_handler.hpp>
+
+mpapp::internal::basic_text_cell w;
+mpapp::text_cell_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::text_cell_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::text_cell_handler<>` and `mpapp::text_cell_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MPAPP C++ API
 
 ```cpp

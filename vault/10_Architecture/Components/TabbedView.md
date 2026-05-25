@@ -22,6 +22,38 @@ tags:
 
 `TabbedView` is the abstract, `IView`-only contract behind [[TabbedPage]] — it describes a container with a horizontal bar of tabs and one child page visible at a time. The contract carries the tab bar's appearance properties (background color/brush, text color, selected/unselected tab colors) so that bar-only handlers can be written without inheriting the full `Page` surface. In MPAPP it surfaces as a lightweight view wrapper distinct from [[TabbedPage]], usable as a tabbed sub-region inside any layout.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_tabbed_view` | [`include/mpapp/internal/basic_tabbed_view.hpp`](../../../include/mpapp/internal/basic_tabbed_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::tabbed_view` | [`include/mpapp/tabbed_view.hpp`](../../../include/mpapp/tabbed_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/tabbed_view.hpp>
+
+mpapp::tabbed_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/tabbed_view.hpp>
+#include <mpapp/handlers/mock/tabbed_view_handler.hpp>
+
+mpapp::internal::basic_tabbed_view w;
+mpapp::tabbed_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::tabbed_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::tabbed_view_handler<>` and `mpapp::tabbed_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** MAUI has no `TabbedViewHandler`; the contract is consumed indirectly through [[TabbedPage]]'s `MultiPage<Page>` handler.

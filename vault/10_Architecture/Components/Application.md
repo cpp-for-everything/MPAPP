@@ -27,6 +27,16 @@ tags:
 
 In MAUI's hierarchy, `Application` derives from `Element` and is the root parent of all `Window`s — every `View` ultimately reaches it through `Parent.Window.Application`.
 
+
+## Wrapper + Surface
+
+> [!info] No wrapper layer
+> `mpapp::application` is an **explicit exception** to [[ADR-0024-wrapper-component-pattern]] — see the ADR's *Skipped categories*.
+>
+> **Why:** Program-entry class; `mpapp::run<App>` already constructs the App inside the handler-driven UI-thread callback, so embedding a handler in the App via the wrapper pattern would produce two handlers (the external one from `run` and the embedded one in `App`). The existing external-handler design is correct.
+
+The component is constructed and used as-is (no `internal::basic_application` indirection, no embedded handler in the public class).
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Application\`

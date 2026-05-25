@@ -22,6 +22,38 @@ tags:
 
 `ContentPage` is the simplest concrete [[Page]] subclass: a single-child container holding one [[View]] (the page's `Content`). It is the workhorse 99% of app screens use, and is the default leaf for every navigation pattern ([[NavigationPage]] pushes it, [[TabbedPage]] hosts it per tab, [[Shell]] points routes at it). It adds three things over `Page`: a `Content` property, a `HideSoftInputOnTapped` convenience flag, and `SafeAreaEdges` for declaratively opting individual edges in or out of platform safe-area insets.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_content_page` | [`include/mpapp/internal/basic_content_page.hpp`](../../../include/mpapp/internal/basic_content_page.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::content_page` | [`include/mpapp/content_page.hpp`](../../../include/mpapp/content_page.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/content_page.hpp>
+
+mpapp::content_page w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/content_page.hpp>
+#include <mpapp/handlers/mock/content_page_handler.hpp>
+
+mpapp::internal::basic_content_page w;
+mpapp::content_page_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::content_page_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::content_page_handler<>` and `mpapp::content_page_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** Uses the base `PageHandler` (`D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Page\PageHandler.*.cs`). No dedicated `ContentPageHandler` — `ContentPage` is a control-layer concept.

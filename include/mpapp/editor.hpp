@@ -1,51 +1,54 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Editor.md
 //
-// `mpapp::editor` — multi-line text input. Mock surface mirrors Entry
-// minus `is_password` and adds no other primitive slots.
+// `mpapp::editor` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_editor` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::editor x; x.<prop> = ...;` with no separate
+// handler variable.
+//
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_editor x;
+//     mpapp::editor_handler<mpapp::platform::mock> h;
+//     h.map_text(x);
 
 #ifndef MPAPP_EDITOR_HPP
 #define MPAPP_EDITOR_HPP
 
-#include <string>
+#include "internal/basic_editor.hpp"
 
-#include "command.hpp"
-#include "control.hpp"
-#include "observable.hpp"
-#include "platform.hpp"
+// Pull in the platform-current handler full definition (umbrella picks
+// the right per-platform header). The handler header is allowed to see
+// `basic_editor` as a complete type now, which lets its inline bodies
+// (mock + per-platform) access surface members.
+#include "handlers/editor_handler.hpp"
 
 namespace mpapp {
 
-template <class Platform = platform::current>
-class editor_handler;
-
-class editor : public control<editor> {
+class editor : public internal::basic_editor {
 public:
-    editor() = default;
+    editor() {
+        set_handler(embedded_handler_);
+        embedded_handler_.map_text(*this);
+        embedded_handler_.map_is_read_only(*this);
+    }
 
     editor(const editor&)            = delete;
     editor& operator=(const editor&) = delete;
     editor(editor&&)                 = delete;
     editor& operator=(editor&&)      = delete;
 
-    Observable<std::string> text{""};
-    Observable<std::string> placeholder{""};
-    Observable<bool>        is_read_only{false};
-    Observable<int>         max_length{-1};
-    Observable<int>         cursor_position{0};
-
-    void completed(Command<> = {}) {}
-    void text_changed(std::string, Command<std::string> = {}) {}
-
-    editor_handler<platform::current>&       handler() noexcept       { return *handler_; }
-    const editor_handler<platform::current>& handler() const noexcept { return *handler_; }
-
-    bool has_handler() const noexcept { return handler_ != nullptr; }
-    void set_handler(editor_handler<platform::current>& h) noexcept { handler_ = &h; }
-
 private:
-    editor_handler<platform::current>* handler_ = nullptr;
+    internal::editor_handler<platform::current> embedded_handler_;
 };
+
+// Template alias so `mpapp::editor_handler<>` (host-current) and
+// `mpapp::editor_handler<platform::mock>` both work without naming
+// `internal::`.
+template <class Platform = platform::current>
+using editor_handler = internal::editor_handler<Platform>;
 
 } // namespace mpapp
 

@@ -35,6 +35,38 @@ tags:
 
 `HybridWebView` extends [[WebView]] with a two-way JavaScript↔native messaging bridge: HTML/JS bundled inside the app (under `Resources/Raw/wwwroot` by default) can call C++ methods, and C++ can invoke JavaScript with strongly-typed JSON marshalling. It is intended for "hybrid" apps where the UI is a web SPA but business logic lives in C++ — comparable to Electron's IPC, Tauri's `invoke()`, or Capacitor's plugin bridge. MAUI ships a small JS shim (`HybridWebView.js`) that MPAPP reuses byte-for-byte for parity.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_hybrid_web_view` | [`include/mpapp/internal/basic_hybrid_web_view.hpp`](../../../include/mpapp/internal/basic_hybrid_web_view.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::hybrid_web_view` | [`include/mpapp/hybrid_web_view.hpp`](../../../include/mpapp/hybrid_web_view.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_hwv_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/hybrid_web_view.hpp>
+
+mpapp::hybrid_web_view w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/hybrid_web_view.hpp>
+#include <mpapp/handlers/mock/hybrid_web_view_handler.hpp>
+
+mpapp::internal::basic_hybrid_web_view w;
+mpapp::hybrid_web_view_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::hybrid_web_view_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::hybrid_web_view_handler<>` and `mpapp::hybrid_web_view_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\HybridWebView\HybridWebViewHandler.cs`

@@ -22,6 +22,38 @@ tags:
 
 `Button` is a tappable command surface that shows a text label and/or an image and raises a click event when activated. It is the canonical primary action control: every supported platform maps it to a native push-button widget so platform conventions for focus, ripple, hover, and accessibility carry over without re-implementation. Per MAUI's `IButton`, it composes text styling, padding, stroke, and image-source contracts.
 
+
+## Wrapper + Surface
+
+Per [[ADR-0024-wrapper-component-pattern]] this component is split into two layers:
+
+| Layer | Class | Header |
+|---|---|---|
+| Surface — platform-agnostic, handler held by pointer | `mpapp::internal::basic_button` | [`include/mpapp/internal/basic_button.hpp`](../../../include/mpapp/internal/basic_button.hpp) |
+| Wrapper — user-facing, embeds the platform handler by value | `mpapp::button` | [`include/mpapp/button.hpp`](../../../include/mpapp/button.hpp) |
+
+**App code uses the wrapper.** Its default constructor auto-binds the embedded handler — no `set_handler()` call, no `map_<property>(...)` calls:
+
+```cpp
+#include <mpapp/button.hpp>
+
+mpapp::button w;
+// w is bound to the platform handler in its ctor; assign properties directly.
+```
+
+**Mock-handler tests use the surface directly** so the test target stays link-isolated from the per-platform handler library (per [[ADR-0008-mock-first-implementation]]):
+
+```cpp
+#include <mpapp/button.hpp>
+#include <mpapp/handlers/mock/button_handler.hpp>
+
+mpapp::internal::basic_button w;
+mpapp::button_handler<mpapp::platform::mock> h;
+// h.map_<property>(w);  // exercise the mapper contract
+```
+
+The `mpapp::button_handler<Platform>` alias (template, defaults to `platform::current`) keeps `mpapp::button_handler<>` and `mpapp::button_handler<platform::mock>` valid spellings without naming `internal::`.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\Button\ButtonHandler.cs`
