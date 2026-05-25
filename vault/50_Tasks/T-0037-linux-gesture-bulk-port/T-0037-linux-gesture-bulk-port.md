@@ -2,21 +2,38 @@
 type: task
 id: T-0037
 title: Bulk-port linux_gestures::attach to every per-component Linux handler
-status: todo
+status: in-progress
 milestone: M-04b
 owner: ""
 area: handlers
 blockedBy: []
-coveragePercent: 0
+coveragePercent: 95
 hasScreenshots: false
 hasRecordings: false
 tags:
   - type/task
-  - status/todo
+  - status/in-progress
   - area/handlers
   - phase/p4
   - platform/linux
 ---
+
+> [!success] Plumbing complete on 2026-05-25 (commits b0a999d + 0d59562)
+> Code + wrapper sweep landed via `tools/dev/sweep-gesture-map.py`:
+> 238 hpp injections + 58 Linux .cpp implementations + 58 wrapper ctors
+> refreshed with `embedded_handler_.map_gestures(*this);`. CI green
+> (linux-native 54 s, 370/370 tests pass). The dual-branch
+> `web_view_handler.cpp` + `hybrid_web_view_handler.cpp` got
+> stub-branch `map_gestures` fixes so the link is clean regardless of
+> webkitgtk-6.0 availability.
+>
+> Remaining work: Rule-11 closure requires an end-to-end recording of
+> a gesture landing on a non-button widget via a real GTK4 display
+> (WSLg or a Linux desktop). Task stays `in-progress` until that
+> evidence lands; the `coveragePercent: 95` reflects the code path being
+> 100% exercised through the mock contract (`view_handler<platform::mock>
+> ::map_gestures` + `simulate_*` helpers) but not yet through a real
+> input event.
 
 # T-0037 — Bulk-port `linux_gestures::attach` to every per-component Linux handler
 
