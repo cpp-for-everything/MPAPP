@@ -33,6 +33,7 @@ public:
         set_sc_handler(embedded_handler_);
         embedded_handler_.map_text(*this);
         embedded_handler_.map_on(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     switch_cell(const switch_cell&)            = delete;

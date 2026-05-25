@@ -50,6 +50,15 @@ public:
     // patterns in this codebase).
     basic_graphics_view* bound() const noexcept { return bound_; }
 
+// RFC-0003: walks `x.gesture_recognizers` and installs
+
+// matching GtkGesture* controllers via
+
+// `mpapp::internal::linux_gestures::attach`.
+
+void map_gestures(basic_graphics_view& x);
+
+
 private:
     void apply_width(int w);
     void apply_height(int h);

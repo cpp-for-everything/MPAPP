@@ -40,6 +40,17 @@ public:
         bind("is_presented", f.is_presented, binding_is_presented_);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_flyout_view& /*x*/) noexcept {}
+
+
 private:
     struct flyout_cb_t {
         flyout_view_handler<platform::mock>* self;

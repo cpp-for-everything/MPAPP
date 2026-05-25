@@ -32,6 +32,17 @@ public:
         c.detail.changed.subscribe(detail_slot_, detail_cb_);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_text_cell& /*x*/) noexcept {}
+
+
 private:
     using self_t = text_cell_handler<platform::mock>;
     mock_property_recorder<self_t, std::string> text_cb_{this, "text"};

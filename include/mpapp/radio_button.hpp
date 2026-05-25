@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_is_checked(*this);
         embedded_handler_.map_group_name(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     radio_button(const radio_button&)            = delete;

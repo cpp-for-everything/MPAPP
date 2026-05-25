@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/menu_bar_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <vector>
@@ -59,6 +61,11 @@ void menu_bar_handler<platform::linux_>::apply_items(const std::vector<view*>& v
 void menu_bar_handler<platform::linux_>::map_items(basic_menu_bar& b) {
     apply_items(b.items.get());
     b.items.changed.subscribe(items_slot_, items_cb_);
+}
+
+void menu_bar_handler<platform::linux_>::map_gestures(basic_menu_bar& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

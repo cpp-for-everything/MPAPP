@@ -26,6 +26,17 @@ public:
     void map_text(basic_menu_flyout_item& i)       { bind("text",       i.text,       binding_text_); }
     void map_is_enabled(basic_menu_flyout_item& i) { bind("is_enabled", i.is_enabled, binding_is_enabled_); }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_menu_flyout_item& /*x*/) noexcept {}
+
+
 private:
     detail::property_binding<std::string> binding_text_{};
     detail::property_binding<bool>        binding_is_enabled_{};

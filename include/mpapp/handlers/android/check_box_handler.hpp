@@ -36,6 +36,17 @@ public:
     static constexpr int kind = 2;
     void on_native_checked_changed(bool checked);
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_check_box& /*x*/) noexcept {}
+
+
 private:
     void apply_is_checked(bool v);
 

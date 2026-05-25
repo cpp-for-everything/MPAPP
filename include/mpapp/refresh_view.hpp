@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_content(*this);
         embedded_handler_.map_is_refreshing(*this);
         embedded_handler_.map_refresh_color(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     refresh_view(const refresh_view&)            = delete;

@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/list_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -106,6 +108,11 @@ void list_view_handler<platform::linux_>::map_items_source(basic_list_view& lv) 
 void list_view_handler<platform::linux_>::map_selected_index(basic_list_view& lv) {
     apply_selection(lv.selected_index.get());
     lv.selected_index.changed.subscribe(sel_slot_, sel_cb_);
+}
+
+void list_view_handler<platform::linux_>::map_gestures(basic_list_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

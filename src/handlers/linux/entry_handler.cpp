@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/entry_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -96,6 +98,11 @@ void entry_handler<platform::linux_>::map_placeholder(basic_entry& e) {
 void entry_handler<platform::linux_>::map_is_read_only(basic_entry& e) {
     apply_is_read_only(e.is_read_only.get());
     e.is_read_only.changed.subscribe(readonly_slot_, readonly_cb_);
+}
+
+void entry_handler<platform::linux_>::map_gestures(basic_entry& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

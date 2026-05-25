@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/menu_bar_item_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -44,6 +46,11 @@ void menu_bar_item_handler<platform::linux_>::map_title(basic_menu_bar_item& m) 
 void menu_bar_item_handler<platform::linux_>::map_items(basic_menu_bar_item& m) {
     apply_items(m.items.get());
     m.items.changed.subscribe(items_slot_, items_cb_);
+}
+
+void menu_bar_item_handler<platform::linux_>::map_gestures(basic_menu_bar_item& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

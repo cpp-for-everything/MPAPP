@@ -38,6 +38,15 @@ public:
     // Called by the script-message-received GTK callback.
     void on_native_inbound(const std::string& payload);
 
+// RFC-0003: walks `x.gesture_recognizers` and installs
+
+// matching GtkGesture* controllers via
+
+// `mpapp::internal::linux_gestures::attach`.
+
+void map_gestures(basic_hybrid_web_view& x);
+
+
 private:
     void send_outbound(const std::string& payload);
     void apply_html(const std::string& html);

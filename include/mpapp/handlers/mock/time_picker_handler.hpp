@@ -21,6 +21,17 @@ public:
     void map_time(basic_time_picker& p)   { bind("time",   p.time,   binding_time_); }
     void map_format(basic_time_picker& p) { bind("format", p.format, binding_format_); }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_time_picker& /*x*/) noexcept {}
+
+
 private:
     detail::property_binding<time_value>   binding_time_{};
     detail::property_binding<std::string>  binding_format_{};

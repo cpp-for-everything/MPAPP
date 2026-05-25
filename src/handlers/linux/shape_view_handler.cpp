@@ -14,6 +14,8 @@
 
 #include "mpapp/handlers/linux/shape_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <cstdint>
@@ -104,6 +106,11 @@ void shape_view_handler<platform::linux_>::map_stroke_thickness(basic_shape_view
 void shape_view_handler<platform::linux_>::map_opacity(basic_shape_view& s) {
     invalidate_();
     s.opacity.changed.subscribe(opacity_slot_, opacity_cb_);
+}
+
+void shape_view_handler<platform::linux_>::map_gestures(basic_shape_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

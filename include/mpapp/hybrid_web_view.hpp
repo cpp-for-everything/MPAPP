@@ -33,6 +33,7 @@ public:
         set_hwv_handler(embedded_handler_);
         embedded_handler_.map_messages(*this);
         embedded_handler_.map_html_source(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     hybrid_web_view(const hybrid_web_view&)            = delete;

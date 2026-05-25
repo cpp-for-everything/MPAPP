@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/date_picker_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -28,6 +30,11 @@ void date_picker_handler<platform::linux_>::apply_date(const date_value& v) {
 void date_picker_handler<platform::linux_>::map_date(basic_date_picker& p) {
     apply_date(p.date.get());
     p.date.changed.subscribe(date_slot_, date_cb_);
+}
+
+void date_picker_handler<platform::linux_>::map_gestures(basic_date_picker& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

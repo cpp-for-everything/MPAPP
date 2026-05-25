@@ -32,6 +32,7 @@ public:
     window() {
         set_handler(embedded_handler_);
         embedded_handler_.bind(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     window(const window&)            = delete;

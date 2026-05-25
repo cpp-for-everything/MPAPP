@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/menu_flyout_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -59,6 +61,11 @@ void menu_flyout_handler<platform::linux_>::map_items(basic_menu_flyout& f) {
 void menu_flyout_handler<platform::linux_>::map_is_open(basic_menu_flyout& f) {
     apply_is_open(f.is_open.get());
     f.is_open.changed.subscribe(is_open_slot_, is_open_cb_);
+}
+
+void menu_flyout_handler<platform::linux_>::map_gestures(basic_menu_flyout& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

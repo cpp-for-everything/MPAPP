@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/title_bar_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -80,6 +82,11 @@ void title_bar_handler<platform::linux_>::map_title(basic_title_bar& t) {
 void title_bar_handler<platform::linux_>::map_subtitle(basic_title_bar& t) {
     apply_subtitle(t.subtitle.get());
     t.subtitle.changed.subscribe(subtitle_slot_, subtitle_cb_);
+}
+
+void title_bar_handler<platform::linux_>::map_gestures(basic_title_bar& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

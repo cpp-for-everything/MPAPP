@@ -45,6 +45,15 @@ public:
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
 
+// RFC-0003: walks `x.gesture_recognizers` and installs
+
+// matching GtkGesture* controllers via
+
+// `mpapp::internal::linux_gestures::attach`.
+
+void map_gestures(basic_flyout_view& x);
+
+
 private:
     void apply_flyout(const std::shared_ptr<view>& v);
     void apply_detail(const std::shared_ptr<view>& v);

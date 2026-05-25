@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/grid_layout_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -84,6 +86,11 @@ void grid_layout_handler<platform::linux_>::map_row_spacing(basic_grid_layout& g
 void grid_layout_handler<platform::linux_>::map_column_spacing(basic_grid_layout& g) {
     apply_column_spacing(g.column_spacing.get());
     g.column_spacing.changed.subscribe(csp_slot_, csp_cb_);
+}
+
+void grid_layout_handler<platform::linux_>::map_gestures(basic_grid_layout& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

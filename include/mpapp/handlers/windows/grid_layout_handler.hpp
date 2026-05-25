@@ -43,6 +43,17 @@ public:
     winrt::Microsoft::UI::Xaml::Controls::Grid&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Grid& native() const noexcept { return native_; }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_grid_layout& /*x*/) noexcept {}
+
+
 private:
     void rebuild_rows(const std::vector<track_def>& v);
     void rebuild_columns(const std::vector<track_def>& v);

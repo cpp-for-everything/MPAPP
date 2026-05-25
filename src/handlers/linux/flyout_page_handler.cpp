@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/flyout_page_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -77,6 +79,11 @@ void flyout_page_handler<platform::linux_>::map_detail(basic_flyout_page& fp) {
 void flyout_page_handler<platform::linux_>::map_is_presented(basic_flyout_page& fp) {
     apply_is_presented(fp.is_presented.get());
     fp.is_presented.changed.subscribe(presented_slot_, presented_cb_);
+}
+
+void flyout_page_handler<platform::linux_>::map_gestures(basic_flyout_page& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

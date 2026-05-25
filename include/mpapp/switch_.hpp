@@ -32,6 +32,7 @@ public:
     switch_() {
         set_handler(embedded_handler_);
         embedded_handler_.map_is_on(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     switch_(const switch_&)            = delete;

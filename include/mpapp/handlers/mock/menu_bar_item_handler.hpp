@@ -33,6 +33,17 @@ public:
         m.items.changed.subscribe(items_slot_, items_cb_);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_menu_bar_item& /*x*/) noexcept {}
+
+
 private:
     struct items_cb_t {
         menu_bar_item_handler<platform::mock>* self;

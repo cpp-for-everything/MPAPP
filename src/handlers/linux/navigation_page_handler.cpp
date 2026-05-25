@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/navigation_page_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -86,6 +88,11 @@ void navigation_page_handler<platform::linux_>::map_stack(basic_navigation_page&
 
     g_signal_connect(static_cast<GtkWidget*>(back_button_), "clicked",
                      G_CALLBACK(on_back_clicked), &np);
+}
+
+void navigation_page_handler<platform::linux_>::map_gestures(basic_navigation_page& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

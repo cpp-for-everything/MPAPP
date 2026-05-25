@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_sections(*this);
         embedded_handler_.map_typed_sections(*this);
         embedded_handler_.map_row_height(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     table_view(const table_view&)            = delete;

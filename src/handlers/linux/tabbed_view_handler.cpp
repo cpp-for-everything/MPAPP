@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/tabbed_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -69,6 +71,11 @@ void tabbed_view_handler<platform::linux_>::map_tab_titles(basic_tabbed_view& t)
 void tabbed_view_handler<platform::linux_>::map_selected_index(basic_tabbed_view& t) {
     apply_selected_index(t.selected_index.get());
     t.selected_index.changed.subscribe(selected_index_slot_, selected_index_cb_);
+}
+
+void tabbed_view_handler<platform::linux_>::map_gestures(basic_tabbed_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

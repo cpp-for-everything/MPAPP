@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_tab_titles(*this);
         embedded_handler_.map_selected_index(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     tabbed_view(const tabbed_view&)            = delete;

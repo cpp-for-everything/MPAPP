@@ -33,6 +33,7 @@ public:
         set_wv_handler(embedded_handler_);
         embedded_handler_.map_url(*this);
         embedded_handler_.map_html(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     web_view(const web_view&)            = delete;

@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_text(*this);
         embedded_handler_.map_detail(*this);
         embedded_handler_.map_image_uri(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     image_cell(const image_cell&)            = delete;

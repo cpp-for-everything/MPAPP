@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/hybrid_web_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__) && defined(MPAPP_HAS_WEBKITGTK)
 
 #include <gtk/gtk.h>
@@ -185,6 +187,11 @@ void hybrid_web_view_handler<platform::linux_>::map_html_source(basic_hybrid_web
     h.html_source.changed.subscribe(html_slot_, html_cb_);
 }
 
+void hybrid_web_view_handler<platform::linux_>::map_gestures(basic_hybrid_web_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
+}
+
 } // namespace mpapp::internal
 // ---------- Self-registration --------------------------------------------
 namespace {
@@ -233,6 +240,12 @@ void hybrid_web_view_handler<platform::linux_>::map_html_source(basic_hybrid_web
     apply_html(h.html_source.get());
     h.html_source.changed.subscribe(html_slot_, html_cb_);
 }
+
+// RFC-0003 stub: native widget is null in this WebKit-less branch so
+// we can't install GTK gesture controllers. The function still has to
+// exist — `mpapp::hybrid_web_view`'s wrapper ctor calls it during
+// auto-bind (see ADR-0024).
+void hybrid_web_view_handler<platform::linux_>::map_gestures(basic_hybrid_web_view& /*x*/) {}
 
 } // namespace mpapp::internal
 namespace {

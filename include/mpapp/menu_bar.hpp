@@ -32,6 +32,7 @@ public:
     menu_bar() {
         set_handler(embedded_handler_);
         embedded_handler_.map_items(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     menu_bar(const menu_bar&)            = delete;

@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/entry_cell_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -158,6 +160,11 @@ void entry_cell_handler<platform::linux_>::map_placeholder(basic_entry_cell& c) 
 void entry_cell_handler<platform::linux_>::map_keyboard(basic_entry_cell& c) {
     apply_keyboard(c.keyboard.get());
     c.keyboard.changed.subscribe(keyboard_slot_, keyboard_cb_);
+}
+
+void entry_cell_handler<platform::linux_>::map_gestures(basic_entry_cell& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

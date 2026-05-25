@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/refresh_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <atomic>
@@ -171,6 +173,11 @@ struct registrar {
 [[maybe_unused]] registrar _reg;
 
 } // namespace
+
+void refresh_view_handler<platform::linux_>::map_gestures(basic_refresh_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
+}
 
 } // namespace mpapp::internal
 #endif // __linux__ && !__ANDROID__

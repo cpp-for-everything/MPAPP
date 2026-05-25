@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/progress_bar_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <atomic>
@@ -115,6 +117,11 @@ void progress_bar_handler<platform::linux_>::map_color(basic_progress_bar& p) {
 void progress_bar_handler<platform::linux_>::map_background_color(basic_progress_bar& p) {
     apply_background_color(p.background_color.get());
     p.background_color.changed.subscribe(bg_slot_, bg_cb_);
+}
+
+void progress_bar_handler<platform::linux_>::map_gestures(basic_progress_bar& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

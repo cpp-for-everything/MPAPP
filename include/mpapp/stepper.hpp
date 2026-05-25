@@ -35,6 +35,7 @@ public:
         embedded_handler_.map_minimum(*this);
         embedded_handler_.map_maximum(*this);
         embedded_handler_.map_interval(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     stepper(const stepper&)            = delete;

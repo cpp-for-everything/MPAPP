@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/border_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <atomic>
@@ -182,6 +184,11 @@ void border_handler<platform::linux_>::map_stroke_shape(basic_border& b)     { a
 
 void border_handler<platform::linux_>::bind_content(basic_border& b, view& child) {
     b.content.set(std::shared_ptr<view>(&child, [](view*){}));
+}
+
+void border_handler<platform::linux_>::map_gestures(basic_border& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

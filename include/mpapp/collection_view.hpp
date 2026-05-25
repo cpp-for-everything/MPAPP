@@ -36,6 +36,7 @@ public:
         embedded_handler_.map_selected_index(*this);
         embedded_handler_.map_selection_mode(*this);
         embedded_handler_.map_layout(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     collection_view(const collection_view&)            = delete;

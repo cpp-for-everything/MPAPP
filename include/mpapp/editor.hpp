@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_text(*this);
         embedded_handler_.map_is_read_only(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     editor(const editor&)            = delete;

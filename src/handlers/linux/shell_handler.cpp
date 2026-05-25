@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/shell_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -131,6 +133,11 @@ void shell_handler<platform::linux_>::map_flyout_content(basic_shell& s) {
 void shell_handler<platform::linux_>::map_current_content(basic_shell& s) {
     apply_current_content(s.current_content.get());
     s.current_content.changed.subscribe(content_slot_, content_cb_);
+}
+
+void shell_handler<platform::linux_>::map_gestures(basic_shell& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

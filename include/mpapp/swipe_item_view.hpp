@@ -32,6 +32,7 @@ public:
     swipe_item_view() {
         set_handler(embedded_handler_);
         embedded_handler_.map_content(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     swipe_item_view(const swipe_item_view&)            = delete;

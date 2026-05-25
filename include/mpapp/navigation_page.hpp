@@ -32,6 +32,7 @@ public:
     navigation_page() {
         set_np_handler(embedded_handler_);
         embedded_handler_.map_stack(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     navigation_page(const navigation_page&)            = delete;

@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_is_running(*this);
         embedded_handler_.map_color(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     activity_indicator(const activity_indicator&)            = delete;

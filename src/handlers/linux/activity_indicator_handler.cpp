@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/activity_indicator_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <atomic>
@@ -105,6 +107,11 @@ void activity_indicator_handler<platform::linux_>::map_is_running(basic_activity
 void activity_indicator_handler<platform::linux_>::map_color(basic_activity_indicator& a) {
     apply_color(a.color.get());
     a.color.changed.subscribe(color_slot_, color_cb_);
+}
+
+void activity_indicator_handler<platform::linux_>::map_gestures(basic_activity_indicator& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

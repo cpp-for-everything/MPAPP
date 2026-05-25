@@ -42,6 +42,15 @@ public:
     // Used by the cairo draw callback to pull current state.
     basic_shape_view* bound() const noexcept { return bound_; }
 
+// RFC-0003: walks `x.gesture_recognizers` and installs
+
+// matching GtkGesture* controllers via
+
+// `mpapp::internal::linux_gestures::attach`.
+
+void map_gestures(basic_shape_view& x);
+
+
 private:
     void invalidate_();
 

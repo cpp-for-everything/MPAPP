@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/flyout_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -93,6 +95,11 @@ void flyout_view_handler<platform::linux_>::bind_flyout(basic_flyout_view& f, vi
 
 void flyout_view_handler<platform::linux_>::bind_detail(basic_flyout_view& f, view& child) {
     f.detail.set(std::shared_ptr<view>(&child, [](view*){}));
+}
+
+void flyout_view_handler<platform::linux_>::map_gestures(basic_flyout_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

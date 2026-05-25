@@ -32,6 +32,7 @@ public:
     time_picker() {
         set_handler(embedded_handler_);
         embedded_handler_.map_time(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     time_picker(const time_picker&)            = delete;

@@ -4,6 +4,8 @@
 
 #include "mpapp/handlers/linux/web_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__) && defined(MPAPP_HAS_WEBKITGTK)
 
 #include <gtk/gtk.h>
@@ -106,6 +108,11 @@ void web_view_handler<platform::linux_>::map_url(basic_web_view& wv) {
 void web_view_handler<platform::linux_>::map_html(basic_web_view& wv) {
     apply_html(wv.html_source.get());
     wv.html_source.changed.subscribe(html_slot_, html_cb_);
+}
+
+void web_view_handler<platform::linux_>::map_gestures(basic_web_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

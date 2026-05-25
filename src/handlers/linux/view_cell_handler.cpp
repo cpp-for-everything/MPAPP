@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/view_cell_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -38,6 +40,11 @@ void view_cell_handler<platform::linux_>::apply_content(view* v) {
 void view_cell_handler<platform::linux_>::map_content(basic_view_cell& c) {
     apply_content(c.content.get());
     c.content.changed.subscribe(content_slot_, content_cb_);
+}
+
+void view_cell_handler<platform::linux_>::map_gestures(basic_view_cell& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

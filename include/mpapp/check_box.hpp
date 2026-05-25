@@ -32,6 +32,7 @@ public:
     check_box() {
         set_handler(embedded_handler_);
         embedded_handler_.map_is_checked(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     check_box(const check_box&)            = delete;

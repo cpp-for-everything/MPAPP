@@ -33,6 +33,7 @@ public:
         set_lv_handler(embedded_handler_);
         embedded_handler_.map_items_source(*this);
         embedded_handler_.map_selected_index(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     list_view(const list_view&)            = delete;

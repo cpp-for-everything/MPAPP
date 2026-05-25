@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/image_cell_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -87,6 +89,11 @@ void image_cell_handler<platform::linux_>::map_detail(basic_image_cell& c) {
 void image_cell_handler<platform::linux_>::map_image_uri(basic_image_cell& c) {
     apply_image_uri(c.image_uri.get());
     c.image_uri.changed.subscribe(uri_slot_, uri_cb_);
+}
+
+void image_cell_handler<platform::linux_>::map_gestures(basic_image_cell& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

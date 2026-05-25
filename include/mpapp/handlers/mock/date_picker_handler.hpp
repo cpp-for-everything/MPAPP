@@ -21,6 +21,17 @@ public:
     void map_date(basic_date_picker& p)   { bind("date",   p.date,   binding_date_); }
     void map_format(basic_date_picker& p) { bind("format", p.format, binding_format_); }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_date_picker& /*x*/) noexcept {}
+
+
 private:
     detail::property_binding<date_value>   binding_date_{};
     detail::property_binding<std::string>  binding_format_{};

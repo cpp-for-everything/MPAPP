@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_size(*this);
         embedded_handler_.map_draw_count(*this);
         embedded_handler_.map_drawable(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     graphics_view(const graphics_view&)            = delete;

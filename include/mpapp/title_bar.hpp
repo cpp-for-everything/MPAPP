@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_title(*this);
         embedded_handler_.map_subtitle(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     title_bar(const title_bar&)            = delete;

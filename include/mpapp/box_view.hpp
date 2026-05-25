@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_fill(*this);
         embedded_handler_.map_corners(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     box_view(const box_view&)            = delete;

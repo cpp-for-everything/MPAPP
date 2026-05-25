@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_value(*this);
         embedded_handler_.map_minimum(*this);
         embedded_handler_.map_maximum(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     slider(const slider&)            = delete;

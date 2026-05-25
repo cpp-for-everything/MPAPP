@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/slider_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -86,6 +88,11 @@ void slider_handler<platform::linux_>::map_minimum(basic_slider& s) {
 void slider_handler<platform::linux_>::map_maximum(basic_slider& s) {
     apply_maximum(s.maximum.get());
     s.maximum.changed.subscribe(maximum_slot_, maximum_cb_);
+}
+
+void slider_handler<platform::linux_>::map_gestures(basic_slider& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

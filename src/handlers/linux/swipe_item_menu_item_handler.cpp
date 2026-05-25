@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/swipe_item_menu_item_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -72,6 +74,11 @@ void swipe_item_menu_item_handler<platform::linux_>::map_invoked(basic_swipe_ite
         "clicked",
         G_CALLBACK(on_swipe_item_clicked),
         invoked_signal_));
+}
+
+void swipe_item_menu_item_handler<platform::linux_>::map_gestures(basic_swipe_item_menu_item& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

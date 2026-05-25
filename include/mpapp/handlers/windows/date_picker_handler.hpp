@@ -28,6 +28,17 @@ public:
     winrt::Microsoft::UI::Xaml::Controls::CalendarDatePicker&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::CalendarDatePicker& native() const noexcept { return native_; }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_date_picker& /*x*/) noexcept {}
+
+
 private:
     void apply_date(const date_value& v);
     void apply_format(const std::string& v);

@@ -52,6 +52,17 @@ public:
         record("scroll_to.animated", req.animated);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_scroll_view& /*x*/) noexcept {}
+
+
 private:
     detail::property_binding<scroll_orientation>    binding_orientation_{};
     detail::property_binding<scroll_bar_visibility> binding_h_visibility_{};

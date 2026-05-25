@@ -8,6 +8,8 @@
 
 #include "mpapp/handlers/linux/radio_button_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <map>
@@ -109,6 +111,11 @@ void radio_button_handler<platform::linux_>::map_is_checked(basic_radio_button& 
 void radio_button_handler<platform::linux_>::map_group_name(basic_radio_button& r) {
     apply_group_name(r.group_name.get());
     r.group_name.changed.subscribe(group_name_slot_, group_name_cb_);
+}
+
+void radio_button_handler<platform::linux_>::map_gestures(basic_radio_button& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

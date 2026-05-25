@@ -35,6 +35,7 @@ public:
         embedded_handler_.map_position(*this);
         embedded_handler_.map_indicator_color(*this);
         embedded_handler_.map_selected_indicator_color(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     indicator_view(const indicator_view&)            = delete;

@@ -9,6 +9,8 @@
 
 #include "mpapp/handlers/linux/graphics_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <cairo.h>
@@ -122,6 +124,11 @@ void graphics_view_handler<platform::linux_>::map_drawable(basic_graphics_view& 
     // the next external invalidate).
     bound_ = &gv;
     gv.drawable.changed.subscribe(drawable_slot_, drawable_cb_);
+}
+
+void graphics_view_handler<platform::linux_>::map_gestures(basic_graphics_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

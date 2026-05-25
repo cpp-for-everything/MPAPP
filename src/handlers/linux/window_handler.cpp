@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/window_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -168,6 +170,11 @@ void window_handler<platform::linux_>::bind(basic_window& w) {
                      "close-request",
                      G_CALLBACK(on_window_close_request),
                      &w);
+}
+
+void window_handler<platform::linux_>::map_gestures(basic_window& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_items(*this);
         embedded_handler_.map_selected_index(*this);
         embedded_handler_.map_title(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     picker(const picker&)            = delete;

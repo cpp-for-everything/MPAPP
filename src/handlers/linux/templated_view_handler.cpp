@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/templated_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -57,6 +59,11 @@ void templated_view_handler<platform::linux_>::map_template_id(basic_templated_v
 
 void templated_view_handler<platform::linux_>::bind_content(basic_templated_view& t, view& child) {
     t.content.set(std::shared_ptr<view>(&child, [](view*){}));
+}
+
+void templated_view_handler<platform::linux_>::map_gestures(basic_templated_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

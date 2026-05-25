@@ -19,6 +19,17 @@ public:
     void map_text(basic_search_bar& s)        { bind("text",        s.text,        binding_text_); }
     void map_placeholder(basic_search_bar& s) { bind("placeholder", s.placeholder, binding_placeholder_); }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_search_bar& /*x*/) noexcept {}
+
+
 private:
     detail::property_binding<std::string> binding_text_{};
     detail::property_binding<std::string> binding_placeholder_{};

@@ -35,6 +35,17 @@ public:
         bind("selected_index", t.selected_index, binding_selected_);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_tabbed_view& /*x*/) noexcept {}
+
+
 private:
     struct tab_titles_cb_t {
         tabbed_view_handler<platform::mock>* self;

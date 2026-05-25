@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_progress(*this);
         embedded_handler_.map_color(*this);
         embedded_handler_.map_background_color(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     progress_bar(const progress_bar&)            = delete;

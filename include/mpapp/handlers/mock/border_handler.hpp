@@ -42,6 +42,17 @@ public:
         b.stroke_dash_array.changed.subscribe(dash_array_slot_, dash_array_callback_);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_border& /*x*/) noexcept {}
+
+
 private:
     detail::property_binding<thickness>         binding_padding_{};
     detail::property_binding<stroke_shape_desc> binding_stroke_shape_{};

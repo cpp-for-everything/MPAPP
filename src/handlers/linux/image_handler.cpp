@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/image_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -51,6 +53,11 @@ void image_handler<platform::linux_>::map_source(basic_image& i) {
 void image_handler<platform::linux_>::map_aspect(basic_image& i) {
     apply_aspect(i.aspect.get());
     i.aspect.changed.subscribe(aspect_slot_, aspect_cb_);
+}
+
+void image_handler<platform::linux_>::map_gestures(basic_image& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

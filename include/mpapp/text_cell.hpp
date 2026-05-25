@@ -33,6 +33,7 @@ public:
         set_tc_handler(embedded_handler_);
         embedded_handler_.map_text(*this);
         embedded_handler_.map_detail(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     text_cell(const text_cell&)            = delete;

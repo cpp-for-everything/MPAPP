@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_source(*this);
         embedded_handler_.map_aspect(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     image(const image&)            = delete;

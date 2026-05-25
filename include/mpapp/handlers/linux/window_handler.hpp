@@ -41,6 +41,15 @@ public:
     // "activate" signal callback.
     void attach_to_application(void* gtk_application);
 
+// RFC-0003: walks `x.gesture_recognizers` and installs
+
+// matching GtkGesture* controllers via
+
+// `mpapp::internal::linux_gestures::attach`.
+
+void map_gestures(basic_window& x);
+
+
 private:
     void apply_title(const std::string& v);
     void apply_content(view* v);

@@ -34,6 +34,15 @@ public:
     void*       native() noexcept       { return native_; }   // GtkButton*
     const void* native() const noexcept { return native_; }
 
+// RFC-0003: walks `x.gesture_recognizers` and installs
+
+// matching GtkGesture* controllers via
+
+// `mpapp::internal::linux_gestures::attach`.
+
+void map_gestures(basic_menu_flyout_item& x);
+
+
 private:
     void apply_text(const std::string& v);
     void apply_is_enabled(bool v);

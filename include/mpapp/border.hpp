@@ -36,6 +36,7 @@ public:
         embedded_handler_.map_stroke(*this);
         embedded_handler_.map_stroke_thickness(*this);
         embedded_handler_.map_stroke_shape(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     border(const border&)            = delete;

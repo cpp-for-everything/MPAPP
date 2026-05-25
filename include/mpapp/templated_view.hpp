@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_content(*this);
         embedded_handler_.map_template_id(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     templated_view(const templated_view&)            = delete;

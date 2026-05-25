@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/swipe_item_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -37,6 +39,11 @@ void swipe_item_view_handler<platform::linux_>::apply_content(view* v) {
 void swipe_item_view_handler<platform::linux_>::map_content(basic_swipe_item_view& iv) {
     apply_content(iv.content.get());
     iv.content.changed.subscribe(content_slot_, content_cb_);
+}
+
+void swipe_item_view_handler<platform::linux_>::map_gestures(basic_swipe_item_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

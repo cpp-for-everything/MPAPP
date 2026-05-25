@@ -32,6 +32,7 @@ public:
     view_cell() {
         set_vc_handler(embedded_handler_);
         embedded_handler_.map_content(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     view_cell(const view_cell&)            = delete;

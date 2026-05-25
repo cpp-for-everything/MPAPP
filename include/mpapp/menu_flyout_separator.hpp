@@ -12,7 +12,7 @@
 //
 //     mpapp::internal::basic_menu_flyout_separator x;
 //     mpapp::menu_flyout_separator_handler<mpapp::platform::mock> h;
-//     h.map_text(x);
+//     h.map_gestures(x);
 
 #ifndef MPAPP_MENU_FLYOUT_SEPARATOR_HPP
 #define MPAPP_MENU_FLYOUT_SEPARATOR_HPP
@@ -31,6 +31,7 @@ class menu_flyout_separator : public internal::basic_menu_flyout_separator {
 public:
     menu_flyout_separator() {
         set_handler(embedded_handler_);
+        embedded_handler_.map_gestures(*this);
     }
 
     menu_flyout_separator(const menu_flyout_separator&)            = delete;

@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_text(*this);
         embedded_handler_.map_icon_uri(*this);
         embedded_handler_.map_invoked(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     swipe_item_menu_item(const swipe_item_menu_item&)            = delete;

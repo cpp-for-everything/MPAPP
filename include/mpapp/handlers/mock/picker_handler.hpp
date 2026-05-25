@@ -30,6 +30,17 @@ public:
     void map_selected_index(basic_picker& p) { bind("selected_index", p.selected_index, binding_selected_); }
     void map_title(basic_picker& p)          { bind("title",          p.title,          binding_title_); }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_picker& /*x*/) noexcept {}
+
+
 private:
     struct items_cb_t {
         picker_handler<platform::mock>* self;

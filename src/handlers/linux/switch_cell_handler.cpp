@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/switch_cell_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -115,6 +117,11 @@ void switch_cell_handler<platform::linux_>::map_on(basic_switch_cell& c) {
         ctx,
         +[](gpointer p, GClosure*) { delete static_cast<state_set_ctx*>(p); },
         static_cast<GConnectFlags>(0));
+}
+
+void switch_cell_handler<platform::linux_>::map_gestures(basic_switch_cell& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

@@ -35,6 +35,7 @@ public:
         embedded_handler_.map_column_definitions(*this);
         embedded_handler_.map_row_spacing(*this);
         embedded_handler_.map_column_spacing(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     grid_layout(const grid_layout&)            = delete;

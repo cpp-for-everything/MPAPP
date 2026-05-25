@@ -54,6 +54,17 @@ public:
     // Public so the trampoline can reach it without becoming a friend.
     void on_layout_changed(int w, int h);
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_shape_view& /*x*/) noexcept {}
+
+
 private:
     void ensure_bitmap(int w, int h);
     void repaint();

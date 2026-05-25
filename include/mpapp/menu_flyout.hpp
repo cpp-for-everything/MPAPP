@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_items(*this);
         embedded_handler_.map_is_open(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     menu_flyout(const menu_flyout&)            = delete;

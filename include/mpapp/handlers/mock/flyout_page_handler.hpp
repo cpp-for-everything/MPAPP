@@ -36,6 +36,17 @@ public:
         fp.is_presented.changed.subscribe(slot_pres_, pres_cb_);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_flyout_page& /*x*/) noexcept {}
+
+
 private:
     using self_t = flyout_page_handler<platform::mock>;
 

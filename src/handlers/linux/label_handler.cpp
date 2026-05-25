@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/label_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -25,6 +27,11 @@ void label_handler<platform::linux_>::apply_text(const std::string& text) {
 void label_handler<platform::linux_>::map_text(basic_label& l) {
     apply_text(l.text.get());
     l.text.changed.subscribe(text_slot_, text_cb_);
+}
+
+void label_handler<platform::linux_>::map_gestures(basic_label& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

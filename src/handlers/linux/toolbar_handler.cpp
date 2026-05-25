@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/toolbar_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <vector>
@@ -77,6 +79,11 @@ void toolbar_handler<platform::linux_>::map_items(basic_toolbar& t) {
 void toolbar_handler<platform::linux_>::map_title(basic_toolbar& t) {
     apply_title(t.title.get());
     t.title.changed.subscribe(title_slot_, title_cb_);
+}
+
+void toolbar_handler<platform::linux_>::map_gestures(basic_toolbar& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

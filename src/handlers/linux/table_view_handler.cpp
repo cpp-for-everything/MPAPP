@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/table_view_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -162,6 +164,11 @@ void table_view_handler<platform::linux_>::map_typed_sections(basic_table_view& 
 void table_view_handler<platform::linux_>::map_row_height(basic_table_view& tv) {
     apply_row_height(tv.row_height.get());
     tv.row_height.changed.subscribe(rh_slot_, rh_cb_);
+}
+
+void table_view_handler<platform::linux_>::map_gestures(basic_table_view& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

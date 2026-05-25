@@ -33,6 +33,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_text(*this);
         embedded_handler_.map_placeholder(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     search_bar(const search_bar&)            = delete;

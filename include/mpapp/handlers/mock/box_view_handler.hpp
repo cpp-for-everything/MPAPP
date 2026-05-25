@@ -22,6 +22,17 @@ public:
     void map_fill(basic_box_view& b)    { bind("fill",    b.fill,    binding_fill_); }
     void map_corners(basic_box_view& b) { bind("corners", b.corners, binding_corners_); }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_box_view& /*x*/) noexcept {}
+
+
 private:
     detail::property_binding<color>         binding_fill_{};
     detail::property_binding<corner_radius> binding_corners_{};

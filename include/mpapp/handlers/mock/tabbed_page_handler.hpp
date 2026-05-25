@@ -40,6 +40,17 @@ public:
         tp.tab_did_disappear.subscribe(slot_did_dis_, lc_did_dis_);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_tabbed_page& /*x*/) noexcept {}
+
+
 private:
     using self_t = tabbed_page_handler<platform::mock>;
 

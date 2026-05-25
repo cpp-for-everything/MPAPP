@@ -32,6 +32,7 @@ public:
     date_picker() {
         set_handler(embedded_handler_);
         embedded_handler_.map_date(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     date_picker(const date_picker&)            = delete;

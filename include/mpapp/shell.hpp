@@ -36,6 +36,7 @@ public:
         embedded_handler_.map_is_flyout_open(*this);
         embedded_handler_.map_flyout_content(*this);
         embedded_handler_.map_current_content(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     shell(const shell&)            = delete;

@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_title(*this);
         embedded_handler_.map_content(*this);
         embedded_handler_.map_is_busy(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     page(const page&)            = delete;

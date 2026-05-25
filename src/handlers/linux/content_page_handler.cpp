@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/content_page_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -71,6 +73,11 @@ void content_page_handler<platform::linux_>::map_padding(basic_content_page& p) 
 
 void content_page_handler<platform::linux_>::bind_content(basic_content_page& p, view& child) {
     p.content.set(std::shared_ptr<view>(&child, [](view*){}));
+}
+
+void content_page_handler<platform::linux_>::map_gestures(basic_content_page& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

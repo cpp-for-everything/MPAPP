@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/picker_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <vector>
@@ -54,6 +56,11 @@ void picker_handler<platform::linux_>::map_selected_index(basic_picker& p) {
 void picker_handler<platform::linux_>::map_title(basic_picker& p) {
     apply_title(p.title.get());
     p.title.changed.subscribe(title_slot_, title_cb_);
+}
+
+void picker_handler<platform::linux_>::map_gestures(basic_picker& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

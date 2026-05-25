@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_flyout(*this);
         embedded_handler_.map_detail(*this);
         embedded_handler_.map_is_presented(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     flyout_view(const flyout_view&)            = delete;

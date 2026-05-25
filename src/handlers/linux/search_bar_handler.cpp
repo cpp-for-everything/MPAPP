@@ -3,6 +3,8 @@
 
 #include "mpapp/handlers/linux/search_bar_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <gtk/gtk.h>
@@ -35,6 +37,11 @@ void search_bar_handler<platform::linux_>::map_text(basic_search_bar& s) {
 void search_bar_handler<platform::linux_>::map_placeholder(basic_search_bar& s) {
     apply_placeholder(s.placeholder.get());
     s.placeholder.changed.subscribe(placeholder_slot_, placeholder_cb_);
+}
+
+void search_bar_handler<platform::linux_>::map_gestures(basic_search_bar& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

@@ -46,6 +46,17 @@ public:
         g.column_spacing.changed.subscribe(col_sp_slot_, col_sp_cb_);
     }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_grid_layout& /*x*/) noexcept {}
+
+
 private:
     using self_t = grid_layout_handler<platform::mock>;
 

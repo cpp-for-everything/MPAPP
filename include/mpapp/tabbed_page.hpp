@@ -33,6 +33,7 @@ public:
         set_tp_handler(embedded_handler_);
         embedded_handler_.map_children(*this);
         embedded_handler_.map_selected_index(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     tabbed_page(const tabbed_page&)            = delete;

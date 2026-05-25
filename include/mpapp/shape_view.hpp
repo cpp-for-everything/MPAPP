@@ -37,6 +37,7 @@ public:
         embedded_handler_.map_stroke(*this);
         embedded_handler_.map_stroke_thickness(*this);
         embedded_handler_.map_opacity(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     shape_view(const shape_view&)            = delete;

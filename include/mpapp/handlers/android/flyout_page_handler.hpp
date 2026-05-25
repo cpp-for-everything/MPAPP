@@ -33,6 +33,17 @@ public:
 
     jobject native() const noexcept { return native_; }
 
+// RFC-0003 stub: per-platform real gesture wire-up is
+
+// pending the platform's real-handler task. No-op today
+
+// so the wrapper ctor's unconditional
+
+// `embedded_handler_.map_gestures(*this);` links.
+
+void map_gestures(basic_flyout_page& /*x*/) noexcept {}
+
+
 private:
     void apply_flyout(basic_page* p);
     void apply_detail(basic_page* p);

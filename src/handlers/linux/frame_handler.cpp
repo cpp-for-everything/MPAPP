@@ -13,6 +13,8 @@
 
 #include "mpapp/handlers/linux/frame_handler.hpp"
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 #if defined(__linux__) && !defined(__ANDROID__)
 
 #include <atomic>
@@ -149,6 +151,11 @@ void frame_handler<platform::linux_>::map_padding(basic_frame& f) {
 
 void frame_handler<platform::linux_>::bind_content(basic_frame& f, view& child) {
     f.content.set(std::shared_ptr<view>(&child, [](view*){}));
+}
+
+void frame_handler<platform::linux_>::map_gestures(basic_frame& x) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
 }
 
 } // namespace mpapp::internal

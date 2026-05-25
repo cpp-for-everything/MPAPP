@@ -32,6 +32,7 @@ public:
     label() {
         set_handler(embedded_handler_);
         embedded_handler_.map_text(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     label(const label&)            = delete;

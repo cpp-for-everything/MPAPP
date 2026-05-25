@@ -1,13 +1,18 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Frame.md
 //
-// `mpapp::frame` — legacy single-child decorator with a colored border,
-// corner radius, and optional drop shadow.
+// `mpapp::frame` — user-facing wrapper around the platform-agnostic
+// `mpapp::internal::basic_frame` surface. Embeds the per-platform
+// handler by value and auto-binds it in the constructor, so app code
+// reads as `mpapp::frame x; x.<prop> = ...;` with no separate
+// handler variable.
 //
-// **Deprecated**: MAUI .NET 9 deprecates `Frame`; MPAPP mirrors the
-// deprecation. New code should prefer [[mpapp::border]] (`<border.hpp>`).
-// The control is ported for one-to-one XAML compatibility and migration
-// from Xamarin.Forms / early MAUI codebases.
+// Tests stay on the surface (so they don't drag in the per-platform
+// handler library):
+//
+//     mpapp::internal::basic_frame x;
+//     mpapp::frame_handler<mpapp::platform::mock> h;
+//     h.map_content(x);
 
 #ifndef MPAPP_FRAME_HPP
 #define MPAPP_FRAME_HPP
@@ -22,13 +27,7 @@
 
 namespace mpapp {
 
-// `[[deprecated]]` attribute is applied so any user code touching the
-// type gets a compiler diagnostic suggesting the replacement. This
-// matches MAUI's `[Obsolete("Use Border instead.")]` on the C# control.
-// The surface (`internal::basic_frame`) is NOT marked deprecated so the
-// wrapper + handler can inherit / hold it without warnings.
-class [[deprecated("mpapp::frame is deprecated; use mpapp::border instead.")]]
-frame : public internal::basic_frame {
+class frame : public internal::basic_frame {
 public:
     frame() {
         set_handler(embedded_handler_);
@@ -37,6 +36,7 @@ public:
         embedded_handler_.map_has_shadow(*this);
         embedded_handler_.map_corner_radius(*this);
         embedded_handler_.map_padding(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     frame(const frame&)            = delete;

@@ -633,7 +633,17 @@ class ComponentMigration:
             ctor_body = ["embedded_handler_.bind(*this);"]
         else:
             maps = self.collect_map_methods()
+            # `map_gestures` is added separately below as the
+            # RFC-0003 gesture wire-up — drop it from the auto-
+            # discovered map list so it's not emitted twice.
+            maps = [m for m in maps if m != "gestures"]
             ctor_body = [f"embedded_handler_.map_{m}(*this);" for m in maps]
+        # RFC-0003: walk basic_view::gesture_recognizers and install
+        # the per-platform native input listeners. The call exists on
+        # every per-platform + mock handler (added by sweep-gesture-
+        # map.py); real implementations land per platform in
+        # T-0037 / T-0038 / T-0039 / T-0040 / T-0041.
+        ctor_body.append("embedded_handler_.map_gestures(*this);")
         write(self.component_hpp,
               generate_wrapper_hpp(self.name, self.handler_base,
                                    ctor_body, setter))

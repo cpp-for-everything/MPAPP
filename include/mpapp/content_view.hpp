@@ -32,6 +32,7 @@ public:
     content_view() {
         set_handler(embedded_handler_);
         embedded_handler_.map_content(*this);
+        embedded_handler_.map_gestures(*this);
     }
 
     content_view(const content_view&)            = delete;
