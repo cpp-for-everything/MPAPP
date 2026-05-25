@@ -13,6 +13,10 @@
 #ifndef MPAPP_HANDLERS_MOCK_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_VIEW_HANDLER_HPP
 
+#include "../../gestures/pan_gesture_recognizer.hpp"
+#include "../../gestures/pinch_gesture_recognizer.hpp"
+#include "../../gestures/pointer_gesture_recognizer.hpp"
+#include "../../gestures/swipe_gesture_recognizer.hpp"
 #include "../../gestures/tap_gesture_recognizer.hpp"
 #include "../../internal/basic_gesture_recognizer.hpp"
 #include "../../platform.hpp"
@@ -76,7 +80,104 @@ public:
         record_event("gesture.tap_simulated");
     }
 
+    // Synthetic pan tick. `status` controls the lifecycle phase
+    // (started → running → completed/canceled); the platform handler
+    // would emit started once + running per frame + completed/canceled
+    // once. Mock callers drive each phase explicitly.
+    void simulate_pan(view& v,
+                      internal::gesture_status status,
+                      int gesture_id,
+                      double total_x, double total_y) {
+        for (const auto& r : v.gesture_recognizers) {
+            if (r->kind() == internal::gesture_kind::pan) {
+                auto& pan = static_cast<pan_gesture_recognizer&>(*r);
+                pan.pan_updated.emit(
+                    pan_updated_event_args{status, gesture_id, total_x, total_y});
+            }
+        }
+        record_event("gesture.pan_simulated");
+    }
+
+    // Synthetic pinch tick. `scale` is incremental (real handlers
+    // compute it per tick by dividing the current two-finger spread
+    // by the previous spread).
+    void simulate_pinch(view& v,
+                        internal::gesture_status status,
+                        double scale,
+                        double origin_x = 0.5, double origin_y = 0.5) {
+        for (const auto& r : v.gesture_recognizers) {
+            if (r->kind() == internal::gesture_kind::pinch) {
+                auto& pinch = static_cast<pinch_gesture_recognizer&>(*r);
+                pinch.pinch_updated.emit(
+                    pinch_updated_event_args{status, scale, origin_x, origin_y});
+            }
+        }
+        record_event("gesture.pinch_simulated");
+    }
+
+    // Synthetic swipe. Fires only on recognizers whose `direction`
+    // bitmask contains the simulated `direction` — matches MAUI's
+    // `SwipeGestureRecognizer.SendSwiped`'s direction filter.
+    void simulate_swipe(view& v, swipe_direction direction) {
+        for (const auto& r : v.gesture_recognizers) {
+            if (r->kind() == internal::gesture_kind::swipe) {
+                auto& sw = static_cast<swipe_gesture_recognizer&>(*r);
+                if (any(sw.direction.get(), direction)) {
+                    sw.swiped.emit(swiped_event_args{direction});
+                }
+            }
+        }
+        record_event("gesture.swipe_simulated");
+    }
+
+    // Synthetic pointer transitions — one helper per signal so tests
+    // can drive each phase independently. Each fans out to every
+    // pointer recognizer attached to `v`.
+    void simulate_pointer_entered(view& v,
+                                  double x = 0.0, double y = 0.0,
+                                  button_mask b = button_mask::none) {
+        fan_out_pointer(v, &pointer_gesture_recognizer::pointer_entered, x, y, b);
+        record_event("gesture.pointer_entered_simulated");
+    }
+    void simulate_pointer_exited(view& v,
+                                 double x = 0.0, double y = 0.0,
+                                 button_mask b = button_mask::none) {
+        fan_out_pointer(v, &pointer_gesture_recognizer::pointer_exited, x, y, b);
+        record_event("gesture.pointer_exited_simulated");
+    }
+    void simulate_pointer_moved(view& v,
+                                double x = 0.0, double y = 0.0,
+                                button_mask b = button_mask::none) {
+        fan_out_pointer(v, &pointer_gesture_recognizer::pointer_moved, x, y, b);
+        record_event("gesture.pointer_moved_simulated");
+    }
+    void simulate_pointer_pressed(view& v,
+                                  double x = 0.0, double y = 0.0,
+                                  button_mask b = button_mask::primary) {
+        fan_out_pointer(v, &pointer_gesture_recognizer::pointer_pressed, x, y, b);
+        record_event("gesture.pointer_pressed_simulated");
+    }
+    void simulate_pointer_released(view& v,
+                                   double x = 0.0, double y = 0.0,
+                                   button_mask b = button_mask::primary) {
+        fan_out_pointer(v, &pointer_gesture_recognizer::pointer_released, x, y, b);
+        record_event("gesture.pointer_released_simulated");
+    }
+
 private:
+    // Shared body for the five simulate_pointer_* helpers above.
+    using pointer_signal = mpapp::signal<const pointer_event_args&>;
+    void fan_out_pointer(view& v,
+                         pointer_signal pointer_gesture_recognizer::* slot,
+                         double x, double y, button_mask b) {
+        for (const auto& r : v.gesture_recognizers) {
+            if (r->kind() == internal::gesture_kind::pointer) {
+                auto& p = static_cast<pointer_gesture_recognizer&>(*r);
+                (p.*slot).emit(pointer_event_args{x, y, b});
+            }
+        }
+    }
+
     detail::property_binding<std::string>     binding_automation_id_{};
     detail::property_binding<visibility>      binding_visibility_{};
     detail::property_binding<bool>            binding_is_enabled_{};

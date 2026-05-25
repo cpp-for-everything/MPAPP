@@ -36,6 +36,16 @@ enum class gesture_kind : std::uint8_t {
     pointer = 4,
 };
 
+// Lifecycle status of a multi-stage gesture (pan / pinch). MAUI's
+// `GestureStatus` 1:1. Tap and swipe are single-shot and don't surface
+// status; they fire once when the recognizer detects them.
+enum class gesture_status : std::uint8_t {
+    started   = 0,
+    running   = 1,
+    completed = 2,
+    canceled  = 3,
+};
+
 class basic_gesture_recognizer {
 public:
     virtual ~basic_gesture_recognizer() = default;
