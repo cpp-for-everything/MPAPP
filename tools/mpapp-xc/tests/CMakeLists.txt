@@ -29,16 +29,22 @@ configure_file(
 )
 
 # Use file(GENERATE) so MPAPP_XC_EXE's generator expression is expanded
-# correctly per-config.
+# correctly per-config. The output is written under a `$<CONFIG>/`
+# subdirectory so multi-config generators (Visual Studio) can keep one
+# copy per config without "Evaluation file to be written multiple times
+# with different content" — `$<TARGET_FILE:mpapp-xc>` resolves to a
+# different absolute path under Release/ vs Debug/ vs RelWithDebInfo/.
+# Single-config generators (Ninja, Makefiles) just write to
+# `<binary-dir>/Release/test_paths.hpp` and life carries on.
 file(GENERATE
-    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/test_paths.hpp"
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/test_paths.hpp"
     INPUT  "${CMAKE_CURRENT_BINARY_DIR}/test_paths.hpp.tmp"
 )
 
 add_executable(mpapp_xc_empty_xaml_test empty_xaml_test.cpp)
 target_link_libraries(mpapp_xc_empty_xaml_test PRIVATE mpapp-xc-lib Catch2::Catch2WithMain)
 target_include_directories(mpapp_xc_empty_xaml_test PRIVATE
-    "${CMAKE_CURRENT_BINARY_DIR}"
+    "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
 )
 add_dependencies(mpapp_xc_empty_xaml_test mpapp-xc)
 

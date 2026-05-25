@@ -222,6 +222,18 @@ void hybrid_web_view_handler<platform::linux_>::map_messages(basic_hybrid_web_vi
     h.message_sent.subscribe(sent_slot_, sent_cb_);
 }
 
+// Stub: WebKitGTK isn't available at configure time so we can't load
+// HTML into a real native view. The function still has to exist —
+// `mpapp::hybrid_web_view`'s wrapper ctor calls it during auto-bind
+// (see ADR-0024), and the umbrella handler header declares it as part
+// of the per-platform surface contract.
+void hybrid_web_view_handler<platform::linux_>::apply_html(const std::string&) {}
+
+void hybrid_web_view_handler<platform::linux_>::map_html_source(basic_hybrid_web_view& h) {
+    apply_html(h.html_source.get());
+    h.html_source.changed.subscribe(html_slot_, html_cb_);
+}
+
 } // namespace mpapp::internal
 namespace {
 GtkWidget* dispatch_hybrid_web_view_stub(::mpapp::view*) { return nullptr; }
