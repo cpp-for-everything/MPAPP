@@ -7,8 +7,10 @@
 #include <string>
 
 #include "../../internal/basic_image.hpp"
+#include "../../internal/basic_image_source.hpp"
 #include "../../platform.hpp"
 #include "handler_base.hpp"
+#include "image_loader.hpp"   // for image_loader<platform::mock>
 
 namespace mpapp::internal {
 
@@ -23,6 +25,21 @@ public:
         record("aspect", static_cast<int>(i.aspect.get()));
         i.aspect.changed.subscribe(aspect_slot_, aspect_cb_);
     }
+
+    // RFC-0004 rich-source mapper. Records the initial value via the
+    // owned `image_loader<platform::mock>` + subscribes a slot so
+    // subsequent `source_object.set(...)` calls record too. Tests can
+    // inspect `loader().calls()` to assert exactly which sources were
+    // loaded + in what order.
+    void map_source_object(basic_image& i) {
+        loader_.load(i.source_object.get());
+        i.source_object.changed.subscribe(source_object_slot_, source_object_cb_);
+    }
+
+    // Inspector for tests — exposes the mock loader so callers can
+    // assert `h.loader().calls_as_strings() == ...`.
+    [[nodiscard]] ::mpapp::image_loader<::mpapp::platform::mock>&
+    loader() noexcept { return loader_; }
 
 // RFC-0003 stub: per-platform real gesture wire-up is
 
@@ -43,9 +60,25 @@ private:
         }
     };
 
+    struct source_object_cb_t {
+        image_handler<platform::mock>* self;
+        void operator()(const ::mpapp::image_source_ref& s) const {
+            self->loader_.load(s);
+        }
+    };
+
     detail::property_binding<std::string>     binding_source_{};
     aspect_cb_t                               aspect_cb_{this};
     signal_slot<const aspect_mode&>           aspect_slot_{};
+
+    // RFC-0004 rich-source state. The loader is owned by the handler
+    // so its `calls()` log mirrors the per-handler test pattern (one
+    // image_handler instance per test ⇒ isolated load log).
+    ::mpapp::image_loader<::mpapp::platform::mock>
+                                              loader_{};
+    source_object_cb_t                        source_object_cb_{this};
+    signal_slot<const ::mpapp::image_source_ref&>
+                                              source_object_slot_{};
 };
 
 } // namespace mpapp::internal

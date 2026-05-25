@@ -12,6 +12,7 @@
 #include "../observable.hpp"
 #include "../platform.hpp"
 #include "../view.hpp"
+#include "basic_image_source.hpp"   // for mpapp::image_source_ref (RFC-0004)
 
 namespace mpapp {
 
@@ -33,7 +34,20 @@ class basic_image : public view {
 public:
     basic_image() = default;
 
+    // Backward-compat string source — equivalent to MAUI's implicit
+    // FileImageSource conversion from a path string. Per RFC-0004 §
+    // Migration, this stays in place for app code that does
+    // `img.source = "icon.png";`.
     Observable<std::string>   source{};
+
+    // RFC-0004 rich source — accepts any ImageSource family member
+    // (file / uri / stream / font / resource). When both `source` and
+    // `source_object` are set, real per-platform handlers prefer
+    // `source_object` (matches MAUI's behaviour when both ImageSource
+    // property paths are bound). Mock handler records both
+    // independently via `map_source` + `map_source_object`.
+    Observable<image_source_ref> source_object{};
+
     Observable<aspect_mode>   aspect{aspect_mode::aspect_fit};
 
     image_handler<platform::current>&       handler() noexcept       { return *handler_; }
