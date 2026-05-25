@@ -37,6 +37,24 @@ AppKit handlers per [[ADR-0005-ios-macos-separate-interop]] — no Mac Catalyst.
 - [ ] AppleScript / Accessibility-API based UI tests run on every PR.
 - [ ] Hot reload working on macOS desktop.
 
+## Readiness checklist
+
+The seed `.mm` files under `src/handlers/macos/` already follow the post-[[ADR-0024-wrapper-component-pattern]] structure: every `map_<property>` takes `internal::basic_<name>&` (the surface), and the per-platform handler lives in `mpapp::internal::`. So the wrapper-pattern migration is **not** a blocker — what is missing is purely the Apple host that can compile + run + UI-test the bodies.
+
+Concrete entry conditions, in order:
+
+1. **Mac host available.** Either the user's MacBook Pro or a temporary cloud Mac (`macos-latest`) to validate the existing seed files build at all under Xcode Clang. Today only `release.yml`'s tag-gated `macos-native` job exercises this, and even that does not run automatically per PR.
+2. **Self-hosted `mpapp-macos-self` runner registered.** Replaces the cloud `macos-latest` minutes in `release.yml`; once online, a `macos-native` job is added to `pr.yml` (see [[CI Strategy]] §Apple platform timeline).
+3. **T-0008 UI-test harness wired in.** AppleScript + accessibility-API recipe must run without human intervention; cost of UI-test failure must be visible in the GitHub Checks UI like any other test.
+4. **Component fill-in** — start with the 4 seed components (application, button, label, window) the `.mm` files already have, then bulk-port the rest of the inventory the same way the Bulk Handler Port (M-04b) did for Linux + Android. After [[ADR-0024-wrapper-component-pattern]] this is a 60-component sweep of "extend the existing `.mm` files with the remaining `map_<prop>` methods + add the surface-class casts to `::mpapp::internal::basic_<name>*` in dispatch functions."
+5. **Hot reload** — the LLVM-based hot-reload daemon from [[Hot Reload]] needs an AppKit-specific code-injection path.
+
+## Risks
+
+## Reinstate trigger
+
+This milestone moves from `planned` → `active` when **either** an Apple-host self-hosted runner is online **or** the project lead has a Mac in front of them to validate the existing seed `.mm` files. The Cloud `macos-latest` cost (~15 min wall-clock per release tag) is acceptable as a temporary fallback during the validation phase.
+
 ## Risks
 
 > [!warning]

@@ -77,6 +77,16 @@ relevant for the follow-up decision on how to bridge that gap (NDK side-by-
 side install vs. wait for a newer Zig release vs. switch to Option B for
 those two targets only).
 
+## CI dependency
+
+This task is the gating work for the **deleted** `windows-cross` / `linux-cross` jobs in [`.github/workflows/pr.yml`](../../../.github/workflows/pr.yml) and the matching cells in [`.github/workflows/release.yml`](../../../.github/workflows/release.yml). Both files previously declared those jobs with `continue-on-error: true` on every cmake/build step (they failed silently for every PR because the toolchain files didn't exist). The CI rewrite landed in commit `39eb308` deleted them with a reinstate-when comment that points back here — see [[CI Strategy]] §Deferred axes.
+
+Reinstate path:
+
+1. Land the missing toolchain files under `cmake/toolchains/`. The Windows-host empirical evidence above proves Zig 0.13 is the right tool for 4 of 6 target triples; the Android + iOS rows need either Zig + bundled bionic/iOS SDK (waiting on Zig 0.14+) or a side-by-side NDK / Xcode install on the runner.
+2. Re-enable the cross-compile jobs in `pr.yml` (and `release.yml` if budget allows). Each cross-compile cell adds ~3 min cloud minutes per PR even cache-warm — match the CI Strategy budget table when reinstating.
+3. Verify the cells run green on a real push before flipping `continue-on-error` off.
+
 ## Links
 
 - Empirical results: [[notes/matrix-status]]

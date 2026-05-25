@@ -40,6 +40,22 @@ UIKit handlers, separate from AppKit per [[ADR-0005-ios-macos-separate-interop]]
 - [ ] iOS real-device hot reload investigation documented (likely "no, but here's the entitlement workaround for dev signing").
 - [ ] Conformance test suite passes on all 5 platforms — [[Interop Parity]] verified.
 
+## Readiness checklist
+
+The seed `.mm` files under `src/handlers/ios/` follow the post-[[ADR-0024-wrapper-component-pattern]] structure (the `mpapp::internal::` move + `basic_<name>&` parameters were applied in the bulk migration commit `4754ac1`). Wrapper-pattern is **not** a blocker — what is missing is the Apple-host workflow.
+
+Concrete entry conditions, in order:
+
+1. [[M-07-macOS-Real]] closed — both Apple platforms share toolchain + host concerns, and macOS has fewer moving parts than iOS Simulator. M-07 also stress-tests the same `.mm` Obj-C++ build path UIKit needs.
+2. **iOS Simulator harness running on the self-hosted Mac.** `xcrun simctl boot` + `xcrun simctl launch` is enough for headless smoke; the visual-UI test harness (T-0008 design) reuses the macOS recipe with `XCUIApplication` instead of `NSApplication`.
+3. **Component fill-in** — extend the seed UIKit handlers (`application_handler.mm`, `button_handler.mm`, `label_handler.mm`, `window_handler.mm`) to cover the full inventory. The wrapper-pattern work means the surgical pattern is `*_handler<platform::ios>::map_<prop>(internal::basic_<name>&)` — identical shape to the AppKit work — so a bulk-port automation script can do most of the boilerplate.
+4. **Real-device hot reload investigation** — document the entitlement / signing constraints; likely the answer is "Simulator only" with a documented workaround for dev signing.
+5. **Conformance test green on all 5 platforms** — the parity-complete bar from [[ADR-0006-interop-parity]].
+
+## Reinstate trigger
+
+This milestone moves from `planned` → `active` when [[M-07-macOS-Real]] is shipped. Doing them strictly in order avoids fighting the Apple-host runner setup twice and lets the AppKit-vs-UIKit code reuse decisions land while macOS is fresh.
+
 ## Risks
 
 > [!warning]

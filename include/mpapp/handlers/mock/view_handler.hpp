@@ -13,6 +13,8 @@
 #ifndef MPAPP_HANDLERS_MOCK_VIEW_HANDLER_HPP
 #define MPAPP_HANDLERS_MOCK_VIEW_HANDLER_HPP
 
+#include "../../gestures/tap_gesture_recognizer.hpp"
+#include "../../internal/basic_gesture_recognizer.hpp"
 #include "../../platform.hpp"
 #include "../../view.hpp"
 #include "handler_base.hpp"
@@ -34,6 +36,45 @@ public:
     void map_flow_direction(view& v)  { bind("flow_direction",  v.flow,            binding_flow_); }
     void map_z_index(view& v)         { bind("z_index",         v.z_index,         binding_z_index_); }
     void map_input_transparent(view& v) { bind("input_transparent", v.input_transparent, binding_input_transparent_); }
+
+    // ----- Gesture recognizers (per RFC-0003) ---------------------------
+    // Record one entry per attached recognizer, tagged with its `kind()`,
+    // so tests can assert that the right recognizer was wired up. Real
+    // handlers replace these records with native listener installs
+    // (UITapGestureRecognizer, GtkGestureClick, …).
+    void map_gestures(view& v) {
+        for (const auto& r : v.gesture_recognizers) {
+            switch (r->kind()) {
+                case internal::gesture_kind::tap:
+                    record_event("gesture.tap_attached");      break;
+                case internal::gesture_kind::pan:
+                    record_event("gesture.pan_attached");      break;
+                case internal::gesture_kind::pinch:
+                    record_event("gesture.pinch_attached");    break;
+                case internal::gesture_kind::swipe:
+                    record_event("gesture.swipe_attached");    break;
+                case internal::gesture_kind::pointer:
+                    record_event("gesture.pointer_attached");  break;
+            }
+        }
+    }
+
+    // Test helper: dispatch a synthetic tap to every tap recognizer
+    // currently attached to `v`. Mirrors what a real platform's native
+    // tap event would do — invoke the recognizer's `tapped` signal so
+    // subscribers fire. Also records one log entry so tests can assert
+    // the simulation happened.
+    void simulate_tap(view& v,
+                      double x = 0.0, double y = 0.0,
+                      button_mask b = button_mask::primary) {
+        for (const auto& r : v.gesture_recognizers) {
+            if (r->kind() == internal::gesture_kind::tap) {
+                auto& tap = static_cast<tap_gesture_recognizer&>(*r);
+                tap.tapped.emit(tapped_event_args{x, y, b});
+            }
+        }
+        record_event("gesture.tap_simulated");
+    }
 
 private:
     detail::property_binding<std::string>     binding_automation_id_{};

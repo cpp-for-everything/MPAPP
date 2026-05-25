@@ -31,6 +31,35 @@ tags:
 >
 > Concrete components that inherit `view` each have their own `mpapp::internal::basic_<...>` surface and `mpapp::<...>` wrapper; this base class participates in the chain as the inheritance root.
 
+## Gesture recognizers
+
+Per [[RFC-0003-gesture-recognizers]] `view` ships a polymorphic collection of attached gesture recognizers that every derived component inherits automatically:
+
+```cpp
+class view {
+    // ... existing Observables ...
+
+    std::vector<std::shared_ptr<internal::basic_gesture_recognizer>>
+        gesture_recognizers{};
+
+    template <class T, class... Args>
+    T& add_gesture(Args&&... args);   // emplace + return ref
+};
+```
+
+App-code usage:
+
+```cpp
+mpapp::button btn;
+auto& tap = btn.add_gesture<mpapp::tap_gesture_recognizer>();
+tap.number_of_taps_required = 2;
+tap.tapped.subscribe(slot, [&](const mpapp::tapped_event_args& a) {
+    std::println("double-tapped at ({}, {})", a.x, a.y);
+});
+```
+
+Per-platform `view_handler<P>::map_gestures(view&)` walks the collection at bind time and installs the matching native listener for each recognizer's `kind()` — `UITapGestureRecognizer` on iOS, `GtkGestureClick` on Linux, `UIElement.Tapped` on Windows, etc. The mock handler records `gesture.<kind>_attached` per recognizer + provides `simulate_tap(view&, …)` for tests to drive synthetic events. See [[../50_Tasks/T-0033-gesture-recognizers-tap-slice/T-0033-gesture-recognizers-tap-slice]] for the first slice (tap only) shipped today.
+
 ## MAUI Reference
 
 - **Handler:** `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\View\`

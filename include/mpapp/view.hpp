@@ -20,15 +20,20 @@
 #define MPAPP_VIEW_HPP
 
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
 #if __has_include(<format>) && !defined(__ANDROID__)
 #  include <format>
 #  define MPAPP_VIEW_HAS_STD_FORMAT 1
 #endif
 
 #include "command.hpp"
+#include "internal/basic_gesture_recognizer.hpp"  // for view::gesture_recognizers
 #include "observable.hpp"
 #include "platform.hpp"
 
@@ -128,6 +133,34 @@ public:
 
     // ----- Hit testing --------------------------------------------------
     Observable<bool>                        input_transparent{false};
+
+    // ----- Gesture recognizers (per RFC-0003) ---------------------------
+    // Polymorphic collection of recognizers attached to this view. Held
+    // by `shared_ptr` so binding layers / view-models can hold a ref to
+    // mutate config without invalidating the slot list. The platform
+    // `view_handler<P>::map_gestures(*this)` walks this vector and
+    // installs the matching native listener for each recognizer's
+    // `kind()` (see `RFC-0003-gesture-recognizers` for the per-platform
+    // wire-up table).
+    std::vector<std::shared_ptr<internal::basic_gesture_recognizer>>
+                                            gesture_recognizers{};
+
+    // Convenience emplace + return. `T` must derive from
+    // `internal::basic_gesture_recognizer`. Returns a reference so
+    // app code reads as:
+    //     auto& tap = btn.add_gesture<mpapp::tap_gesture_recognizer>();
+    //     tap.number_of_taps_required = 2;
+    //     tap.tapped.subscribe(slot, cb);
+    template <class T, class... Args>
+    T& add_gesture(Args&&... args) {
+        static_assert(std::is_base_of_v<internal::basic_gesture_recognizer, T>,
+                      "view::add_gesture<T>: T must derive from "
+                      "mpapp::internal::basic_gesture_recognizer");
+        auto p = std::make_shared<T>(std::forward<Args>(args)...);
+        T& ref = *p;
+        gesture_recognizers.push_back(std::move(p));
+        return ref;
+    }
 
     // ----- Commands -----------------------------------------------------
     // Declared with the Command<> tag per ADR-0009. The XAML compiler
