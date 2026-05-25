@@ -159,6 +159,11 @@ void web_view_handler<platform::linux_>::map_html(basic_web_view& wv) {
     wv.html_source.changed.subscribe(html_slot_, html_cb_);
 }
 
+// RFC-0003 stub: no native widget in this WebKit-less branch — the
+// function still has to exist because mpapp::web_view's wrapper ctor
+// calls embedded_handler_.map_gestures(*this) per ADR-0024.
+void web_view_handler<platform::linux_>::map_gestures(basic_web_view& /*wv*/) {}
+
 } // namespace mpapp::internal
 namespace {
 GtkWidget* dispatch_web_view_stub(::mpapp::view*) { return nullptr; }
