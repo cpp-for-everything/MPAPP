@@ -27,15 +27,30 @@ What runs today, per workflow.
 | Job | Runs on | What it does | Trigger condition |
 |---|---|---|---|
 | `linux-native` | `ubuntu-latest` | Configure / build / ctest the full project on Ubuntu 24.04 with apt-installed GTK4 + Cairo + WebKitGTK. Examples + tools enabled. Canonical validator. | Any PR that touches non-docs paths; push to main. |
-| `windows-native` | `windows-latest` | Configure / build / ctest mpapp-core + tools on MSVC 2022. Examples disabled until WindowsAppSDK provisioning lands here. | Same as above. |
 | `android-emulator` | self-hosted `[mpapp-windows-self]` | Conditional Android cross-build + emulator smoke (no-op until [[T-0009]]'s toolchain files land). | Only for in-repo PRs (fork PRs skipped — security boundary), non-blocking. |
+
+#### Windows on the cloud runner is deferred
+
+A `windows-native` cloud job lived in `pr.yml` previously; it has been **removed**. After [[ADR-0024-wrapper-component-pattern]] the wrapper layer embeds the platform handler by value, so building any TU that pulls in `mpapp.hpp` (the umbrella) on Windows requires the WinUI 3 / WindowsAppSDK headers (`winrt/Microsoft.UI.Xaml.Controls.h` etc.) to be reachable. `mpapp-core/src/mpapp.cpp` does pull the umbrella in, and the `windows-latest` GitHub runner does not ship WindowsAppSDK — the project's [`cmake/WindowsAppSDK.cmake`](../../cmake/WindowsAppSDK.cmake) helper is only auto-invoked from example targets, not from `mpapp-core`.
+
+Per-PR Windows validation in the meantime comes from:
+
+- Local builds on the project lead's Windows machine (where WindowsAppSDK is installed).
+- The self-hosted `mpapp-windows-self` runner (slot reserved for a future `windows-self` job in the android-emulator family — WindowsAppSDK is already provisioned there).
+
+Reinstate the cloud Windows job when either:
+
+1. `mpapp-core` is decoupled from the umbrella (`src/mpapp.cpp` becomes a trivial TU that doesn't `#include <mpapp/mpapp.hpp>`, and the few tests / tools that do are made conditional on a `MPAPP_HAS_PLATFORM_HANDLERS` flag), OR
+2. The Windows-CI step gains a `mpapp_install_windows_app_sdk()` invocation + NuGet cache.
+
+Until then the cloud Windows minutes are wasted on a known-failing job, and `linux-native` is the canonical per-PR gate.
 
 ### `release.yml` (push to `v*` tag)
 
 | Job | Runs on | What it does |
 |---|---|---|
 | `linux-native` | `ubuntu-latest` | Same shape as the PR job. |
-| `windows-native` | `windows-latest` | Same shape as the PR job. |
+| `windows-native` | `windows-latest` | Currently expected to fail with the WinUI 3 header gap described above — left in place so a future "windows in CI" enabler PR has an obvious target to fix. Tag builds are gated by humans, so a red Windows job here is informational, not blocking merge of code into `main`. |
 | `macos-native` | `macos-latest` | Configure / build / ctest macos-arm64 (Xcode Clang), then configure / build ios-arm64 Simulator. Examples disabled until [[M-07-macOS-Real]] / [[M-08-iOS-Real]] complete the Apple handler set. |
 
 ## Deferred axes
@@ -142,12 +157,12 @@ Public-repo Actions minutes are unlimited, but wall-clock matters for developer 
 
 | Job | Target wall-clock | Notes |
 |---|---|---|
-| `linux-native` | ≤ 5 min | apt install → cached ccache → cmake configure (~30s) + parallel build (~1.5min) + parallel ctest (~30s) |
-| `windows-native` | ≤ 10 min | sccache-warm; sccache-cold is closer to 20 min for the C++/WinRT chunks |
+| `linux-native` (per PR) | ≤ 1 min cache-warm, ≤ 5 min cold | apt install → cached ccache → cmake configure (~30s) + parallel build (~1.5min) + parallel ctest (~30s). The canonical per-PR validator. |
+| `windows-native` (release only) | currently fails | See § *Windows on the cloud runner is deferred*. Tag-only runs so the cost is occasional. |
 | `macos-native` (release only) | ≤ 15 min | full macOS-arm64 + ios-arm64 build |
 | Cross + Skia /MD prebuild | manual / out-of-band | not on the PR critical path |
 
-A docs-only PR consumes **zero** runner minutes (paths-ignore short-circuits the whole workflow).
+A docs-only PR consumes **zero** runner minutes (paths-ignore short-circuits the whole workflow). The most recent runs show `linux-native` at ~54 s for an incremental cache-warm build, well inside the budget.
 
 ## See in code
 
