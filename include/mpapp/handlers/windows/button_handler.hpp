@@ -41,6 +41,11 @@ public:
     // Wires the native `Click` event into `b.clicked`. Idempotent.
     void map_clicked(basic_button& b);
 
+    // RFC-0003 stub: WinUI 3 GestureRecognizer wire-up pending the
+    // Windows real-handler task. No-op today so the wrapper ctor's
+    // unconditional `embedded_handler_.map_gestures(*this)` links.
+    void map_gestures(basic_button& /*b*/) noexcept {}
+
     // Native widget access — for the host to add to a Window content tree.
     winrt::Microsoft::UI::Xaml::Controls::Button&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::Button& native() const noexcept { return native_; }

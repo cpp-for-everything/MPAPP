@@ -30,6 +30,10 @@ public:
     void map_text(basic_button& b);
     void map_clicked(basic_button& b);
 
+    // RFC-0003 stub: UIGestureRecognizer wire-up pending the iOS
+    // real-handler task. No-op today.
+    void map_gestures(basic_button& /*b*/) noexcept {}
+
     void*       native() noexcept       { return native_; }
     const void* native() const noexcept { return native_; }
 

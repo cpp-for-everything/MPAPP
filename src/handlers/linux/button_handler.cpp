@@ -7,6 +7,8 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/handlers/linux/gesture_attach.hpp"
+
 namespace mpapp::internal {
 
 namespace {
@@ -47,6 +49,11 @@ void button_handler<platform::linux_>::map_text(basic_button& b) {
     bound_ = &b;
     apply_text(b.text.get());
     b.text.changed.subscribe(text_slot_, text_cb_);
+}
+
+void button_handler<platform::linux_>::map_gestures(basic_button& b) {
+    if (native_ == nullptr) return;
+    linux_gestures::attach(static_cast<GtkWidget*>(native_), b);
 }
 
 void button_handler<platform::linux_>::map_clicked(basic_button& b) {

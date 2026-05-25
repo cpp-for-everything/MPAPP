@@ -27,6 +27,9 @@ public:
 
     void map_text(basic_button& b);
     void map_clicked(basic_button& b);
+    // Walks `b.gesture_recognizers` and installs the matching
+    // GtkGesture* controller for each one — see RFC-0003.
+    void map_gestures(basic_button& b);
 
     // GtkWidget* (GtkButton), type-erased.
     void*       native() noexcept       { return native_; }

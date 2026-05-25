@@ -71,6 +71,11 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_text(*this);
         embedded_handler_.map_clicked(*this);
+        // RFC-0003: walk basic_view::gesture_recognizers and install
+        // the per-platform native listeners. No-op on platform::mock;
+        // attaches GtkGesture* on Linux, UI*GestureRecognizer on
+        // Apple, etc. once the per-platform map_gestures land.
+        embedded_handler_.map_gestures(*this);
     }
 
     button(const button&)            = delete;

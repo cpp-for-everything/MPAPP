@@ -54,6 +54,14 @@ public:
     // ours, which appends `"clicked"` to the call log).
     void simulate_click(basic_button& b) const { b.clicked.emit(); }
 
+    // No-op on the mock platform: gesture wire-up is observed via
+    // `view_handler<platform::mock>::map_gestures` directly (which
+    // tests already use). The per-component mock handler exists only
+    // because the wrapper's ctor calls `embedded_handler_.map_gestures(*this)`
+    // unconditionally — on real platforms that delegates to the
+    // platform's native gesture controllers (per RFC-0003).
+    void map_gestures(basic_button& /*b*/) noexcept {}
+
 private:
     struct click_recorder {
         button_handler<platform::mock>* self = nullptr;

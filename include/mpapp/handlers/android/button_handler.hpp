@@ -30,6 +30,10 @@ public:
     void map_text(basic_button& b);
     void map_clicked(basic_button& b);
 
+    // RFC-0003 stub: Android GestureDetector wire-up pending the
+    // Android real-handler task. No-op today.
+    void map_gestures(basic_button& /*b*/) noexcept {}
+
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
 
