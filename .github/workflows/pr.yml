@@ -1,235 +1,160 @@
 name: PR
 
+# Per CLAUDE rule 8 + [[vault/10_Architecture/CI Strategy]]:
+#   - Public repo → Actions minutes are unlimited, but minimal wall-clock
+#     time + minimal self-hosted-runner wear still matter.
+#   - Skip docs-only changes entirely.
+#   - One in-flight run per branch — newer pushes cancel older runs.
+#   - No submodules: the references/ submodules (maui, maui-toolkit,
+#     maui-community-toolkit, dotnet-community-toolkit) are research-only,
+#     not build dependencies. Pulling them historically failed on Windows
+#     with "Filename too long" inside references/maui-community-toolkit
+#     and cost ~30 s of bandwidth on every job for no value.
+#   - Cross-compile jobs (linux-cross / windows-cross) are deferred until
+#     cmake/toolchains/*.cmake actually exists — every previous run
+#     had `continue-on-error: true` on every cmake/build step, so they
+#     never validated anything and just burnt runner minutes.
+#   - Android emulator stays on the self-hosted runner, non-blocking.
+
 on:
   pull_request:
+    # Docs-only changes skip the C++ matrix entirely.
+    paths-ignore:
+      - 'vault/**'
+      - '**/*.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'tools/dev/**'   # generator scripts; tested out-of-band
   push:
     branches: [main]
+    paths-ignore:
+      - 'vault/**'
+      - '**/*.md'
+      - '.gitignore'
+      - 'LICENSE'
+      - 'tools/dev/**'
 
-# Per CLAUDE rule 8 and vault/10_Architecture/CI Strategy.md:
-# - Cloud minutes are scarce; shard aggressively, cache aggressively.
-# - Cross-compilation uses Zig (see RFC-0002).
-# - Long Android emulator runs go to the self-hosted runner labeled mpapp-windows-self.
-# - macOS-hosted jobs live in release.yml, not here, until the self-hosted Mac runner is online.
+# Cancel previous runs on the same ref when a newer commit arrives.
+concurrency:
+  group: pr-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  ZIG_VERSION: "0.13.0"
   CMAKE_BUILD_TYPE: Release
 
 jobs:
-  windows-native:
-    name: windows-native
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup MSBuild (MSVC)
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Setup sccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          variant: sccache
-          key: windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Cache build directory
-        uses: actions/cache@v4
-        with:
-          path: build
-          key: build-windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-          restore-keys: |
-            build-windows-native-
-
-      - name: Configure
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-
-      - name: Build
-        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --parallel
-
-      - name: Test
-        run: ctest --test-dir build -C ${{ env.CMAKE_BUILD_TYPE }} --output-on-failure
-
-  windows-cross:
-    name: windows-cross
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Cache Zig toolchain
-        id: zig-cache
-        uses: actions/cache@v4
-        with:
-          path: C:\zig
-          key: zig-${{ env.ZIG_VERSION }}-windows
-
-      - name: Install Zig (pinned)
-        if: steps.zig-cache.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          $url = "https://ziglang.org/download/$env:ZIG_VERSION/zig-windows-x86_64-$env:ZIG_VERSION.zip"
-          Invoke-WebRequest -Uri $url -OutFile zig.zip
-          Expand-Archive zig.zip -DestinationPath C:\zig-tmp
-          Move-Item "C:\zig-tmp\zig-windows-x86_64-$env:ZIG_VERSION" C:\zig
-          Remove-Item zig.zip
-
-      - name: Add Zig to PATH
-        shell: pwsh
-        run: Add-Content $env:GITHUB_PATH "C:\zig"
-
-      - name: Cache build (linux-x64 cross)
-        uses: actions/cache@v4
-        with:
-          path: build-linux-x64
-          key: build-windows-cross-linux-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Configure linux-x64 (Zig cross)
-        # NOTE: cmake/toolchains/linux-x64.cmake does not exist yet — placeholder
-        # until T-0009 (cross-compilation matrix) lands the toolchain files.
-        run: cmake -S . -B build-linux-x64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/linux-x64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-        continue-on-error: true
-
-      - name: Build linux-x64
-        run: cmake --build build-linux-x64 --parallel
-        continue-on-error: true
-
-      - name: Cache build (android-arm64 cross)
-        uses: actions/cache@v4
-        with:
-          path: build-android-arm64
-          key: build-windows-cross-android-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Configure android-arm64 (Zig cross)
-        # NOTE: cmake/toolchains/android-arm64.cmake placeholder — pending T-0009.
-        run: cmake -S . -B build-android-arm64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-        continue-on-error: true
-
-      - name: Build android-arm64
-        run: cmake --build build-android-arm64 --parallel
-        continue-on-error: true
-
   linux-native:
     name: linux-native
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
-      - name: Checkout
+      - name: Checkout (no submodules)
+        # The references/maui-* submodules are MAUI source-of-truth
+        # research material, NOT build dependencies — keep them out of
+        # CI to avoid the multi-GB clone + Windows-side long-path break.
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+          fetch-depth: 1
 
-      - name: Install Clang + build tools
+      - name: Install C++ + GTK4 + Cairo dev packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang lld ninja-build cmake
+          sudo apt-get install -y --no-install-recommends \
+            clang lld ninja-build cmake pkg-config \
+            libgtk-4-dev libcairo2-dev libwebkit2gtk-4.1-dev
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: linux-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Cache build directory
-        uses: actions/cache@v4
-        with:
-          path: build
-          key: build-linux-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-          restore-keys: |
-            build-linux-native-
+          key: linux-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt', 'cmake/**') }}
+          # ccache is cheap — 200 MB cap is plenty for the C++23 codebase.
+          max-size: 200M
 
       - name: Configure
         env:
           CC: clang
           CXX: clang++
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+        # Examples are enabled so the gtk4_* demos compile-check on the
+        # canonical platform; tools are enabled so mpapp / mpapp-xc tests
+        # run inside ctest.
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
         run: cmake --build build --parallel
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --output-on-failure --parallel
 
-  linux-cross:
-    name: linux-cross
-    runs-on: ubuntu-latest
+  windows-native:
+    name: windows-native
+    runs-on: windows-latest
+    timeout-minutes: 30
     steps:
-      - name: Checkout
+      - name: Checkout (no submodules)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+          fetch-depth: 1
 
-      - name: Cache Zig toolchain
-        id: zig-cache
-        uses: actions/cache@v4
+      - name: Setup sccache
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: /opt/zig
-          key: zig-${{ env.ZIG_VERSION }}-linux
+          variant: sccache
+          key: windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt', 'cmake/**') }}
+          max-size: 300M
 
-      - name: Install Zig (pinned)
-        if: steps.zig-cache.outputs.cache-hit != 'true'
+      - name: Configure
+        # Examples are skipped on Windows CI for now: gtk4_* demos won't
+        # build (no GTK4), and the windows_* WinUI 3 demos need a
+        # WindowsAppSDK install step that is not yet automated here.
+        # Re-enable once WindowsAppSDK provisioning lands.
+        shell: pwsh
         run: |
-          curl -fsSL "https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz" -o zig.tar.xz
-          sudo mkdir -p /opt/zig
-          sudo tar -xJf zig.tar.xz -C /opt/zig --strip-components=1
-          rm zig.tar.xz
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} `
+            -DMPAPP_BUILD_EXAMPLES=OFF
 
-      - name: Add Zig to PATH
-        run: echo "/opt/zig" >> "$GITHUB_PATH"
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --parallel
 
-      - name: Cache build (windows-x64 cross)
-        uses: actions/cache@v4
-        with:
-          path: build-windows-x64
-          key: build-linux-cross-windows-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+      - name: Test
+        shell: pwsh
+        run: ctest --test-dir build -C ${{ env.CMAKE_BUILD_TYPE }} --output-on-failure --parallel
 
-      - name: Configure windows-x64 (Zig cross)
-        # NOTE: cmake/toolchains/windows-x64.cmake placeholder — pending T-0009.
-        run: cmake -S . -B build-windows-x64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/windows-x64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-        continue-on-error: true
-
-      - name: Build windows-x64
-        run: cmake --build build-windows-x64 --parallel
-        continue-on-error: true
-
-      - name: Cache build (android-arm64 cross)
-        uses: actions/cache@v4
-        with:
-          path: build-android-arm64
-          key: build-linux-cross-android-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Configure android-arm64 (Zig cross)
-        # NOTE: cmake/toolchains/android-arm64.cmake placeholder — pending T-0009.
-        run: cmake -S . -B build-android-arm64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-        continue-on-error: true
-
-      - name: Build android-arm64
-        run: cmake --build build-android-arm64 --parallel
-        continue-on-error: true
-
+  # Self-hosted Android emulator run. Non-blocking + only for in-repo PRs
+  # (fork PRs would expose the self-hosted machine — security boundary
+  # per vault/50_Tasks/.../runner-setup.md).
   android-emulator:
-    name: android-emulator
+    name: android-emulator (self-hosted)
     runs-on: [self-hosted, mpapp-windows-self]
-    # Only run for in-repo PRs, never for fork PRs (security boundary per runner-setup.md).
     if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
     continue-on-error: true
+    timeout-minutes: 30
     steps:
-      - name: Checkout
+      - name: Checkout (no submodules)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+          fetch-depth: 1
 
-      - name: Configure android-arm64
-        # NOTE: toolchain file pending T-0009.
+      - name: Build android-arm64 (deferred — toolchain pending T-0009)
         shell: pwsh
-        run: cmake -S . -B build-android -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-
-      - name: Build android-arm64
-        shell: pwsh
-        run: cmake --build build-android --parallel
+        run: |
+          if (Test-Path cmake/toolchains/android-arm64.cmake) {
+            cmake -S . -B build-android `
+              -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake `
+              -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+            cmake --build build-android --parallel
+          } else {
+            Write-Host "::notice::Android cross toolchain file missing (T-0009 deferred); skipping build."
+          }
 
       - name: Run Android emulator smoke tests
         shell: pwsh
-        run: |
-          Write-Host "Android emulator harness pending T-0008 / T-0009"
+        run: Write-Host "::notice::Android emulator harness pending T-0008 / T-0009"

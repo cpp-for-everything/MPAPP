@@ -1,216 +1,144 @@
 name: Release
 
+# Per CLAUDE rule 8 + [[vault/10_Architecture/CI Strategy]]:
+#   - Tagged releases run the full validation set, including the macOS
+#     cloud runner (no self-hosted Mac available yet — see M-07).
+#   - The cross-compile jobs (linux→windows, windows→linux/android) stay
+#     out until cmake/toolchains/*.cmake actually exists. Reinstate them
+#     once T-0009 lands the toolchain files; until then they only burn
+#     minutes via `continue-on-error: true` no-ops.
+#   - Same submodule discipline as pr.yml: don't clone the multi-GB
+#     references/maui-* research mirrors that break Windows long-path
+#     checkouts and are not on any build path.
+
 on:
   push:
     tags: ['v*']
 
-# Per CLAUDE rule 8 and vault/10_Architecture/CI Strategy.md:
-# - Tagged releases run the full matrix, including macos-latest.
-# - Once a self-hosted macOS runner is online, macOS will also run per-PR (see M-07-macOS-Real).
-# - Until then, macos-native runs only here to conserve cloud minutes.
+# A tag-driven release should never have two concurrent runs of the same
+# tag — but a force-tag move would. Cancel the older one.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
-  ZIG_VERSION: "0.13.0"
   CMAKE_BUILD_TYPE: Release
 
 jobs:
-  windows-native:
-    name: windows-native
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup MSBuild (MSVC)
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Setup sccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          variant: sccache
-          key: release-windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Cache build directory
-        uses: actions/cache@v4
-        with:
-          path: build
-          key: build-release-windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Configure
-        run: cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-
-      - name: Build
-        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --parallel
-
-      - name: Test
-        run: ctest --test-dir build -C ${{ env.CMAKE_BUILD_TYPE }} --output-on-failure
-
-  windows-cross:
-    name: windows-cross
-    runs-on: windows-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Cache Zig toolchain
-        id: zig-cache
-        uses: actions/cache@v4
-        with:
-          path: C:\zig
-          key: zig-${{ env.ZIG_VERSION }}-windows
-
-      - name: Install Zig (pinned)
-        if: steps.zig-cache.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          $url = "https://ziglang.org/download/$env:ZIG_VERSION/zig-windows-x86_64-$env:ZIG_VERSION.zip"
-          Invoke-WebRequest -Uri $url -OutFile zig.zip
-          Expand-Archive zig.zip -DestinationPath C:\zig-tmp
-          Move-Item "C:\zig-tmp\zig-windows-x86_64-$env:ZIG_VERSION" C:\zig
-          Remove-Item zig.zip
-
-      - name: Add Zig to PATH
-        shell: pwsh
-        run: Add-Content $env:GITHUB_PATH "C:\zig"
-
-      - name: Configure linux-x64 (Zig cross)
-        run: cmake -S . -B build-linux-x64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/linux-x64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-        continue-on-error: true
-
-      - name: Build linux-x64
-        run: cmake --build build-linux-x64 --parallel
-        continue-on-error: true
-
-      - name: Configure android-arm64 (Zig cross)
-        run: cmake -S . -B build-android-arm64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-        continue-on-error: true
-
-      - name: Build android-arm64
-        run: cmake --build build-android-arm64 --parallel
-        continue-on-error: true
-
   linux-native:
     name: linux-native
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: Checkout
+      - name: Checkout (no submodules)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+          fetch-depth: 1
 
-      - name: Install Clang + build tools
+      - name: Install C++ + GTK4 + Cairo dev packages
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang lld ninja-build cmake
+          sudo apt-get install -y --no-install-recommends \
+            clang lld ninja-build cmake pkg-config \
+            libgtk-4-dev libcairo2-dev libwebkit2gtk-4.1-dev
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: release-linux-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Cache build directory
-        uses: actions/cache@v4
-        with:
-          path: build
-          key: build-release-linux-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+          key: release-linux-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt', 'cmake/**') }}
+          max-size: 200M
 
       - name: Configure
         env:
           CC: clang
           CXX: clang++
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} \
+            -DCMAKE_C_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
         run: cmake --build build --parallel
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --test-dir build --output-on-failure --parallel
 
-  linux-cross:
-    name: linux-cross
-    runs-on: ubuntu-latest
+  windows-native:
+    name: windows-native
+    runs-on: windows-latest
+    timeout-minutes: 35
     steps:
-      - name: Checkout
+      - name: Checkout (no submodules)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+          fetch-depth: 1
 
-      - name: Cache Zig toolchain
-        id: zig-cache
-        uses: actions/cache@v4
+      - name: Setup sccache
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: /opt/zig
-          key: zig-${{ env.ZIG_VERSION }}-linux
+          variant: sccache
+          key: release-windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt', 'cmake/**') }}
+          max-size: 300M
 
-      - name: Install Zig (pinned)
-        if: steps.zig-cache.outputs.cache-hit != 'true'
+      - name: Configure
+        shell: pwsh
         run: |
-          curl -fsSL "https://ziglang.org/download/${ZIG_VERSION}/zig-linux-x86_64-${ZIG_VERSION}.tar.xz" -o zig.tar.xz
-          sudo mkdir -p /opt/zig
-          sudo tar -xJf zig.tar.xz -C /opt/zig --strip-components=1
-          rm zig.tar.xz
+          cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} `
+            -DMPAPP_BUILD_EXAMPLES=OFF
 
-      - name: Add Zig to PATH
-        run: echo "/opt/zig" >> "$GITHUB_PATH"
+      - name: Build
+        shell: pwsh
+        run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} --parallel
 
-      - name: Configure windows-x64 (Zig cross)
-        run: cmake -S . -B build-windows-x64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/windows-x64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-        continue-on-error: true
-
-      - name: Build windows-x64
-        run: cmake --build build-windows-x64 --parallel
-        continue-on-error: true
-
-      - name: Configure android-arm64 (Zig cross)
-        run: cmake -S . -B build-android-arm64 -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
-        continue-on-error: true
-
-      - name: Build android-arm64
-        run: cmake --build build-android-arm64 --parallel
-        continue-on-error: true
+      - name: Test
+        shell: pwsh
+        run: ctest --test-dir build -C ${{ env.CMAKE_BUILD_TYPE }} --output-on-failure --parallel
 
   macos-native:
     name: macos-native
     runs-on: macos-latest
+    timeout-minutes: 35
     steps:
-      - name: Checkout
+      - name: Checkout (no submodules)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          submodules: false
+          fetch-depth: 1
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: release-macos-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
-
-      - name: Cache build directory (macos-arm64)
-        uses: actions/cache@v4
-        with:
-          path: build-macos-arm64
-          key: build-release-macos-arm64-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+          key: release-macos-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt', 'cmake/**') }}
+          max-size: 200M
 
       - name: Configure macos-arm64
-        # Uses Xcode-bundled Clang; no Zig needed for native macOS builds.
-        run: cmake -S . -B build-macos-arm64 -G Xcode -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+        # Xcode Clang; native macOS doesn't need Zig. Examples disabled
+        # until macOS handler set is complete (M-07).
+        run: |
+          cmake -S . -B build-macos-arm64 -G Xcode \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} \
+            -DMPAPP_BUILD_EXAMPLES=OFF
 
       - name: Build macos-arm64
         run: cmake --build build-macos-arm64 --config ${{ env.CMAKE_BUILD_TYPE }} --parallel
 
       - name: Test macos-arm64
-        run: ctest --test-dir build-macos-arm64 -C ${{ env.CMAKE_BUILD_TYPE }} --output-on-failure
-
-      - name: Cache build directory (ios-arm64 Simulator)
-        uses: actions/cache@v4
-        with:
-          path: build-ios-arm64
-          key: build-release-ios-arm64-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt') }}
+        run: ctest --test-dir build-macos-arm64 -C ${{ env.CMAKE_BUILD_TYPE }} --output-on-failure --parallel
 
       - name: Configure ios-arm64 (Simulator)
-        run: cmake -S . -B build-ios-arm64 -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator -DCMAKE_OSX_ARCHITECTURES=arm64 -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+        run: |
+          cmake -S . -B build-ios-arm64 -G Xcode \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_OSX_SYSROOT=iphonesimulator \
+            -DCMAKE_OSX_ARCHITECTURES=arm64 \
+            -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} \
+            -DMPAPP_BUILD_EXAMPLES=OFF \
+            -DMPAPP_BUILD_TOOLS=OFF
 
       - name: Build ios-arm64 (Simulator)
         run: cmake --build build-ios-arm64 --config ${{ env.CMAKE_BUILD_TYPE }} --parallel
