@@ -11,6 +11,15 @@ MPAPP owns its async executor. It is a **coroutine-based thread pool integrated 
 
 This is more ambitious than MAUI's `MainThread.InvokeOnMainThreadAsync` (which delegates to the platform's main thread queue). MPAPP integrates async I/O directly with the platform's most efficient primitive.
 
+> [!info] Status — real main-thread dispatchers landed (`d5db702`)
+> The **UI-thread dispatcher** half is real on Win + Linux + Android (macOS/iOS blind). `mpapp::dispatcher` gained a virtual `post_after`, and `main_dispatcher()` now returns whatever is installed via `install_main_dispatcher(dispatcher*)`, defaulting to the deterministic `test_dispatcher` (so tests keep virtual time). Each platform's application handler installs its real dispatcher at startup (on the UI thread):
+> - **Linux** — `glib_dispatcher` (`g_idle_add_full` / `g_timeout_add_full` on the GLib main loop). `src/handlers/linux/glib_dispatcher.cpp`. Runtime-verified headless.
+> - **Windows** — `win_dispatcher` (`DispatcherQueue.TryEnqueue` / one-shot `DispatcherQueueTimer`). `src/handlers/windows/dispatcher_queue.cpp`.
+> - **Android** — `looper_dispatcher` (`Handler` on the main `Looper`: `post` / `postDelayed`) + the `io.mpapp.MppDispatchRunnable` shim + `nativeRun` JNI trampoline. `src/handlers/android/looper_dispatcher.cpp`.
+> - **macOS / iOS** — GCD main queue (`dispatch_async` / `dispatch_after`), **blind** (compiled+run on a Mac: PENDING).
+>
+> The real dispatchers live in the per-platform **handler libs** (which link the native toolkit), so `mpapp-core` stays platform-neutral (T-0032). The background **thread pool** + native **async I/O** primitives below (IOCP / io_uring / kqueue / ALooper-epoll) remain the aspirational next layer — `async_sleep` / `ui_task` continuations / animation frame ticks already run on the real main loop through these dispatchers.
+
 ## Per-platform event-loop primitive
 
 | Platform | Native primitive | Implementation file | Notes |
