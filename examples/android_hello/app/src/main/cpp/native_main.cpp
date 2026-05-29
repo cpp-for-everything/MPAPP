@@ -61,10 +61,18 @@
 #include <mpapp/handlers/text_cell_handler.hpp>
 #include <mpapp/handlers/window_handler.hpp>
 
+#include <optional>
+
+#include <mpapp/binding/binding.hpp>   // RFC-0007 — on-device data binding demo
+
 namespace {
 
 struct view_model {
-    mpapp::Observable<int> count{0};
+    mpapp::Observable<int>         count{0};
+    // RFC-0007: the label caption lives on the view-model and is bound
+    // one-way to the label's text, so the on-device label update flows
+    // through mpapp::binding (verified live on the emulator).
+    mpapp::Observable<std::string> caption{"Count: 0 — hello, world"};
 };
 
 class spike_app : public mpapp::application {
@@ -140,6 +148,12 @@ public:
         shape_.set_sv_handler(shape_handler_);
 
         lbl_handler_.map_text(lbl_);
+        // Bind the view-model caption -> the label's text (one-way). From
+        // here the label is driven entirely through the RFC-0007 binding
+        // engine: render_label() sets vm_.caption, the binding pushes it
+        // into lbl_.text, and the android label handler updates the
+        // native TextView. Proven live on the emulator.
+        caption_binding_.emplace(vm_.caption, lbl_.text, mpapp::binding_mode::one_way);
         name_handler_.map_text(name_);
         name_handler_.map_placeholder(name_);
         shout_handler_.map_is_on(shout_);
@@ -206,7 +220,9 @@ private:
             if (i > 0) repeated += " · ";
             repeated += greet;
         }
-        lbl_.text.set("Count: " + std::to_string(n) + " — " + repeated);
+        // Write the view-model caption; the RFC-0007 binding propagates
+        // it to lbl_.text (and on to the native TextView).
+        vm_.caption.set("Count: " + std::to_string(n) + " — " + repeated);
     }
 
     struct click_cb_t {
@@ -227,6 +243,10 @@ private:
     };
 
     view_model              vm_{};
+    // RFC-0007 one-way binding: vm_.caption -> lbl_.text. optional so it
+    // is constructed in on_launch after lbl_ is wired (binding is
+    // non-movable; emplace builds it in place).
+    std::optional<mpapp::binding<std::string>> caption_binding_{};
     mpapp::button           btn_{};
     mpapp::label            lbl_{};
     mpapp::entry            name_{};

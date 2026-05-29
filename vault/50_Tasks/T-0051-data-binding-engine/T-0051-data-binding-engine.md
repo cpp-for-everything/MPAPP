@@ -45,7 +45,7 @@ Binding is **platform-neutral infrastructure** — no per-platform handler code.
 |---|---|
 | Linux (WSL/GCC) | ✅ `ctest` 403 → **416** green; `[binding]` 13 cases / 39 assertions. |
 | Windows (MSVC, Release, no WindowsAppSDK) | ✅ `[binding]` 13 cases / 39 assertions in `build-winci`. |
-| Android (NDK r26, aarch64 + x86_64) | ✅ headers compile clean (`build/android-binding-smoke-{aarch64,x86_64}.o`; source in `tests/`). |
+| Android (NDK r26, aarch64 + x86_64) | ✅ headers compile clean (`build/android-binding-smoke-{aarch64,x86_64}.o`; source in `tests/`). **+ live emulator e2e**: android_hello's label rerouted through `mpapp::binding<std::string>`; 3 taps drive "Count: 3" on the `coroute_test` AVD — `adb screencap` evidence at `vault/_Assets/screenshots/android-e2e/binding-after-3taps.png`. |
 | Apple | ❌ no host — pure C++23/STL, expected to compile under AppleClang when a host lands. |
 
 ## Acceptance Criteria

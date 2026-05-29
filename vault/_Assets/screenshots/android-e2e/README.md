@@ -40,6 +40,25 @@ the binding runtime on-device (the binding integration test pins the
 binding→pipeline link; this pins the pipeline→native-widget link on a
 real Android runtime).
 
+## New-subsystem e2e: data binding on-device
+
+`binding-initial.png` / `binding-after-3taps.png` — after rerouting
+android_hello's label through the **RFC-0007 binding engine**
+(`view_model::caption` Observable bound one-way to `lbl_.text` via
+`mpapp::binding<std::string>`), three taps on "Click me" drive the
+label to **"Count: 3 — hello, world"**. The update path is now:
+
+```
+tap -> click signal -> vm_.count++ -> render_label()
+     -> vm_.caption.set(...)            (view-model Observable)
+     -> mpapp::binding<std::string>     (RFC-0007, one_way)
+     -> lbl_.text                       (control Observable)
+     -> label_handler<android> map_text -> native TextView
+```
+
+So the data-binding subsystem is verified executing on a real Android
+runtime — not just ctest + NDK compile, but live on the emulator.
+
 ## Reproduce
 
 ```
