@@ -8,7 +8,7 @@
 #include <memory>
 
 #include <mpapp/handlers/mock/scroll_view_handler.hpp>
-#include <mpapp/scroll_view.hpp>
+#include <mpapp/internal/basic_scroll_view.hpp>
 #include <mpapp/view.hpp>
 
 using namespace mpapp;
@@ -22,7 +22,7 @@ class plain_view : public view {};
 TEST_CASE("scroll_view mock handler records initial values on bind",
           "[mock][scroll_view]") {
     internal::basic_scroll_view sv;
-    scroll_view_handler<platform::mock> h;
+    internal::scroll_view_handler<platform::mock> h;
 
     h.map_orientation(sv);
     h.map_horizontal_scroll_bar_visibility(sv);
@@ -38,7 +38,7 @@ TEST_CASE("scroll_view mock handler records initial values on bind",
 TEST_CASE("scroll_view mock handler records single call per property change",
           "[mock][scroll_view]") {
     internal::basic_scroll_view sv;
-    scroll_view_handler<platform::mock> h;
+    internal::scroll_view_handler<platform::mock> h;
 
     h.map_orientation(sv);
     h.clear_calls();
@@ -58,7 +58,7 @@ TEST_CASE("scroll_view mock handler records single call per property change",
 TEST_CASE("scroll_view mock handler tracks content presence",
           "[mock][scroll_view][content]") {
     internal::basic_scroll_view sv;
-    scroll_view_handler<platform::mock> h;
+    internal::scroll_view_handler<platform::mock> h;
 
     h.map_content(sv);
     REQUIRE(h.calls().size() == 1);
@@ -73,7 +73,7 @@ TEST_CASE("scroll_view mock handler tracks content presence",
 TEST_CASE("scroll_view scroll_to command records request fields",
           "[mock][scroll_view][command]") {
     internal::basic_scroll_view sv;
-    scroll_view_handler<platform::mock> h;
+    internal::scroll_view_handler<platform::mock> h;
 
     h.map_scroll_to(sv, scroll_to_request{
         .x = 120.0, .y = 300.0,

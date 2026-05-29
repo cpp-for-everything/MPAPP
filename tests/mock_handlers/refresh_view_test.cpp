@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <mpapp/handlers/mock/refresh_view_handler.hpp>
-#include <mpapp/refresh_view.hpp>
+#include <mpapp/internal/basic_refresh_view.hpp>
 #include <mpapp/view.hpp>
 
 using namespace mpapp;
@@ -20,7 +20,7 @@ class plain_view : public view {};
 TEST_CASE("refresh_view mock records initial values on bind",
           "[mock][refresh_view]") {
     internal::basic_refresh_view rv;
-    refresh_view_handler<platform::mock> h;
+    internal::refresh_view_handler<platform::mock> h;
 
     h.map_content(rv);
     h.map_is_refreshing(rv);
@@ -37,7 +37,7 @@ TEST_CASE("refresh_view mock records initial values on bind",
 TEST_CASE("refresh_view mock records is_refreshing transitions",
           "[mock][refresh_view]") {
     internal::basic_refresh_view rv;
-    refresh_view_handler<platform::mock> h;
+    internal::refresh_view_handler<platform::mock> h;
 
     h.map_is_refreshing(rv);
     h.clear_calls();
@@ -57,7 +57,7 @@ TEST_CASE("refresh_view mock records is_refreshing transitions",
 TEST_CASE("refresh_view mock tracks content presence and color changes",
           "[mock][refresh_view][content]") {
     internal::basic_refresh_view rv;
-    refresh_view_handler<platform::mock> h;
+    internal::refresh_view_handler<platform::mock> h;
 
     h.map_content(rv);
     h.map_refresh_color(rv);

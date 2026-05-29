@@ -7,11 +7,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/switch_handler.hpp>
-#include <mpapp/switch_.hpp>
+#include <mpapp/internal/basic_switch_.hpp>
 
 namespace {
 
-using switch_mock = mpapp::switch_handler<mpapp::platform::mock>;
+using switch_mock = mpapp::internal::switch_handler<mpapp::platform::mock>;
 
 } // namespace
 

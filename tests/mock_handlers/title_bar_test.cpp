@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/title_bar_handler.hpp>
-#include <mpapp/title_bar.hpp>
+#include <mpapp/internal/basic_title_bar.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("title_bar mock records initial values on bind",
           "[mock][title_bar]") {
     internal::basic_title_bar t;
-    title_bar_handler<platform::mock> h;
+    internal::title_bar_handler<platform::mock> h;
 
     h.map_title(t);
     h.map_subtitle(t);
@@ -26,7 +26,7 @@ TEST_CASE("title_bar mock records initial values on bind",
 TEST_CASE("title_bar records title and subtitle changes",
           "[mock][title_bar]") {
     internal::basic_title_bar t;
-    title_bar_handler<platform::mock> h;
+    internal::title_bar_handler<platform::mock> h;
 
     h.map_title(t);
     h.map_subtitle(t);

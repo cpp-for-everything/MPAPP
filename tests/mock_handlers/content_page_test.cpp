@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/content_page.hpp>
+#include <mpapp/internal/basic_content_page.hpp>
 #include <mpapp/handlers/mock/content_page_handler.hpp>
 #include <mpapp/layout.hpp>
 #include <mpapp/view.hpp>
@@ -23,7 +23,7 @@ class plain_view : public view {};
 TEST_CASE("content_page mock handler records initial property values on bind",
           "[mock][content_page]") {
     internal::basic_content_page p;
-    content_page_handler<platform::mock> h;
+    internal::content_page_handler<platform::mock> h;
 
     h.map_title(p);
     h.map_content(p);
@@ -41,7 +41,7 @@ TEST_CASE("content_page mock handler records initial property values on bind",
 TEST_CASE("content_page mock handler tracks title + content + padding changes",
           "[mock][content_page]") {
     internal::basic_content_page p;
-    content_page_handler<platform::mock> h;
+    internal::content_page_handler<platform::mock> h;
 
     h.map_title(p);
     h.map_content(p);
@@ -65,7 +65,7 @@ TEST_CASE("content_page mock handler tracks title + content + padding changes",
 TEST_CASE("content_page mock handler records single call per property change",
           "[mock][content_page]") {
     internal::basic_content_page p;
-    content_page_handler<platform::mock> h;
+    internal::content_page_handler<platform::mock> h;
 
     h.map_padding(p);
     h.clear_calls();

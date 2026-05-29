@@ -10,7 +10,7 @@
 
 #include <string>
 
-#include "../image.hpp"      // aspect_mode
+#include "basic_image.hpp"      // aspect_mode
 #include "../observable.hpp"
 #include "../platform.hpp"
 #include "../view.hpp"

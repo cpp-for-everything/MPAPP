@@ -6,7 +6,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/button.hpp>
+#include <mpapp/internal/basic_button.hpp>
 #include <mpapp/gestures/pan_gesture_recognizer.hpp>
 #include <mpapp/handlers/mock/view_handler.hpp>
 

@@ -2,7 +2,7 @@
 type: task
 id: T-0032
 title: Provision WindowsAppSDK on the cloud Windows runner so windows-native can rejoin pr.yml
-status: todo
+status: in-progress
 milestone: M-04
 owner: ""
 area: build
@@ -62,9 +62,30 @@ The cloud Windows job was deleted from `pr.yml` in commit `e45d969` to stop burn
 
 The two paths are not mutually exclusive — Path A gives full test coverage; Path B is the right starting point.
 
+## Resolution — Path B landed
+
+Path B is implemented and locally verified. `mpapp-core` + the entire mock/test suite now build with **zero** WindowsAppSDK dependency, and `windows-native` is back in `pr.yml` (examples OFF) as a blocking gate.
+
+Work done:
+- `src/mpapp.cpp` → trivial anchor TU (dropped the umbrella include).
+- Umbrella canaries (`smoke_test.cpp`, `template_type_spike/test.cpp`) → platform-neutral surface includes.
+- Mock test suite swept wrapper→surface includes + `internal::`-qualified handlers (`tools/dev/sweep-mock-test-includes.py`, `sweep-mock-handler-qualify.py`).
+- 9 `internal/basic_*.hpp` surfaces + `font_image_source.hpp` repointed from sibling wrappers to sibling surfaces (`tools/dev/sweep-surface-includes.py`).
+- Fixed a latent Windows-only test-isolation bug (`bindable_layout` pointer-keyed side-table) + a non-ASCII test name that broke ctest name-matching on Windows.
+
+Local proof (MSVC, `windows-latest`-equivalent, no WindowsAppSDK):
+
+```
+cmake -S . -B build-winci -G Ninja -DCMAKE_BUILD_TYPE=Release -DMPAPP_BUILD_EXAMPLES=OFF
+cmake --build build-winci
+ctest --test-dir build-winci   ->   100% tests passed, 398/398
+```
+
+Remaining to fully close: confirm `windows-native` is green for 3 consecutive `main` merges in actual cloud CI (observation-only). Path A (provision WindowsAppSDK in the cloud to also build the WinUI 3 *examples*) stays an optional future enhancement, not a blocker.
+
 ## Acceptance Criteria
 
-- [ ] `mpapp-core` builds on `windows-latest` without WindowsAppSDK installed (Path B exit gate).
+- [x] `mpapp-core` builds on `windows-latest` without WindowsAppSDK installed (Path B exit gate). **Done — local MSVC build green, examples OFF.**
 - [ ] `windows-native` job in `pr.yml` is green for at least 3 consecutive merges to `main`.
 - [ ] CI Strategy doc updated: the "Windows on the cloud runner is deferred" subsection moves from §Active to §History (or is deleted).
 - [ ] If Path A is also implemented: the NuGet cache lands a hit on the second run; cold restore time measured + recorded under `logs/`.

@@ -13,7 +13,7 @@
 
 #include <string>
 
-#include "../box_view.hpp"   // reuses `mpapp::color` for the tint
+#include "../internal/basic_box_view.hpp"   // reuses `mpapp::color` for the tint (surface, not the wrapper — keeps image sources SDK-free)
 #include "../internal/basic_image_source.hpp"
 #include "../observable.hpp"
 

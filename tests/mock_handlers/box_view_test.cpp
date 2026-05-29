@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/box_view.hpp>
+#include <mpapp/internal/basic_box_view.hpp>
 #include <mpapp/handlers/mock/box_view_handler.hpp>
 
 using namespace mpapp;
@@ -13,7 +13,7 @@ using namespace mpapp;
 TEST_CASE("box_view mock handler records initial values on bind",
           "[mock][box_view]") {
     internal::basic_box_view b;
-    box_view_handler<platform::mock> h;
+    internal::box_view_handler<platform::mock> h;
 
     h.map_fill(b);
     h.map_corners(b);
@@ -28,7 +28,7 @@ TEST_CASE("box_view mock handler records initial values on bind",
 TEST_CASE("box_view mock handler records single call per fill change",
           "[mock][box_view]") {
     internal::basic_box_view b;
-    box_view_handler<platform::mock> h;
+    internal::box_view_handler<platform::mock> h;
 
     h.map_fill(b);
     h.clear_calls();
@@ -48,7 +48,7 @@ TEST_CASE("box_view mock handler records single call per fill change",
 TEST_CASE("box_view mock handler records asymmetric corners",
           "[mock][box_view][corners]") {
     internal::basic_box_view b;
-    box_view_handler<platform::mock> h;
+    internal::box_view_handler<platform::mock> h;
 
     h.map_corners(b);
     h.clear_calls();
@@ -61,7 +61,7 @@ TEST_CASE("box_view mock handler records asymmetric corners",
 TEST_CASE("box_view sequence: fill then corners then fill back",
           "[mock][box_view][sequence]") {
     internal::basic_box_view b;
-    box_view_handler<platform::mock> h;
+    internal::box_view_handler<platform::mock> h;
 
     h.map_fill(b);
     h.map_corners(b);

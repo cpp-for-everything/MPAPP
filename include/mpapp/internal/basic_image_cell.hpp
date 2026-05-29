@@ -12,7 +12,7 @@
 
 #include "../observable.hpp"
 #include "../platform.hpp"
-#include "../text_cell.hpp"
+#include "basic_text_cell.hpp"
 
 namespace mpapp::internal {
 

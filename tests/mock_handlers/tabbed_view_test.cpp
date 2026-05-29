@@ -7,14 +7,14 @@
 #include <vector>
 
 #include <mpapp/handlers/mock/tabbed_view_handler.hpp>
-#include <mpapp/tabbed_view.hpp>
+#include <mpapp/internal/basic_tabbed_view.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("tabbed_view mock records initial values on bind",
           "[mock][tabbed_view]") {
     internal::basic_tabbed_view tv;
-    tabbed_view_handler<platform::mock> h;
+    internal::tabbed_view_handler<platform::mock> h;
 
     h.map_tab_titles(tv);
     h.map_selected_index(tv);
@@ -29,7 +29,7 @@ TEST_CASE("tabbed_view mock records initial values on bind",
 TEST_CASE("tabbed_view records tab_titles.count when collection changes",
           "[mock][tabbed_view]") {
     internal::basic_tabbed_view tv;
-    tabbed_view_handler<platform::mock> h;
+    internal::tabbed_view_handler<platform::mock> h;
 
     h.map_tab_titles(tv);
     h.clear_calls();
@@ -48,7 +48,7 @@ TEST_CASE("tabbed_view records tab_titles.count when collection changes",
 TEST_CASE("tabbed_view records selection changes",
           "[mock][tabbed_view]") {
     internal::basic_tabbed_view tv;
-    tabbed_view_handler<platform::mock> h;
+    internal::tabbed_view_handler<platform::mock> h;
 
     h.map_selected_index(tv);
     h.clear_calls();

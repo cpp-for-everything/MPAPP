@@ -10,16 +10,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/button.hpp>
+#include <mpapp/internal/basic_button.hpp>
 #include <mpapp/handlers/mock/window_handler.hpp>
-#include <mpapp/window.hpp>
+#include <mpapp/internal/basic_window.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("window mock handler records initial property values on bind",
           "[mock][window]") {
     internal::basic_window w;
-    window_handler<platform::mock> h;
+    internal::window_handler<platform::mock> h;
 
     h.map_title(w);
     h.map_content(w);
@@ -43,7 +43,7 @@ TEST_CASE("window mock handler records initial property values on bind",
 TEST_CASE("window mock handler fires once per real title change",
           "[mock][window]") {
     internal::basic_window w;
-    window_handler<platform::mock> h;
+    internal::window_handler<platform::mock> h;
 
     h.map_title(w);
     h.clear_calls();
@@ -60,7 +60,7 @@ TEST_CASE("window mock handler records content.present transition when assigned 
           "[mock][window]") {
     internal::basic_button some_button{};
     internal::basic_window w;
-    window_handler<platform::mock> h;
+    internal::window_handler<platform::mock> h;
 
     h.map_content(w);
     h.clear_calls();
@@ -77,7 +77,7 @@ TEST_CASE("window mock handler records content.present transition when assigned 
 TEST_CASE("window::show toggles is_visible and the handler records it",
           "[mock][window]") {
     internal::basic_window w;
-    window_handler<platform::mock> h;
+    internal::window_handler<platform::mock> h;
 
     h.map_is_visible(w);
     h.clear_calls();
@@ -90,7 +90,7 @@ TEST_CASE("window::show toggles is_visible and the handler records it",
 TEST_CASE("window::close fires closed signal and toggles is_visible",
           "[mock][window]") {
     internal::basic_window w;
-    window_handler<platform::mock> h;
+    internal::window_handler<platform::mock> h;
     h.map_is_visible(w);
 
     int closed_count = 0;
@@ -112,7 +112,7 @@ TEST_CASE("window::close fires closed signal and toggles is_visible",
 TEST_CASE("window activated simulator drives user-side subscribers",
           "[mock][window]") {
     internal::basic_window w;
-    window_handler<platform::mock> h;
+    internal::window_handler<platform::mock> h;
 
     int activated_count = 0;
     signal_slot<> activated_slot;

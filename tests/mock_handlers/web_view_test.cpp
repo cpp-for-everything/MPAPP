@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/web_view_handler.hpp>
-#include <mpapp/web_view.hpp>
+#include <mpapp/internal/basic_web_view.hpp>
 
 using namespace mpapp;
 
@@ -48,7 +48,7 @@ TEST_CASE("load() updates url + emits navigating/navigated",
 TEST_CASE("mock handler records url + is_loading",
           "[mock][web_view]") {
     internal::basic_web_view wv;
-    web_view_handler<platform::mock> h;
+    internal::web_view_handler<platform::mock> h;
     h.map_url(wv);
     h.map_is_loading(wv);
     h.clear_calls();

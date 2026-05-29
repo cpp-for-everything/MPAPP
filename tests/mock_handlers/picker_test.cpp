@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/picker_handler.hpp>
-#include <mpapp/picker.hpp>
+#include <mpapp/internal/basic_picker.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("picker mock records initial values on bind",
           "[mock][picker]") {
     internal::basic_picker p;
-    picker_handler<platform::mock> h;
+    internal::picker_handler<platform::mock> h;
 
     h.map_items(p);
     h.map_selected_index(p);
@@ -28,7 +28,7 @@ TEST_CASE("picker mock records initial values on bind",
 TEST_CASE("picker records items.count when collection changes",
           "[mock][picker]") {
     internal::basic_picker p;
-    picker_handler<platform::mock> h;
+    internal::picker_handler<platform::mock> h;
 
     h.map_items(p);
     h.clear_calls();
@@ -42,7 +42,7 @@ TEST_CASE("picker records items.count when collection changes",
 TEST_CASE("picker records selection changes",
           "[mock][picker]") {
     internal::basic_picker p;
-    picker_handler<platform::mock> h;
+    internal::picker_handler<platform::mock> h;
 
     h.map_selected_index(p);
     h.clear_calls();

@@ -7,14 +7,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/list_view_handler.hpp>
-#include <mpapp/list_view.hpp>
+#include <mpapp/internal/basic_list_view.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("list_view mock records initial values on bind",
           "[mock][list_view]") {
     internal::basic_list_view lv;
-    list_view_handler<platform::mock> h;
+    internal::list_view_handler<platform::mock> h;
     h.map_items_source(lv);
     h.map_selected_index(lv);
 
@@ -28,7 +28,7 @@ TEST_CASE("list_view mock records initial values on bind",
 TEST_CASE("list_view records collection + selection changes",
           "[mock][list_view]") {
     internal::basic_list_view lv;
-    list_view_handler<platform::mock> h;
+    internal::list_view_handler<platform::mock> h;
     h.map_items_source(lv);
     h.map_selected_index(lv);
     h.clear_calls();

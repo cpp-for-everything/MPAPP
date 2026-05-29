@@ -6,14 +6,14 @@
 #include <string>
 
 #include <mpapp/handlers/mock/swipe_item_menu_item_handler.hpp>
-#include <mpapp/swipe_item_menu_item.hpp>
+#include <mpapp/internal/basic_swipe_item_menu_item.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("swipe_item_menu_item mock records initial values on bind",
           "[mock][swipe_item_menu_item]") {
     internal::basic_swipe_item_menu_item m;
-    swipe_item_menu_item_handler<platform::mock> h;
+    internal::swipe_item_menu_item_handler<platform::mock> h;
 
     h.map_text(m);
     h.map_icon_uri(m);
@@ -29,7 +29,7 @@ TEST_CASE("swipe_item_menu_item mock records initial values on bind",
 TEST_CASE("swipe_item_menu_item mock records text + icon_uri changes",
           "[mock][swipe_item_menu_item]") {
     internal::basic_swipe_item_menu_item m;
-    swipe_item_menu_item_handler<platform::mock> h;
+    internal::swipe_item_menu_item_handler<platform::mock> h;
 
     h.map_text(m);
     h.map_icon_uri(m);
@@ -51,7 +51,7 @@ TEST_CASE("swipe_item_menu_item mock records text + icon_uri changes",
 TEST_CASE("swipe_item_menu_item mock records invoked signal emissions",
           "[mock][swipe_item_menu_item][invoked]") {
     internal::basic_swipe_item_menu_item m;
-    swipe_item_menu_item_handler<platform::mock> h;
+    internal::swipe_item_menu_item_handler<platform::mock> h;
 
     h.map_invoked(m);
     h.clear_calls();

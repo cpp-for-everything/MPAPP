@@ -6,12 +6,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/check_box.hpp>
+#include <mpapp/internal/basic_check_box.hpp>
 #include <mpapp/handlers/mock/check_box_handler.hpp>
 
 namespace {
 
-using check_box_mock = mpapp::check_box_handler<mpapp::platform::mock>;
+using check_box_mock = mpapp::internal::check_box_handler<mpapp::platform::mock>;
 
 } // namespace
 

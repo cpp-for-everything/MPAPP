@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/progress_bar_handler.hpp>
-#include <mpapp/progress_bar.hpp>
+#include <mpapp/internal/basic_progress_bar.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("progress_bar mock records initial values on bind",
           "[mock][progress_bar]") {
     internal::basic_progress_bar p;
-    progress_bar_handler<platform::mock> h;
+    internal::progress_bar_handler<platform::mock> h;
 
     h.map_progress(p);
     h.map_color(p);
@@ -27,7 +27,7 @@ TEST_CASE("progress_bar mock records initial values on bind",
 TEST_CASE("progress_bar records progress changes",
           "[mock][progress_bar]") {
     internal::basic_progress_bar p;
-    progress_bar_handler<platform::mock> h;
+    internal::progress_bar_handler<platform::mock> h;
 
     h.map_progress(p);
     h.clear_calls();

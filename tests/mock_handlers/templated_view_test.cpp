@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/templated_view_handler.hpp>
-#include <mpapp/templated_view.hpp>
+#include <mpapp/internal/basic_templated_view.hpp>
 #include <mpapp/view.hpp>
 
 using namespace mpapp;
@@ -22,7 +22,7 @@ class plain_view : public view {};
 TEST_CASE("templated_view mock handler records initial property values on bind",
           "[mock][templated_view]") {
     internal::basic_templated_view t;
-    templated_view_handler<platform::mock> h;
+    internal::templated_view_handler<platform::mock> h;
 
     h.map_content(t);
     h.map_template_id(t);
@@ -37,7 +37,7 @@ TEST_CASE("templated_view mock handler records initial property values on bind",
 TEST_CASE("templated_view mock handler tracks content + template_id changes",
           "[mock][templated_view]") {
     internal::basic_templated_view t;
-    templated_view_handler<platform::mock> h;
+    internal::templated_view_handler<platform::mock> h;
 
     h.map_content(t);
     h.map_template_id(t);

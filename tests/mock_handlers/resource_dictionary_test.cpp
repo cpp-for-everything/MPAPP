@@ -138,7 +138,7 @@ TEST_CASE("resource_dictionary composition_changed fires on merged-dict mutation
     });
 }
 
-TEST_CASE("find_in walks view → parent → ... and returns first typed match",
+TEST_CASE("find_in walks view -> parent -> ... and returns first typed match",
           "[mock][resources][static_resource]") {
     // root.resources = { BrandColor }
     // mid is a layout; its resources = { Accent }

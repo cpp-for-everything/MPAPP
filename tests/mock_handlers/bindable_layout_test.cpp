@@ -18,7 +18,18 @@ using namespace mpapp;
 
 namespace {
 
-class test_layout : public layout {};
+// Detaches its bindable_layout attached-property state on destruction.
+// bindable_layout keys its static side-table by host POINTER and does
+// not auto-clear (see bindable_layout.hpp: callers detach from the
+// host dtor). Without this, two stack `test_layout` objects in
+// different TEST_CASEs can reuse the same address (common under MSVC)
+// and the second test reads the first's stale entries — a real
+// test-isolation bug surfaced once the suite started running on
+// Windows. Mirrors the documented real-world contract.
+class test_layout : public layout {
+public:
+    ~test_layout() override { bindable_layout::detach(*this); }
+};
 
 } // namespace
 

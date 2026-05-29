@@ -6,8 +6,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/tabbed_page_handler.hpp>
-#include <mpapp/page.hpp>
-#include <mpapp/tabbed_page.hpp>
+#include <mpapp/internal/basic_page.hpp>
+#include <mpapp/internal/basic_tabbed_page.hpp>
 
 using namespace mpapp;
 
@@ -77,7 +77,7 @@ TEST_CASE("mock handler records lifecycle on tab switch",
     tp.add_tab(&a);
     tp.add_tab(&b);
 
-    tabbed_page_handler<platform::mock> h;
+    internal::tabbed_page_handler<platform::mock> h;
     h.map_lifecycle(tp);
     h.clear_calls();
 

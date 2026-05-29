@@ -13,7 +13,7 @@
 
 #include <memory>
 
-#include "../box_view.hpp"   // for `color`
+#include "basic_box_view.hpp"   // for `color`
 #include "../layout.hpp"     // for `thickness`
 #include "../observable.hpp"
 #include "../platform.hpp"

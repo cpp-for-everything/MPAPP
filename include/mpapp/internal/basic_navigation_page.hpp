@@ -26,7 +26,7 @@
 #include "../detail/page_stack.hpp"
 #include "../executor.hpp"
 #include "../observable.hpp"
-#include "../page.hpp"
+#include "basic_page.hpp"
 #include "../platform.hpp"
 
 namespace mpapp::internal {

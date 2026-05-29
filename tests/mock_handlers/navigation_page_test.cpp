@@ -8,8 +8,8 @@
 
 #include <mpapp/executor.hpp>
 #include <mpapp/handlers/mock/navigation_page_handler.hpp>
-#include <mpapp/navigation_page.hpp>
-#include <mpapp/page.hpp>
+#include <mpapp/internal/basic_navigation_page.hpp>
+#include <mpapp/internal/basic_page.hpp>
 #include <mpapp/test_dispatcher.hpp>
 
 using namespace mpapp;
@@ -92,7 +92,7 @@ TEST_CASE("mock handler records lifecycle signals around push/pop",
           "[mock][navigation_page]") {
     internal::basic_page home, details;
     internal::basic_navigation_page nav(&home);
-    navigation_page_handler<platform::mock> h;
+    internal::navigation_page_handler<platform::mock> h;
 
     h.map_stack(nav);
     h.clear_calls();   // discard the bind-time stack.depth record

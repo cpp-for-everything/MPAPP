@@ -8,9 +8,9 @@
 #include <mpapp/handlers/mock/table_view_handler.hpp>
 #include <mpapp/handlers/mock/text_cell_handler.hpp>
 #include <mpapp/handlers/mock/switch_cell_handler.hpp>
-#include <mpapp/switch_cell.hpp>
-#include <mpapp/table_view.hpp>
-#include <mpapp/text_cell.hpp>
+#include <mpapp/internal/basic_switch_cell.hpp>
+#include <mpapp/internal/basic_table_view.hpp>
+#include <mpapp/internal/basic_text_cell.hpp>
 
 using namespace mpapp;
 
@@ -53,7 +53,7 @@ TEST_CASE("add_row to invalid section is a no-op",
 TEST_CASE("mock handler records sections.count + row_height",
           "[mock][table_view]") {
     internal::basic_table_view tv;
-    table_view_handler<platform::mock> h;
+    internal::table_view_handler<platform::mock> h;
     h.map_sections(tv);
     h.map_row_height(tv);
     h.clear_calls();
@@ -71,7 +71,7 @@ TEST_CASE("mock handler records sections.count + row_height",
 TEST_CASE("typed_sections starts empty + records count via mock handler",
           "[mock][table_view][typed]") {
     internal::basic_table_view tv;
-    table_view_handler<platform::mock> h;
+    internal::table_view_handler<platform::mock> h;
     h.map_typed_sections(tv);
     h.clear_calls();
 

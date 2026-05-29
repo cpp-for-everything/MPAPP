@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/time_picker_handler.hpp>
-#include <mpapp/time_picker.hpp>
+#include <mpapp/internal/basic_time_picker.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("time_picker mock records initial values on bind",
           "[mock][time_picker]") {
     internal::basic_time_picker p;
-    time_picker_handler<platform::mock> h;
+    internal::time_picker_handler<platform::mock> h;
 
     h.map_time(p);
     h.map_format(p);
@@ -24,7 +24,7 @@ TEST_CASE("time_picker mock records initial values on bind",
 TEST_CASE("time_picker records time changes",
           "[mock][time_picker]") {
     internal::basic_time_picker p;
-    time_picker_handler<platform::mock> h;
+    internal::time_picker_handler<platform::mock> h;
 
     h.map_time(p);
     h.clear_calls();

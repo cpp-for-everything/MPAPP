@@ -40,7 +40,7 @@
 #include "../observable.hpp"
 #include "../platform.hpp"
 #include "../signal.hpp"
-#include "../web_view.hpp"
+#include "basic_web_view.hpp"
 
 namespace mpapp::internal {
 

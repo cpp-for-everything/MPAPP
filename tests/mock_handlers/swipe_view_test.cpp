@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <mpapp/handlers/mock/swipe_view_handler.hpp>
-#include <mpapp/swipe_view.hpp>
+#include <mpapp/internal/basic_swipe_view.hpp>
 #include <mpapp/view.hpp>
 
 using namespace mpapp;
@@ -20,7 +20,7 @@ class plain_view : public view {};
 TEST_CASE("swipe_view mock records initial values on bind",
           "[mock][swipe_view]") {
     internal::basic_swipe_view sv;
-    swipe_view_handler<platform::mock> h;
+    internal::swipe_view_handler<platform::mock> h;
 
     h.map_content(sv);
     h.map_left_items(sv);
@@ -39,7 +39,7 @@ TEST_CASE("swipe_view mock tracks content presence changes",
           "[mock][swipe_view]") {
     plain_view child;
     internal::basic_swipe_view sv;
-    swipe_view_handler<platform::mock> h;
+    internal::swipe_view_handler<platform::mock> h;
 
     h.map_content(sv);
     h.clear_calls();
@@ -61,7 +61,7 @@ TEST_CASE("swipe_view mock records left/right item count changes",
           "[mock][swipe_view][items]") {
     plain_view a, b;
     internal::basic_swipe_view sv;
-    swipe_view_handler<platform::mock> h;
+    internal::swipe_view_handler<platform::mock> h;
 
     h.map_left_items(sv);
     h.map_right_items(sv);

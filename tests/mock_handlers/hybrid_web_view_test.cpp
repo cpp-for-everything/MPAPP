@@ -8,7 +8,7 @@
 
 #include <mpapp/handlers/mock/hybrid_web_view_handler.hpp>
 #include <mpapp/hybrid_bridge.hpp>
-#include <mpapp/hybrid_web_view.hpp>
+#include <mpapp/internal/basic_hybrid_web_view.hpp>
 
 using namespace mpapp;
 
@@ -44,7 +44,7 @@ TEST_CASE("hybrid_web_view bridge sends and receives",
 TEST_CASE("mock handler records bridge traffic",
           "[mock][hybrid_web_view]") {
     internal::basic_hybrid_web_view h;
-    hybrid_web_view_handler<platform::mock> hh;
+    internal::hybrid_web_view_handler<platform::mock> hh;
     hh.map_messages(h);
     hh.clear_calls();
 

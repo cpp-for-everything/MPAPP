@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/image_button_handler.hpp>
-#include <mpapp/image_button.hpp>
+#include <mpapp/internal/basic_image_button.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("image_button mock records initial values on bind",
           "[mock][image_button]") {
     internal::basic_image_button b;
-    image_button_handler<platform::mock> h;
+    internal::image_button_handler<platform::mock> h;
 
     h.map_source(b);
     h.map_aspect(b);

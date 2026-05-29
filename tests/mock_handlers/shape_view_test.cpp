@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/shape_view_handler.hpp>
-#include <mpapp/shape_view.hpp>
+#include <mpapp/internal/basic_shape_view.hpp>
 
 using namespace mpapp;
 
@@ -24,7 +24,7 @@ TEST_CASE("shape_view defaults",
 TEST_CASE("shape_view mock records kind + data + fill changes",
           "[mock][shape_view]") {
     internal::basic_shape_view sv;
-    shape_view_handler<platform::mock> h;
+    internal::shape_view_handler<platform::mock> h;
     h.map_kind(sv);
     h.map_data(sv);
     h.map_fill(sv);

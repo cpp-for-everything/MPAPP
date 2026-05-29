@@ -7,14 +7,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/menu_flyout_separator_handler.hpp>
-#include <mpapp/menu_flyout_separator.hpp>
+#include <mpapp/internal/basic_menu_flyout_separator.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("menu_flyout_separator mock handler records the bare bind event",
           "[mock][menu_flyout_separator]") {
     internal::basic_menu_flyout_separator s;
-    menu_flyout_separator_handler<platform::mock> h;
+    internal::menu_flyout_separator_handler<platform::mock> h;
 
     h.map_bind(s);
 

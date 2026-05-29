@@ -7,11 +7,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/label_handler.hpp>
-#include <mpapp/label.hpp>
+#include <mpapp/internal/basic_label.hpp>
 
 namespace {
 
-using label_mock = mpapp::label_handler<mpapp::platform::mock>;
+using label_mock = mpapp::internal::label_handler<mpapp::platform::mock>;
 
 } // namespace
 

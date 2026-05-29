@@ -6,12 +6,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/entry.hpp>
+#include <mpapp/internal/basic_entry.hpp>
 #include <mpapp/handlers/mock/entry_handler.hpp>
 
 namespace {
 
-using entry_mock = mpapp::entry_handler<mpapp::platform::mock>;
+using entry_mock = mpapp::internal::entry_handler<mpapp::platform::mock>;
 
 } // namespace
 

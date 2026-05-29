@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/date_picker.hpp>
+#include <mpapp/internal/basic_date_picker.hpp>
 #include <mpapp/handlers/mock/date_picker_handler.hpp>
 
 using namespace mpapp;
@@ -11,7 +11,7 @@ using namespace mpapp;
 TEST_CASE("date_picker mock records initial values on bind",
           "[mock][date_picker]") {
     internal::basic_date_picker p;
-    date_picker_handler<platform::mock> h;
+    internal::date_picker_handler<platform::mock> h;
 
     h.map_date(p);
     h.map_format(p);
@@ -25,7 +25,7 @@ TEST_CASE("date_picker mock records initial values on bind",
 TEST_CASE("date_picker records date changes",
           "[mock][date_picker]") {
     internal::basic_date_picker p;
-    date_picker_handler<platform::mock> h;
+    internal::date_picker_handler<platform::mock> h;
 
     h.map_date(p);
     h.clear_calls();

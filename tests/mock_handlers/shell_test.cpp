@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/shell_handler.hpp>
-#include <mpapp/shell.hpp>
+#include <mpapp/internal/basic_shell.hpp>
 
 using namespace mpapp;
 
@@ -99,7 +99,7 @@ TEST_CASE("mock handler records route + tab + flyout changes",
     s.add_tab("home");
     s.add_tab("library");
 
-    shell_handler<platform::mock> h;
+    internal::shell_handler<platform::mock> h;
     h.map_current_route(s);
     h.map_current_tab_index(s);
     h.map_is_flyout_open(s);
@@ -191,7 +191,7 @@ TEST_CASE("can_activate guard applies to typed go_to too",
           "[mock][shell][guard][route]") {
     // The typed go_to<Path, &Table>(args...) delegates to the
     // string-based go_to, so a single guard covers both.
-    struct dummy_page : page {};
+    struct dummy_page : internal::basic_page {};
     static constexpr auto routes = route_table{
         route<"home",        dummy_page>{},
         route<"home/details", dummy_page,

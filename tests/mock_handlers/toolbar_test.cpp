@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/toolbar_handler.hpp>
-#include <mpapp/toolbar.hpp>
+#include <mpapp/internal/basic_toolbar.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("toolbar mock records initial values on bind",
           "[mock][toolbar]") {
     internal::basic_toolbar t;
-    toolbar_handler<platform::mock> h;
+    internal::toolbar_handler<platform::mock> h;
 
     h.map_items(t);
     h.map_title(t);
@@ -26,7 +26,7 @@ TEST_CASE("toolbar mock records initial values on bind",
 TEST_CASE("toolbar records items.count when collection changes",
           "[mock][toolbar]") {
     internal::basic_toolbar t;
-    toolbar_handler<platform::mock> h;
+    internal::toolbar_handler<platform::mock> h;
 
     h.map_items(t);
     h.clear_calls();
@@ -56,7 +56,7 @@ TEST_CASE("toolbar records items.count when collection changes",
 TEST_CASE("toolbar records title changes",
           "[mock][toolbar]") {
     internal::basic_toolbar t;
-    toolbar_handler<platform::mock> h;
+    internal::toolbar_handler<platform::mock> h;
 
     h.map_title(t);
     h.clear_calls();

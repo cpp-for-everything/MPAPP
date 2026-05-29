@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/search_bar_handler.hpp>
-#include <mpapp/search_bar.hpp>
+#include <mpapp/internal/basic_search_bar.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("search_bar mock records initial values on bind",
           "[mock][search_bar]") {
     internal::basic_search_bar s;
-    search_bar_handler<platform::mock> h;
+    internal::search_bar_handler<platform::mock> h;
 
     h.map_text(s);
     h.map_placeholder(s);
@@ -25,7 +25,7 @@ TEST_CASE("search_bar mock records initial values on bind",
 TEST_CASE("search_bar records text changes",
           "[mock][search_bar]") {
     internal::basic_search_bar s;
-    search_bar_handler<platform::mock> h;
+    internal::search_bar_handler<platform::mock> h;
 
     h.map_text(s);
     h.clear_calls();

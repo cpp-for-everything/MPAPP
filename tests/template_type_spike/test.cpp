@@ -14,7 +14,17 @@
 #include <type_traits>
 #include <utility>
 
-#include <mpapp/mpapp.hpp>
+// This spike exercises only the platform-neutral template-wrapper
+// primitives — it never instantiates a wrapper component, so it includes
+// the specific primitive headers rather than the app umbrella
+// <mpapp/mpapp.hpp>. The umbrella drags in every wrapper, and each
+// wrapper embeds a <platform::current> handler (WinUI/GTK4/…) that this
+// pure-surface test must not depend on (T-0032 Path B — keep core-side
+// test TUs free of the platform SDK).
+#include <mpapp/command.hpp>
+#include <mpapp/computed.hpp>
+#include <mpapp/observable.hpp>
+#include <mpapp/signal.hpp>
 
 // --------------------------------------------------------------------------
 // View model used across multiple test cases. Mirrors the example in

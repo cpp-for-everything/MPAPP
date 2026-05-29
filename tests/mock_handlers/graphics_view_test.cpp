@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/detail/graphics/canvas.hpp>
-#include <mpapp/graphics_view.hpp>
+#include <mpapp/internal/basic_graphics_view.hpp>
 #include <mpapp/handlers/mock/graphics_view_handler.hpp>
 
 using namespace mpapp;
@@ -37,7 +37,7 @@ TEST_CASE("invalidate() bumps draw_count and emits draw_requested",
 TEST_CASE("mock handler records draw_count + size",
           "[mock][graphics_view]") {
     internal::basic_graphics_view gv;
-    graphics_view_handler<platform::mock> h;
+    internal::graphics_view_handler<platform::mock> h;
     h.map_draw_count(gv);
     h.map_size(gv);
     h.clear_calls();
@@ -63,7 +63,7 @@ TEST_CASE("drawable defaults to an empty std::function",
 TEST_CASE("mock handler records drawable install + clear",
           "[mock][graphics_view][drawable]") {
     internal::basic_graphics_view gv;
-    graphics_view_handler<platform::mock> h;
+    internal::graphics_view_handler<platform::mock> h;
     h.map_drawable(gv);
     CHECK(h.last_drawable_set == false);
     h.clear_calls();
@@ -76,7 +76,7 @@ TEST_CASE("mock handler records drawable install + clear",
     h.clear_calls();
 
     // Clear it — should record back to 0.
-    gv.drawable = graphics_view::draw_callback_t{};
+    gv.drawable = internal::basic_graphics_view::draw_callback_t{};
     CHECK(h.last_drawable_set == false);
     REQUIRE(h.calls_as_strings().size() == 1);
     CHECK(h.calls_as_strings()[0] == "drawable=0");

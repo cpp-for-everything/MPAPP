@@ -90,28 +90,52 @@ jobs:
       - name: Test
         run: ctest --test-dir build --output-on-failure --parallel
 
-  # windows-native deferred from pr.yml — see [[vault/10_Architecture/CI Strategy.md#Windows on the cloud runner is deferred]].
+  # windows-native — reinstated after T-0032 Path B (commit decoupling
+  # `mpapp-core` from the `mpapp.hpp` umbrella). `mpapp-core` + the
+  # entire mock/test suite now build platform-neutral, with zero
+  # WinUI 3 / WindowsAppSDK dependency, so the GitHub-hosted
+  # `windows-latest` runner (VS2022 + C++/WinRT, but NO WindowsAppSDK)
+  # builds + tests them green.
   #
-  # Short version: `mpapp-core` transitively #includes `mpapp.hpp` →
-  # every wrapper → every per-platform handler header. After
-  # [[ADR-0024-wrapper-component-pattern]] the wrapper embeds the
-  # platform handler by VALUE, so building `mpapp-core` on Windows
-  # requires the WinUI 3 / WindowsAppSDK headers (`winrt/Microsoft.UI.
-  # Xaml.Controls.h` etc.) to be reachable. The `windows-latest`
-  # runner does not ship WindowsAppSDK and the project's
-  # `cmake/WindowsAppSDK.cmake` helper is only auto-invoked from
-  # example targets (not from `mpapp-core`).
-  #
-  # For per-PR validation we rely on:
-  #   - `linux-native` above (canonical, ~1 min cold + cache → fast feedback)
-  #   - local Windows builds (the project lead develops on Windows)
-  #   - the self-hosted `mpapp-windows-self` runner (WindowsAppSDK
-  #     already provisioned there — slot reserved for a future
-  #     `windows-self` job in the android-emulator family)
-  #
-  # release.yml still runs windows-native on tagged releases (and is
-  # expected to fail today until WindowsAppSDK provisioning lands —
-  # tracked in CI Strategy.md).
+  # Examples are OFF: the WinUI 3 example apps DO need WindowsAppSDK
+  # (provisioned via cmake/WindowsAppSDK.cmake on a local/self-hosted
+  # Windows machine), so they stay out of the cloud per-PR gate. The
+  # full example + real-handler build runs on the self-hosted
+  # `mpapp-windows-self` runner and on tagged releases (release.yml).
+  windows-native:
+    name: windows-native
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout (no submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Set up MSVC dev environment (cl + ninja on PATH)
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup sccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          variant: sccache
+          key: windows-native-${{ hashFiles('CMakeLists.txt', 'tests/CMakeLists.txt', 'cmake/**') }}
+          max-size: 200M
+
+      - name: Configure (examples OFF — core is platform-neutral; WinUI examples need WindowsAppSDK)
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
+          -DMPAPP_BUILD_EXAMPLES=OFF
+          -DCMAKE_C_COMPILER_LAUNCHER=sccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --parallel
 
   # Self-hosted Android emulator run. Non-blocking + only for in-repo PRs
   # (fork PRs would expose the self-hosted machine — security boundary

@@ -6,8 +6,8 @@
 #include <vector>
 
 #include <mpapp/handlers/mock/menu_bar_handler.hpp>
-#include <mpapp/menu_bar.hpp>
-#include <mpapp/menu_bar_item.hpp>
+#include <mpapp/internal/basic_menu_bar.hpp>
+#include <mpapp/internal/basic_menu_bar_item.hpp>
 #include <mpapp/view.hpp>
 
 using namespace mpapp;
@@ -15,7 +15,7 @@ using namespace mpapp;
 TEST_CASE("menu_bar mock records initial items count on bind",
           "[mock][menu_bar]") {
     internal::basic_menu_bar mb;
-    menu_bar_handler<platform::mock> h;
+    internal::menu_bar_handler<platform::mock> h;
 
     h.map_items(mb);
 
@@ -27,7 +27,7 @@ TEST_CASE("menu_bar mock records initial items count on bind",
 TEST_CASE("menu_bar records items.count when collection changes",
           "[mock][menu_bar]") {
     internal::basic_menu_bar mb;
-    menu_bar_handler<platform::mock> h;
+    internal::menu_bar_handler<platform::mock> h;
 
     h.map_items(mb);
     h.clear_calls();

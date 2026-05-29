@@ -3,9 +3,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/flyout_page.hpp>
+#include <mpapp/internal/basic_flyout_page.hpp>
 #include <mpapp/handlers/mock/flyout_page_handler.hpp>
-#include <mpapp/page.hpp>
+#include <mpapp/internal/basic_page.hpp>
 
 using namespace mpapp;
 
@@ -60,7 +60,7 @@ TEST_CASE("mock handler records flyout + detail + is_presented",
           "[mock][flyout_page]") {
     internal::basic_page menu, content;
     internal::basic_flyout_page fp;
-    flyout_page_handler<platform::mock> h;
+    internal::flyout_page_handler<platform::mock> h;
 
     h.map_flyout(fp);
     h.map_detail(fp);

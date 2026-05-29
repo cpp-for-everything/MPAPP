@@ -7,11 +7,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/radio_button_handler.hpp>
-#include <mpapp/radio_button.hpp>
+#include <mpapp/internal/basic_radio_button.hpp>
 
 namespace {
 
-using radio_button_mock = mpapp::radio_button_handler<mpapp::platform::mock>;
+using radio_button_mock = mpapp::internal::radio_button_handler<mpapp::platform::mock>;
 
 } // namespace
 

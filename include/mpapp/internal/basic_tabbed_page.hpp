@@ -20,7 +20,7 @@
 #include <vector>
 
 #include "../observable.hpp"
-#include "../page.hpp"
+#include "basic_page.hpp"
 #include "../platform.hpp"
 #include "../signal.hpp"
 

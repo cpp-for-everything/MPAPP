@@ -4,7 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/swipe_item_view_handler.hpp>
-#include <mpapp/swipe_item_view.hpp>
+#include <mpapp/internal/basic_swipe_item_view.hpp>
 #include <mpapp/view.hpp>
 
 using namespace mpapp;
@@ -18,7 +18,7 @@ class plain_view : public view {};
 TEST_CASE("swipe_item_view mock records initial values on bind",
           "[mock][swipe_item_view]") {
     internal::basic_swipe_item_view iv;
-    swipe_item_view_handler<platform::mock> h;
+    internal::swipe_item_view_handler<platform::mock> h;
 
     h.map_content(iv);
 
@@ -31,7 +31,7 @@ TEST_CASE("swipe_item_view mock tracks content presence transitions",
           "[mock][swipe_item_view]") {
     plain_view child;
     internal::basic_swipe_item_view iv;
-    swipe_item_view_handler<platform::mock> h;
+    internal::swipe_item_view_handler<platform::mock> h;
 
     h.map_content(iv);
     h.clear_calls();

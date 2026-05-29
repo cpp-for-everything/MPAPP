@@ -6,16 +6,16 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/button.hpp>
+#include <mpapp/internal/basic_button.hpp>
 #include <mpapp/handlers/mock/page_handler.hpp>
-#include <mpapp/page.hpp>
+#include <mpapp/internal/basic_page.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("page mock handler records initial property values on bind",
           "[mock][page]") {
     internal::basic_page p;
-    page_handler<platform::mock> h;
+    internal::page_handler<platform::mock> h;
 
     h.map_title(p);
     h.map_content(p);
@@ -33,7 +33,7 @@ TEST_CASE("page mock handler tracks title + content + is_busy changes",
           "[mock][page]") {
     internal::basic_button child;
     internal::basic_page p;
-    page_handler<platform::mock> h;
+    internal::page_handler<platform::mock> h;
 
     h.map_title(p);
     h.map_content(p);

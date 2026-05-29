@@ -9,9 +9,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/page.hpp>
+#include <mpapp/internal/basic_page.hpp>
 #include <mpapp/route.hpp>
-#include <mpapp/shell.hpp>
+#include <mpapp/internal/basic_shell.hpp>
 
 using namespace mpapp;
 
@@ -19,9 +19,9 @@ namespace {
 
 // Stand-in page subclasses — instances are never created in tests but
 // the types flow through the route_table for compile-time lookups.
-struct home_page    : page {};
-struct details_page : page {};
-struct settings_page: page {};
+struct home_page    : internal::basic_page {};
+struct details_page : internal::basic_page {};
+struct settings_page: internal::basic_page {};
 
 inline constexpr auto test_routes = route_table{
     route<"home",         home_page>{},

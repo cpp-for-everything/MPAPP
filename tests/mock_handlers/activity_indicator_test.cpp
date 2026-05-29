@@ -3,7 +3,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/activity_indicator.hpp>
+#include <mpapp/internal/basic_activity_indicator.hpp>
 #include <mpapp/handlers/mock/activity_indicator_handler.hpp>
 
 using namespace mpapp;
@@ -11,7 +11,7 @@ using namespace mpapp;
 TEST_CASE("activity_indicator mock records initial values on bind",
           "[mock][activity_indicator]") {
     internal::basic_activity_indicator a;
-    activity_indicator_handler<platform::mock> h;
+    internal::activity_indicator_handler<platform::mock> h;
 
     h.map_is_running(a);
     h.map_color(a);
@@ -25,7 +25,7 @@ TEST_CASE("activity_indicator mock records initial values on bind",
 TEST_CASE("activity_indicator records start/stop transitions",
           "[mock][activity_indicator]") {
     internal::basic_activity_indicator a;
-    activity_indicator_handler<platform::mock> h;
+    internal::activity_indicator_handler<platform::mock> h;
 
     h.map_is_running(a);
     h.clear_calls();

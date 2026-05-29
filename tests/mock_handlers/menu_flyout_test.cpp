@@ -6,8 +6,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/menu_flyout_handler.hpp>
-#include <mpapp/menu_flyout.hpp>
-#include <mpapp/menu_flyout_item.hpp>
+#include <mpapp/internal/basic_menu_flyout.hpp>
+#include <mpapp/internal/basic_menu_flyout_item.hpp>
 #include <mpapp/view.hpp>
 
 using namespace mpapp;
@@ -15,7 +15,7 @@ using namespace mpapp;
 TEST_CASE("menu_flyout mock handler records initial property values on bind",
           "[mock][menu_flyout]") {
     internal::basic_menu_flyout f;
-    menu_flyout_handler<platform::mock> h;
+    internal::menu_flyout_handler<platform::mock> h;
 
     h.map_items(f);
     h.map_is_open(f);
@@ -30,7 +30,7 @@ TEST_CASE("menu_flyout mock handler records initial property values on bind",
 TEST_CASE("menu_flyout mock handler tracks items + is_open changes",
           "[mock][menu_flyout]") {
     internal::basic_menu_flyout f;
-    menu_flyout_handler<platform::mock> h;
+    internal::menu_flyout_handler<platform::mock> h;
 
     h.map_items(f);
     h.map_is_open(f);

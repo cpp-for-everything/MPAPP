@@ -5,7 +5,7 @@
 
 #include <memory>
 
-#include <mpapp/flyout_view.hpp>
+#include <mpapp/internal/basic_flyout_view.hpp>
 #include <mpapp/handlers/mock/flyout_view_handler.hpp>
 #include <mpapp/view.hpp>
 
@@ -20,7 +20,7 @@ class plain_view : public view {};
 TEST_CASE("flyout_view mock records initial values on bind",
           "[mock][flyout_view]") {
     internal::basic_flyout_view fv;
-    flyout_view_handler<platform::mock> h;
+    internal::flyout_view_handler<platform::mock> h;
 
     h.map_flyout(fv);
     h.map_detail(fv);
@@ -38,7 +38,7 @@ TEST_CASE("flyout_view mock records initial values on bind",
 TEST_CASE("flyout_view mock tracks pane assignments and drawer toggles",
           "[mock][flyout_view]") {
     internal::basic_flyout_view fv;
-    flyout_view_handler<platform::mock> h;
+    internal::flyout_view_handler<platform::mock> h;
 
     h.map_flyout(fv);
     h.map_detail(fv);

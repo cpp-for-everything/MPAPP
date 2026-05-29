@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-#include <mpapp/border.hpp>
+#include <mpapp/internal/basic_border.hpp>
 #include <mpapp/handlers/mock/border_handler.hpp>
 #include <mpapp/view.hpp>
 
@@ -23,7 +23,7 @@ class plain_view : public view {};
 TEST_CASE("border mock handler records initial values on bind",
           "[mock][border]") {
     internal::basic_border b;
-    border_handler<platform::mock> h;
+    internal::border_handler<platform::mock> h;
 
     h.map_stroke_thickness(b);
     h.map_stroke_line_cap(b);
@@ -44,7 +44,7 @@ TEST_CASE("border mock handler records initial values on bind",
 TEST_CASE("border mock handler records single call per property change",
           "[mock][border]") {
     internal::basic_border b;
-    border_handler<platform::mock> h;
+    internal::border_handler<platform::mock> h;
 
     h.map_stroke_thickness(b);
     h.clear_calls();
@@ -64,7 +64,7 @@ TEST_CASE("border mock handler records single call per property change",
 TEST_CASE("border mock handler tracks content presence and dash array size",
           "[mock][border]") {
     internal::basic_border b;
-    border_handler<platform::mock> h;
+    internal::border_handler<platform::mock> h;
 
     h.map_content(b);
     h.map_stroke_dash_array(b);
@@ -86,7 +86,7 @@ TEST_CASE("border mock handler tracks content presence and dash array size",
 TEST_CASE("border mock handler records stroke and shape mappers",
           "[mock][border][sequence]") {
     internal::basic_border b;
-    border_handler<platform::mock> h;
+    internal::border_handler<platform::mock> h;
 
     h.map_stroke_shape(b);
     h.map_stroke(b);

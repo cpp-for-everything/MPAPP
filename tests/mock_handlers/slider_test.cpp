@@ -7,11 +7,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/slider_handler.hpp>
-#include <mpapp/slider.hpp>
+#include <mpapp/internal/basic_slider.hpp>
 
 namespace {
 
-using slider_mock = mpapp::slider_handler<mpapp::platform::mock>;
+using slider_mock = mpapp::internal::slider_handler<mpapp::platform::mock>;
 
 } // namespace
 

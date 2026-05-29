@@ -6,10 +6,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/collection_view.hpp>
+#include <mpapp/internal/basic_collection_view.hpp>
 #include <mpapp/handlers/mock/collection_view_handler.hpp>
-#include <mpapp/label.hpp>
-#include <mpapp/text_cell.hpp>
+#include <mpapp/internal/basic_label.hpp>
+#include <mpapp/internal/basic_text_cell.hpp>
 
 using namespace mpapp;
 
@@ -145,7 +145,7 @@ TEST_CASE("item_template materializes a cell per items_source row",
     // We constructed text_cell so each pointer should be non-null and
     // downcast-able. Check via static_cast (we know the concrete type).
     for (int i = 0; i < 4; ++i) {
-        auto* tc = static_cast<text_cell*>(vs[static_cast<std::size_t>(i)]);
+        auto* tc = static_cast<internal::basic_text_cell*>(vs[static_cast<std::size_t>(i)]);
         REQUIRE(tc != nullptr);
         CHECK(tc->text.get() == "row-" + std::to_string(i));
     }
@@ -184,7 +184,7 @@ TEST_CASE("item_template re-materializes when template changes",
     CHECK(cv.materialized_count() == 3);
 
     // Clear the template — materialized clears.
-    cv.item_template = collection_view::item_factory_t{};
+    cv.item_template = internal::basic_collection_view::item_factory_t{};
     CHECK(cv.materialized_count() == 0);
 }
 
@@ -247,14 +247,14 @@ TEST_CASE("materialized_changed fires on rematerialize",
     CHECK(hits == 3);
 
     // Template cleared → fires (materialize empties).
-    cv.item_template = collection_view::item_factory_t{};
+    cv.item_template = internal::basic_collection_view::item_factory_t{};
     CHECK(hits == 4);
 }
 
 TEST_CASE("layout default is vertical_list and map_layout records it",
           "[mock][collection_view][layout]") {
     internal::basic_collection_view cv;
-    collection_view_handler<platform::mock> h;
+    internal::collection_view_handler<platform::mock> h;
     h.map_layout(cv);
 
     CHECK(cv.layout.get() == collection_layout::vertical_list);
@@ -264,7 +264,7 @@ TEST_CASE("layout default is vertical_list and map_layout records it",
 TEST_CASE("layout cycles through all four enum values",
           "[mock][collection_view][layout]") {
     internal::basic_collection_view cv;
-    collection_view_handler<platform::mock> h;
+    internal::collection_view_handler<platform::mock> h;
     h.map_layout(cv);
 
     cv.layout = collection_layout::horizontal_list;

@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/indicator_view_handler.hpp>
-#include <mpapp/indicator_view.hpp>
+#include <mpapp/internal/basic_indicator_view.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("indicator_view mock records initial values on bind",
           "[mock][indicator_view]") {
     internal::basic_indicator_view iv;
-    indicator_view_handler<platform::mock> h;
+    internal::indicator_view_handler<platform::mock> h;
 
     h.map_count(iv);
     h.map_position(iv);
@@ -30,7 +30,7 @@ TEST_CASE("indicator_view mock records initial values on bind",
 TEST_CASE("indicator_view records count changes",
           "[mock][indicator_view]") {
     internal::basic_indicator_view iv;
-    indicator_view_handler<platform::mock> h;
+    internal::indicator_view_handler<platform::mock> h;
 
     h.map_count(iv);
     h.clear_calls();

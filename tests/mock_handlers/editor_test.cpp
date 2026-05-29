@@ -6,12 +6,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/editor.hpp>
+#include <mpapp/internal/basic_editor.hpp>
 #include <mpapp/handlers/mock/editor_handler.hpp>
 
 namespace {
 
-using editor_mock = mpapp::editor_handler<mpapp::platform::mock>;
+using editor_mock = mpapp::internal::editor_handler<mpapp::platform::mock>;
 
 } // namespace
 

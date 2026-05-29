@@ -7,24 +7,24 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/cell.hpp>
-#include <mpapp/entry_cell.hpp>
+#include <mpapp/internal/basic_entry_cell.hpp>
 #include <mpapp/handlers/mock/entry_cell_handler.hpp>
 #include <mpapp/handlers/mock/image_cell_handler.hpp>
 #include <mpapp/handlers/mock/switch_cell_handler.hpp>
 #include <mpapp/handlers/mock/text_cell_handler.hpp>
 #include <mpapp/handlers/mock/view_cell_handler.hpp>
-#include <mpapp/image_cell.hpp>
-#include <mpapp/label.hpp>
-#include <mpapp/switch_cell.hpp>
-#include <mpapp/text_cell.hpp>
-#include <mpapp/view_cell.hpp>
+#include <mpapp/internal/basic_image_cell.hpp>
+#include <mpapp/internal/basic_label.hpp>
+#include <mpapp/internal/basic_switch_cell.hpp>
+#include <mpapp/internal/basic_text_cell.hpp>
+#include <mpapp/internal/basic_view_cell.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("text_cell mock records text + detail changes",
           "[mock][cell][text_cell]") {
     internal::basic_text_cell c;
-    text_cell_handler<platform::mock> h;
+    internal::text_cell_handler<platform::mock> h;
     h.map_text(c);
     h.map_detail(c);
     h.clear_calls();
@@ -41,7 +41,7 @@ TEST_CASE("text_cell mock records text + detail changes",
 TEST_CASE("entry_cell mock records label + text changes",
           "[mock][cell][entry_cell]") {
     internal::basic_entry_cell c;
-    entry_cell_handler<platform::mock> h;
+    internal::entry_cell_handler<platform::mock> h;
     h.map_label(c);
     h.map_text(c);
     h.clear_calls();
@@ -58,7 +58,7 @@ TEST_CASE("entry_cell mock records label + text changes",
 TEST_CASE("switch_cell toggle() flips on + emits signal",
           "[mock][cell][switch_cell]") {
     internal::basic_switch_cell c;
-    switch_cell_handler<platform::mock> h;
+    internal::switch_cell_handler<platform::mock> h;
     h.map_text(c);
     h.map_on(c);
     h.clear_calls();
@@ -88,7 +88,7 @@ TEST_CASE("view_cell records content.present transitions",
           "[mock][cell][view_cell]") {
     internal::basic_label child;
     internal::basic_view_cell c;
-    view_cell_handler<platform::mock> h;
+    internal::view_cell_handler<platform::mock> h;
     h.map_content(c);
     h.clear_calls();
 
@@ -104,7 +104,7 @@ TEST_CASE("view_cell records content.present transitions",
 TEST_CASE("image_cell carries text + image_uri",
           "[mock][cell][image_cell]") {
     internal::basic_image_cell c;
-    image_cell_handler<platform::mock> h;
+    internal::image_cell_handler<platform::mock> h;
     h.map_text(c);
     h.map_image_uri(c);
     h.clear_calls();

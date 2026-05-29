@@ -7,11 +7,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/stepper_handler.hpp>
-#include <mpapp/stepper.hpp>
+#include <mpapp/internal/basic_stepper.hpp>
 
 namespace {
 
-using stepper_mock = mpapp::stepper_handler<mpapp::platform::mock>;
+using stepper_mock = mpapp::internal::stepper_handler<mpapp::platform::mock>;
 
 } // namespace
 

@@ -6,7 +6,7 @@
 #include <vector>
 
 #include <mpapp/handlers/mock/menu_bar_item_handler.hpp>
-#include <mpapp/menu_bar_item.hpp>
+#include <mpapp/internal/basic_menu_bar_item.hpp>
 #include <mpapp/view.hpp>
 
 using namespace mpapp;
@@ -20,7 +20,7 @@ class plain_view : public view {};
 TEST_CASE("menu_bar_item mock records initial values on bind",
           "[mock][menu_bar_item]") {
     internal::basic_menu_bar_item m;
-    menu_bar_item_handler<platform::mock> h;
+    internal::menu_bar_item_handler<platform::mock> h;
 
     h.map_title(m);
     h.map_items(m);
@@ -35,7 +35,7 @@ TEST_CASE("menu_bar_item mock records initial values on bind",
 TEST_CASE("menu_bar_item records title and items changes",
           "[mock][menu_bar_item]") {
     internal::basic_menu_bar_item m;
-    menu_bar_item_handler<platform::mock> h;
+    internal::menu_bar_item_handler<platform::mock> h;
 
     h.map_title(m);
     h.map_items(m);

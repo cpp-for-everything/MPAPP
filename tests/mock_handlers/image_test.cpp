@@ -4,14 +4,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/handlers/mock/image_handler.hpp>
-#include <mpapp/image.hpp>
+#include <mpapp/internal/basic_image.hpp>
 
 using namespace mpapp;
 
 TEST_CASE("image mock records initial values on bind",
           "[mock][image]") {
     internal::basic_image i;
-    image_handler<platform::mock> h;
+    internal::image_handler<platform::mock> h;
 
     h.map_source(i);
     h.map_aspect(i);
@@ -26,7 +26,7 @@ TEST_CASE("image mock records initial values on bind",
 TEST_CASE("image records source changes",
           "[mock][image]") {
     internal::basic_image i;
-    image_handler<platform::mock> h;
+    internal::image_handler<platform::mock> h;
 
     h.map_source(i);
     h.clear_calls();

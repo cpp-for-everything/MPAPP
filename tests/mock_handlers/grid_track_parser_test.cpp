@@ -5,7 +5,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <mpapp/grid_layout.hpp>
+#include <mpapp/internal/basic_grid_layout.hpp>
 
 using namespace mpapp;
 using kind = track_def::kind;

@@ -19,7 +19,7 @@
 
 #include <memory>
 
-#include <mpapp/frame.hpp>
+#include <mpapp/internal/basic_frame.hpp>
 #include <mpapp/handlers/mock/frame_handler.hpp>
 #include <mpapp/view.hpp>
 
@@ -34,7 +34,7 @@ class plain_view : public view {};
 TEST_CASE("frame mock handler records initial values on bind",
           "[mock][frame][deprecated]") {
     internal::basic_frame f;
-    frame_handler<platform::mock> h;
+    internal::frame_handler<platform::mock> h;
 
     h.map_has_shadow(f);
     h.map_corner_radius(f);
@@ -49,7 +49,7 @@ TEST_CASE("frame mock handler records initial values on bind",
 TEST_CASE("frame mock handler records single call per property change",
           "[mock][frame]") {
     internal::basic_frame f;
-    frame_handler<platform::mock> h;
+    internal::frame_handler<platform::mock> h;
 
     h.map_has_shadow(f);
     h.clear_calls();
@@ -69,7 +69,7 @@ TEST_CASE("frame mock handler records single call per property change",
 TEST_CASE("frame mock handler tracks content presence",
           "[mock][frame]") {
     internal::basic_frame f;
-    frame_handler<platform::mock> h;
+    internal::frame_handler<platform::mock> h;
 
     h.map_content(f);
     REQUIRE(h.calls().size() == 1);
@@ -83,7 +83,7 @@ TEST_CASE("frame mock handler tracks content presence",
 TEST_CASE("frame default padding mirrors MAUI's 20-dip default",
           "[mock][frame][padding]") {
     internal::basic_frame f;
-    frame_handler<platform::mock> h;
+    internal::frame_handler<platform::mock> h;
 
     h.map_padding(f);
     REQUIRE(h.calls().size() == 1);
