@@ -44,7 +44,8 @@ public:
 
 // `embedded_handler_.map_gestures(*this);` links.
 
-void map_gestures(basic_label& /*x*/) noexcept {}
+// RFC-0003: installs the view's tap recognizers on the native TextView.
+void map_gestures(basic_label& x);
 
 
 private:

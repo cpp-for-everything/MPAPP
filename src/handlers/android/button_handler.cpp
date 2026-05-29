@@ -6,6 +6,7 @@
 #if defined(__ANDROID__)
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
+#include "mpapp/handlers/android/gesture_attach.hpp"
 
 namespace mpapp::internal {
 
@@ -95,6 +96,10 @@ void button_handler<platform::android>::apply_semantics(const std::string& desc)
 void button_handler<platform::android>::map_semantics(basic_button& b) {
     apply_semantics(b.semantic_description.get());
     b.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
+}
+
+void button_handler<platform::android>::map_gestures(basic_button& b) {
+    android_gestures::attach(native_, b);
 }
 
 void button_handler<platform::android>::map_clicked(basic_button& b) {

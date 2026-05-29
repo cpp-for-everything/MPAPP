@@ -6,6 +6,7 @@
 #if defined(__ANDROID__)
 
 #include "mpapp/handlers/android/jni_bridge.hpp"
+#include "mpapp/handlers/android/gesture_attach.hpp"
 
 namespace mpapp::internal {
 
@@ -172,6 +173,10 @@ void label_handler<platform::android>::map_font_family(basic_label& l) {
     font_family_ = l.font_family.get();
     apply_typeface();
     l.font_family.changed.subscribe(ffamily_slot_, ffamily_cb_);
+}
+
+void label_handler<platform::android>::map_gestures(basic_label& x) {
+    android_gestures::attach(native_, x);
 }
 
 void label_handler<platform::android>::map_text_color(basic_label& l) {

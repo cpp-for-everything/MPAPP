@@ -31,9 +31,8 @@ public:
     void map_clicked(basic_button& b);
     void map_semantics(basic_button& b);   // contentDescription (a11y)
 
-    // RFC-0003 stub: Android GestureDetector wire-up pending the
-    // Android real-handler task. No-op today.
-    void map_gestures(basic_button& /*b*/) noexcept {}
+    // RFC-0003: installs the view's tap recognizers on the native Button.
+    void map_gestures(basic_button& b);
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
