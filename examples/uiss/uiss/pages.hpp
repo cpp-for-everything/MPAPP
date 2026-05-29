@@ -43,23 +43,11 @@ struct section_page {
     label_list          labels{};
 
     // Optional picker (only Плащания uses one) — heap-allocated so the
-    // other nine sections pay nothing for it. Its selection updates
-    // picker_sel_lbl via picker_cb.
+    // other nine sections pay nothing for it. Its RFC-0014 command updates
+    // picker_sel_lbl on selection (demonstrates control-side command on a
+    // non-button control).
     std::unique_ptr<mpapp::picker> opt_picker{};
     mpapp::label*                  picker_sel_lbl = nullptr;
-    mpapp::signal_slot<const int&> picker_slot{};
-    struct picker_cb_t {
-        section_page* self;
-        void operator()(int idx) const {
-            if (!self->opt_picker || self->picker_sel_lbl == nullptr) return;
-            const auto& its = self->opt_picker->items.get();
-            self->picker_sel_lbl->text =
-                (idx >= 0 && idx < static_cast<int>(its.size()))
-                    ? ("Избрано: " + its[static_cast<std::size_t>(idx)])
-                    : std::string{"Избрано: (нищо)"};
-        }
-    };
-    picker_cb_t picker_cb{this};
 
     // Begin a page: header bar + an empty content column ready for rows.
     void begin(const std::string& title, std::function<void()> on_menu) {
@@ -150,7 +138,17 @@ inline void build_payments(section_page& p, const student& s) {
     p.opt_picker->items = s.payment_kinds;
     p.body.add(*p.opt_picker);
     p.picker_sel_lbl = &p.labels.add(p.body, "Избрано: (нищо)");
-    p.opt_picker->selected_index.changed.subscribe(p.picker_slot, p.picker_cb);
+    // RFC-0014 command on the picker: executed on every selection change.
+    section_page* pp = &p;
+    p.opt_picker->command = std::make_shared<mpapp::relay_command>([pp]() {
+        if (!pp->opt_picker || pp->picker_sel_lbl == nullptr) return;
+        const int   idx = pp->opt_picker->selected_index.get();
+        const auto& its = pp->opt_picker->items.get();
+        pp->picker_sel_lbl->text =
+            (idx >= 0 && idx < static_cast<int>(its.size()))
+                ? ("Избрано: " + its[static_cast<std::size_t>(idx)])
+                : std::string{"Избрано: (нищо)"};
+    });
 }
 
 inline void build_identification(section_page& p, const student& s) {

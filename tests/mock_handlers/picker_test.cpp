@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: Apache-2.0
 // Mock-handler tests for `mpapp::internal::basic_picker`.
 
+#include <memory>
+
 #include <catch2/catch_test_macros.hpp>
 
+#include <mpapp/binding/relay_command.hpp>
 #include <mpapp/handlers/mock/picker_handler.hpp>
 #include <mpapp/internal/basic_picker.hpp>
 
@@ -56,4 +59,28 @@ TEST_CASE("picker records selection changes",
 
     p.selected_index = -1;
     REQUIRE(h.calls().size() == 2);
+}
+
+TEST_CASE("picker executes its RFC-0014 command on selection change",
+          "[mock][picker][command]") {
+    internal::basic_picker p;
+    p.items = std::vector<std::string>{"a", "b", "c"};
+
+    int last = -99;
+    p.command = std::make_shared<relay_command>(
+        [&p, &last]() { last = p.selected_index.get(); });
+
+    p.selected_index = 1;
+    CHECK(last == 1);
+
+    p.selected_index = 2;
+    CHECK(last == 2);
+
+    p.selected_index = 2;          // idempotent — command must not re-fire
+    CHECK(last == 2);
+
+    // Clearing the command stops execution.
+    p.command = std::shared_ptr<command_base>{};
+    p.selected_index = 0;
+    CHECK(last == 2);
 }
