@@ -38,7 +38,7 @@ tags:
 >
 > **Verification:** Linux/GTK4 **builds + runs** (window composes, no crash); Windows/WinUI 3 **builds** (`uiss.exe` linked); Android NDK **cross-compiles on both ABIs** (aarch64 + x86_64, Cyrillic UTF-8 literals OK) — the full "Win + Linux + Android" build bar. On-screen capture is blocked by the WSLg/RAIL wall (Linux) — Android `adb screencap` / Windows native capture are the visual routes (deferred while the host PC is in use).
 >
-> **The app is a gap detector.** Building a real screen surfaced the next priorities: `label` has no font/color/weight (plain text only); data tables want `CollectionView`/`TableView` typed items; the TU logo needs the RFC-0004 image loaders; Плащания wants a real `picker`; RFC-0005 styles aren't applied for app-wide theming. These become the prioritized backlog — the app tells us what to harden next.
+> **The app is a gap detector.** Building a real screen surfaced the next priorities: ~~`label` has no font/color/weight~~ (**done** — [[T-0061-label-typography]]: `font_size`/`font_bold`/`font_family` real on every platform; УИСС headings/titles now styled); data tables want `CollectionView`/`TableView` typed items; the TU logo needs the RFC-0004 image loaders; Плащания wants a real `picker`; RFC-0005 styles aren't applied for app-wide theming. These become the prioritized backlog — the app tells us what to harden next.
 
 ## Where we are now
 

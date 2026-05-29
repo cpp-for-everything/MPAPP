@@ -32,6 +32,9 @@ public:
     label() {
         set_handler(embedded_handler_);
         embedded_handler_.map_text(*this);
+        embedded_handler_.map_font_size(*this);
+        embedded_handler_.map_font_bold(*this);
+        embedded_handler_.map_font_family(*this);
         embedded_handler_.map_gestures(*this);
     }
 

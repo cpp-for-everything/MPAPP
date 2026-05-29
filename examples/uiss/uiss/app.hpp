@@ -63,9 +63,13 @@ private:
     void build_menu() {
         menu_page_.title = "Меню";
 
-        uni_lbl_.text     = "Технически университет - София";
-        product_lbl_.text = "Е-Студент";
-        student_lbl_.text = "Студент: " + student_.full_name;
+        uni_lbl_.text       = "Технически университет - София";
+        uni_lbl_.font_bold  = true;
+        uni_lbl_.font_size  = 15.0;
+        product_lbl_.text   = "Е-Студент";
+        product_lbl_.font_size = 13.0;
+        student_lbl_.text   = "Студент: " + student_.full_name;
+        student_lbl_.font_bold = true;
 
         menu_box_.vertical(gap_sm, mpapp::thickness{pad_md})
                  .add(uni_lbl_)

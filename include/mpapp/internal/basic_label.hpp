@@ -31,6 +31,15 @@ public:
 
     Observable<std::string> text{""};
 
+    // ----- Typography (RFC-0015 fidelity / goal: fonts loading) ----------
+    // Minimal cross-platform font surface. `font_size` is in points;
+    // 0 means "platform default". `font_bold` toggles weight.
+    // `font_family` names a font; "" means the platform default family
+    // (a registered RFC-0012 font alias resolves here once that lands).
+    Observable<double>      font_size{0.0};
+    Observable<bool>        font_bold{false};
+    Observable<std::string> font_family{""};
+
     label_handler<platform::current>&       handler() noexcept       { return *handler_; }
     const label_handler<platform::current>& handler() const noexcept { return *handler_; }
 

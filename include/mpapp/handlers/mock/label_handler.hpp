@@ -29,6 +29,21 @@ public:
         l.text.changed.subscribe(text_slot_, text_cb_);
     }
 
+    void map_font_size(basic_label& l) {
+        record_change("font_size", l.font_size.get());
+        l.font_size.changed.subscribe(font_size_slot_, font_size_cb_);
+    }
+
+    void map_font_bold(basic_label& l) {
+        record_change("font_bold", l.font_bold.get());
+        l.font_bold.changed.subscribe(font_bold_slot_, font_bold_cb_);
+    }
+
+    void map_font_family(basic_label& l) {
+        record_change("font_family", l.font_family.get());
+        l.font_family.changed.subscribe(font_family_slot_, font_family_cb_);
+    }
+
 // RFC-0003 stub: per-platform real gesture wire-up is
 
 // pending the platform's real-handler task. No-op today
@@ -44,6 +59,18 @@ private:
     mock_property_recorder<label_handler<platform::mock>, std::string> text_cb_{
         this, "text"};
     signal_slot<const std::string&> text_slot_{};
+
+    mock_property_recorder<label_handler<platform::mock>, double> font_size_cb_{
+        this, "font_size"};
+    signal_slot<const double&> font_size_slot_{};
+
+    mock_property_recorder<label_handler<platform::mock>, bool> font_bold_cb_{
+        this, "font_bold"};
+    signal_slot<const bool&> font_bold_slot_{};
+
+    mock_property_recorder<label_handler<platform::mock>, std::string> font_family_cb_{
+        this, "font_family"};
+    signal_slot<const std::string&> font_family_slot_{};
 };
 
 } // namespace mpapp::internal

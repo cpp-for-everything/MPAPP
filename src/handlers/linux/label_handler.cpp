@@ -29,6 +29,41 @@ void label_handler<platform::linux_>::map_text(basic_label& l) {
     l.text.changed.subscribe(text_slot_, text_cb_);
 }
 
+void label_handler<platform::linux_>::apply_font() {
+    if (native_ == nullptr) return;
+    PangoAttrList* attrs = pango_attr_list_new();
+    if (font_size_ > 0.0) {
+        pango_attr_list_insert(
+            attrs, pango_attr_size_new(static_cast<int>(font_size_ * PANGO_SCALE)));
+    }
+    if (font_bold_) {
+        pango_attr_list_insert(attrs, pango_attr_weight_new(PANGO_WEIGHT_BOLD));
+    }
+    if (!font_family_.empty()) {
+        pango_attr_list_insert(attrs, pango_attr_family_new(font_family_.c_str()));
+    }
+    gtk_label_set_attributes(GTK_LABEL(static_cast<GtkWidget*>(native_)), attrs);
+    pango_attr_list_unref(attrs);
+}
+
+void label_handler<platform::linux_>::map_font_size(basic_label& l) {
+    font_size_ = l.font_size.get();
+    apply_font();
+    l.font_size.changed.subscribe(fsize_slot_, fsize_cb_);
+}
+
+void label_handler<platform::linux_>::map_font_bold(basic_label& l) {
+    font_bold_ = l.font_bold.get();
+    apply_font();
+    l.font_bold.changed.subscribe(fbold_slot_, fbold_cb_);
+}
+
+void label_handler<platform::linux_>::map_font_family(basic_label& l) {
+    font_family_ = l.font_family.get();
+    apply_font();
+    l.font_family.changed.subscribe(ffamily_slot_, ffamily_cb_);
+}
+
 void label_handler<platform::linux_>::map_gestures(basic_label& x) {
     if (native_ == nullptr) return;
     linux_gestures::attach(static_cast<GtkWidget*>(native_), x);

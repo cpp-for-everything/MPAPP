@@ -40,6 +40,53 @@ void text_view_set_text(JNIEnv* env, jobject tv, const std::string& text) {
     env->DeleteLocalRef(cls);
 }
 
+// TypedValue.COMPLEX_UNIT_PT == 3 — interpret font_size as points so the
+// sizing matches the desktop handlers' point semantics.
+void text_view_set_text_size(JNIEnv* env, jobject tv, float pt) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/TextView");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setTextSize", "(IF)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(tv, m, /*COMPLEX_UNIT_PT*/ 3, pt);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
+// Apply a typeface derived from family ("" = default) + bold flag.
+// Typeface styles: NORMAL=0, BOLD=1.
+void text_view_set_typeface(JNIEnv* env, jobject tv,
+                            const std::string& family, bool bold) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass tvcls = env->FindClass("android/widget/TextView");
+    if (tvcls == nullptr) { env->ExceptionClear(); return; }
+    jclass tfcls = env->FindClass("android/graphics/Typeface");
+    if (tfcls == nullptr) { env->ExceptionClear(); env->DeleteLocalRef(tvcls); return; }
+
+    jobject tf = nullptr;   // null -> default family
+    if (!family.empty()) {
+        jmethodID create = env->GetStaticMethodID(
+            tfcls, "create", "(Ljava/lang/String;I)Landroid/graphics/Typeface;");
+        if (create != nullptr) {
+            jstring jfam = env->NewStringUTF(family.c_str());
+            tf = env->CallStaticObjectMethod(tfcls, create, jfam, /*NORMAL*/ 0);
+            if (env->ExceptionCheck()) { env->ExceptionClear(); tf = nullptr; }
+            env->DeleteLocalRef(jfam);
+        }
+    }
+
+    jmethodID setTf = env->GetMethodID(
+        tvcls, "setTypeface", "(Landroid/graphics/Typeface;I)V");
+    if (setTf != nullptr) {
+        env->CallVoidMethod(tv, setTf, tf, bold ? 1 : 0);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    if (tf != nullptr) env->DeleteLocalRef(tf);
+    env->DeleteLocalRef(tfcls);
+    env->DeleteLocalRef(tvcls);
+}
+
 } // namespace
 
 label_handler<platform::android>::label_handler() {
@@ -65,9 +112,40 @@ void label_handler<platform::android>::apply_text(const std::string& text) {
     text_view_set_text(env, native_, text);
 }
 
+void label_handler<platform::android>::apply_font_size(double pt) {
+    if (native_ == nullptr || pt <= 0.0) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    text_view_set_text_size(env, native_, static_cast<float>(pt));
+}
+
+void label_handler<platform::android>::apply_typeface() {
+    if (native_ == nullptr) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    text_view_set_typeface(env, native_, font_family_, font_bold_);
+}
+
 void label_handler<platform::android>::map_text(basic_label& l) {
     apply_text(l.text.get());
     l.text.changed.subscribe(text_slot_, text_cb_);
+}
+
+void label_handler<platform::android>::map_font_size(basic_label& l) {
+    apply_font_size(l.font_size.get());
+    l.font_size.changed.subscribe(fsize_slot_, fsize_cb_);
+}
+
+void label_handler<platform::android>::map_font_bold(basic_label& l) {
+    font_bold_ = l.font_bold.get();
+    apply_typeface();
+    l.font_bold.changed.subscribe(fbold_slot_, fbold_cb_);
+}
+
+void label_handler<platform::android>::map_font_family(basic_label& l) {
+    font_family_ = l.font_family.get();
+    apply_typeface();
+    l.font_family.changed.subscribe(ffamily_slot_, ffamily_cb_);
 }
 
 } // namespace mpapp::internal

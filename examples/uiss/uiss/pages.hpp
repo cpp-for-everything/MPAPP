@@ -40,7 +40,9 @@ struct section_page {
 
     // Begin a page: header bar + an empty content column ready for rows.
     void begin(const std::string& title, std::function<void()> on_menu) {
-        title_lbl.text = title;
+        title_lbl.text      = title;
+        title_lbl.font_bold = true;
+        title_lbl.font_size = 20.0;
         menu_btn.build("≡", std::move(on_menu));   // ≡
         header.horizontal(gap_md, mpapp::thickness{pad_md})
               .add(menu_btn.btn)
@@ -50,7 +52,10 @@ struct section_page {
 
     // A bold-ish section heading (plain text until label styling lands).
     mpapp::label& heading(const std::string& text) {
-        return labels.add(body, text);
+        auto& l     = labels.add(body, text);
+        l.font_bold = true;
+        l.font_size = 15.0;
+        return l;
     }
     mpapp::label& line(const std::string& text) {
         return labels.add(body, text);
@@ -180,8 +185,11 @@ struct login_page {
     void build(std::function<void()> on_login) {
         page.title = "Вход";
 
-        title_lbl.text    = "Технически университет - София";
-        subtitle_lbl.text = "Е-Студент — Информационна система за студенти";
+        title_lbl.text      = "Технически университет - София";
+        title_lbl.font_bold = true;
+        title_lbl.font_size = 22.0;
+        subtitle_lbl.text   = "Е-Студент — Информационна система за студенти";
+        subtitle_lbl.font_size = 13.0;
         fac_lbl.text      = "Факултетен номер:";
         fac_entry.placeholder = "напр. 201221001";
         id_lbl.text       = "ЕГН (национален идентификатор):";

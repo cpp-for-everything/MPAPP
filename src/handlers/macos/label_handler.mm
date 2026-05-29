@@ -39,5 +39,39 @@ void label_handler<platform::macos>::map_text(basic_label& l) {
     l.text.changed.subscribe(text_slot_, text_cb_);
 }
 
+void label_handler<platform::macos>::apply_font() {
+    if (!native_) return;
+    NSTextField* lbl = (__bridge NSTextField*)native_;
+    CGFloat size = font_size_ > 0.0 ? (CGFloat)font_size_ : [NSFont systemFontSize];
+    NSFont* font = nil;
+    if (!font_family_.empty()) {
+        font = [NSFont fontWithName:[NSString stringWithUTF8String:font_family_.c_str()]
+                              size:size];
+    }
+    if (!font) {
+        font = font_bold_ ? [NSFont boldSystemFontOfSize:size]
+                          : [NSFont systemFontOfSize:size];
+    }
+    [lbl setFont:font];
+}
+
+void label_handler<platform::macos>::map_font_size(basic_label& l) {
+    font_size_ = l.font_size.get();
+    apply_font();
+    l.font_size.changed.subscribe(fsize_slot_, fsize_cb_);
+}
+
+void label_handler<platform::macos>::map_font_bold(basic_label& l) {
+    font_bold_ = l.font_bold.get();
+    apply_font();
+    l.font_bold.changed.subscribe(fbold_slot_, fbold_cb_);
+}
+
+void label_handler<platform::macos>::map_font_family(basic_label& l) {
+    font_family_ = l.font_family.get();
+    apply_font();
+    l.font_family.changed.subscribe(ffamily_slot_, ffamily_cb_);
+}
+
 } // namespace mpapp::internal
 #endif // __APPLE__ && !TARGET_OS_IPHONE

@@ -53,3 +53,35 @@ TEST_CASE("label mock handler ignores no-op writes", "[mock][label]") {
 
     REQUIRE(h.calls().empty());
 }
+
+TEST_CASE("label mock handler records initial font styling",
+          "[mock][label]") {
+    mpapp::internal::basic_label l;
+    label_mock   h;
+
+    l.font_size   = 18.0;
+    l.font_bold   = true;
+    l.font_family = "Sans";
+    h.map_font_size(l);
+    h.map_font_bold(l);
+    h.map_font_family(l);
+
+    REQUIRE(h.calls_as_strings() == std::vector<std::string>{
+        "font_size=18", "font_bold=true", "font_family=Sans"});
+}
+
+TEST_CASE("label mock handler tracks font changes", "[mock][label]") {
+    mpapp::internal::basic_label l;
+    label_mock   h;
+
+    h.map_font_size(l);
+    h.map_font_bold(l);
+    h.clear_calls();
+
+    l.font_size = 24.0;
+    l.font_bold = true;
+    l.font_bold = true;        // no-op, must not re-fire
+
+    REQUIRE(h.calls_as_strings() ==
+            std::vector<std::string>{"font_size=24", "font_bold=true"});
+}

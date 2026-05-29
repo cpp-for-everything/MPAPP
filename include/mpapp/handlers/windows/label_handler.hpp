@@ -32,6 +32,9 @@ public:
     label_handler& operator=(label_handler&&)      = delete;
 
     void map_text(basic_label& l);
+    void map_font_size(basic_label& l);
+    void map_font_bold(basic_label& l);
+    void map_font_family(basic_label& l);
 
     winrt::Microsoft::UI::Xaml::Controls::TextBlock&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::TextBlock& native() const noexcept { return native_; }
@@ -49,15 +52,36 @@ void map_gestures(basic_label& /*x*/) noexcept {}
 
 private:
     void apply_text(std::string_view text);
+    void apply_font_size(double v);
+    void apply_font_bold(bool v);
+    void apply_font_family(std::string_view v);
 
     struct text_callback {
         label_handler<platform::windows>* self = nullptr;
         void operator()(const std::string& v) const { self->apply_text(v); }
     };
+    struct fsize_callback {
+        label_handler<platform::windows>* self = nullptr;
+        void operator()(const double& v) const { self->apply_font_size(v); }
+    };
+    struct fbold_callback {
+        label_handler<platform::windows>* self = nullptr;
+        void operator()(const bool& v) const { self->apply_font_bold(v); }
+    };
+    struct ffamily_callback {
+        label_handler<platform::windows>* self = nullptr;
+        void operator()(const std::string& v) const { self->apply_font_family(v); }
+    };
 
     winrt::Microsoft::UI::Xaml::Controls::TextBlock native_{nullptr};
     signal_slot<const std::string&>                 text_slot_{};
     text_callback                                   text_callback_{this};
+    signal_slot<const double&>                      fsize_slot_{};
+    fsize_callback                                  fsize_callback_{this};
+    signal_slot<const bool&>                        fbold_slot_{};
+    fbold_callback                                  fbold_callback_{this};
+    signal_slot<const std::string&>                 ffamily_slot_{};
+    ffamily_callback                                ffamily_callback_{this};
 };
 
 } // namespace mpapp::internal
