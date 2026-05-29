@@ -15,6 +15,7 @@
 #include <string>
 
 #include <mpapp/entry.hpp>
+#include <mpapp/image.hpp>
 #include <mpapp/label.hpp>
 #include <mpapp/page.hpp>
 #include <mpapp/picker.hpp>
@@ -203,6 +204,7 @@ inline void build_section(section s, section_page& p, const student& st) {
 struct login_page {
     mpapp::page   page{};
     box           root{};
+    mpapp::image  logo_{};
     mpapp::label  title_lbl{};
     mpapp::label  subtitle_lbl{};
     mpapp::label  fac_lbl{};
@@ -214,6 +216,13 @@ struct login_page {
 
     void build(std::function<void()> on_login) {
         page.title = "Вход";
+
+        // Real image loader: the bundled TU logo (GtkPicture / BitmapImage /
+        // BitmapFactory load it natively from the build-time asset path).
+#ifdef UISS_ASSET_DIR
+        logo_.source = std::string{UISS_ASSET_DIR} + "/tu_logo.png";
+#endif
+        logo_.aspect = mpapp::aspect_mode::aspect_fit;
 
         title_lbl.text       = "Технически университет - София";
         title_lbl.font_bold  = true;
@@ -231,6 +240,7 @@ struct login_page {
         login_btn.build("Вход", std::move(on_login));
 
         root.vertical(gap_md, mpapp::thickness{pad_lg})
+            .add(logo_)
             .add(title_lbl)
             .add(subtitle_lbl)
             .add(fac_lbl)

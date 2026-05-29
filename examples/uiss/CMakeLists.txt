@@ -61,3 +61,10 @@ if(WIN32)
 
     mpapp_add_winappsdk_runtime(uiss)
 endif()
+
+# Bake the source-tree asset dir in so the app can load the bundled TU logo
+# by absolute path (demonstrates the real per-platform image loaders).
+if(TARGET uiss)
+    target_compile_definitions(uiss PRIVATE
+        UISS_ASSET_DIR="${CMAKE_CURRENT_SOURCE_DIR}/assets")
+endif()
