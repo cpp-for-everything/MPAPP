@@ -62,7 +62,7 @@ Building a real screen immediately exposed framework limits worth their own tick
 1. ~~**`label` has no font/color/weight**~~ — **addressed** ([[T-0061-label-typography]]): `font_size` / `font_bold` / `font_family` added to `basic_label` + real handlers on all platforms (GTK Pango attrs / WinUI TextBlock / Android TextView setTextSize+setTypeface / AppKit+UIKit blind). УИСС headings + titles now bold/sized. `text_color` still pending (needs the `color` type plumbed into the label surface).
 2. **No table/grid-of-data widget ergonomics** — the grades/history/attribute tables are rendered as flat label rows; `CollectionView`/`TableView` typed-item templates would be the idiomatic path (and exercise virtualization).
 3. **Image loading** — the TU logo needs a real file/URI image loader (RFC-0004 per-platform loaders, T-0045+).
-4. **`picker`** — the Плащания payment-kind dropdown wants a real `picker` (currently listed as text).
+4. ~~**`picker`**~~ — **addressed**: the Плащания page now uses a real `mpapp::picker` (items = payment kinds, live selection label) instead of a text list — mirrors the portal's `<select>`.
 5. **Styling/resources** — RFC-0005 styles aren't applied for app-wide theming yet.
 
 These become the prioritized backlog: the app tells us what to harden next.

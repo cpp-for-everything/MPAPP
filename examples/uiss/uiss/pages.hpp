@@ -9,13 +9,17 @@
 #ifndef UISS_PAGES_HPP
 #define UISS_PAGES_HPP
 
+#include <cstddef>
 #include <functional>
+#include <memory>
 #include <string>
 
 #include <mpapp/entry.hpp>
 #include <mpapp/label.hpp>
 #include <mpapp/page.hpp>
+#include <mpapp/picker.hpp>
 #include <mpapp/scroll_view.hpp>
+#include <mpapp/signal.hpp>
 
 #include "data.hpp"
 #include "support.hpp"
@@ -37,6 +41,25 @@ struct section_page {
     mpapp::scroll_view  scroll{};
     box                 body{};
     label_list          labels{};
+
+    // Optional picker (only Плащания uses one) — heap-allocated so the
+    // other nine sections pay nothing for it. Its selection updates
+    // picker_sel_lbl via picker_cb.
+    std::unique_ptr<mpapp::picker> opt_picker{};
+    mpapp::label*                  picker_sel_lbl = nullptr;
+    mpapp::signal_slot<const int&> picker_slot{};
+    struct picker_cb_t {
+        section_page* self;
+        void operator()(int idx) const {
+            if (!self->opt_picker || self->picker_sel_lbl == nullptr) return;
+            const auto& its = self->opt_picker->items.get();
+            self->picker_sel_lbl->text =
+                (idx >= 0 && idx < static_cast<int>(its.size()))
+                    ? ("Избрано: " + its[static_cast<std::size_t>(idx)])
+                    : std::string{"Избрано: (нищо)"};
+        }
+    };
+    picker_cb_t picker_cb{this};
 
     // Begin a page: header bar + an empty content column ready for rows.
     void begin(const std::string& title, std::function<void()> on_menu) {
@@ -119,8 +142,13 @@ inline void build_housing(section_page& p, const student& s) {
 
 inline void build_payments(section_page& p, const student& s) {
     p.line(s.payments_note);
-    for (const auto& k : s.payment_kinds)
-        p.line("   • " + k);
+    // Real picker for the payment kind (mirrors the portal's <select>).
+    p.opt_picker = std::make_unique<mpapp::picker>();
+    p.opt_picker->title = "Изберете вид плащане";
+    p.opt_picker->items = s.payment_kinds;
+    p.body.add(*p.opt_picker);
+    p.picker_sel_lbl = &p.labels.add(p.body, "Избрано: (нищо)");
+    p.opt_picker->selected_index.changed.subscribe(p.picker_slot, p.picker_cb);
 }
 
 inline void build_identification(section_page& p, const student& s) {
