@@ -66,6 +66,21 @@ void edit_text_set_enabled(JNIEnv* env, jobject et, bool enabled) {
     env->DeleteLocalRef(cls);
 }
 
+void edit_text_set_content_description(JNIEnv* env, jobject et, const std::string& desc) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/view/View");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setContentDescription",
+                                   "(Ljava/lang/CharSequence;)V");
+    if (m != nullptr) {
+        jstring jstr = env->NewStringUTF(desc.c_str());
+        env->CallVoidMethod(et, m, jstr);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+        env->DeleteLocalRef(jstr);
+    }
+    env->DeleteLocalRef(cls);
+}
+
 jobject install_text_watcher(JNIEnv* env, jobject edit_text, jlong handler_ptr) {
     if (env->ExceptionCheck()) env->ExceptionClear();
     jclass watcher_cls = env->FindClass("io/mpapp/MppTextWatcher");
@@ -155,6 +170,18 @@ void entry_handler<platform::android>::map_text(basic_entry& e) {
                                             reinterpret_cast<jlong>(this));
         }
     }
+}
+
+void entry_handler<platform::android>::apply_semantics(const std::string& desc) {
+    if (native_ == nullptr || desc.empty()) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    edit_text_set_content_description(env, native_, desc);
+}
+
+void entry_handler<platform::android>::map_semantics(basic_entry& e) {
+    apply_semantics(e.semantic_description.get());
+    e.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
 }
 
 void entry_handler<platform::android>::map_placeholder(basic_entry& e) {

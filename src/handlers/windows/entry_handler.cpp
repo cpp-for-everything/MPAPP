@@ -8,6 +8,7 @@
 #include <winrt/base.h>
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Microsoft.UI.Xaml.h>
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 
 #include "winrt_strings.hpp"
@@ -74,6 +75,18 @@ void entry_handler<platform::windows>::map_text(basic_entry& e) {
                 target->text.set(utf8);
             }
         });
+}
+
+void entry_handler<platform::windows>::apply_semantics(std::string_view desc) {
+    if (native_ != nullptr && !desc.empty()) {
+        winrt::Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
+            native_, detail::to_hstring_utf8(desc));
+    }
+}
+
+void entry_handler<platform::windows>::map_semantics(basic_entry& e) {
+    apply_semantics(e.semantic_description.get());
+    e.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
 }
 
 void entry_handler<platform::windows>::map_placeholder(basic_entry& e) {

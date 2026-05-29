@@ -44,6 +44,11 @@ public:
         e.is_read_only.changed.subscribe(is_read_only_slot_, is_read_only_cb_);
     }
 
+    void map_semantics(basic_entry& e) {
+        record_change("semantic_description", e.semantic_description.get());
+        e.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
+    }
+
     void map_max_length(basic_entry& e) {
         record_change("max_length", e.max_length.get());
         e.max_length.changed.subscribe(max_length_slot_, max_length_cb_);
@@ -83,6 +88,10 @@ private:
     mock_property_recorder<self_t, bool>        is_read_only_cb_{this,
                                                                  "is_read_only"};
     signal_slot<const bool&>                    is_read_only_slot_{};
+
+    mock_property_recorder<self_t, std::string> sem_cb_{this,
+                                                        "semantic_description"};
+    signal_slot<const std::string&>             sem_slot_{};
 
     mock_property_recorder<self_t, int>         max_length_cb_{this,
                                                                "max_length"};

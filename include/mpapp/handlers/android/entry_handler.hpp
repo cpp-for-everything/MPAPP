@@ -34,6 +34,7 @@ public:
     void map_text(basic_entry& e);
     void map_placeholder(basic_entry& e);
     void map_is_read_only(basic_entry& e);
+    void map_semantics(basic_entry& e);   // contentDescription (a11y)
 
     jobject native() noexcept       { return native_; }
     jobject native() const noexcept { return native_; }
@@ -57,10 +58,15 @@ private:
     void apply_text(const std::string& text);
     void apply_placeholder(const std::string& text);
     void apply_is_read_only(bool ro);
+    void apply_semantics(const std::string& desc);
 
     struct text_callback {
         entry_handler<platform::android>* self = nullptr;
         void operator()(const std::string& v) const { self->apply_text(v); }
+    };
+    struct sem_callback {
+        entry_handler<platform::android>* self = nullptr;
+        void operator()(const std::string& v) const { self->apply_semantics(v); }
     };
     struct placeholder_callback {
         entry_handler<platform::android>* self = nullptr;
@@ -78,9 +84,11 @@ private:
     text_callback                    text_cb_{this};
     placeholder_callback             placeholder_cb_{this};
     readonly_callback                readonly_cb_{this};
+    sem_callback                     sem_cb_{this};
     signal_slot<const std::string&>  text_slot_{};
     signal_slot<const std::string&>  placeholder_slot_{};
     signal_slot<const bool&>         readonly_slot_{};
+    signal_slot<const std::string&>  sem_slot_{};
 };
 
 // Trampoline for the Java MppTextWatcher to call back into the

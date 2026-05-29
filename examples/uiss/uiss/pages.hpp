@@ -232,9 +232,11 @@ struct login_page {
         subtitle_lbl.font_size = 13.0;
         fac_lbl.text      = "Факултетен номер:";
         fac_entry.placeholder = "напр. 201221001";
+        fac_entry.semantic_description = "Факултетен номер";   // a11y name
         id_lbl.text       = "ЕГН (национален идентификатор):";
         id_entry.placeholder = "ЕГН";
         id_entry.is_password = true;
+        id_entry.semantic_description = "ЕГН, национален идентификатор";   // a11y name
         status_lbl.text   = "";
 
         login_btn.build("Вход", std::move(on_login));

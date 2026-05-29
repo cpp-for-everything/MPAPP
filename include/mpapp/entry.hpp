@@ -34,6 +34,7 @@ public:
         embedded_handler_.map_text(*this);
         embedded_handler_.map_placeholder(*this);
         embedded_handler_.map_is_read_only(*this);
+        embedded_handler_.map_semantics(*this);
         embedded_handler_.map_gestures(*this);
     }
 

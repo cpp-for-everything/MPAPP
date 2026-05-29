@@ -35,17 +35,19 @@ platforms** — GTK4 (`gtk_accessible_update_property` LABEL), WinUI 3
 `mpapp::button` wrapper auto-maps it. Mock recorder + test. УИСС gives the ≡
 hamburger an accessible name ("Отвори навигацията") since the glyph alone is
 meaningless to assistive tech.
-Out: applying to every control (label/entry/picker/… — labels expose their text
-to AT natively); `semantic_hint` / `HeadingLevel`; focus order. Follow-ups.
+Applied on **`basic_button` + `basic_entry`** (the УИСС interactive controls);
+the УИСС login names both fields ("Факултетен номер" / "ЕГН…").
+Out: every remaining control (label/picker/… — labels expose their text to AT
+natively); `semantic_hint` / `HeadingLevel`; focus order. Follow-ups.
 
 ## Per-platform verification
 
 | Platform | Result |
 |---|---|
-| Linux WSL/GTK4 | ✅ full build (143 targets) + ctest `[button]` (added `[a11y]` case); GTK accessible LABEL applied. |
-| Windows MSVC/WinUI 3 | ⏳ uiss rebuild (AutomationProperties.Name). |
-| Android NDK r26 | ✅ button_handler.cpp (setContentDescription) + uiss main cross-compile (aarch64). |
-| Apple | ❌ no host — AppKit/UIKit accessibilityLabel written blind. |
+| Linux WSL/GTK4 | ✅ full build + ctest `[button]`/`[entry]` (added `[a11y]` case); GTK accessible LABEL applied (button + entry). |
+| Windows MSVC/WinUI 3 | ✅ uiss.exe relinked — `AutomationProperties.Name` on button + entry. |
+| Android NDK r26 | ✅ button_handler.cpp + entry_handler.cpp (setContentDescription) + uiss main cross-compile (aarch64). |
+| Apple | ❌ no host — AppKit/UIKit accessibilityLabel written blind (button only; entry has no Apple handler yet). |
 
 ## Acceptance Criteria
 

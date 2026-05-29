@@ -100,6 +100,18 @@ void entry_handler<platform::linux_>::map_is_read_only(basic_entry& e) {
     e.is_read_only.changed.subscribe(readonly_slot_, readonly_cb_);
 }
 
+void entry_handler<platform::linux_>::apply_semantics(const std::string& desc) {
+    if (native_ == nullptr || desc.empty()) return;
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(static_cast<GtkWidget*>(native_)),
+        GTK_ACCESSIBLE_PROPERTY_LABEL, desc.c_str(), -1);
+}
+
+void entry_handler<platform::linux_>::map_semantics(basic_entry& e) {
+    apply_semantics(e.semantic_description.get());
+    e.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
+}
+
 void entry_handler<platform::linux_>::map_gestures(basic_entry& x) {
     if (native_ == nullptr) return;
     linux_gestures::attach(static_cast<GtkWidget*>(native_), x);
