@@ -32,8 +32,10 @@
 #  define MPAPP_VIEW_HAS_STD_FORMAT 1
 #endif
 
+#include "behaviors/behavior.hpp"                  // for view::behaviors (RFC-0009)
 #include "binding/binding_context.hpp"            // for view::binding_context (RFC-0007)
 #include "command.hpp"
+#include "effects/effect.hpp"                      // for view::effects (RFC-0009)
 #include "internal/basic_gesture_recognizer.hpp"  // for view::gesture_recognizers
 #include "observable.hpp"
 #include "platform.hpp"
@@ -168,6 +170,53 @@ public:
         auto p = std::make_shared<T>(std::forward<Args>(args)...);
         T& ref = *p;
         gesture_recognizers.push_back(std::move(p));
+        return ref;
+    }
+
+    // ----- Behaviors (per RFC-0009) -------------------------------------
+    // Attached behaviors, MAUI's element.Behaviors. Held by shared_ptr
+    // so view-models can keep a ref. `add_behavior` constructs + calls
+    // on_attached; `remove_behavior` calls on_detached + drops. View
+    // destruction simply drops the behaviors (the defaulted dtor does
+    // not call on_detached — call remove_behavior first if a behavior's
+    // detach has side effects). Mirrors `gesture_recognizers`.
+    std::vector<std::shared_ptr<behavior>> behaviors{};
+
+    template <class B, class... Args>
+    B& add_behavior(Args&&... args) {
+        static_assert(std::is_base_of_v<behavior, B>,
+                      "view::add_behavior<B>: B must derive from mpapp::behavior");
+        auto p = std::make_shared<B>(std::forward<Args>(args)...);
+        B& ref = *p;
+        behaviors.push_back(std::move(p));
+        ref.on_attached(*this);
+        return ref;
+    }
+
+    void remove_behavior(behavior& b) {
+        for (auto it = behaviors.begin(); it != behaviors.end(); ++it) {
+            if (it->get() == &b) {
+                b.on_detached(*this);
+                behaviors.erase(it);
+                return;
+            }
+        }
+    }
+
+    // ----- Effects (per RFC-0009) ---------------------------------------
+    // Attached platform effects, MAUI's element.Effects. Prefer a handler
+    // for new code (ADR-0024); this exists for surface parity + legacy
+    // XAML lowering.
+    std::vector<std::shared_ptr<effect>> effects{};
+
+    template <class E, class... Args>
+    E& add_effect(Args&&... args) {
+        static_assert(std::is_base_of_v<effect, E>,
+                      "view::add_effect<E>: E must derive from mpapp::effect");
+        auto p = std::make_shared<E>(std::forward<Args>(args)...);
+        E& ref = *p;
+        effects.push_back(std::move(p));
+        ref.on_attached(*this);
         return ref;
     }
 
