@@ -14,6 +14,7 @@
 #include <memory>
 #include <string>
 
+#include <mpapp/carousel_view.hpp>
 #include <mpapp/entry.hpp>
 #include <mpapp/gestures/tap_gesture_recognizer.hpp>
 #include <mpapp/image.hpp>
@@ -50,6 +51,14 @@ struct section_page {
     // non-button control).
     std::unique_ptr<mpapp::picker> opt_picker{};
     mpapp::label*                  picker_sel_lbl = nullptr;
+
+    // Optional announcements carousel (only Информация uses one) — a real
+    // CarouselView (GtkStack / FlipView / ViewFlipper) paged by ◀ ▶ buttons
+    // that drive carousel.scroll_to → the native page switch.
+    std::unique_ptr<mpapp::carousel_view> opt_carousel{};
+    std::unique_ptr<click_button>         car_prev{};
+    std::unique_ptr<click_button>         car_next{};
+    box                                   car_nav{};
 
     // Begin a page: header bar + an empty content column ready for rows.
     void begin(const std::string& title, std::function<void()> on_menu) {
@@ -99,6 +108,35 @@ inline void build_information(section_page& p, const student& s) {
         p.line(a.key + " " + a.value);
     p.spacer();
     p.line(s.group_note);
+    p.spacer();
+
+    // Announcements as a real CarouselView (one page per message). The
+    // ◀ ▶ buttons drive carousel.scroll_to, which sets `position` and
+    // switches the native page (GtkStack / FlipView / ViewFlipper).
+    p.heading("Съобщения");
+    p.opt_carousel = std::make_unique<mpapp::carousel_view>();
+    p.opt_carousel->items_source = std::vector<std::string>{
+        "Записването за летния семестър е отворено до 15-ти.",
+        "Изпитната сесия започва на 1-ви юни.",
+        "Стипендиите се изплащат до 10-то число на месеца.",
+    };
+    p.opt_carousel->loop = true;
+    p.body.add(*p.opt_carousel);
+
+    section_page* pp = &p;
+    p.car_prev = std::make_unique<click_button>();
+    p.car_next = std::make_unique<click_button>();
+    p.car_prev->build("◀", [pp]() {
+        if (pp->opt_carousel)
+            pp->opt_carousel->scroll_to(pp->opt_carousel->position.get() - 1);
+    });
+    p.car_next->build("▶", [pp]() {
+        if (pp->opt_carousel)
+            pp->opt_carousel->scroll_to(pp->opt_carousel->position.get() + 1);
+    });
+    p.car_nav.horizontal(gap_md).add(p.car_prev->btn).add(p.car_next->btn);
+    p.car_nav.done();
+    p.body.add(p.car_nav.as_view());
     p.spacer();
     p.heading("Хронология на студентското състояние");
     for (const auto& r : s.status_history)
