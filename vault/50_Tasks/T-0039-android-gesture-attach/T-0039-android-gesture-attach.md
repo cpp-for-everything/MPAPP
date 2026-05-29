@@ -2,7 +2,7 @@
 type: task
 id: T-0039
 title: Android real gesture wire-up — android_gestures::attach over JNI + android.view.GestureDetector
-status: todo
+status: in-progress
 milestone: M-05
 owner: ""
 area: handlers
@@ -12,7 +12,7 @@ hasScreenshots: false
 hasRecordings: false
 tags:
   - type/task
-  - status/todo
+  - status/in-progress
   - area/handlers
   - phase/p5
   - platform/android
@@ -36,10 +36,16 @@ Android analog of `linux_gestures::attach`: install JNI-bridged native gesture l
 
 ## Acceptance Criteria
 
-- [ ] `include/mpapp/handlers/android/gesture_attach.hpp` + `src/handlers/android/gesture_attach.cpp` implement the C++ side of all 5 recognizers.
-- [ ] Java glue: `examples/android_hello/app/src/main/java/io/mpapp/MppGestureRouter.java` — mirrors `MppClickRouter`'s shape per [[ADR-0022-android-kind-discriminated-routers]].
-- [ ] Per-component `map_gestures` stubs replaced with calls into `android_gestures::attach`.
+- [x] `include/mpapp/handlers/android/gesture_attach.hpp` + `src/handlers/android/gesture_attach.cpp` implement the C++ side of **tap** (commit `0486df9`). Pan / pinch / swipe / pointer remain follow-up.
+- [x] Java glue: `examples/android_hello/app/src/main/java/io/mpapp/MppGestureRouter.java` — mirrors `MppClickRouter`'s shape per [[ADR-0022-android-kind-discriminated-routers]].
+- [x] Per-component `map_gestures` stubs replaced with calls into `android_gestures::attach` (label + button).
 - [ ] Rule-11 closure: recording of a tap on a non-button widget on a real Android device or emulator (the self-hosted `mpapp-windows-self` runner already has an Android emulator slot — see [[CI Strategy]]).
+
+## Implemented (tap — commit `0486df9`)
+
+`android_gestures::attach(jobject, view&)` walks `v.gesture_recognizers`; for each `gesture_kind::tap` it calls `View.setClickable(true)` and installs an `io.mpapp.MppGestureRouter` (a `View.OnClickListener`) constructed with `reinterpret_cast<jlong>(&tap)`. The router's `onClick` JNI-dispatches `Java_io_mpapp_MppGestureRouter_nativeDispatchTap(JNIEnv*, jclass, jlong)`, which `reinterpret_cast`s the recognizer pointer back and `emit`s its `tapped` signal. Same kind-discriminated-router pattern as `MppClickRouter` (ADR-0022). The Java class is resolved via `FindClass("io/mpapp/MppGestureRouter")` at runtime, so the native TU cross-compiles without it. Auto-globbed into the Android native build (`examples/android_hello/.../cpp/CMakeLists.txt` `GLOB src/handlers/android/*.cpp`).
+
+**Verification:** all four touched TUs (new `gesture_attach.cpp` + modified `button_handler.cpp` / `label_handler.cpp`) syntax-clean on both NDK r27 ABIs (`aarch64-linux-android28` + `x86_64-linux-android28`, `-std=c++2b`). On-device tap recording (Rule-11 gate) deferred — host PC in use; emulator route via `tools/dev/android-e2e.ps1`. This closes the **tap** half; the full 5-recognizer port stays the ticket's open scope.
 
 ## Notes
 
