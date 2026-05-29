@@ -56,6 +56,17 @@ void button_handler<platform::macos>::map_text(basic_button& b) {
     b.text.changed.subscribe(text_slot_, text_cb_);
 }
 
+void button_handler<platform::macos>::apply_semantics(const std::string& desc) {
+    if (!native_ || desc.empty()) return;
+    NSButton* btn = (__bridge NSButton*)native_;
+    [btn setAccessibilityLabel:[NSString stringWithUTF8String:desc.c_str()]];
+}
+
+void button_handler<platform::macos>::map_semantics(basic_button& b) {
+    apply_semantics(b.semantic_description.get());
+    b.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
+}
+
 void button_handler<platform::macos>::map_clicked(basic_button& b) {
     if (!native_) return;
     NSButton* btn = (__bridge NSButton*)native_;

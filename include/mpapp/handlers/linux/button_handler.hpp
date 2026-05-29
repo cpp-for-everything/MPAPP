@@ -27,6 +27,7 @@ public:
 
     void map_text(basic_button& b);
     void map_clicked(basic_button& b);
+    void map_semantics(basic_button& b);   // accessible name (a11y)
     // Walks `b.gesture_recognizers` and installs the matching
     // GtkGesture* controller for each one — see RFC-0003.
     void map_gestures(basic_button& b);
@@ -37,17 +38,24 @@ public:
 
 private:
     void apply_text(const std::string& text);
+    void apply_semantics(const std::string& desc);
 
     struct text_callback {
         button_handler<platform::linux_>* self = nullptr;
         void operator()(const std::string& v) const { self->apply_text(v); }
+    };
+    struct sem_callback {
+        button_handler<platform::linux_>* self = nullptr;
+        void operator()(const std::string& v) const { self->apply_semantics(v); }
     };
 
     void*                            native_      = nullptr; // GtkWidget*
     basic_button*                    bound_       = nullptr;
     unsigned long                    click_handler_id_ = 0;  // gulong from g_signal_connect
     text_callback                    text_cb_{this};
+    sem_callback                     sem_cb_{this};
     signal_slot<const std::string&>  text_slot_{};
+    signal_slot<const std::string&>  sem_slot_{};
 };
 
 } // namespace mpapp::internal

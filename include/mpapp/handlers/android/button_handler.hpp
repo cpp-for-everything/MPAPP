@@ -29,6 +29,7 @@ public:
 
     void map_text(basic_button& b);
     void map_clicked(basic_button& b);
+    void map_semantics(basic_button& b);   // contentDescription (a11y)
 
     // RFC-0003 stub: Android GestureDetector wire-up pending the
     // Android real-handler task. No-op today.
@@ -39,15 +40,22 @@ public:
 
 private:
     void apply_text(const std::string& text);
+    void apply_semantics(const std::string& desc);
 
     struct text_callback {
         button_handler<platform::android>* self = nullptr;
         void operator()(const std::string& v) const { self->apply_text(v); }
     };
+    struct sem_callback {
+        button_handler<platform::android>* self = nullptr;
+        void operator()(const std::string& v) const { self->apply_semantics(v); }
+    };
 
     jobject                          native_ = nullptr;  // global ref to Button
     text_callback                    text_cb_{this};
+    sem_callback                     sem_cb_{this};
     signal_slot<const std::string&>  text_slot_{};
+    signal_slot<const std::string&>  sem_slot_{};
 };
 
 // Called by the JNI bridge when the Java Button's onClick fires.

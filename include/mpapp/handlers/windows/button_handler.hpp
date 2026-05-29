@@ -41,6 +41,9 @@ public:
     // Wires the native `Click` event into `b.clicked`. Idempotent.
     void map_clicked(basic_button& b);
 
+    // Accessible name (AutomationProperties.Name).
+    void map_semantics(basic_button& b);
+
     // RFC-0003 stub: WinUI 3 GestureRecognizer wire-up pending the
     // Windows real-handler task. No-op today so the wrapper ctor's
     // unconditional `embedded_handler_.map_gestures(*this)` links.
@@ -52,6 +55,7 @@ public:
 
 private:
     void apply_text(std::string_view text);
+    void apply_semantics(std::string_view desc);
 
     // Tiny stable callable stored as a member so its address can be
     // handed to `signal::subscribe`, which holds it by reference. No
@@ -60,11 +64,17 @@ private:
         button_handler<platform::windows>* self = nullptr;
         void operator()(const std::string& v) const { self->apply_text(v); }
     };
+    struct sem_callback {
+        button_handler<platform::windows>* self = nullptr;
+        void operator()(const std::string& v) const { self->apply_semantics(v); }
+    };
 
     winrt::Microsoft::UI::Xaml::Controls::Button native_{nullptr};
     winrt::event_token                           click_token_{};
     signal_slot<const std::string&>              text_slot_{};
     text_callback                                text_callback_{this};
+    signal_slot<const std::string&>              sem_slot_{};
+    sem_callback                                 sem_callback_{this};
 };
 
 } // namespace mpapp::internal

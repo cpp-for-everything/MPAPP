@@ -22,6 +22,7 @@
 // IButtonBase::Click lives in the Primitives header — including
 // Controls.h alone leaves `consume_*::Click` forward-declared only.
 #include <winrt/Microsoft.UI.Xaml.h>
+#include <winrt/Microsoft.UI.Xaml.Automation.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
 
@@ -56,6 +57,18 @@ void button_handler<platform::windows>::map_text(basic_button& b) {
     apply_text(b.text.get());
     // signal::subscribe calls disconnect first, so this is idempotent.
     b.text.changed.subscribe(text_slot_, text_callback_);
+}
+
+void button_handler<platform::windows>::apply_semantics(std::string_view desc) {
+    if (native_ != nullptr && !desc.empty()) {
+        winrt::Microsoft::UI::Xaml::Automation::AutomationProperties::SetName(
+            native_, ::mpapp::detail::to_hstring_utf8(desc));
+    }
+}
+
+void button_handler<platform::windows>::map_semantics(basic_button& b) {
+    apply_semantics(b.semantic_description.get());
+    b.semantic_description.changed.subscribe(sem_slot_, sem_callback_);
 }
 
 void button_handler<platform::windows>::map_clicked(basic_button& b) {

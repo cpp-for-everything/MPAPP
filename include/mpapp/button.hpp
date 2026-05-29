@@ -71,6 +71,7 @@ public:
         set_handler(embedded_handler_);
         embedded_handler_.map_text(*this);
         embedded_handler_.map_clicked(*this);
+        embedded_handler_.map_semantics(*this);
         // RFC-0003: walk basic_view::gesture_recognizers and install
         // the per-platform native listeners. No-op on platform::mock;
         // attaches GtkGesture* on Linux, UI*GestureRecognizer on

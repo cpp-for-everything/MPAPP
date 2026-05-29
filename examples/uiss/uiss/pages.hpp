@@ -56,6 +56,8 @@ struct section_page {
         title_lbl.font_size  = 20.0;
         title_lbl.text_color = tu_blue;
         menu_btn.build("≡", std::move(on_menu));   // ≡
+        // Accessibility: the glyph alone is meaningless to a screen reader.
+        menu_btn.btn.semantic_description = "Отвори навигацията";
         header.horizontal(gap_md, mpapp::thickness{pad_md})
               .add(menu_btn.btn)
               .add(title_lbl);

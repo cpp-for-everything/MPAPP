@@ -49,6 +49,11 @@ public:
         b.clicked.subscribe(clicked_slot_, clicked_cb_);
     }
 
+    void map_semantics(basic_button& b) {
+        record_change("semantic_description", b.semantic_description.get());
+        b.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
+    }
+
     // Helper: simulate the platform raising the native click. The
     // cross-platform `clicked` signal forwards to subscribers (including
     // ours, which appends `"clicked"` to the call log).
@@ -71,6 +76,10 @@ private:
     mock_property_recorder<button_handler<platform::mock>, std::string> text_cb_{
         this, "text"};
     signal_slot<const std::string&> text_slot_{};
+
+    mock_property_recorder<button_handler<platform::mock>, std::string> sem_cb_{
+        this, "semantic_description"};
+    signal_slot<const std::string&> sem_slot_{};
 
     click_recorder        clicked_cb_{this};
     signal_slot<>         clicked_slot_{};

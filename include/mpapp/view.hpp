@@ -111,6 +111,12 @@ public:
     // ----- Identity / accessibility -------------------------------------
     Observable<std::string>                 automation_id{""};
     Observable<std::optional<std::string>>  tool_tip{std::nullopt};
+    // Screen-reader accessible name (MAUI SemanticProperties.Description).
+    // "" = unset: real handlers leave the platform default (e.g. a button's
+    // own text) in place. Applied by the per-control handler's
+    // `map_semantics` (GTK accessible label / WinUI AutomationProperties.Name
+    // / Android contentDescription).
+    Observable<std::string>                 semantic_description{""};
 
     // ----- Layout -------------------------------------------------------
     Observable<double>                      width{-1.0};          // -1 = unset / auto

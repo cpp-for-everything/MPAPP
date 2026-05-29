@@ -51,6 +51,18 @@ void button_handler<platform::linux_>::map_text(basic_button& b) {
     b.text.changed.subscribe(text_slot_, text_cb_);
 }
 
+void button_handler<platform::linux_>::apply_semantics(const std::string& desc) {
+    if (native_ == nullptr || desc.empty()) return;
+    gtk_accessible_update_property(
+        GTK_ACCESSIBLE(static_cast<GtkWidget*>(native_)),
+        GTK_ACCESSIBLE_PROPERTY_LABEL, desc.c_str(), -1);
+}
+
+void button_handler<platform::linux_>::map_semantics(basic_button& b) {
+    apply_semantics(b.semantic_description.get());
+    b.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
+}
+
 void button_handler<platform::linux_>::map_gestures(basic_button& b) {
     if (native_ == nullptr) return;
     linux_gestures::attach(static_cast<GtkWidget*>(native_), b);

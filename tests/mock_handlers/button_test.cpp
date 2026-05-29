@@ -74,3 +74,19 @@ TEST_CASE("button mock handler records click forwarding", "[mock][button]") {
 
     REQUIRE(h.calls_as_strings() == std::vector<std::string>{"clicked", "clicked"});
 }
+
+TEST_CASE("button mock handler records accessible name", "[mock][button][a11y]") {
+    mpapp::internal::basic_button b;
+    button_mock                   h;
+
+    b.semantic_description = "Open menu";
+    h.map_semantics(b);
+    REQUIRE(h.calls_as_strings() ==
+            std::vector<std::string>{"semantic_description=Open menu"});
+
+    h.clear_calls();
+    b.semantic_description = "Close menu";
+    b.semantic_description = "Close menu";   // idempotent
+    REQUIRE(h.calls_as_strings() ==
+            std::vector<std::string>{"semantic_description=Close menu"});
+}

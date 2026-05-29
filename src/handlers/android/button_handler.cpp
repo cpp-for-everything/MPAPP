@@ -40,6 +40,21 @@ void button_set_text(JNIEnv* env, jobject btn, const std::string& text) {
     env->DeleteLocalRef(cls);
 }
 
+void button_set_content_description(JNIEnv* env, jobject btn, const std::string& desc) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/view/View");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setContentDescription",
+                                   "(Ljava/lang/CharSequence;)V");
+    if (m != nullptr) {
+        jstring jstr = env->NewStringUTF(desc.c_str());
+        env->CallVoidMethod(btn, m, jstr);
+        if (env->ExceptionCheck()) env->ExceptionClear();
+        env->DeleteLocalRef(jstr);
+    }
+    env->DeleteLocalRef(cls);
+}
+
 } // namespace
 
 button_handler<platform::android>::button_handler() {
@@ -68,6 +83,18 @@ void button_handler<platform::android>::apply_text(const std::string& text) {
 void button_handler<platform::android>::map_text(basic_button& b) {
     apply_text(b.text.get());
     b.text.changed.subscribe(text_slot_, text_cb_);
+}
+
+void button_handler<platform::android>::apply_semantics(const std::string& desc) {
+    if (native_ == nullptr || desc.empty()) return;
+    JNIEnv* env = ::mpapp::detail::attach_current_thread();
+    if (env == nullptr) return;
+    button_set_content_description(env, native_, desc);
+}
+
+void button_handler<platform::android>::map_semantics(basic_button& b) {
+    apply_semantics(b.semantic_description.get());
+    b.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
 }
 
 void button_handler<platform::android>::map_clicked(basic_button& b) {

@@ -55,6 +55,17 @@ void button_handler<platform::ios>::map_text(basic_button& b) {
     b.text.changed.subscribe(text_slot_, text_cb_);
 }
 
+void button_handler<platform::ios>::apply_semantics(const std::string& desc) {
+    if (!native_ || desc.empty()) return;
+    UIButton* btn = (__bridge UIButton*)native_;
+    btn.accessibilityLabel = [NSString stringWithUTF8String:desc.c_str()];
+}
+
+void button_handler<platform::ios>::map_semantics(basic_button& b) {
+    apply_semantics(b.semantic_description.get());
+    b.semantic_description.changed.subscribe(sem_slot_, sem_cb_);
+}
+
 void button_handler<platform::ios>::map_clicked(basic_button& b) {
     if (!native_) return;
     UIButton* btn = (__bridge UIButton*)native_;
