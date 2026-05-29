@@ -50,7 +50,7 @@ Both commands store `std::function`s for execute + can_execute. `relay_command` 
 ## Open Questions
 
 > [!todo] Open
-> - [ ] A `command` property on the relevant controls (button/menu items/gestures) that auto-invokes the bound `command_base` on activation + toggles `is_enabled` from `can_execute`.
+> - [~] A `command` property on the relevant controls — **done for Button**: `basic_button` has `Observable<shared_ptr<command_base>> command` and executes it (self-gated) on click. Remaining: menu items / gesture recognizers, and binding `is_enabled <- can_execute()` (auto-disable).
 > - [ ] `<Button Command="{Binding Save}">` XAML lowering — mpapp-xc (M-09).
 > - [ ] An `async_relay_command` returning `task<void>` (ADR-0019) for awaitable command bodies.
 

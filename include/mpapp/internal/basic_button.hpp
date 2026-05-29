@@ -17,8 +17,10 @@
 #ifndef MPAPP_INTERNAL_BASIC_BUTTON_HPP
 #define MPAPP_INTERNAL_BASIC_BUTTON_HPP
 
+#include <memory>
 #include <string>
 
+#include "../binding/relay_command.hpp"   // RFC-0014 — command_base for button.command
 #include "../control.hpp"
 #include "../observable.hpp"
 #include "../platform.hpp"
@@ -36,7 +38,12 @@ class button_handler;
 
 class basic_button : public control<basic_button> {
 public:
-    basic_button() = default;
+    basic_button() {
+        // RFC-0014: when clicked, invoke the bound command (if any).
+        // command_base::execute() self-gates on can_execute(), matching
+        // MAUI's Button.Command behaviour.
+        clicked.subscribe(command_invoke_slot_, command_invoke_cb_);
+    }
 
     basic_button(const basic_button&)            = delete;
     basic_button& operator=(const basic_button&) = delete;
@@ -45,6 +52,12 @@ public:
 
     // ----- Properties ----------------------------------------------------
     Observable<std::string> text{""};
+
+    // ----- Command (RFC-0014) -------------------------------------------
+    // The bound ICommand. Set `command = std::make_shared<relay_command>(…)`
+    // and the button executes it on click (gated by can_execute). MAUI's
+    // Button.Command. Binding is_enabled <- can_execute() is a follow-up.
+    Observable<std::shared_ptr<command_base>> command{};
 
     // ----- Events --------------------------------------------------------
     mpapp::signal<>         clicked;
@@ -58,6 +71,17 @@ public:
     void set_handler(button_handler<platform::current>& h) noexcept { handler_ = &h; }
 
 private:
+    struct command_invoke_cb_t {
+        basic_button* self;
+        void operator()() const {
+            if (auto c = self->command.get()) {
+                c->execute();   // self-gates on can_execute()
+            }
+        }
+    };
+
+    command_invoke_cb_t                command_invoke_cb_{ this };
+    signal_slot<>                      command_invoke_slot_{};
     button_handler<platform::current>* handler_ = nullptr;
 };
 
