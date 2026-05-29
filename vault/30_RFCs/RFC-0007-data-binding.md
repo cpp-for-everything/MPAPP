@@ -70,7 +70,7 @@ Holds a `std::tuple` of source pointers, per-source member callbacks, and per-so
 > - [ ] `DataTemplate` / `DataTemplateSelector` generalization (today `CollectionView::item_template` + `bindable_layout`'s `data_template` are bespoke). Fold into a shared `data_template` in a follow-up.
 > - [ ] `{Binding}` / `{Binding Path=…}` XAML lowering — mpapp-xc (M-09), lowers a string path onto a typed accessor against the `BindingContext`.
 > - [ ] `RelativeSource TemplatedParent` — needs the control-template machinery.
-> - [ ] String-formatted bindings (`StringFormat`) — a converter shorthand; sugar over `to_target`.
+> - [x] String-formatted bindings (`StringFormat`) + a value-converter library — **done** ([[T-0058-value-converters]]): `include/mpapp/binding/converters.hpp` ships `invert_bool_converter`, `bool_to_visibility_converter`, and `format_with<T>` / `to_string_converter<T>` (the StringFormat shorthand), each as both a `value_converter<S,T>` object and a `std::function` helper for the converter slot. The `<format>`-based converters are gated for Android NDK (same guard as view.hpp).
 
 ## Migration / Compatibility
 
