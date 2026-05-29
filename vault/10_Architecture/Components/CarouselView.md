@@ -2,21 +2,21 @@
 type: component
 mauiHandler: "CarouselView"
 mauiDocUrl: "https://learn.microsoft.com/en-us/dotnet/maui/user-interface/controls/carouselview"
-mpappStatus: mock
-platformWindows: false
-platformAndroid: false
-platformLinux: false
+mpappStatus: android-real
+platformWindows: true
+platformAndroid: true
+platformLinux: true
 platformMacos: false
 platformIos: false
 tags:
   - type/component
-  - status/mock
+  - status/android-real
 ---
 
 # CarouselView
 
-> [!info] Status — mock
-> The last MAUI control with no MPAPP counterpart, filled mock-first. The `mpapp::internal::basic_carousel_view` surface + mock handler + tests are in; per-platform real handlers are the standard follow-up (mock → platform-real).
+> [!info] Status — android-real (real on Win + Linux + Android)
+> Real per-platform handlers are in: WinUI `FlipView`, GTK4 `GtkStack` + swipe gesture, Android `ViewFlipper`. The `mpapp::carousel_view` wrapper (ADR-0024) + the `mpapp::internal::basic_carousel_view` surface + mock handler + tests all exist. macOS/iOS handlers are **blind-written** (compiled+run on a Mac: PENDING). The УИСС reference app exercises it (Информация-page announcements carousel, paged by ◀ ▶ buttons).
 
 ## Overview
 
@@ -24,7 +24,7 @@ tags:
 
 ## Wrapper + Surface
 
-Per [[ADR-0024-wrapper-component-pattern]], a concrete control has a `basic_<name>` surface + a `mpapp::<name>` wrapper. At `mock` status only the **surface** (`internal::basic_carousel_view`) + the **mock handler** exist; the wrapper lands with the per-platform real handlers.
+Per [[ADR-0024-wrapper-component-pattern]], a concrete control has a `basic_<name>` surface + a `mpapp::<name>` wrapper. The `mpapp::carousel_view` wrapper embeds the platform-current handler by value and auto-binds it in its constructor (`map_items_source` / `map_position` / `map_loop` / `map_is_swipe_enabled` / `map_peek_count` / `map_gestures`), so app code reads `mpapp::carousel_view c; c.items_source = {...};` with no separate handler variable.
 
 ```cpp
 namespace mpapp::internal {
@@ -44,14 +44,16 @@ public:
 
 `scroll_to` wraps the target index modulo `item_count()` when `loop` is set, else clamps to `[0, count-1]`, and fires `position_changed` only on a real change.
 
-## Per-platform plan (follow-ups)
+## Per-platform handlers (implemented)
 
-| Platform | Native widget |
-|---|---|
-| Windows | `Microsoft.UI.Xaml.Controls.FlipView` |
-| Linux | `Adw.Carousel` (libadwaita) or a `GtkStack` + swipe gesture |
-| Android | `androidx.viewpager2.widget.ViewPager2` |
-| macOS / iOS | `NSPageController` / `UIPageViewController` (blind, Apple-host pending) |
+| Platform | Native widget | Status | Notes |
+|---|---|---|---|
+| Windows | `Microsoft.UI.Xaml.Controls.FlipView` | **real** | `SelectedIndex` ↔ `position`; `SelectionChanged` drives `position_changed`. Swipe is always touch-enabled (no public `IsSwipeEnabled`). |
+| Linux | `GtkStack` + `GtkGestureSwipe` | **real** | One named page per item; horizontal fling → `scroll_to(±1)`. `Adw.Carousel` (peek/native-swipe) is a libadwaita follow-up. |
+| Android | `android.widget.ViewFlipper` | **real** | Framework built-in (no androidx); `setDisplayedChild(position)`. Programmatic + tap-driven; `ViewPager2` fling paging is a follow-up. |
+| macOS / iOS | `NSView` / `UIView` one-visible-page | **blind** | Compiled+run on a Mac: PENDING. `NSPageController` / `UIPageViewController` swipe is a follow-up. |
+
+Cross-platform notes: `loop`/clamp is applied in `basic_carousel_view::scroll_to` (platform-neutral); `peek_count` shows a single page on every desktop/mobile widget in v1 (real peek-area insets are a per-platform follow-up).
 
 ## MAUI Reference
 

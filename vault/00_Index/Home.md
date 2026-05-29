@@ -92,7 +92,7 @@ See [[CLAUDE]] for the full text.
 - **21 accepted + 2 proposed ADRs** (proposed are ADR-0015 graphics dual + ADR-0023 shell route guards): see [[Decisions MOC]] or [[_Bases/ADRs.base]]
 - 0 open RFCs (RFC-0001 and RFC-0002 both accepted): see [[_Bases/RFCs.base]]
 - **12 milestones** (M-04c `active`): [[Roadmap MOC]] or [[_Canvases/Phase-Roadmap.canvas|Phase Roadmap canvas]]
-- **64 components, 61 at `android-real` on Win + Linux + Android**: [[Components MOC]] or [[Controls Inventory]]
+- **64 components, 62 at `android-real` on Win + Linux + Android**: [[Components MOC]] or [[Controls Inventory]]
 - Architecture canvases: [[_Canvases/Architecture-Overview.canvas|Architecture]], [[_Canvases/Build-Dependency-Graph.canvas|Build Graph]], [[_Canvases/Phase-Roadmap.canvas|Roadmap]], [[_Canvases/Interop-Parity-Matrix.canvas|Interop Parity]], [[_Canvases/Cross-Compilation-Matrix.canvas|Cross-compilation]]
 - Most recent log: [[90_Logs/2026-W21-autonomous-m04c-push|2026-W21 autonomous M-04c push]]
 - Decision log: [[Decision Log]]
