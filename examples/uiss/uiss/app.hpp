@@ -22,6 +22,7 @@
 #include <string>
 
 #include <mpapp/application.hpp>
+#include <mpapp/essentials/file_preferences.hpp>
 #include <mpapp/flyout_page.hpp>
 #include <mpapp/label.hpp>
 #include <mpapp/page.hpp>
@@ -95,6 +96,8 @@ private:
 
     void build_login() {
         login_.build([this]() { try_login(); });
+        // Essentials: prefill the last faculty number from persisted prefs.
+        login_.fac_entry.text = prefs_.get("last_faculty", std::string{});
     }
 
     void build_sections() {
@@ -115,6 +118,7 @@ private:
         if (fac == student_.faculty_number && !id.empty()) {
             logged_in_ = true;
             login_.status_lbl.text = "";
+            prefs_.set("last_faculty", fac);   // Essentials: remember it
             navigate(section::information);
             fp_.present();    // reveal the nav menu
         } else {
@@ -143,6 +147,8 @@ private:
 
     student student_{};
     bool     logged_in_ = false;
+    // Essentials: real persistent settings store (file-backed, no ifdefs).
+    mpapp::file_preferences prefs_{mpapp::default_preferences_path("uiss")};
 
     mpapp::window      window_{};
     mpapp::flyout_page fp_{};
