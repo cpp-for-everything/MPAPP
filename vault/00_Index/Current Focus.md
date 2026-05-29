@@ -19,9 +19,10 @@ tags:
 > - [[RFC-0003-gesture-recognizers]] — `view::gesture_recognizers` + tap / pan / pinch / swipe / pointer recognizers. Linux real wire-up via GtkGesture controllers; Win / Android / macOS / iOS captured as T-0038 / T-0039 / T-0040 / T-0041.
 > - [[RFC-0004-image-source-family]] — polymorphic `image_source_ref` over file / uri / stream / font / resource sources; `image::source_object` carries the rich source alongside the legacy string `source`. Per-platform real loaders deferred to T-0045 / T-0046 / T-0047 / T-0048 / T-0049 follow-ups.
 > - [[RFC-0005-resource-dictionaries-and-styling]] — `resource_dictionary` with merged-dictionary composition, `find_in<T>` hierarchical walker over `view::resources` + the new `view::parent_` pointer, `style` with `based_on` setter chains. Closed by [[T-0044-resource-dictionary-styling-mock]]. XAML lowering of `{StaticResource}` / `<Style TargetType=…>` deferred to mpapp-xc (M-09).
-> - [[RFC-0006-visual-state-manager]] — `visual_state_manager` with grouped pseudo-state setters (Normal / Pressed / PointerOver / Disabled / Focused / Selected), `go_to_state(view, name)` walking every group + applying matching state's setters. Closed by [[T-0050-rfc-0006-vsm-mock]]. Per-platform real auto-routing of system input events deferred to T-0051+ stubs (to be opened).
+> - [[RFC-0006-visual-state-manager]] — `visual_state_manager` with grouped pseudo-state setters (Normal / Pressed / PointerOver / Disabled / Focused / Selected), `go_to_state(view, name)` walking every group + applying matching state's setters. Closed by [[T-0050-rfc-0006-vsm-mock]].
+> - [[RFC-0007-data-binding]] — **the keystone.** `binding<S,T>` (one_way / two_way / one_time / one_way_to_source + converters), `multi_binding`, type-erased `binding_context` inherited down the view tree, `find_ancestor` / `RelativeSource`. Composes with `Observable`/`signal`/`Computed`, no macros; platform-neutral (drives the existing Observable→handler pipeline). Closed by [[T-0051-data-binding-engine]]. Unblocks triggers, converter-driven UI, and `{Binding}` XAML lowering.
 >
-> CI test count is **403 / 403 green on Linux WSL** as of the RFC-0006 landing (351 → 403 across the four subsystems).
+> CI test count is **416 / 416 green on Linux WSL** (351 → 416 across the subsystems). **Windows is back as a green CI gate** (T-0032 Path B): core + full suite build SDK-free, 398/398 on MSVC. **Android build repaired** (APK builds again).
 
 ## Where we are now
 

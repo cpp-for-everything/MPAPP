@@ -32,6 +32,7 @@
 #  define MPAPP_VIEW_HAS_STD_FORMAT 1
 #endif
 
+#include "binding/binding_context.hpp"            // for view::binding_context (RFC-0007)
 #include "command.hpp"
 #include "internal/basic_gesture_recognizer.hpp"  // for view::gesture_recognizers
 #include "observable.hpp"
@@ -200,6 +201,19 @@ public:
     [[nodiscard]] view* parent() const noexcept { return parent_; }
     void               set_parent(view* p) noexcept { parent_ = p; }
 
+    // ----- Data-binding context (per RFC-0007) --------------------------
+    // The view's LOCAL binding context. Empty by default; the inherited
+    // (effective) context — a child uses its own if set, else the nearest
+    // ancestor's — is resolved by `effective_binding_context(view)` in
+    // <mpapp/binding/relative_source.hpp>, which walks the `parent()`
+    // chain. Mirrors MAUI's BindingContext + its inheritance down the
+    // visual tree.
+    [[nodiscard]] binding_context&       local_binding_context() noexcept       { return binding_ctx_; }
+    [[nodiscard]] const binding_context& local_binding_context() const noexcept { return binding_ctx_; }
+
+    template <class C>
+    void set_binding_context(std::shared_ptr<C> ctx) { binding_ctx_.set(std::move(ctx)); }
+
     // ----- Handler ------------------------------------------------------
     view_handler<platform::current>&       handler() noexcept       { return *handler_; }
     const view_handler<platform::current>& handler() const noexcept { return *handler_; }
@@ -208,6 +222,7 @@ public:
 
 private:
     view*                            parent_  = nullptr;
+    binding_context                  binding_ctx_{};
     view_handler<platform::current>* handler_ = nullptr;
 };
 
