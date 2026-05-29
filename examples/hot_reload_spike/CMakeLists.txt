@@ -1,13 +1,12 @@
-# T-0010 hot-reload spike — Windows-only host program.
+# T-0010 hot-reload spike — desktop host program (Windows + Linux).
 #
-# The host (host.exe) links mpapp-core which already pulls in the
-# hot_reload runtime via src/hot_reload/windows.cpp. user_code.cpp is NOT
-# built by CMake; the host's runtime invokes clang++ at run time to
-# produce user_code.dll next to it. user_code.cpp is, however, copied into
-# the build directory so the host can find and recompile it from the
-# default cwd.
+# The host links mpapp-core which pulls in the hot_reload runtime via
+# src/hot_reload/{windows,linux}.cpp. user_code.cpp is NOT built by CMake;
+# the host's runtime invokes the compiler at run time to produce a sibling
+# user_code.{dll,so}. user_code.cpp is copied into the build directory so
+# the host can find and recompile it from the default cwd.
 
-if(NOT WIN32)
+if(NOT WIN32 AND NOT (UNIX AND NOT APPLE))
     return()
 endif()
 

@@ -43,6 +43,7 @@ if(UNIX AND NOT APPLE)
     add_subdirectory(gtk4_hybridwebview_demo)
     add_subdirectory(gtk4_vsm_demo)
     add_subdirectory(uiss)
+    add_subdirectory(hot_reload_spike)
 endif()
 
 # Cross-platform CLI demo of the canvas facade (ADR-0015). Renders

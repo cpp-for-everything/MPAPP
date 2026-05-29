@@ -169,6 +169,8 @@ endif()
 
 if(WIN32)
     list(APPEND MPAPP_CORE_SOURCES src/hot_reload/windows.cpp)
+elseif(UNIX AND NOT APPLE)
+    list(APPEND MPAPP_CORE_SOURCES src/hot_reload/linux.cpp)
 endif()
 
 add_library(mpapp-core STATIC ${MPAPP_CORE_SOURCES})
@@ -177,6 +179,11 @@ target_include_directories(mpapp-core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
+
+# Hot-reload runtime (Linux) loads images via dlopen — link libdl.
+if(UNIX AND NOT APPLE)
+    target_link_libraries(mpapp-core PUBLIC ${CMAKE_DL_LIBS})
+endif()
 
 # Cairo backend wiring — include paths + link flags from pkg-config.
 # Include path is PUBLIC because tests in this repo include
