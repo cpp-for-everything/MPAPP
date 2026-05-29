@@ -32,6 +32,11 @@ _add_registrars.py
 # when a WSL `>` redirect interprets a Windows path literally.
 D:GitHubMPAPP_logs_*.log
 
+# УИСС reference screens — saved portal pages (examples/УИСС/*.mhtml)
+# contain real personal data; kept local only. The reference content is
+# transcribed + anonymized into examples/uiss/uiss/data.hpp.
+examples/УИСС/
+
 # OS
 Thumbs.db
 .DS_Store
