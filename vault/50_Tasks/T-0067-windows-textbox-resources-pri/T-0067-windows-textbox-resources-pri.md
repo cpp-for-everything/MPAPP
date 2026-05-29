@@ -103,6 +103,31 @@ in the priconfig `<index>`.
       → screenshot the picker. Save shots to this task's `screenshots/`.
 - [ ] Confirm the same fix lets `windows_button_spike` etc. host a TextBox.
 
+## Update — pri generation works; the gap is pri *loading*
+Generated a correct merged app pri via `makepri new /pr <stage-with-the-4
+framework win-x64 PRIs> /cf priconfig.xml /of resources.pri /in uiss /o`
+(861 KB). `makepri dump` confirms it embeds the theme resources as
+**EmbeddedData** under `ms-resource://uiss/Files/Microsoft.UI.Xaml/Themes/
+themeresources.xbf` — exactly the URI ms-appx resolves to for the unpackaged
+"uiss" package. **But deploying it next to the exe does NOT change the crash:
+minimal-pri, merged-pri, and no-pri all produce the identical generic E_FAIL.**
+⇒ Decisive conclusion: **unpackaged WinUI 3 is not loading `<exedir>\
+resources.pri`** in this hand-rolled CMake setup. So the fix is not just
+*making* the right pri — it's getting MRT/WinUI to *load* it.
+
+Next directions to try (in order):
+1. Generate the pri via the **WindowsAppSDK MSBuild MrtCore targets** (build a
+   tiny stub `.vcxproj` that `<Import>`s the SDK props/targets so it emits a
+   correctly-registered `resources.pri` + whatever load wiring it adds), then
+   mirror that wiring in CMake. This is the canonical, supported path.
+2. Investigate whether MRT auto-load needs the pri's primary map name to equal
+   the app's runtime identity (try `/in` = exe module name / AUMID), or whether
+   an explicit `ResourceManager`/`ResourceContext` init is required at startup
+   for unpackaged.
+3. Consider giving `uiss` (and the Windows examples) a lightweight **MSIX
+   packaging** path for the demo, where pri + framework resources resolve by
+   construction.
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
