@@ -22,18 +22,18 @@ Java_io_mpapp_MppTextWatcher_nativeDispatchTextChanged(
 
     switch (kind) {
         case 1:  // entry_handler
-            mpapp::android_entry_dispatch_text_changed(
-                reinterpret_cast<mpapp::entry_handler<mpapp::platform::android>*>(handler_ptr),
+            mpapp::internal::android_entry_dispatch_text_changed(
+                reinterpret_cast<mpapp::internal::entry_handler<mpapp::platform::android>*>(handler_ptr),
                 s);
             return;
         case 2:  // editor_handler
-            mpapp::android_editor_dispatch_text_changed(
-                reinterpret_cast<mpapp::editor_handler<mpapp::platform::android>*>(handler_ptr),
+            mpapp::internal::android_editor_dispatch_text_changed(
+                reinterpret_cast<mpapp::internal::editor_handler<mpapp::platform::android>*>(handler_ptr),
                 s);
             return;
         case 3:  // entry_cell_handler
-            mpapp::android_entry_cell_dispatch_text_changed(
-                reinterpret_cast<mpapp::entry_cell_handler<mpapp::platform::android>*>(handler_ptr),
+            mpapp::internal::android_entry_cell_dispatch_text_changed(
+                reinterpret_cast<mpapp::internal::entry_cell_handler<mpapp::platform::android>*>(handler_ptr),
                 s);
             return;
         default:

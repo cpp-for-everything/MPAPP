@@ -179,8 +179,8 @@ extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_MppSeekBarChangeListener_nativeDispatchProgress(
     JNIEnv* /*env*/, jclass /*cls*/, jlong handler_ptr, jint progress, jint max) {
     if (handler_ptr == 0) return;
-    mpapp::android_slider_dispatch_progress(
-        reinterpret_cast<mpapp::slider_handler<mpapp::platform::android>*>(handler_ptr),
+    mpapp::internal::android_slider_dispatch_progress(
+        reinterpret_cast<mpapp::internal::slider_handler<mpapp::platform::android>*>(handler_ptr),
         static_cast<int>(progress), static_cast<int>(max));
 }
 

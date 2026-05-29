@@ -179,8 +179,8 @@ extern "C" JNIEXPORT void JNICALL
 Java_io_mpapp_MppNumberPickerListener_nativeDispatchValue(
     JNIEnv* /*env*/, jclass /*cls*/, jlong handler_ptr, jint value) {
     if (handler_ptr == 0) return;
-    mpapp::android_stepper_dispatch_value(
-        reinterpret_cast<mpapp::stepper_handler<mpapp::platform::android>*>(handler_ptr),
+    mpapp::internal::android_stepper_dispatch_value(
+        reinterpret_cast<mpapp::internal::stepper_handler<mpapp::platform::android>*>(handler_ptr),
         static_cast<int>(value));
 }
 

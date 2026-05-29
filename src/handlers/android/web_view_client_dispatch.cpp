@@ -16,8 +16,8 @@ Java_io_mpapp_MppWebViewClient_nativeDispatchPageStarted(
     const char* utf8 = (url != nullptr) ? env->GetStringUTFChars(url, nullptr) : nullptr;
     std::string s = (utf8 != nullptr) ? std::string{utf8} : std::string{};
     if (utf8 != nullptr) env->ReleaseStringUTFChars(url, utf8);
-    mpapp::android_web_view_dispatch_page_started(
-        reinterpret_cast<mpapp::web_view_handler<mpapp::platform::android>*>(handler_ptr),
+    mpapp::internal::android_web_view_dispatch_page_started(
+        reinterpret_cast<mpapp::internal::web_view_handler<mpapp::platform::android>*>(handler_ptr),
         s);
 }
 
@@ -28,8 +28,8 @@ Java_io_mpapp_MppWebViewClient_nativeDispatchPageFinished(
     const char* utf8 = (url != nullptr) ? env->GetStringUTFChars(url, nullptr) : nullptr;
     std::string s = (utf8 != nullptr) ? std::string{utf8} : std::string{};
     if (utf8 != nullptr) env->ReleaseStringUTFChars(url, utf8);
-    mpapp::android_web_view_dispatch_page_finished(
-        reinterpret_cast<mpapp::web_view_handler<mpapp::platform::android>*>(handler_ptr),
+    mpapp::internal::android_web_view_dispatch_page_finished(
+        reinterpret_cast<mpapp::internal::web_view_handler<mpapp::platform::android>*>(handler_ptr),
         s,
         success == JNI_TRUE);
 }

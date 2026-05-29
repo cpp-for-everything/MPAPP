@@ -50,7 +50,7 @@
 #include <mpapp/handlers/shape_view_handler.hpp>
 #include <mpapp/handlers/check_box_handler.hpp>
 #include <mpapp/handlers/entry_handler.hpp>
-#include <mpapp/handlers/jni_bridge.hpp>
+#include <mpapp/handlers/android/jni_bridge.hpp>
 #include <mpapp/handlers/label_handler.hpp>
 #include <mpapp/handlers/scroll_view_handler.hpp>
 #include <mpapp/handlers/slider_handler.hpp>

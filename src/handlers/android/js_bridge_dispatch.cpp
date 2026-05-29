@@ -17,8 +17,8 @@ Java_io_mpapp_MppJsBridge_nativeDispatchInbound(
     const char* utf8 = (payload != nullptr) ? env->GetStringUTFChars(payload, nullptr) : nullptr;
     std::string s = (utf8 != nullptr) ? std::string{utf8} : std::string{};
     if (utf8 != nullptr) env->ReleaseStringUTFChars(payload, utf8);
-    mpapp::android_hybrid_web_view_dispatch_inbound(
-        reinterpret_cast<mpapp::hybrid_web_view_handler<mpapp::platform::android>*>(handler_ptr),
+    mpapp::internal::android_hybrid_web_view_dispatch_inbound(
+        reinterpret_cast<mpapp::internal::hybrid_web_view_handler<mpapp::platform::android>*>(handler_ptr),
         s);
 }
 

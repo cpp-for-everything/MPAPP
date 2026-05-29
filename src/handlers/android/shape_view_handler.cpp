@@ -331,7 +331,7 @@ Java_io_mpapp_MppShapeViewLayoutListener_nativeOnLayoutChanged(
     jlong   owner_ptr,
     jint    w,
     jint    h) {
-    auto* self = reinterpret_cast<mpapp::shape_view_handler<mpapp::platform::android>*>(owner_ptr);
+    auto* self = reinterpret_cast<mpapp::internal::shape_view_handler<mpapp::platform::android>*>(owner_ptr);
     if (self != nullptr) self->on_layout_changed(static_cast<int>(w), static_cast<int>(h));
 }
 

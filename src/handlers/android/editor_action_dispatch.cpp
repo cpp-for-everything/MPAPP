@@ -15,8 +15,8 @@ Java_io_mpapp_MppEditorActionListener_nativeDispatchEditorAction(
     if (owner_ptr == 0) return;
     switch (kind) {
         case 1:  // entry_cell_handler
-            mpapp::android_entry_cell_dispatch_editor_action(
-                reinterpret_cast<mpapp::entry_cell_handler<mpapp::platform::android>*>(owner_ptr),
+            mpapp::internal::android_entry_cell_dispatch_editor_action(
+                reinterpret_cast<mpapp::internal::entry_cell_handler<mpapp::platform::android>*>(owner_ptr),
                 static_cast<int>(action_id));
             return;
         default:
