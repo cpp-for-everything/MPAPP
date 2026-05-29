@@ -48,7 +48,9 @@ public:
 
 // `embedded_handler_.map_gestures(*this);` links.
 
-void map_gestures(basic_label& /*x*/) noexcept {}
+// RFC-0003: wires the view's gesture recognizers (tap / pointer) onto the
+// native TextBlock via WinUI routed input events.
+void map_gestures(basic_label& x);
 
 
 private:

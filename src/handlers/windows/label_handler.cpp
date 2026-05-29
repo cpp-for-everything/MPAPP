@@ -17,6 +17,7 @@
 #include <winrt/Windows.UI.h>
 
 #include "winrt_strings.hpp"
+#include "mpapp/handlers/windows/gesture_attach.hpp"
 
 namespace mpapp::internal {
 
@@ -90,6 +91,10 @@ void label_handler<platform::windows>::map_font_family(basic_label& l) {
 void label_handler<platform::windows>::map_text_color(basic_label& l) {
     apply_text_color(l.text_color.get());
     l.text_color.changed.subscribe(tcolor_slot_, tcolor_callback_);
+}
+
+void label_handler<platform::windows>::map_gestures(basic_label& x) {
+    windows_gestures::attach(native_, x);
 }
 
 } // namespace mpapp::internal

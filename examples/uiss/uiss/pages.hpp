@@ -15,6 +15,7 @@
 #include <string>
 
 #include <mpapp/entry.hpp>
+#include <mpapp/gestures/tap_gesture_recognizer.hpp>
 #include <mpapp/image.hpp>
 #include <mpapp/label.hpp>
 #include <mpapp/page.hpp>
@@ -214,6 +215,17 @@ struct login_page {
     click_button  login_btn{};
     mpapp::label  status_lbl{};
 
+    // RFC-0003 gesture demo: the subtitle is tappable (real on GTK/WinUI;
+    // Android once its gesture handler lands).
+    struct tap_cb_t {
+        login_page* self;
+        void operator()(const mpapp::tapped_event_args&) const {
+            self->status_lbl.text = "Подзаглавието беше натиснато (жест).";
+        }
+    };
+    tap_cb_t                                            tap_cb_{this};
+    mpapp::signal_slot<const mpapp::tapped_event_args&> tap_slot_{};
+
     void build(std::function<void()> on_login) {
         page.title = "Вход";
 
@@ -230,6 +242,9 @@ struct login_page {
         title_lbl.text_color = tu_blue;
         subtitle_lbl.text   = "Е-Студент — Информационна система за студенти";
         subtitle_lbl.font_size = 13.0;
+        // RFC-0003: attach a tap recognizer to a non-button control.
+        auto& tap = subtitle_lbl.add_gesture<mpapp::tap_gesture_recognizer>();
+        tap.tapped.subscribe(tap_slot_, tap_cb_);
         fac_lbl.text      = "Факултетен номер:";
         fac_entry.placeholder = "напр. 201221001";
         fac_entry.semantic_description = "Факултетен номер";   // a11y name

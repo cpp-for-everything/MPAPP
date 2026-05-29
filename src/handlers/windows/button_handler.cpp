@@ -27,6 +27,7 @@
 #include <winrt/Microsoft.UI.Xaml.Controls.Primitives.h>
 
 #include "winrt_strings.hpp"
+#include "mpapp/handlers/windows/gesture_attach.hpp"
 
 namespace mpapp::internal {
 
@@ -69,6 +70,10 @@ void button_handler<platform::windows>::apply_semantics(std::string_view desc) {
 void button_handler<platform::windows>::map_semantics(basic_button& b) {
     apply_semantics(b.semantic_description.get());
     b.semantic_description.changed.subscribe(sem_slot_, sem_callback_);
+}
+
+void button_handler<platform::windows>::map_gestures(basic_button& b) {
+    windows_gestures::attach(native_, b);
 }
 
 void button_handler<platform::windows>::map_clicked(basic_button& b) {

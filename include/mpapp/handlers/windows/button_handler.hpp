@@ -44,10 +44,9 @@ public:
     // Accessible name (AutomationProperties.Name).
     void map_semantics(basic_button& b);
 
-    // RFC-0003 stub: WinUI 3 GestureRecognizer wire-up pending the
-    // Windows real-handler task. No-op today so the wrapper ctor's
-    // unconditional `embedded_handler_.map_gestures(*this)` links.
-    void map_gestures(basic_button& /*b*/) noexcept {}
+    // RFC-0003: wires the view's gesture recognizers (tap / pointer) onto
+    // the native Button via WinUI routed input events.
+    void map_gestures(basic_button& b);
 
     // Native widget access — for the host to add to a Window content tree.
     winrt::Microsoft::UI::Xaml::Controls::Button&       native() noexcept       { return native_; }
