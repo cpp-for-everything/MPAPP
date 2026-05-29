@@ -85,3 +85,14 @@ TEST_CASE("label mock handler tracks font changes", "[mock][label]") {
     REQUIRE(h.calls_as_strings() ==
             std::vector<std::string>{"font_size=24", "font_bold=true"});
 }
+
+TEST_CASE("label mock handler records text color", "[mock][label]") {
+    mpapp::internal::basic_label l;
+    label_mock   h;
+
+    l.text_color = mpapp::color::from_rgb8(29, 53, 87);   // #1D3557
+    h.map_text_color(l);
+
+    REQUIRE(h.calls_as_strings().size() == 1);
+    REQUIRE(h.calls_as_strings()[0].rfind("text_color=rgba(", 0) == 0);
+}

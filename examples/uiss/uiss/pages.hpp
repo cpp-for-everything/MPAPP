@@ -63,9 +63,10 @@ struct section_page {
 
     // Begin a page: header bar + an empty content column ready for rows.
     void begin(const std::string& title, std::function<void()> on_menu) {
-        title_lbl.text      = title;
-        title_lbl.font_bold = true;
-        title_lbl.font_size = 20.0;
+        title_lbl.text       = title;
+        title_lbl.font_bold  = true;
+        title_lbl.font_size  = 20.0;
+        title_lbl.text_color = tu_blue;
         menu_btn.build("≡", std::move(on_menu));   // ≡
         header.horizontal(gap_md, mpapp::thickness{pad_md})
               .add(menu_btn.btn)
@@ -75,9 +76,10 @@ struct section_page {
 
     // A bold-ish section heading (plain text until label styling lands).
     mpapp::label& heading(const std::string& text) {
-        auto& l     = labels.add(body, text);
-        l.font_bold = true;
-        l.font_size = 15.0;
+        auto& l      = labels.add(body, text);
+        l.font_bold  = true;
+        l.font_size  = 15.0;
+        l.text_color = tu_blue;
         return l;
     }
     mpapp::label& line(const std::string& text) {
@@ -213,9 +215,10 @@ struct login_page {
     void build(std::function<void()> on_login) {
         page.title = "Вход";
 
-        title_lbl.text      = "Технически университет - София";
-        title_lbl.font_bold = true;
-        title_lbl.font_size = 22.0;
+        title_lbl.text       = "Технически университет - София";
+        title_lbl.font_bold  = true;
+        title_lbl.font_size  = 22.0;
+        title_lbl.text_color = tu_blue;
         subtitle_lbl.text   = "Е-Студент — Информационна система за студенти";
         subtitle_lbl.font_size = 13.0;
         fac_lbl.text      = "Факултетен номер:";

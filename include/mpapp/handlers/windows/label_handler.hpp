@@ -35,6 +35,7 @@ public:
     void map_font_size(basic_label& l);
     void map_font_bold(basic_label& l);
     void map_font_family(basic_label& l);
+    void map_text_color(basic_label& l);
 
     winrt::Microsoft::UI::Xaml::Controls::TextBlock&       native() noexcept       { return native_; }
     const winrt::Microsoft::UI::Xaml::Controls::TextBlock& native() const noexcept { return native_; }
@@ -55,6 +56,7 @@ private:
     void apply_font_size(double v);
     void apply_font_bold(bool v);
     void apply_font_family(std::string_view v);
+    void apply_text_color(const color& c);
 
     struct text_callback {
         label_handler<platform::windows>* self = nullptr;
@@ -72,6 +74,10 @@ private:
         label_handler<platform::windows>* self = nullptr;
         void operator()(const std::string& v) const { self->apply_font_family(v); }
     };
+    struct tcolor_callback {
+        label_handler<platform::windows>* self = nullptr;
+        void operator()(const color& v) const { self->apply_text_color(v); }
+    };
 
     winrt::Microsoft::UI::Xaml::Controls::TextBlock native_{nullptr};
     signal_slot<const std::string&>                 text_slot_{};
@@ -82,6 +88,8 @@ private:
     fbold_callback                                  fbold_callback_{this};
     signal_slot<const std::string&>                 ffamily_slot_{};
     ffamily_callback                                ffamily_callback_{this};
+    signal_slot<const color&>                       tcolor_slot_{};
+    tcolor_callback                                 tcolor_callback_{this};
 };
 
 } // namespace mpapp::internal

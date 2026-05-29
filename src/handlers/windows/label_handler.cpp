@@ -8,10 +8,13 @@
 
 #if defined(_WIN32)
 
+#include <cstdint>
+
 #include <winrt/base.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>
 #include <winrt/Microsoft.UI.Xaml.Media.h>
 #include <winrt/Microsoft.UI.Text.h>
+#include <winrt/Windows.UI.h>
 
 #include "winrt_strings.hpp"
 
@@ -64,9 +67,29 @@ void label_handler<platform::windows>::map_font_bold(basic_label& l) {
     l.font_bold.changed.subscribe(fbold_slot_, fbold_callback_);
 }
 
+void label_handler<platform::windows>::apply_text_color(const color& c) {
+    if (native_ == nullptr || c.a <= 0.0) return;
+    auto to8 = [](double v) -> uint8_t {
+        if (v < 0.0) v = 0.0;
+        if (v > 1.0) v = 1.0;
+        return static_cast<uint8_t>(v * 255.0 + 0.5);
+    };
+    winrt::Windows::UI::Color col{};
+    col.A = to8(c.a);
+    col.R = to8(c.r);
+    col.G = to8(c.g);
+    col.B = to8(c.b);
+    native_.Foreground(winrt::Microsoft::UI::Xaml::Media::SolidColorBrush{col});
+}
+
 void label_handler<platform::windows>::map_font_family(basic_label& l) {
     apply_font_family(l.font_family.get());
     l.font_family.changed.subscribe(ffamily_slot_, ffamily_callback_);
+}
+
+void label_handler<platform::windows>::map_text_color(basic_label& l) {
+    apply_text_color(l.text_color.get());
+    l.text_color.changed.subscribe(tcolor_slot_, tcolor_callback_);
 }
 
 } // namespace mpapp::internal

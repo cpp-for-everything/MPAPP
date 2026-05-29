@@ -49,6 +49,12 @@ void label_handler<platform::ios>::apply_font() {
                           : [UIFont systemFontOfSize:size];
     }
     lbl.font = font;
+    if (text_color_.a > 0.0) {
+        lbl.textColor = [UIColor colorWithRed:text_color_.r
+                                        green:text_color_.g
+                                         blue:text_color_.b
+                                        alpha:text_color_.a];
+    }
 }
 
 void label_handler<platform::ios>::map_font_size(basic_label& l) {
@@ -67,6 +73,12 @@ void label_handler<platform::ios>::map_font_family(basic_label& l) {
     font_family_ = l.font_family.get();
     apply_font();
     l.font_family.changed.subscribe(ffamily_slot_, ffamily_cb_);
+}
+
+void label_handler<platform::ios>::map_text_color(basic_label& l) {
+    text_color_ = l.text_color.get();
+    apply_font();
+    l.text_color.changed.subscribe(tcolor_slot_, tcolor_cb_);
 }
 
 } // namespace mpapp::internal

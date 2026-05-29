@@ -66,6 +66,7 @@ private:
         uni_lbl_.text       = "Технически университет - София";
         uni_lbl_.font_bold  = true;
         uni_lbl_.font_size  = 15.0;
+        uni_lbl_.text_color = tu_blue;
         product_lbl_.text   = "Е-Студент";
         product_lbl_.font_size = 13.0;
         student_lbl_.text   = "Студент: " + student_.full_name;

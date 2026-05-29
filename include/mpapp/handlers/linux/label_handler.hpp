@@ -29,6 +29,7 @@ public:
     void map_font_size(basic_label& l);
     void map_font_bold(basic_label& l);
     void map_font_family(basic_label& l);
+    void map_text_color(basic_label& l);
 
     // GtkWidget* (GtkLabel), type-erased.
     void*       native() noexcept       { return native_; }
@@ -63,19 +64,26 @@ private:
         label_handler<platform::linux_>* self = nullptr;
         void operator()(const std::string& v) const { self->font_family_ = v; self->apply_font(); }
     };
+    struct tcolor_callback {
+        label_handler<platform::linux_>* self = nullptr;
+        void operator()(const color& v) const { self->text_color_ = v; self->apply_font(); }
+    };
 
     void*                            native_ = nullptr; // GtkWidget*
     double                           font_size_   = 0.0;
     bool                             font_bold_   = false;
     std::string                      font_family_{};
+    color                            text_color_{0.0, 0.0, 0.0, 0.0};
     text_callback                    text_cb_{this};
     fsize_callback                   fsize_cb_{this};
     fbold_callback                   fbold_cb_{this};
     ffamily_callback                 ffamily_cb_{this};
+    tcolor_callback                  tcolor_cb_{this};
     signal_slot<const std::string&>  text_slot_{};
     signal_slot<const double&>       fsize_slot_{};
     signal_slot<const bool&>         fbold_slot_{};
     signal_slot<const std::string&>  ffamily_slot_{};
+    signal_slot<const color&>        tcolor_slot_{};
 };
 
 } // namespace mpapp::internal

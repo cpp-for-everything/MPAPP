@@ -11,6 +11,7 @@
 
 #include <string>
 
+#include "../color.hpp"
 #include "../control.hpp"
 #include "../observable.hpp"
 #include "../platform.hpp"
@@ -39,6 +40,9 @@ public:
     Observable<double>      font_size{0.0};
     Observable<bool>        font_bold{false};
     Observable<std::string> font_family{""};
+    // Text color. Default is fully transparent (a == 0) = "unset" — real
+    // handlers leave the platform default in place until a > 0.
+    Observable<color>       text_color{color{0.0, 0.0, 0.0, 0.0}};
 
     label_handler<platform::current>&       handler() noexcept       { return *handler_; }
     const label_handler<platform::current>& handler() const noexcept { return *handler_; }

@@ -12,6 +12,7 @@
 #  define MPAPP_BOX_VIEW_HAS_STD_FORMAT 1
 #endif
 
+#include "../color.hpp"   // mpapp::color (moved here so labels can share it)
 #include "../observable.hpp"
 #include "../platform.hpp"
 #include "../view.hpp"
@@ -27,18 +28,6 @@ struct corner_radius {
     double bottom_right = 0.0;
 
     bool operator==(const corner_radius&) const = default;
-};
-
-// Lightweight color. The full sRGB / wide-gamut `color` type lands in
-// P3 alongside the graphics handlers; the mock records the four channels
-// as-is.
-struct color {
-    double r = 0.0;
-    double g = 0.0;
-    double b = 0.0;
-    double a = 1.0;
-
-    bool operator==(const color&) const = default;
 };
 
 } // namespace mpapp
@@ -69,13 +58,7 @@ private:
 
 #ifdef MPAPP_BOX_VIEW_HAS_STD_FORMAT
 
-template <>
-struct std::formatter<mpapp::color> {
-    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-    auto format(const mpapp::color& c, std::format_context& ctx) const {
-        return std::format_to(ctx.out(), "rgba({},{},{},{})", c.r, c.g, c.b, c.a);
-    }
-};
+// (std::formatter<mpapp::color> now lives in <mpapp/color.hpp>.)
 
 template <>
 struct std::formatter<mpapp::corner_radius> {

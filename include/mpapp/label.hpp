@@ -35,6 +35,7 @@ public:
         embedded_handler_.map_font_size(*this);
         embedded_handler_.map_font_bold(*this);
         embedded_handler_.map_font_family(*this);
+        embedded_handler_.map_text_color(*this);
         embedded_handler_.map_gestures(*this);
     }
 

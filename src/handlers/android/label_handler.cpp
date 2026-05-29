@@ -87,6 +87,18 @@ void text_view_set_typeface(JNIEnv* env, jobject tv,
     env->DeleteLocalRef(tvcls);
 }
 
+void text_view_set_text_color(JNIEnv* env, jobject tv, int argb) {
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    jclass cls = env->FindClass("android/widget/TextView");
+    if (cls == nullptr) { env->ExceptionClear(); return; }
+    jmethodID m = env->GetMethodID(cls, "setTextColor", "(I)V");
+    if (m != nullptr) {
+        env->CallVoidMethod(tv, m, static_cast<jint>(argb));
+        if (env->ExceptionCheck()) env->ExceptionClear();
+    }
+    env->DeleteLocalRef(cls);
+}
+
 } // namespace
 
 label_handler<platform::android>::label_handler() {
@@ -142,10 +154,29 @@ void label_handler<platform::android>::map_font_bold(basic_label& l) {
     l.font_bold.changed.subscribe(fbold_slot_, fbold_cb_);
 }
 
+void label_handler<platform::android>::apply_text_color(const color& c) {
+    if (native_ == nullptr || c.a <= 0.0) return;
+    JNIEnv* env = detail::attach_current_thread();
+    if (env == nullptr) return;
+    auto to8 = [](double v) -> int {
+        if (v < 0.0) v = 0.0;
+        if (v > 1.0) v = 1.0;
+        return static_cast<int>(v * 255.0 + 0.5);
+    };
+    const int argb = (to8(c.a) << 24) | (to8(c.r) << 16) |
+                     (to8(c.g) << 8)  |  to8(c.b);
+    text_view_set_text_color(env, native_, argb);
+}
+
 void label_handler<platform::android>::map_font_family(basic_label& l) {
     font_family_ = l.font_family.get();
     apply_typeface();
     l.font_family.changed.subscribe(ffamily_slot_, ffamily_cb_);
+}
+
+void label_handler<platform::android>::map_text_color(basic_label& l) {
+    apply_text_color(l.text_color.get());
+    l.text_color.changed.subscribe(tcolor_slot_, tcolor_cb_);
 }
 
 } // namespace mpapp::internal

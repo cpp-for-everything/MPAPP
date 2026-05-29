@@ -42,8 +42,23 @@ void label_handler<platform::linux_>::apply_font() {
     if (!font_family_.empty()) {
         pango_attr_list_insert(attrs, pango_attr_family_new(font_family_.c_str()));
     }
+    if (text_color_.a > 0.0) {
+        auto to16 = [](double c) {
+            if (c < 0.0) c = 0.0;
+            if (c > 1.0) c = 1.0;
+            return static_cast<guint16>(c * 65535.0);
+        };
+        pango_attr_list_insert(attrs, pango_attr_foreground_new(
+            to16(text_color_.r), to16(text_color_.g), to16(text_color_.b)));
+    }
     gtk_label_set_attributes(GTK_LABEL(static_cast<GtkWidget*>(native_)), attrs);
     pango_attr_list_unref(attrs);
+}
+
+void label_handler<platform::linux_>::map_text_color(basic_label& l) {
+    text_color_ = l.text_color.get();
+    apply_font();
+    l.text_color.changed.subscribe(tcolor_slot_, tcolor_cb_);
 }
 
 void label_handler<platform::linux_>::map_font_size(basic_label& l) {

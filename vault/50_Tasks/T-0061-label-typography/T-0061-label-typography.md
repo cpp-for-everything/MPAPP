@@ -28,13 +28,15 @@ render with weight/size instead of flat body text.
 ## Scope
 
 In: `basic_label` surface (`font_size` double / `font_bold` bool / `font_family`
-string) + mock recorder + tests; real handlers on **all platforms** — GTK4
-(Pango `PangoAttrList`), WinUI 3 (`TextBlock.FontSize/FontWeight/FontFamily`),
-Android (`TextView.setTextSize(PT)` + `setTypeface`), AppKit (`NSFont`) + UIKit
-(`UIFont`) blind; `mpapp::label` wrapper auto-maps them in its ctor. Applied in
-УИСС (`section_page` headings/title, login title, nav menu).
-Out: `text_color` (needs the `mpapp::color` type plumbed into the label surface)
-and RFC-0012 custom-font-file registration resolving `font_family` aliases.
+string / `text_color` `mpapp::color`) + mock recorder + tests; real handlers on
+**all platforms** — GTK4 (Pango `PangoAttrList` incl. foreground attr), WinUI 3
+(`FontSize/FontWeight/FontFamily` + `Foreground` SolidColorBrush), Android
+(`TextView.setTextSize(PT)` + `setTypeface` + `setTextColor`), AppKit (`NSFont` +
+`NSColor`) + UIKit (`UIFont` + `UIColor`) blind; `mpapp::label` wrapper auto-maps
+them in its ctor. `mpapp::color` extracted to `include/mpapp/color.hpp` (shared
+by box_view + label). Applied in УИСС (`section_page` headings/title in TU navy
+`#1D3557`, login title, nav menu).
+Out: RFC-0012 custom-font-file registration resolving `font_family` aliases.
 
 ## Per-platform verification
 
@@ -47,11 +49,11 @@ and RFC-0012 custom-font-file registration resolving `font_family` aliases.
 
 ## Acceptance Criteria
 
-- [x] `font_size` / `font_bold` / `font_family` on `basic_label`; mock records + tests.
+- [x] `font_size` / `font_bold` / `font_family` / `text_color` on `basic_label`; mock records + tests (3 `[label]` cases).
 - [x] `mpapp::label` wrapper auto-maps the new properties.
 - [x] Real handlers on GTK4 + Android (verified) + WinUI/AppKit/UIKit (compile).
-- [x] УИСС applies bold/sized headings + titles.
-- [ ] `text_color` (follow-up — color-type plumbing).
+- [x] УИСС applies bold/sized + TU-navy headings + titles.
+- [x] `text_color` — `mpapp::color` extracted to `color.hpp`; real on all platforms.
 
 ## Links
 

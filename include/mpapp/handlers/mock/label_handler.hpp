@@ -44,6 +44,11 @@ public:
         l.font_family.changed.subscribe(font_family_slot_, font_family_cb_);
     }
 
+    void map_text_color(basic_label& l) {
+        record_change("text_color", l.text_color.get());
+        l.text_color.changed.subscribe(text_color_slot_, text_color_cb_);
+    }
+
 // RFC-0003 stub: per-platform real gesture wire-up is
 
 // pending the platform's real-handler task. No-op today
@@ -71,6 +76,10 @@ private:
     mock_property_recorder<label_handler<platform::mock>, std::string> font_family_cb_{
         this, "font_family"};
     signal_slot<const std::string&> font_family_slot_{};
+
+    mock_property_recorder<label_handler<platform::mock>, color> text_color_cb_{
+        this, "text_color"};
+    signal_slot<const color&> text_color_slot_{};
 };
 
 } // namespace mpapp::internal

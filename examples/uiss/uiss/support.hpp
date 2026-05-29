@@ -36,6 +36,10 @@ inline constexpr double pad_md = 14.0;
 inline constexpr double gap_md = 10.0;
 inline constexpr double gap_sm = 6.0;
 
+// ---- Palette -----------------------------------------------------------
+// The portal's deep-navy chrome (#1D3557) for headings + titles.
+inline const mpapp::color tu_blue = mpapp::color::from_rgb8(29, 53, 87);
+
 // A non-owning shared_ptr aliasing a long-lived member `view`. Used where
 // the surface wants `Observable<shared_ptr<view>>` (e.g. ScrollView) but
 // the child is owned elsewhere (a struct member).
