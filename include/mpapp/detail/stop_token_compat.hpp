@@ -11,7 +11,15 @@
 #ifndef MPAPP_DETAIL_STOP_TOKEN_COMPAT_HPP
 #define MPAPP_DETAIL_STOP_TOKEN_COMPAT_HPP
 
-#if __has_include(<stop_token>)
+// Detect a *usable* std::stop_token, not merely the header's presence.
+// Android NDK 27 libc++ ships <stop_token> but gates the types out (no
+// jthread support), so `__has_include` alone is a false positive. The
+// `__cpp_lib_jthread` feature-test macro is defined only when stop_token /
+// stop_source / stop_callback are actually available, so gate on it.
+#if __has_include(<version>)
+#  include <version>
+#endif
+#if __has_include(<stop_token>) && defined(__cpp_lib_jthread)
 #  include <stop_token>
 #  define MPAPP_HAS_STD_STOP_TOKEN 1
 #endif

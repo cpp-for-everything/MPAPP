@@ -52,8 +52,10 @@ public:
         ready_.push(std::move(work));
     }
 
-    // Enqueue work to fire after `d` of virtual time.
-    void post_after(duration d, std::function<void()> work) {
+    // Enqueue work to fire after `d` of virtual time. Overrides the
+    // dispatcher contract; the mock uses virtual time (fires on advance())
+    // rather than a wall-clock timer.
+    void post_after(duration d, std::function<void()> work) override {
         std::lock_guard lock{mu_};
         timed_.push(timed_entry{now_ + d, ++sequence_, std::move(work)});
     }

@@ -21,6 +21,7 @@
 #if defined(__ANDROID__)
 
 #include "jni_bridge.hpp"
+#include "looper_dispatcher.hpp"
 
 namespace mpapp {
 
@@ -42,6 +43,11 @@ public:
         // run_app returns.
         static App* user_app = nullptr;
         if (user_app == nullptr) {
+            // Route mpapp::main_dispatcher() onto the real Android main
+            // Looper (Handler) — we're on the Java main thread here — so
+            // async_sleep / ui_task continuations / animation ticks run on
+            // real frames instead of the deterministic test_dispatcher.
+            ::mpapp::detail::install_android_main_dispatcher();
             user_app = new App{};
             user_app->on_launch();
         }

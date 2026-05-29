@@ -24,6 +24,8 @@ extern "C" HRESULT __stdcall WindowsAppRuntime_EnsureIsLoaded();
 #include <winrt/Windows.Foundation.h>
 #include <winrt/Microsoft.UI.Xaml.h>
 
+#include "mpapp/handlers/windows/dispatcher_queue.hpp"
+
 // Diagnostic log used when MPAPP_LOG_LAUNCH=path is set in the env;
 // captures fatal exceptions from `OnLaunched` + `UnhandledException`
 // to a file so a headless caller can read them. Off by default.
@@ -97,6 +99,11 @@ public:
             return;
         }
         try {
+            // Route mpapp::main_dispatcher() onto the real WinUI
+            // DispatcherQueue now that we're on the UI thread — so
+            // async_sleep / ui_task continuations / animation ticks run on
+            // the real message loop.
+            ::mpapp::detail::install_dispatcher_queue_main_dispatcher();
             mpapp_diag_log("OnLaunched: about to construct app");
             h->out_app = h->launcher.construct();
             mpapp_diag_log("OnLaunched: app constructed");

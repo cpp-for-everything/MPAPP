@@ -11,6 +11,8 @@
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
 
+#include "mpapp/handlers/macos/gcd_dispatcher.hpp"
+
 @interface MppAppDelegate : NSObject <NSApplicationDelegate>
 @property (nonatomic, assign) ::mpapp::detail::appkit_application_launcher launcher;
 @property (nonatomic, assign) mpapp::internal::basic_application** outAppSlot;
@@ -20,6 +22,10 @@
 - (void)applicationDidFinishLaunching:(NSNotification*)notification {
     (void)notification;
     if (_launcher.construct == nullptr) return;
+    // Route mpapp::main_dispatcher() onto the real GCD main queue (CFRunLoop)
+    // now that we're on the main thread — so async_sleep / ui_task
+    // continuations / animation ticks run on real frames.
+    ::mpapp::detail::install_macos_main_dispatcher();
     mpapp::internal::basic_application* app = _launcher.construct();
     if (_outAppSlot) {
         *_outAppSlot = app;

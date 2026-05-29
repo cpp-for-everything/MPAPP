@@ -8,6 +8,8 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 
+#include "mpapp/handlers/ios/gcd_dispatcher.hpp"
+
 namespace mpapp::detail {
 
 // Singleton handoff between `uikit_run_app_impl` and our
@@ -33,6 +35,10 @@ static uikit_handoff g_uikit_handoff{};
     (void)launchOptions;
     auto& h = ::mpapp::detail::g_uikit_handoff;
     if (h.launcher.construct) {
+        // Route mpapp::main_dispatcher() onto the real GCD main queue now
+        // that we're on the main thread — so async_sleep / ui_task
+        // continuations / animation ticks run on real frames.
+        ::mpapp::detail::install_ios_main_dispatcher();
         h.out_app = h.launcher.construct();
         if (h.out_app) {
             h.out_app->on_launch();

@@ -137,6 +137,59 @@ TEST_CASE("request_stop cancels a long-running task", "[executor]") {
     REQUIRE(t.is_ready());
 }
 
+namespace {
+
+// A minimal dispatcher that records how it was driven — stands in for a real
+// per-platform dispatcher (glib / DispatcherQueue / Handler) so we can verify
+// install_main_dispatcher() routes main_dispatcher() and post_after_on_main()
+// through the installed instance, then reverts cleanly to the default.
+struct recording_dispatcher : mpapp::dispatcher {
+    int posts = 0;
+    int timed_posts = 0;
+    std::chrono::steady_clock::duration last_delay{};
+
+    void post(std::function<void()> work) override {
+        ++posts;
+        if (work) work();
+    }
+    void post_after(std::chrono::steady_clock::duration d,
+                    std::function<void()> work) override {
+        ++timed_posts;
+        last_delay = d;
+        if (work) work();
+    }
+};
+
+} // namespace
+
+TEST_CASE("install_main_dispatcher routes main_dispatcher + reverts to default",
+          "[executor]") {
+    // Default: main_dispatcher() is the deterministic test_dispatcher.
+    REQUIRE(dynamic_cast<mpapp::test_dispatcher*>(&mpapp::main_dispatcher()) != nullptr);
+
+    recording_dispatcher rec;
+    mpapp::install_main_dispatcher(&rec);
+    REQUIRE(&mpapp::main_dispatcher() == &rec);
+
+    bool ran = false;
+    mpapp::main_dispatcher().post([&] { ran = true; });
+    REQUIRE(ran);
+    REQUIRE(rec.posts == 1);
+
+    // The async_sleep timer path (post_after_on_main) must reach the
+    // installed dispatcher's post_after with the right delay.
+    auto t = sleep_then_return(99);
+    REQUIRE(rec.timed_posts == 1);
+    REQUIRE(rec.last_delay == std::chrono::duration_cast<std::chrono::steady_clock::duration>(100ms));
+    // recording_dispatcher fires the timer inline, so the task completed.
+    REQUIRE(t.is_ready());
+    REQUIRE(t.await_resume() == 99);
+
+    // Revert so the remaining suite sees the default test_dispatcher again.
+    mpapp::install_main_dispatcher(nullptr);
+    REQUIRE(dynamic_cast<mpapp::test_dispatcher*>(&mpapp::main_dispatcher()) != nullptr);
+}
+
 TEST_CASE("multiple concurrent tasks all run to completion", "[executor]") {
     auto& d = main_test_dispatcher();
     d.run_until_idle();

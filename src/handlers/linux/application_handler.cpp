@@ -9,6 +9,8 @@
 
 #include <gtk/gtk.h>
 
+#include "mpapp/handlers/linux/glib_dispatcher.hpp"
+
 namespace mpapp::detail {
 
 namespace {
@@ -27,6 +29,10 @@ void on_activate(GtkApplication* /*app*/, gpointer user_data) {
     if (h == nullptr || h->launcher.construct == nullptr) {
         return;
     }
+    // Route mpapp::main_dispatcher() onto the real GLib main loop now that
+    // we're on the UI thread with the loop about to pump — so async_sleep /
+    // ui_task continuations / animation ticks run on real frames.
+    ::mpapp::detail::install_glib_main_dispatcher();
     h->out_app = h->launcher.construct();
     if (h->out_app != nullptr) {
         h->out_app->on_launch();

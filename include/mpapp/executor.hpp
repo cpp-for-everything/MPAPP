@@ -61,14 +61,29 @@ public:
     // be safe to call from any thread.
     virtual void post(std::function<void()> work) = 0;
 
+    // Enqueue `work` to run after `delay` on the dispatcher's thread. The
+    // deterministic test_dispatcher uses virtual time (fires on advance());
+    // real per-platform dispatchers route through the native timer queue
+    // (g_timeout_add / DispatcherQueueTimer / Handler.postDelayed).
+    virtual void post_after(std::chrono::steady_clock::duration delay,
+                            std::function<void()> work) = 0;
+
     // Awaitable: resumes the coroutine on this dispatcher's thread.
     auto operator co_await() const noexcept;
 };
 
 // The process-wide UI-thread dispatcher. Defined in src/executor/mock.cpp.
-// Returns a reference to a deterministic test_dispatcher in the skeleton
-// build; real per-platform implementations replace this in P3+.
+// Returns the dispatcher installed via install_main_dispatcher(), or a
+// deterministic test_dispatcher if none was installed (the default for the
+// test build). Real per-platform dispatchers are installed by the platform
+// application handler at startup.
 dispatcher& main_dispatcher() noexcept;
+
+// Install `d` as the dispatcher returned by main_dispatcher(). Apps call this
+// once at startup with a real per-platform dispatcher (the platform
+// application handler does it automatically). Passing nullptr reverts to the
+// default deterministic test_dispatcher. Defined in src/executor/mock.cpp.
+void install_main_dispatcher(dispatcher* d) noexcept;
 
 // ---------------------------------------------------------------------------
 // executor
