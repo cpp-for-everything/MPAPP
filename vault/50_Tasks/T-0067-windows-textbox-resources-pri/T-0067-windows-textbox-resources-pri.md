@@ -161,6 +161,51 @@ Stop hand-rolling makepri. Replicate the SDK flow the supported way:
    login→nav→CarouselView and screenshot (a **Windows-MCP** server with
    Screenshot/Click/Type is now available in-session — use it, or computer-use).
 
+## Update 3 — proved the platform works; isolated the gap to host resource-init
+Built a minimal **.NET unpackaged WinUI 3 probe** (`<WindowsPackageType>None`,
+a Window + TextBox + Button) via `dotnet build`:
+- **It renders a TextBox fine** ⇒ unpackaged WinUI 3 + this WindowsAppRuntime
+  (1.8 / 8000.859.21.0) works on this machine.
+- Its app pri (`winuiprobe.pri`, 664 B) is **tiny / app-only — no framework
+  themeresources**. So framework theme resources resolve at runtime from the
+  framework package (via the bootstrap), NOT from the app pri.
+- **Remove that pri → the probe crashes with the identical `0xC0000409`** as
+  uiss ⇒ a (tiny, app-named) pri is *required*; its job is to initialise MRT.
+
+Deploying the equivalent tiny pri (map `uiss`) next to `uiss.exe`, as both
+`uiss.pri` and `resources.pri`, **still crashes**. So the difference between
+the working .NET probe and `uiss.exe` is **not the pri** — it's how the
+**C++/CMake host wires resource loading** vs the .NET WinUI host (which auto-
+registers the app pri at startup). The VS C++ WinUI *project system* does this
+at build time; our hand-rolled CMake build does not.
+
+**Packaged attempt** (loose-registered MSIX, `AppxManifest.xml` w/
+`Microsoft.WindowsAppRuntime.1.8` + `Microsoft.VCLibs` `<PackageDependency>`,
+`runFullTrust`): activation works, identity detected, on_launch completes —
+but themeresources **still** fails (tried tiny pri map=`MPAPP.UISS` and the
+861 KB merged pri map=`MPAPP.UISS`). So packaging alone doesn't fix it either.
+
+### Landed this session
+- **`fix(windows)` (commit `3c6f7b0`):** `run_app_impl` now detects package
+  identity (`GetCurrentPackageFullName`) and only runs the unpackaged
+  `MddBootstrap*` when there is none — required for any future packaged
+  deployment; unpackaged path unchanged (verified still reaches
+  `Application::Start`).
+
+### The remaining gap (for next session)
+Replicate the **.NET / VS-C++ WinUI host's resource-context registration** in
+the C++ app so `uiss.exe` actually loads its `resources.pri`. Concretely:
+- Decompile/inspect what the .NET WinUI generated `Main` (or
+  `Microsoft.WindowsAppSDK`'s C# host) does at startup to register the app pri
+  — likely a `Microsoft.Windows.ApplicationModel.Resources.ResourceManager`
+  init or an MRT `MrtResourceManager`/`ResourceContext` call — and call the
+  C++/WinRT equivalent from `run_app_impl` *before* `Application::Start`.
+- Then a **tiny app `resources.pri`** (map = exe identity, app-only, from the
+  trivial makepri flow) deployed next to the exe should suffice (no framework
+  merge needed — that was a wrong turn).
+- Repro reference: `build/pristub/` (the working .NET probe) — diff its startup
+  + deployed layout against uiss.
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
