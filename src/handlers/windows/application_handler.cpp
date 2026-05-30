@@ -16,6 +16,7 @@
 #include <string>
 
 #include <windows.h>
+#include <appmodel.h>   // GetCurrentPackageFullName / APPMODEL_ERROR_NO_PACKAGE
 #include <MddBootstrap.h>
 
 extern "C" HRESULT __stdcall WindowsAppRuntime_EnsureIsLoaded();
@@ -143,22 +144,36 @@ int run_app_impl(const application_launcher& launcher,
                  mpapp::application*& out_app) {
     mpapp_diag_log("run_app_impl: enter");
 
-    // 1. Bootstrap the unpackaged Windows App SDK 1.8 dynamic dependency.
-    PACKAGE_VERSION min_version{};
-    if (const HRESULT hr = ::MddBootstrapInitialize2(
-            0x00010008, nullptr, min_version,
-            MddBootstrapInitializeOptions_OnNoMatch_ShowUI);
-        FAILED(hr)) {
-        char buf[128]; std::snprintf(buf, sizeof(buf), "MddBootstrapInitialize2 FAILED 0x%08X", static_cast<unsigned>(hr));
-        mpapp_diag_log(buf);
-        return static_cast<int>(hr);
-    }
+    // 1. Bootstrap the Windows App SDK 1.8 dynamic dependency — but ONLY when
+    //    running unpackaged. A packaged app (one with package identity) gets
+    //    the WindowsAppRuntime framework + its resources via its manifest
+    //    <PackageDependency>; calling the unpackaged bootstrap there is wrong
+    //    and makes activation bail. Detect identity via GetCurrentPackageFullName
+    //    (APPMODEL_ERROR_NO_PACKAGE ⇒ unpackaged). This is also what makes
+    //    resource-heavy controls (TextBox/themeresources) resolve when the app
+    //    is packaged — the package graph supplies ms-appx:///Microsoft.UI.Xaml/.
+    UINT32 pkg_name_len = 0;
+    const bool has_identity =
+        ::GetCurrentPackageFullName(&pkg_name_len, nullptr) != APPMODEL_ERROR_NO_PACKAGE;
+    if (has_identity) {
+        mpapp_diag_log("run_app_impl: packaged (identity present) — skipping bootstrap");
+    } else {
+        PACKAGE_VERSION min_version{};
+        if (const HRESULT hr = ::MddBootstrapInitialize2(
+                0x00010008, nullptr, min_version,
+                MddBootstrapInitializeOptions_OnNoMatch_ShowUI);
+            FAILED(hr)) {
+            char buf[128]; std::snprintf(buf, sizeof(buf), "MddBootstrapInitialize2 FAILED 0x%08X", static_cast<unsigned>(hr));
+            mpapp_diag_log(buf);
+            return static_cast<int>(hr);
+        }
 
-    if (const HRESULT hr = ::WindowsAppRuntime_EnsureIsLoaded(); FAILED(hr)) {
-        ::MddBootstrapShutdown();
-        char buf[128]; std::snprintf(buf, sizeof(buf), "WindowsAppRuntime_EnsureIsLoaded FAILED 0x%08X", static_cast<unsigned>(hr));
-        mpapp_diag_log(buf);
-        return static_cast<int>(hr);
+        if (const HRESULT hr = ::WindowsAppRuntime_EnsureIsLoaded(); FAILED(hr)) {
+            ::MddBootstrapShutdown();
+            char buf[128]; std::snprintf(buf, sizeof(buf), "WindowsAppRuntime_EnsureIsLoaded FAILED 0x%08X", static_cast<unsigned>(hr));
+            mpapp_diag_log(buf);
+            return static_cast<int>(hr);
+        }
     }
 
     mpapp_diag_log("run_app_impl: bootstrap done");
@@ -196,7 +211,9 @@ int run_app_impl(const application_launcher& launcher,
         rc = E_FAIL;
     }
 
-    ::MddBootstrapShutdown();
+    if (!has_identity) {
+        ::MddBootstrapShutdown();
+    }
     mpapp_diag_log("run_app_impl: exit");
     return rc;
 }
