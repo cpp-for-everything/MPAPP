@@ -128,6 +128,39 @@ Next directions to try (in order):
    packaging** path for the demo, where pri + framework resources resolve by
    construction.
 
+## Update 2 — decisive: the gap is pri *loading*, and root namespace
+- **Garbage-pri test:** replacing `resources.pri` with non-pri bytes yields the
+  **identical** crash as no-pri and as the correct merged pri ⇒ the app is
+  **not consuming `<exedir>\resources.pri` at all**. Generating the perfect pri
+  is necessary but **not sufficient** — the *loading*/registration the
+  WindowsAppSDK MSBuild MrtCore targets do at build time is the missing half.
+- **Read the SDK targets** (`build/packages/Microsoft.Windows.SDK.BuildTools.MSIX/build/...MrtCore.PriGen.targets`):
+  - `ProjectPriIndexName` defaults to `$(TargetName)` (the exe name).
+  - For **unpackaged ("Centennial") apps the resources go in the ROOT
+    namespace** — `PriIndexName` is set **empty** and `PrependPriInitialPath`
+    is false, so resources resolve as `ms-resource:///Files/...` (root), not
+    under an app-named map. My `/in uiss` filed them under `uiss/...`.
+  - Tried `makepri new … /in ""` to force root namespace → **exit 4** (CLI
+    rejects empty `/in`). Root namespace must be set via the **priconfig**
+    (`<packaging>` / index `root`/`initialPath`), not the `/in` flag — OR by
+    letting the MrtCore targets run.
+
+## Recommended implementation (next session, fresh context)
+Stop hand-rolling makepri. Replicate the SDK flow the supported way:
+1. Author a tiny **MSBuild stub** `.vcxproj` (or `.proj`) that imports
+   `Microsoft.WindowsAppSDK` + `Microsoft.Windows.SDK.BuildTools.MSIX` props/
+   targets with `<WindowsPackageType>None</WindowsPackageType>` and the same
+   package refs the CMake build resolves (under `MPAPP_PACKAGES_DIR`).
+2. `msbuild` it once to emit a **known-good unpackaged `resources.pri`**;
+   inspect its `makepri dump` (index name, root namespace) to learn the exact
+   structure + the exact `makepri` command line the target logged.
+3. Mirror that one `makepri` invocation as a CMake `add_custom_command` that
+   deploys `resources.pri` next to every WinUI exe (extend
+   `mpapp_add_winappsdk_runtime` in `cmake/WindowsAppSDK.cmake`).
+4. Re-run `uiss.exe`; expect a rendered login window. Then drive
+   login→nav→CarouselView and screenshot (a **Windows-MCP** server with
+   Screenshot/Click/Type is now available in-session — use it, or computer-use).
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
