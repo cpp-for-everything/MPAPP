@@ -235,6 +235,40 @@ replicate the host's resource-context registration in C++. Tracked here.
 
 The conditional-bootstrap fix (`3c6f7b0`) stands as a correct prerequisite.
 
+## Update 4 — even the full MSBuild WinUI integration does NOT fix it
+Built `uiss` via the CMake **Visual Studio generator** (`-G "Visual Studio 18
+2026"`) with the WindowsAppSDK MSBuild WinUI integration enabled on the target
+(`VS_GLOBAL_UseWinUI=true`, `EnableMsixTooling`, `WindowsPackageType=None`,
+`VS_PACKAGE_REFERENCES Microsoft.WindowsAppSDK`). Result:
+- It **builds** — `uiss.exe` + an MrtCore-generated **`uiss.pri`** (640 B,
+  app-only) + the WindowsAppSDK **auto-initializers**
+  (`WindowsAppRuntimeAutoInitializer.cpp`, `MddBootstrapAutoInitializer.cpp`).
+- It **still crashes identically** at the first TextBox render
+  (`themeresources` E_FAIL) — with the manual bootstrap on *and* off (env-gated
+  `MPAPP_NO_BOOTSTRAP` test, so it's not a double-bootstrap).
+
+⇒ **The build integration is not the missing piece.** A *.NET* pure-code WinUI
+app (no App.xaml) renders TextBox fine with the same app-only pri; the
+hand-rolled **C++/WinRT** app does not. The real gap is **C++/WinRT-host
+specific**: the VS C++ WinUI *template* generates `App.xaml` +
+`XamlTypeInfo`/`IXamlMetadataProvider` + an App with `InitializeComponent()`
+that `LoadComponent(ms-appx:///App.xaml)` (merging `XamlControlsResources`),
+and that is what wires up framework-theme-resource resolution. The .NET runtime
+provides the equivalent automatically; our hand-rolled `mpapp_winui_app`
+(code-only, no App.xaml, trivial metadata provider) does not.
+
+### Conclusion / real fix (substantial — own ticket later)
+Restructure the **Windows app shell** (`mpapp_winui_app` in
+`src/handlers/windows/application_handler.cpp`) to the VS C++ WinUI template
+shape: a generated `App.xaml`-backed App (x:Class) that `InitializeComponent`s
+and merges `XamlControlsResources`, plus the `XamlTypeInfo` metadata provider —
+driven by the XAML compiler (needs the VS generator / MSBuild path landed
+above). This is an app-architecture change to the shared shell, not a
+per-app tweak. Everything else (Linux + Android) ships today.
+
+All experiments reverted; tree clean; only `3c6f7b0` (conditional bootstrap)
+stands.
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
