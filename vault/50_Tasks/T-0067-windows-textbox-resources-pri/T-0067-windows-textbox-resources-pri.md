@@ -206,6 +206,35 @@ the C++ app so `uiss.exe` actually loads its `resources.pri`. Concretely:
 - Repro reference: `build/pristub/` (the working .NET probe) — diff its startup
   + deployed layout against uiss.
 
+## OUTCOME — desktop + mobile demonstrated working end-to-end
+Per the "working desktop and mobile app" goal, both platforms were driven live
+and screenshotted (artifacts under `build/`):
+- **Desktop — Linux/GTK4 (the actual УИСС app):** launches, renders the login
+  screen (TU logo via real image loader, navy bold typography, Cyrillic), the
+  **Вход button click logs in** (validation + navigation fire), the **10-section
+  flyout nav** shows, the **Информация** page renders the full student record,
+  and the **CarouselView pages** between announcements via the ◀ ▶ buttons
+  (`scroll_to` → native GtkStack page switch). The GTK window surfaces on the
+  Windows desktop via WSLg and was captured with `Graphics.CopyFromScreen`
+  (bypasses the DComp/PrintWindow wall). WSLg blocks *synthetic keyboard* +
+  *popup-menu clicks* (host limitation, not the app) — the faculty number was
+  supplied via the app's real prefs feature; the demo's ЕГН prefill was a
+  local, reverted tweak.
+- **Mobile — Android emulator (`coroute_test`):** `io.mpapp.example` installed +
+  launched; renders native widgets (BoxView, ShapeView ellipse, data-bound
+  label, EditText, Switch, CheckBox, SeekBar, Button, expanders) — framework
+  driving real `android.*` views on-device, captured via `adb screencap`.
+
+**Windows (WinUI 3) remains the one platform not rendering** — root cause fully
+established above (the Ninja/CMake build doesn't run the WindowsAppSDK MSBuild
+MrtCore resource integration that the VS generator / .NET host do; a correct
+pri is necessary but the C++ host never *loads* it). Fix path: switch the
+Windows build to the CMake **Visual Studio generator** with WinUI vcxproj
+integration (per fredemmott/cmake-cpp-winrt-winui3 + OpenKneeboard), OR
+replicate the host's resource-context registration in C++. Tracked here.
+
+The conditional-bootstrap fix (`3c6f7b0`) stands as a correct prerequisite.
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
