@@ -53,24 +53,22 @@ if(WIN32)
         )
         set_source_files_properties(winui/App.xaml PROPERTIES
             VS_XAML_TYPE "ApplicationDefinition")
-        # Pin CppWinRT's intermediate winmd/projection dirs to pre-created
-        # absolute paths — CMake's $(ProjectDir)/$(IntDir) (mixed slashes) +
-        # the implicit Unmerged/ subdir don't exist when midlrt writes
-        # App.winmd (MIDL2212 path-not-found). Create them at configure time.
-        file(MAKE_DIRECTORY
-            "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/unmerged"
-            "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/merged"
-            "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/generated")
         set_target_properties(uiss PROPERTIES
             VS_GLOBAL_UseWinUI            "true"
             VS_GLOBAL_EnableMsixTooling   "true"
             VS_GLOBAL_WindowsPackageType  "None"
             VS_GLOBAL_AppxPackage         "false"
             VS_GLOBAL_WindowsAppSDKSelfContained "false"
-            VS_GLOBAL_RootNamespace       "uiss"
-            VS_GLOBAL_CppWinRTUnmergedDir "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/unmerged/"
-            VS_GLOBAL_CppWinRTMergedDir   "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/merged/"
-            VS_GLOBAL_GeneratedFilesDir   "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/generated/")
+            VS_GLOBAL_RootNamespace       "uiss")
+        # CppWinRT writes the per-idl winmd to $(IntDir)Unmerged\ and the
+        # projection under "$(IntDir)Generated Files\"; CMake doesn't create
+        # those subdirs before midlrt runs (MIDL2212 path-not-found). A
+        # PreBuild step (MSBuild expands $(IntDir)) makes them exist first.
+        add_custom_command(TARGET uiss PRE_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E make_directory
+                "$(IntDir)Unmerged"
+                "$(IntDir)Merged"
+                "$(IntDir)Generated Files")
         # CppWinRT's targets override the Midl build step to use midlrt (MIDL
         # 3.0 / WinRT), which the `runtimeclass App` syntax in App.idl needs;
         # classic midl rejects `namespace`.

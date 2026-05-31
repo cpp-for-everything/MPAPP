@@ -310,6 +310,40 @@ Build progress (VS generator, `-G "Visual Studio 18 2026"`):
 The app-side shell files are correct and committed; only the CMake↔CppWinRT
 toolchain coordination remains. Linux + Android ship today.
 
+## Update 6 — winmd fixed; XAML compiler HANGS (the new wall)
+- ✅ **MIDL2212 winmd path fixed:** a `add_custom_command(TARGET uiss PRE_BUILD
+  ... make_directory "$(IntDir)Unmerged" "$(IntDir)Merged" "$(IntDir)Generated
+  Files")` creates the dirs midlrt/cppwinrt write to. `App.winmd` (2560 B) now
+  generates under `uiss.dir\Debug\Unmerged\`. (The `VS_GLOBAL_CppWinRTUnmergedDir`
+  override doesn't work — the CppWinRT targets set it *unconditionally* to
+  `$(IntDir)Unmerged\`, clobbering it.)
+- ⛔ **NEW BLOCKER: the XAML compiler step HANGS** — after midlrt, the build sits
+  in `Microsoft.UI.Xaml.Markup.Compiler` with **no output for 60+ min, no
+  progress**; `App.xaml.g.h` is never produced, `uiss.exe` never links. The
+  process eventually dies on its own. This is the XAML compiler deadlocking when
+  driven outside the standard VS project system (CMake's VS generator on the new
+  **VS 2026 / v18** toolset) — a known nasty failure mode (design-time-build
+  spin / blocked sub-tool). **Each attempt risks a 60-min hang**, so iterate
+  carefully (build with `/m:1 /v:diag` and a hard timeout; kill on stall).
+
+### Resume here (next session)
+The toolchain is now wired correctly through **midlrt + winmd**. The remaining
+problem is the XAML-compiler hang, which is environment/toolset-specific. Options:
+1. Try an older, known-good toolset — configure with `-G "Visual Studio 17 2022"`
+   (v143) instead of 18/2026; the XAML compiler is far more battle-tested there.
+2. Or invoke the XAML compiler standalone (the `Microsoft.UI.Xaml.Markup.Compiler`
+   task / `XamlCompiler.exe`) with explicit inputs to bypass the design-time
+   path that hangs.
+3. Or sidestep the XAML compiler entirely: hand-write `App.xaml.g.h`
+   (InitializeComponent → `Application::LoadComponent(*this, Uri{L"ms-appx:///
+   uiss/App.xaml"})`) + a trivial `IXamlMetadataProvider`, ship App.xaml as a
+   plain content/PRI resource so MrtCore still merges its `XamlControlsResources`.
+   This avoids the compiler hang but needs the App.xbf in the pri.
+
+WARNING in the CMake: the WIP path is double-guarded
+(`Visual Studio` generator AND `MPAPP_UISS_WINUI_SHELL_WIP`) so it can't hang a
+default build; only an explicit opt-in (`-DMPAPP_UISS_WINUI_SHELL_WIP=ON`) hits it.
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
