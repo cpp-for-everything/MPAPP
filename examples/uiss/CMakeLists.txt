@@ -30,10 +30,61 @@ if(WIN32)
 
     set(_winappsdk_inc "${MPAPP_PACKAGES_DIR}/Microsoft.WindowsAppSDK.Foundation/include")
 
-    add_executable(uiss
-        main.cpp
-        "${CMAKE_SOURCE_DIR}/examples/windows_button_spike/app.manifest"
-    )
+    # NOTE: the App.xaml WinUI-shell path below is WORK IN PROGRESS (T-0067).
+    # It builds through midlrt (App.idl's `runtimeclass` parses) but is blocked
+    # on the CppWinRT winmd output-dir coordination (MIDL2212). It is guarded to
+    # the Visual Studio generator and is INERT under Ninja, so the default
+    # toolchain + CI (Ninja) are unaffected. Opt in only to continue this work.
+    if(CMAKE_GENERATOR MATCHES "Visual Studio" AND MPAPP_UISS_WINUI_SHELL_WIP)
+        # ---- App.xaml-backed WinUI 3 shell (WIP — see T-0067) --------------
+        # Unpackaged WinUI 3 needs the VS-C++-WinUI-template structure for
+        # framework theme resources to resolve: an App.xaml (x:Class) whose
+        # <XamlControlsResources/> triggers the MrtCore framework-resource merge
+        # into resources.pri AND wires ms-appx:/// resolution, plus the XAML
+        # compiler's generated entry point + IXamlMetadataProvider. The hand-
+        # rolled code-only shell (Ninja path below) builds + runs but can't
+        # resolve themeresources, so a TextBox crashes on first render. Requires
+        # the Visual Studio generator (Ninja can't run the XAML compiler).
+        add_executable(uiss WIN32
+            winui/App.idl
+            winui/App.xaml
+            winui/App.xaml.cpp
+            "${CMAKE_SOURCE_DIR}/examples/windows_button_spike/app.manifest"
+        )
+        set_source_files_properties(winui/App.xaml PROPERTIES
+            VS_XAML_TYPE "ApplicationDefinition")
+        # Pin CppWinRT's intermediate winmd/projection dirs to pre-created
+        # absolute paths — CMake's $(ProjectDir)/$(IntDir) (mixed slashes) +
+        # the implicit Unmerged/ subdir don't exist when midlrt writes
+        # App.winmd (MIDL2212 path-not-found). Create them at configure time.
+        file(MAKE_DIRECTORY
+            "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/unmerged"
+            "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/merged"
+            "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/generated")
+        set_target_properties(uiss PROPERTIES
+            VS_GLOBAL_UseWinUI            "true"
+            VS_GLOBAL_EnableMsixTooling   "true"
+            VS_GLOBAL_WindowsPackageType  "None"
+            VS_GLOBAL_AppxPackage         "false"
+            VS_GLOBAL_WindowsAppSDKSelfContained "false"
+            VS_GLOBAL_RootNamespace       "uiss"
+            VS_GLOBAL_CppWinRTUnmergedDir "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/unmerged/"
+            VS_GLOBAL_CppWinRTMergedDir   "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/merged/"
+            VS_GLOBAL_GeneratedFilesDir   "${CMAKE_CURRENT_BINARY_DIR}/cppwinrt/generated/")
+        # CppWinRT's targets override the Midl build step to use midlrt (MIDL
+        # 3.0 / WinRT), which the `runtimeclass App` syntax in App.idl needs;
+        # classic midl rejects `namespace`.
+        set_property(TARGET uiss PROPERTY
+            VS_PACKAGE_REFERENCES "Microsoft.WindowsAppSDK_1.8.260416003;Microsoft.Windows.CppWinRT_2.0.250303.1")
+    else()
+        # ---- Ninja fallback: builds + links + runs, but framework theme
+        #      resources don't resolve (T-0067) — kept so the Ninja toolchain
+        #      stays green for everything else.
+        add_executable(uiss
+            main.cpp
+            "${CMAKE_SOURCE_DIR}/examples/windows_button_spike/app.manifest"
+        )
+    endif()
 
     target_include_directories(uiss PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
@@ -54,7 +105,6 @@ if(WIN32)
         _UNICODE
     )
     target_compile_options(uiss PRIVATE
-        /W3
         /Zc:__cplusplus
         /utf-8
     )

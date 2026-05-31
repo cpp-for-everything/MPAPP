@@ -269,6 +269,47 @@ per-app tweak. Everything else (Linux + Android) ships today.
 All experiments reverted; tree clean; only `3c6f7b0` (conditional bootstrap)
 stands.
 
+## Update 5 — App.xaml WinUI shell scaffolded (WIP, ~75%)
+Started the real fix: an App.xaml-backed WinUI 3 shell for uiss (the VS C++
+WinUI template structure that the .NET host provides automatically). Landed:
+- **`examples/uiss/winui/`** — `App.idl` (`runtimeclass App : Application`),
+  `App.xaml` (`<XamlControlsResources/>` → triggers the framework-resource
+  merge + ms-appx wiring), `App.xaml.h`, `App.xaml.cpp` (OnLaunched hands off
+  to the existing platform-neutral `uiss::uiss_app` — every widget handler is
+  reused). The generated `App.xaml.g.h`/entry point come from the XAML compiler.
+- **`examples/uiss/CMakeLists.txt`** — VS-generator path that adds the winui
+  sources, marks `App.xaml` as `ApplicationDefinition`, enables `UseWinUI` +
+  `PackageReference`s (WindowsAppSDK **and** CppWinRT, the latter to drive
+  midlrt), and pins the CppWinRT intermediate dirs. **Double-guarded**
+  (`CMAKE_GENERATOR MATCHES "Visual Studio" AND MPAPP_UISS_WINUI_SHELL_WIP`) so
+  it is fully inert under the default Ninja build + CI.
+
+Build progress (VS generator, `-G "Visual Studio 18 2026"`):
+1. ~~classic midl rejected `namespace`~~ → fixed by adding the
+   **Microsoft.Windows.CppWinRT** PackageReference (drives **midlrt**).
+2. **midlrt now parses `runtimeclass App`** ✓ — the IDL is accepted.
+3. **BLOCKED:** `midlrt error MIDL2212: error writing App.winmd (0x80070003
+   path not found)`. CMake emits the Midl `<OutputDirectory>$(ProjectDir)/$(IntDir)`
+   (mixed `\/` slashes) and the CppWinRT midlrt `/winmd` output dir isn't
+   created. `VS_GLOBAL_CppWinRTUnmergedDir/MergedDir/GeneratedFilesDir`
+   overrides did **not** redirect it.
+
+### Resume here (next session, fresh context)
+1. Read `~/.nuget/packages/microsoft.windows.cppwinrt/2.0.250303.1/build/native/
+   Microsoft.Windows.CppWinRT.targets` to find the exact `/winmd` output-path
+   property the Midl override uses, and pin it to a pre-created dir (or fix the
+   Midl `OutputDirectory` mixed-slash path via `set_source_files_properties(...
+   VS_SETTINGS OutputDirectory=<clean abs path>)`).
+2. Then expect, in order: XAML compiler emits `App.xaml.g.h` + the generated
+   entry point → link (watch the projection/cppwinrt header coordination
+   between the UseWinUI uiss TU and the Ninja-projection mpapp libs) → run.
+3. On a rendered window: drive login→nav→CarouselView + screenshot; then
+   generalise the shell into the framework (`mpapp_winui_app`) so all Windows
+   apps get it via `mpapp::run<App>` with no per-app boilerplate.
+
+The app-side shell files are correct and committed; only the CMake↔CppWinRT
+toolchain coordination remains. Linux + Android ship today.
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
