@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- T-0067: Windows interactive smoke test for the UISS WinUI 3 app, driven via
+       FlaUI (UIA3 COM, robust against WinUI 3 unlike the .NET System.Windows.Automation
+       UIA2 wrapper). Launches the built uiss.exe, invokes the login button through UI
+       Automation, and asserts the UI navigates. See Program.cs header for the run line. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>uiss_uitest</AssemblyName>
+    <RootNamespace>Uiss.UiTest</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="FlaUI.UIA3" Version="4.0.0" />
+  </ItemGroup>
+</Project>

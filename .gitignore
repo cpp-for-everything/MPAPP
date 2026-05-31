@@ -43,3 +43,7 @@ Thumbs.db
 
 # Windows v143 build investigation logs (T-0067)
 /*.log
+
+# dotnet FlaUI uitest build outputs
+examples/uiss/winui/uitest/bin/
+examples/uiss/winui/uitest/obj/

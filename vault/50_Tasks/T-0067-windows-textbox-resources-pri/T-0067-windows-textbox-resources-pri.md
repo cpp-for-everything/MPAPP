@@ -539,3 +539,44 @@ then `cmake --build … --target uiss -- /m:1 /p:MultiProcessorCompilation=true 
 
 Status: **RESOLVED.** Desktop (Linux GTK4 + Windows WinUI 3) and mobile (Android)
 all build and render the УИСС app from the single ifdef-free codebase.
+
+---
+
+## Update 11 — Windows interactive e2e: blocked by a WinUI UIA (accessibility) defect
+
+Asked to verify the Windows app interactively with computer-use, then via UI Automation:
+
+- **computer-use MCP cannot target uiss** — `request_access` returns `notInstalled`
+  ("doesn't match any installed or running application"). The MCP only grants
+  installed/registered Start-menu apps and masks non-allowlisted windows; uiss.exe is
+  an unregistered dev build. So computer-use can neither drive nor see it.
+- **Built a FlaUI (UIA3) smoke test** — `examples/uiss/winui/uitest/` — the right tool
+  (Playwright-for-desktop). It launches uiss.exe, gets the window, and tries to invoke
+  the login control. But **the WinUI XAML content is not exposed to UI Automation**:
+  ```
+  WinUIDesktopWin32WindowClass
+   ├ Pane  Microsoft.UI.Content.DesktopChildSiteBridge  → 1 XAML-root child →
+   │        enumerating its children throws COMException E_UNEXPECTED (0x8000FFFF)
+   └ TitleBar (min/max/close)
+  ```
+  Both the .NET `System.Windows.Automation` (UIA2) client AND FlaUI/UIA3 fail
+  identically on `FindAllDescendants()` / enumerating the XAML root's children. So no
+  TextBox/Button is reachable; automated UIA interaction is impossible.
+
+### What this means
+- The app **renders** correctly (proven, Update 10) and runs a real message loop, but
+  its **accessibility tree is broken at the WinUI ContentIsland (DesktopChildSiteBridge)
+  UIA bridge** — screen readers + UIA automation can't see the content. This is a real
+  accessibility gap (the goal explicitly calls out accessibility).
+- It's at the **WinUI 3 / WindowsAppSDK** content-island UIA layer, not a missing
+  control in our tree (window + title bar enumerate fine; only the XAML-island subtree
+  throws). Likely a framework/hosting issue (known-fragile in recent WinAppSDK,
+  esp. unpackaged) — needs a framework-vs-app diagnosis: run the FlaUI harness against
+  a minimal one-button WinUI app built the same way; if it also throws, it's the
+  framework/host, else a specific control's UIA peer.
+
+### Honest status of "interactive on Windows"
+- **Render**: ✅ proven. **Interactive (synthetic, on Windows)**: ❌ not verified —
+  blocked by the UIA defect (computer-use can't target the exe; UIA can't see the tree).
+  The controls are driven by the same handler dispatch proven interactive on Linux.
+- The FlaUI harness is committed and will pass once the UIA bridge is fixed.
