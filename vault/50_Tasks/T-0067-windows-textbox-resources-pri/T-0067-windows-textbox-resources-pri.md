@@ -618,3 +618,37 @@ FlaUI harness (examples/uiss/winui/uitest) will pass once the bridge works.
 
 Status: render ✅ (Update 10); interactive/accessible on Windows ❌ blocked by this
 framework UIA defect — root-caused, not fixable in app code.
+
+---
+
+## Update 13 — MSIX packaging works + UNBLOCKS computer-use; UIA-tree is a WinUI framework bug
+
+Packaged the УИСС app as a loose MSIX layout (Identity Name="uiss" to match the
+resources.pri map name; framework-dependent on Microsoft.WindowsAppRuntime.1.8;
+registered in dev mode, unsigned — see `winui/package/`).
+
+- **Packaged-launch crash, fixed.** The first packaged activation died before `main`
+  with no WER. Root cause: the WindowsAppSDK auto-bootstrap-initializer (compiled into
+  the App.xaml shell) defaults to `OnNoMatch_ShowUI` and tries to bootstrap the runtime
+  EVEN under package identity (illegal for MSIX). Fix: define
+  `MICROSOFT_WINDOWSAPPSDK_BOOTSTRAP_AUTO_INITIALIZE_OPTIONS_ONPACKAGEIDENTITY_NOOP`
+  (+ `_ONNOMATCH_SHOWUI`) on the uiss target → the initializer no-ops when packaged.
+  The packaged app now launches and renders (trace: ctor → InitializeComponent → OnLaunched → on_launch).
+- **UIA tree still broken packaged.** FlaUI/UIA3 against the packaged app (AUMID launch,
+  game minimized, force-foreground + 6 retries) still hit `DesktopChildSiteBridge →
+  E_UNEXPECTED`, 0 controls. Sanity check: UIA2 on **Calculator** enumerates 36 buttons
+  → UIA + the environment are fine. So the defect is specifically the **WinUI 3 desktop
+  content-island UIA bridge** (not env, not our controls — a stock one-button app fails
+  too, not packaging, not occlusion). It is a WinUI 3 / WindowsAppSDK 1.8 framework
+  defect; FlaUI/UIA-tree e2e is blocked by it. (Open: whether stable 1.7's older hosting
+  exposes UIA — a version swap not yet attempted.)
+- **computer-use is now unblocked.** Before packaging, `request_access` returned
+  `notInstalled` for the bare exe. Packaged, the registered "УИСС — Е-Студент" RESOLVES
+  (the approval dialog appears). computer-use drives PIXELS (screenshot + coordinate
+  click), not the UIA tree — so the broken UIA doesn't block it. A computer-use e2e
+  (screenshot the login → click → screenshot the result) is available once the user
+  approves the access dialog.
+
+Net: Windows builds + renders (Update 10) + ships as MSIX. Interactive e2e via
+UIA/FlaUI is blocked by the WinUI content-island defect; via computer-use it's available
+pending user approval.

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- T-0067: MSIX package manifest for the УИСС WinUI 3 app. Package IDENTITY is what
+     gives the WinUI content-island a working UI-Automation / MRT bridge (the unpackaged
+     app renders but its a11y/UIA tree is broken) AND makes the app targetable by
+     computer-use. Identity Name MUST equal the resources.pri resource-map name ("uiss")
+     so ms-appx:///App.xaml resolves. Framework-dependent on the installed WindowsAppSDK
+     1.8 runtime package. Registered as a loose layout in dev mode (no signing). -->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <Identity Name="uiss"
+            Publisher="CN=MPAPP Dev"
+            Version="1.0.0.0"
+            ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>УИСС — Е-Студент</DisplayName>
+    <PublisherDisplayName>MPAPP</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Universal" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+    <PackageDependency Name="Microsoft.WindowsAppRuntime.1.8"
+                       MinVersion="8000.859.21.0"
+                       Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+
+  <Applications>
+    <Application Id="App" Executable="uiss.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="УИСС — Е-Студент"
+        Description="Университетска информационна система за студенти (MPAPP)"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        BackgroundColor="#1A2B57">
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+</Package>

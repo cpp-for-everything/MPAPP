@@ -116,6 +116,13 @@ if(WIN32)
         NOMINMAX
         UNICODE
         _UNICODE
+        # T-0067: the WindowsAppSDK auto-bootstrap-initializer (compiled into the App.xaml
+        # shell) defaults to MddBootstrapInitializeOptions_OnNoMatch_ShowUI, which tries to
+        # bootstrap the runtime EVEN under package identity — illegal for a packaged (MSIX)
+        # app, so it dies before main. These flags make it no-op when packaged (so the MSIX
+        # build runs) while still showing UI on no-match when run unpackaged.
+        MICROSOFT_WINDOWSAPPSDK_BOOTSTRAP_AUTO_INITIALIZE_OPTIONS_ONNOMATCH_SHOWUI
+        MICROSOFT_WINDOWSAPPSDK_BOOTSTRAP_AUTO_INITIALIZE_OPTIONS_ONPACKAGEIDENTITY_NOOP
     )
     target_compile_options(uiss PRIVATE
         /Zc:__cplusplus

@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using FlaUI.Core;
 using FlaUI.Core.AutomationElements;
@@ -27,19 +28,31 @@ internal static class Program
 {
     private static int Main(string[] args)
     {
-        var exe = args.Length > 0
+        var arg0 = args.Length > 0
             ? args[0]
             : @"D:\GitHub\MPAPP\build-vs143\examples\uiss\Debug\uiss.exe";
-        var outDir = args.Length > 1 ? args[1] : Path.GetDirectoryName(Path.GetFullPath(exe));
+        // An arg containing '!' is an AppUserModelId -> launch the PACKAGED (MSIX) app
+        // (package identity is what gives WinUI's content-island a working UIA bridge).
+        var isAumid = arg0.Contains("!");
+        var outDir = args.Length > 1 ? args[1]
+            : (isAumid ? @"D:\GitHub\MPAPP\build-vs143\package" : Path.GetDirectoryName(Path.GetFullPath(arg0)));
 
-        if (!File.Exists(exe)) { Console.WriteLine($"[FAIL] exe not found: {exe}"); return 10; }
-        Console.WriteLine($"[uitest] launching {exe}");
-
-        var app = Application.Launch(new ProcessStartInfo
+        FlaUI.Core.Application app;
+        if (isAumid)
         {
-            FileName = exe,
-            WorkingDirectory = Path.GetDirectoryName(Path.GetFullPath(exe)),
-        });
+            Console.WriteLine($"[uitest] launching PACKAGED app via AUMID: {arg0}");
+            app = Application.LaunchStoreApp(arg0);
+        }
+        else
+        {
+            if (!File.Exists(arg0)) { Console.WriteLine($"[FAIL] exe not found: {arg0}"); return 10; }
+            Console.WriteLine($"[uitest] launching {arg0}");
+            app = Application.Launch(new ProcessStartInfo
+            {
+                FileName = arg0,
+                WorkingDirectory = Path.GetDirectoryName(Path.GetFullPath(arg0)),
+            });
+        }
 
         try
         {
@@ -65,10 +78,20 @@ internal static class Program
             }
             catch (Exception ex) { Console.WriteLine("   window.FindAllChildren threw: " + ex.Message); }
 
-            int errsBefore;
-            var beforeEls = Collect(window, out errsBefore);
-            var before = Tags(beforeEls);
-            Console.WriteLine($"[uitest] collected {beforeEls.Count} elements (subtree errors skipped: {errsBefore})");
+            // The WinUI content-island UIA tree can build a beat after the window shows,
+            // and may only populate once the window is genuinely foreground. Force the
+            // window foreground and retry the enumeration before giving up.
+            List<AutomationElement> beforeEls = new List<AutomationElement>();
+            List<string> before = new List<string>();
+            for (int attempt = 1; attempt <= 6; attempt++)
+            {
+                ForceForeground(window);
+                Thread.Sleep(1000);
+                int e; beforeEls = Collect(window, out e);
+                before = Tags(beforeEls);
+                Console.WriteLine($"[uitest] collect attempt {attempt}: {beforeEls.Count} elements, {before.Count} named, {e} subtree errors");
+                if (before.Count > 0) break;
+            }
             Print(before, "BEFORE login");
             TrySnap(window, Path.Combine(outDir, "uitest-1-login.png"));
 
@@ -178,6 +201,34 @@ internal static class Program
     private static void TryFocus(Window w)
     {
         try { w.FocusNative(); } catch { try { w.Focus(); } catch { } }
+    }
+
+    [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr h);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr h, int n);
+    [DllImport("user32.dll")] private static extern bool BringWindowToTop(IntPtr h);
+    [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr h, IntPtr pid);
+    [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
+    [DllImport("kernel32.dll")] private static extern uint GetCurrentThreadId();
+    [DllImport("user32.dll")] private static extern bool AttachThreadInput(uint a, uint b, bool attach);
+
+    // Force a window genuinely foreground (steal focus via thread-input attach) so the
+    // WinUI content-island composites and builds its UIA tree.
+    private static void ForceForeground(Window w)
+    {
+        try
+        {
+            var h = w.Properties.NativeWindowHandle.ValueOrDefault;
+            if (h == IntPtr.Zero) return;
+            ShowWindow(h, 9);   // SW_RESTORE
+            var fg = GetForegroundWindow();
+            uint tgt = GetWindowThreadProcessId(fg, IntPtr.Zero);
+            uint cur = GetCurrentThreadId();
+            AttachThreadInput(cur, tgt, true);
+            BringWindowToTop(h);
+            SetForegroundWindow(h);
+            AttachThreadInput(cur, tgt, false);
+        }
+        catch { try { w.FocusNative(); } catch { } }
     }
 
     private static void TrySnap(Window w, string path)
