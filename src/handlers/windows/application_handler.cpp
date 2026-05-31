@@ -23,7 +23,9 @@ extern "C" HRESULT __stdcall WindowsAppRuntime_EnsureIsLoaded();
 
 #include <winrt/base.h>
 #include <winrt/Windows.Foundation.h>
+#include <winrt/Windows.Foundation.Collections.h>  // IVector<>::Append (MergedDictionaries)
 #include <winrt/Microsoft.UI.Xaml.h>
+#include <winrt/Microsoft.UI.Xaml.Controls.h>   // XamlControlsResources
 
 #include "mpapp/handlers/windows/dispatcher_queue.hpp"
 
@@ -63,6 +65,26 @@ class mpapp_winui_app : public mux::ApplicationT<mpapp_winui_app> {
 public:
     mpapp_winui_app() {
         mpapp_diag_log("mpapp_winui_app: ctor enter");
+
+        // Merge the WinUI control theme resources (themeresources.xaml) into the
+        // application resources. In a code-only host (no App.xaml) this MUST be
+        // done explicitly — otherwise the first templated control (TextBox, etc.)
+        // can't resolve its default style at the deferred layout pass and the app
+        // dies with 0x80070002 (FILE_NOT_FOUND) a few hundred ms after launch.
+        // This is the C++ equivalent of <XamlControlsResources/> in App.xaml.
+        try {
+            auto xcr = ::winrt::Microsoft::UI::Xaml::Controls::XamlControlsResources{};
+            Resources().MergedDictionaries().Append(xcr);
+            mpapp_diag_log("mpapp_winui_app: XamlControlsResources merged");
+        } catch (winrt::hresult_error const& e) {
+            char buf[256]; std::snprintf(buf, sizeof(buf),
+                                          "XamlControlsResources merge FAILED hr=0x%08X",
+                                          static_cast<unsigned>(e.code().value));
+            mpapp_diag_log(buf);
+        } catch (...) {
+            mpapp_diag_log("XamlControlsResources merge FAILED (unknown)");
+        }
+
         try {
             // Capture exceptions raised on deferred layout passes / event
             // handlers — without this, an exception on the message loop

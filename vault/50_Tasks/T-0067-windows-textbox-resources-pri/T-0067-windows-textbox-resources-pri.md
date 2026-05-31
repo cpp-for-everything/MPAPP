@@ -402,3 +402,82 @@ App.xaml WIP + this whole investigation are committed; nothing is lost.
 - [[T-0060-uiss-reference-app]] (the app), [[00_Index/Current Focus]].
 - Diagnostic switch: `MPAPP_LOG_LAUNCH=<file>` in
   `src/handlers/windows/application_handler.cpp`.
+
+---
+
+## Update 9 — BREAKTHROUGH: v143 installed → app builds + full UI constructs; lone blocker is `resources.pri`
+
+The user installed the **MSVC v143 toolset** (VS 2022 C++ compiler, `14.42.34433` /
+`14.44.35207`) **inside the Build Tools 2026 instance** (no full VS 2022 product).
+That is exactly what was missing. Everything below was established this session.
+
+### 1. The compiler pathology is GONE (v143 fixes it)
+- A trivial TU compiles in 7.7 s; `src/mpapp.cpp` — the TU that took **22–27 min**
+  under the v145 preview compiler — now compiles in **seconds**.
+- Build driven via: `cmake -G "Visual Studio 18 2026" -A x64 -T v143
+  -DCMAKE_GENERATOR_INSTANCE="…\18\BuildTools" -DMPAPP_UISS_WINUI_SHELL_WIP=ON`
+  (v143 lives only in the BuildTools instance; `CMAKE_GENERATOR_INSTANCE` selects it).
+  Ninja path: BuildTools `vcvars64.bat -vcvars_ver=14.42`.
+- **C1060 "out of heap space"** appeared at Ninja's default 12-way parallelism on
+  16 GB RAM (each heavy C++/WinRT TU peaks ~2 GB). Fix: throttle to **3** parallel
+  cl.exe (`-j 3` for Ninja; `/m:1 /p:MultiProcessorCompilation=true /p:CL_MPCount=3`
+  for MSBuild). The whole Windows handler set + uiss link cleanly under v143.
+
+### 2. The entire УИСС UI CONSTRUCTS on Windows (huge)
+Running the code-only Ninja `uiss.exe` (v143) with `MPAPP_LOG_LAUNCH` shows:
+`bootstrap done → init_apartment → Application::Start → ctor → OnLaunched →
+app constructed → on_launch returned`. **`on_launch()` returns** — the full UI
+tree (login, 10-section nav, CarouselView, every control incl. TextBox) instantiates
+under WinUI 3 with **no error**. It then dies on the *deferred first render*:
+`UnhandledException hr=0x802B000A "Cannot locate resource from
+'ms-appx:///Microsoft.UI.Xaml/Themes/themeresources.xaml'."`
+Constructing `XamlControlsResources{}` in code also fails (`0x80004005`) for the
+same reason. ⇒ **The sole blocker is the absence of an app `resources.pri`** — MRT
+has no root, so no `ms-appx:///Microsoft.UI.Xaml/` framework resource resolves.
+
+### 3. mdmerge doubled-path bug — FOUND + FIXED
+The App.xaml VS build reached `mdmerge` and failed `MDM2025`: the input path had
+`$(IntDir)` **doubled** (`…\uiss.dir\Debug\uiss.dir\Debug\Unmerged\App.winmd`).
+Root cause: CppWinRT's `GetCppWinRTMdMergeInputs` builds each input as
+`%(Midl.OutputDirectory)%(Midl.MetadataFileName)`; CMake sets
+`<Midl><OutputDirectory>$(ProjectDir)/$(IntDir)` while `MetadataFileName` already
+contains `$(IntDir)` → they stack. **Fix (committed):** a generated
+`Directory.Build.targets` resets `<Midl><OutputDirectory>` to `$(ProjectDir)`.
+mdmerge then merges `App.winmd` + `XamlMetaDataProvider.winmd` → `uiss.winmd` ✓.
+
+### 4. The real remaining gap — CMake doesn't wire the WinUI XAML build pipeline
+After mdmerge, the App.xaml build fails at `App.xaml.h(3): C1083 'App.xaml.g.h'`.
+The **per-page XAML markup codegen** (which emits `App.xaml.g.h` with
+`InitializeComponent`) **does not run** under CMake's VS generator — only
+`XamlMetaDataProvider` is produced. The project imports `Microsoft.Windows.CppWinRT.targets`
+(midlrt/mdmerge/cppwinrt all work) and `Microsoft.WindowsAppSDK.WinUI.targets`, but
+the markup compiler's per-page pass + the **MakePri (`resources.pri`) task** are part
+of the WinUI XAML pipeline that the **VS C++/WinUI project *system*** wires (early
+`*.BeforeCommon.targets` import + item plumbing) and that CMake does **not** replicate.
+- `App.g.h` (cppwinrt projection of the `App` runtimeclass) IS generated, but it
+  only supplies `implementation::App_base`; the markup `App.xaml.g.h` (`AppT` +
+  `InitializeComponent`) is what's missing.
+- `resources.pri` is produced by the same pipeline (MSBuild *Tasks*, not a
+  replicable raw `makepri` command), and merging the prebuilt framework PRIs
+  (`Microsoft.UI.Xaml.Controls.pri` = themeresources, `Microsoft.UI.pri`,
+  `Microsoft.WindowsAppRuntime.pri`) by hand is not supported by makepri.
+
+### Conclusive status
+v143 (the user's install) **fully unblocked the build** — MPAPP + УИСС compile and
+the entire UI constructs on Windows/WinUI 3. The only thing between here and a
+rendered window is `resources.pri` / the WinUI XAML build wiring under CMake.
+
+### Two viable paths to a rendered window (next iteration)
+1. **Hybrid shell (recommended, most robust):** author the thin Windows app shell
+   as a *real* VS C++/WinUI `.vcxproj` (App.xaml from the template) built by MSBuild,
+   linking the CMake/Ninja-built `mpapp-core.lib` + `mpapp-handlers-windows.lib`.
+   The markup compiler + MakePri run natively → `App.xaml.g.h` + `resources.pri` →
+   themeresources resolve → render. (Same WinAppSDK 1.8 + CppWinRT 2.0.250303 on
+   both sides keeps the projection ABI-consistent.)
+2. **Replicate the WinUI XAML targets under CMake:** import the markup compiler
+   `*.BeforeCommon.targets` early + wire the per-page codegen and MakePri tasks into
+   the CMake-generated vcxproj. Keeps the single build system but re-implements what
+   the VS project system does — fragile.
+
+Code-only `XamlControlsResources` merge added to `application_handler.cpp` (correct
+for when a `resources.pri` exists; currently logs `0x80004005` and is inert without it).

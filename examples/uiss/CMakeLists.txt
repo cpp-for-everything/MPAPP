@@ -69,6 +69,16 @@ if(WIN32)
                 "$(IntDir)Unmerged"
                 "$(IntDir)Merged"
                 "$(IntDir)Generated Files")
+        # T-0067 mdmerge fix: CMake emits <Midl><OutputDirectory>$(ProjectDir)/$(IntDir)
+        # but CppWinRT's GetCppWinRTMdMergeInputs computes each merge input as
+        # %(Midl.OutputDirectory)%(Midl.MetadataFileName), and MetadataFileName already
+        # carries $(IntDir) (e.g. "$(IntDir)Unmerged\App.winmd"). The two stack, doubling
+        # $(IntDir), so mdmerge looks at <IntDir><IntDir>Unmerged\*.winmd and fails MDM2025
+        # even though the winmd was written to the single-IntDir path. A Directory.Build.targets
+        # (imported last, so it wins) resets OutputDirectory to just $(ProjectDir) so the two
+        # combine to the real path. Covers App.idl AND the generated XamlMetaDataProvider.idl.
+        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/Directory.Build.targets"
+"<Project>\n  <ItemDefinitionGroup>\n    <Midl>\n      <OutputDirectory>$(ProjectDir)</OutputDirectory>\n    </Midl>\n  </ItemDefinitionGroup>\n</Project>\n")
         # CppWinRT's targets override the Midl build step to use midlrt (MIDL
         # 3.0 / WinRT), which the `runtimeclass App` syntax in App.idl needs;
         # classic midl rejects `namespace`.

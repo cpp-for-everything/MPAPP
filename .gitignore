@@ -40,3 +40,6 @@ examples/УИСС/
 # OS
 Thumbs.db
 .DS_Store
+
+# Windows v143 build investigation logs (T-0067)
+/*.log
