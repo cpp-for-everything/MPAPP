@@ -367,6 +367,31 @@ only at the winmd dir — already fixed in `9cfbcea`'s PreBuild mkdir) without
 hanging, Windows likely renders. Iterate with a hard per-build timeout and
 kill-on-stall (watch a single cl.exe exceeding ~3 min / msbuild with no output).
 
+## Update 8 — CONCLUSIVE: the installed toolset (VS 2026/v18) is the blocker
+- **VS 2022 / v143 is NOT installed** on this machine (only VS 2026 v18
+  Community). So the "switch toolset" plan can't run without first installing
+  VS 2022 (a user action — ~several GB).
+- Re-tested the no-XAML `UseWinUI` path with **`CppWinRTGenerateProjection=false`**
+  (reuse the lean bootstrapped projection): **no change** — `cl.exe` still spent
+  27 min / 1.2 GB on the single uiss TU before I killed it. So the pathology is
+  **not** the projection generation; it is a **v18-preview cl.exe/MSBuild
+  defect** on heavy C++23 + WinRT code, not configurable away.
+- Combined with the App.xaml → XAML-compiler **hang**, BOTH VS-generator routes
+  are broken on v18, and the WindowsAppSDK resource wiring *requires* a
+  VS-generator build. ⇒ **There is no working WinUI 3 C++ toolset on this box.**
+
+### Definitive next step (needs a user action first)
+Install **Visual Studio 2022** with *Desktop development with C++* + the
+*Windows App SDK / WinUI* components (coexists with VS 2026). Then:
+`cmake -G "Visual Studio 17 2022" -A x64 -T v143 -DMPAPP_UISS_WINUI_SHELL_WIP=ON`
+and build the **already-committed App.xaml shell** (toolchain is wired through
+midlrt + the winmd PreBuild fix). On v143 the XAML compiler + projection PCH are
+mature, so it has a real chance to build through to a rendered window. Iterate
+with a hard per-build timeout + kill-on-stall regardless.
+
+Everything else ships today (Linux desktop + Android mobile, demonstrated). The
+App.xaml WIP + this whole investigation are committed; nothing is lost.
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
