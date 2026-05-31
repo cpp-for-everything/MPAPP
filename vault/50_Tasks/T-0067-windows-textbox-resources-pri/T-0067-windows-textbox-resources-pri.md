@@ -580,3 +580,41 @@ Asked to verify the Windows app interactively with computer-use, then via UI Aut
   blocked by the UIA defect (computer-use can't target the exe; UIA can't see the tree).
   The controls are driven by the same handler dispatch proven interactive on Linux.
 - The FlaUI harness is committed and will pass once the UIA bridge is fixed.
+
+---
+
+## Update 12 — UIA defect DIAGNOSED: framework/host-level (unpackaged content-island), not MPAPP
+
+Per the framework-vs-app check: an env-gated branch in App.xaml.cpp (MPAPP_UIA_DIAG=1)
+brought up a **trivial standard-WinUI window with one `Button` + `TextBox`** — no MPAPP
+controls — and the FlaUI/UIA3 harness saw the **exact same** broken tree as the full app:
+
+```
+WinUIDesktopWin32WindowClass
+ ├ Pane  Microsoft.UI.Content.DesktopChildSiteBridge → 1 XAML-root child →
+ │        enumerating its children throws COMException E_UNEXPECTED (0x8000FFFF)
+ └ TitleBar
+0 named controls reachable
+```
+
+⇒ **A single stock WinUI Button is not exposed to UI Automation.** The defect is the
+WinUI 3 **content-island UIA bridge (DesktopChildSiteBridge)** for an **unpackaged** app
+hosted via the pure-CMake App.xaml shell + WindowsAppSDK 1.8.260416003 — NOT a bad UIA
+peer on any MPAPP control. Nothing in `src/handlers/windows/*` can fix it; the control
+tree is irrelevant (even one Button fails).
+
+Repro (minimal): a `Microsoft.UI.Xaml.Window` with `StackPanel{ TextBox, Button }` as
+Content, Activate(), then `FindAllDescendants()` → E_UNEXPECTED. (The temporary
+MPAPP_UIA_DIAG branch was reverted to keep the shell clean.)
+
+### Consequence + likely unblock
+Automated UIA e2e (FlaUI), screen readers, AND computer-use (which uses the a11y tree +
+needs app identity) are all blocked by this. The standard unblock is to **MSIX-package
+the app** — package identity gives the WinUI content-island a proper UIA/MRT bridge AND
+makes the app targetable by computer-use. Alternatively try a different WindowsAppSDK
+version (1.8.2604xx is a recent/preview-ish build; content-island UIA has been fragile).
+Both are framework-level follow-ups; neither is an MPAPP control change. The committed
+FlaUI harness (examples/uiss/winui/uitest) will pass once the bridge works.
+
+Status: render ✅ (Update 10); interactive/accessible on Windows ❌ blocked by this
+framework UIA defect — root-caused, not fixable in app code.
