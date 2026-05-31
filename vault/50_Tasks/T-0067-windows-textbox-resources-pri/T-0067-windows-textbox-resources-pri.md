@@ -481,3 +481,61 @@ rendered window is `resources.pri` / the WinUI XAML build wiring under CMake.
 
 Code-only `XamlControlsResources` merge added to `application_handler.cpp` (correct
 for when a `resources.pri` exists; currently logs `0x80004005` and is inert without it).
+
+---
+
+## Update 10 — ✅ RESOLVED: УИСС builds AND renders natively on Windows via PURE CMake
+
+The Windows WinUI 3 build now works end-to-end under the CMake Visual Studio
+generator (no separate VS project) with the v143 toolset. `uiss.exe` builds and
+**renders the full УИСС login page** — title bar "УИСС — Е-Студент (MPAPP)", the
+TU-Sofia banner, "Технически университет - София", and real WinUI **TextBoxes**
+(Факултетен номер / ЕГН) with their default theme templates. **The themeresources
+0x802B000A crash is gone** — `resources.pri` resolves `ms-appx:///Microsoft.UI.Xaml/`.
+Proof: `closure/uiss-windows-render-login.png` (captured via PrintWindow
+PW_RENDERFULLCONTENT; the window was occluded by another app but the WinUI DComp
+content rendered into the DC).
+
+### Root cause (final): CMake's VS generator does not wire the WinUI XAML pipeline
+The C++/WinRT + WindowsAppSDK NuGet targets import fine (midlrt/mdmerge/cppwinrt
+work), but the **WinUI XAML markup compiler + MakePri** are sequenced by the VS
+*project system* (item plumbing + build-chain hooks) that CMake does not replicate.
+Each gap had to be wired by hand in a `Directory.Build.targets` (imported last):
+
+1. **mdmerge MDM2025 (doubled `$(IntDir)`)** — reset `<Midl><OutputDirectory>` from
+   CMake's `$(ProjectDir)/$(IntDir)` to `$(ProjectDir)` (MetadataFileName already
+   carries `$(IntDir)`; the two stacked).
+2. **Markup passes never run** — CMake never inserts `MarkupCompilePass1/2` into the
+   build. Added a target that runs them (after `CppWinRTMakeProjections`, before
+   `ClCompile`).
+3. **WMC1007 "cannot resolve WinUI types"** — the `CompileXaml` task resolves base
+   types from `@(ReferencePath)` (`ResolveReferences`) + `$(OutDir)*.winmd`
+   (`CppWinRTAddXamlReferences`); CMake sequenced neither before the passes. Added
+   both to `MarkupCompilePass1/2DependsOn`, and ran the sequence *after* the
+   projection so `$(OutDir)` is populated.
+4. **Generated sources not compiled** — the native-C++ `CompileXaml` "add generated
+   code to ClCompile" Output is `Condition`'d managed-only. Added
+   `XamlTypeInfo.g.cpp`, `XamlTypeInfo.Impl.g.cpp`, `module.g.cpp` to `ClCompile`
+   explicitly; `module.g.cpp` needs `<unknwn.h>` force-included.
+5. **`App.xaml.g.hpp` (wWinMain + InitializeComponent)** isn't self-contained — it's
+   `#include`d by `App.xaml.cpp` (where `implementation::App` is defined). Set the
+   entry point to `wWinMainCRTStartup` (Unicode wWinMain).
+6. **`module.g.cpp` includes `"App.h"`** — cppwinrt's stub `sources/App.h` has a
+   tripwire + conflicting stub impl. Added a real shim `winui/App.h` that forwards to
+   `App.xaml.h` and defines `factory_implementation::App`; put the source `winui`
+   dir earlier on the include path than the stub.
+7. **resources.pri name** — MakePri emits `uiss.pri`; the unpackaged ms-appx
+   ResourceManager loads `resources.pri`. POST_BUILD copy.
+
+All of this is generated reproducibly from `winui/Directory.Build.targets.in`
+(via `configure_file(@ONLY)`) + the POST_BUILD pri copy, guarded behind
+`MPAPP_UISS_WINUI_SHELL_WIP` + the VS generator (Ninja/CI unaffected).
+
+### Build recipe
+`cmake -G "Visual Studio 18 2026" -A x64 -T v143
+  -DCMAKE_GENERATOR_INSTANCE="…\18\BuildTools" -DMPAPP_UISS_WINUI_SHELL_WIP=ON`
+then `cmake --build … --target uiss -- /m:1 /p:MultiProcessorCompilation=true /p:CL_MPCount=3`
+(throttle avoids C1060 on 16 GB; v143 lives in the BuildTools instance).
+
+Status: **RESOLVED.** Desktop (Linux GTK4 + Windows WinUI 3) and mobile (Android)
+all build and render the УИСС app from the single ifdef-free codebase.

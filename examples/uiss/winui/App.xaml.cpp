@@ -41,3 +41,11 @@ namespace winrt::uiss::implementation
         s_app.on_launch();
     }
 }
+
+// The XAML markup compiler (Pass2) generates App.xaml.g.hpp containing
+// InitializeComponent()'s body AND the wWinMain entry point that calls
+// Application::Start([]{ winrt::make<implementation::App>(); }). It only
+// #includes <windows.h>, so it must be compiled in a TU where implementation::App
+// is already defined (here, via "App.xaml.h" above) — the stock VS build force-
+// includes the pch for this; the CMake build has none. (T-0067)
+#include "App.xaml.g.hpp"

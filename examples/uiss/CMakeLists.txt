@@ -69,21 +69,26 @@ if(WIN32)
                 "$(IntDir)Unmerged"
                 "$(IntDir)Merged"
                 "$(IntDir)Generated Files")
-        # T-0067 mdmerge fix: CMake emits <Midl><OutputDirectory>$(ProjectDir)/$(IntDir)
-        # but CppWinRT's GetCppWinRTMdMergeInputs computes each merge input as
-        # %(Midl.OutputDirectory)%(Midl.MetadataFileName), and MetadataFileName already
-        # carries $(IntDir) (e.g. "$(IntDir)Unmerged\App.winmd"). The two stack, doubling
-        # $(IntDir), so mdmerge looks at <IntDir><IntDir>Unmerged\*.winmd and fails MDM2025
-        # even though the winmd was written to the single-IntDir path. A Directory.Build.targets
-        # (imported last, so it wins) resets OutputDirectory to just $(ProjectDir) so the two
-        # combine to the real path. Covers App.idl AND the generated XamlMetaDataProvider.idl.
-        file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/Directory.Build.targets"
-"<Project>\n  <ItemDefinitionGroup>\n    <Midl>\n      <OutputDirectory>$(ProjectDir)</OutputDirectory>\n    </Midl>\n  </ItemDefinitionGroup>\n</Project>\n")
         # CppWinRT's targets override the Midl build step to use midlrt (MIDL
         # 3.0 / WinRT), which the `runtimeclass App` syntax in App.idl needs;
         # classic midl rejects `namespace`.
         set_property(TARGET uiss PROPERTY
             VS_PACKAGE_REFERENCES "Microsoft.WindowsAppSDK_1.8.260416003;Microsoft.Windows.CppWinRT_2.0.250303.1")
+        # T-0067: wire the full WinUI 3 XAML pipeline into the CMake VS-generator
+        # project via a Directory.Build.targets (imported last, so its edits win):
+        # mdmerge $(IntDir)-doubling fix, the markup-pass sequencing + reference
+        # resolution, the generated-source compilation, and the Unicode entry point.
+        # Without it the markup compiler never runs and themeresources can't resolve.
+        # @ONLY keeps MSBuild $(...) / %(...) literal, substituting only @CMAKE_*@.
+        configure_file(
+            "${CMAKE_CURRENT_SOURCE_DIR}/winui/Directory.Build.targets.in"
+            "${CMAKE_CURRENT_BINARY_DIR}/Directory.Build.targets"
+            @ONLY)
+        # Unpackaged WinUI 3's default ms-appx ResourceManager loads "resources.pri"
+        # from the exe dir; MakePri emits "$(RootNamespace).pri" (uiss.pri). Copy it.
+        add_custom_command(TARGET uiss POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                "$(OutDir)uiss.pri" "$(OutDir)resources.pri")
     else()
         # ---- Ninja fallback: builds + links + runs, but framework theme
         #      resources don't resolve (T-0067) — kept so the Ninja toolchain

@@ -1,0 +1,58 @@
+<Project>
+  <!-- ====================================================================== -->
+  <!-- T-0067: wire the full WinUI 3 XAML build pipeline into the CMake        -->
+  <!-- Visual Studio generator project. CMake does NOT do this natively, so    -->
+  <!-- without these the markup compiler never runs (no App.xaml.g.h/.g.hpp),  -->
+  <!-- mdmerge doubles $(IntDir), the generated sources aren't compiled, and   -->
+  <!-- the app can't resolve ms-appx:///Microsoft.UI.Xaml themeresources.       -->
+  <!-- Generated from Directory.Build.targets.in via configure_file(@ONLY).    -->
+  <!-- This file is imported LAST, so its property/item edits win.             -->
+  <!-- ====================================================================== -->
+  <ItemDefinitionGroup>
+    <Midl>
+      <!-- mdmerge MDM2025 fix: CppWinRT's GetCppWinRTMdMergeInputs builds each
+           input as %(Midl.OutputDirectory)%(Midl.MetadataFileName), and
+           MetadataFileName already carries $(IntDir); CMake's default
+           OutputDirectory ($(ProjectDir)/$(IntDir)) doubles $(IntDir). Reset to
+           $(ProjectDir) so the two combine to the real single-IntDir path. -->
+      <OutputDirectory>$(ProjectDir)</OutputDirectory>
+    </Midl>
+    <ClCompile>
+      <!-- The markup compiler emits App.xaml.g.h/.g.hpp under $(IntDir)<src-subdir>\
+           (here winui\). The shim App.h (forwards to the XAML code-behind for
+           cppwinrt's module.g.cpp) lives in the source winui dir. -->
+      <AdditionalIncludeDirectories>@CMAKE_CURRENT_SOURCE_DIR@/winui;$(IntDir)winui;$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <!-- App.xaml.g.hpp provides the Unicode wWinMain; use the matching CRT
+           startup (default pulls ANSI WinMainCRTStartup -> unresolved WinMain). -->
+      <EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
+    </Link>
+  </ItemDefinitionGroup>
+  <!-- The XAML markup passes resolve WinUI base types from @(ReferencePath)
+       (ResolveReferences) + the framework winmds copied to $(OutDir)
+       (CppWinRTAddXamlReferences). CMake doesn't sequence either before the
+       passes, so without these the XamlCompiler fails WMC1007. -->
+  <PropertyGroup>
+    <MarkupCompilePass1DependsOn>ResolveReferences;CppWinRTAddXamlReferences;$(MarkupCompilePass1DependsOn)</MarkupCompilePass1DependsOn>
+    <MarkupCompilePass2DependsOn>ResolveReferences;CppWinRTAddXamlReferences;$(MarkupCompilePass2DependsOn)</MarkupCompilePass2DependsOn>
+  </PropertyGroup>
+  <!-- Insert the markup passes into the build chain: after the C++/WinRT
+       projection (so $(OutDir) has the winmds for reference resolution) and
+       before ClCompile (so App.xaml.g.h/.g.hpp exist for the code-behind).
+       CMake's VS generator never inserts the markup passes at all. -->
+  <Target Name="_MppRunMarkupBeforeCompile"
+          BeforeTargets="ClCompile"
+          DependsOnTargets="ResolveReferences;CppWinRTMakeProjections;MarkupCompilePass1;MarkupCompilePass2" />
+  <!-- The native-C++ markup path's "add generated code to ClCompile" output is
+       managed-only (Condition ManagedAssembly!=false), so the generated XAML
+       sources never get compiled. Add them explicitly. module.g.cpp (cppwinrt
+       activation-factory glue) needs <unknwn.h> ahead of winrt/base.h. -->
+  <ItemGroup>
+    <ClCompile Include="$(IntDir)XamlTypeInfo.g.cpp" />
+    <ClCompile Include="$(IntDir)XamlTypeInfo.Impl.g.cpp" />
+    <ClCompile Include="$(IntDir)Generated Files\module.g.cpp">
+      <ForcedIncludeFiles>unknwn.h;%(ClCompile.ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+  </ItemGroup>
+</Project>
