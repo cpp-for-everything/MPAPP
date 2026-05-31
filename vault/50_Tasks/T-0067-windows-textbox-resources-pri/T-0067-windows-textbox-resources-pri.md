@@ -344,6 +344,29 @@ WARNING in the CMake: the WIP path is double-guarded
 (`Visual Studio` generator AND `MPAPP_UISS_WINUI_SHELL_WIP`) so it can't hang a
 default build; only an explicit opt-in (`-DMPAPP_UISS_WINUI_SHELL_WIP=ON`) hits it.
 
+## Update 7 — the no-XAML path is ALSO blocked (toolset is implicated)
+Tested the "pure C++, no XAML" route (drop App.xaml; keep `UseWinUI` only for
+the MrtCore resource-LOAD wiring; merge `XamlControlsResources` at runtime in
+C++ in `application_handler.cpp`). Result: **`cl.exe` compiles `main.cpp` for
+22+ min on a single TU (1161 CPU-s, 750 MB) and never finishes** — `UseWinUI`
+forces the **full** WinRT projection (vs the lean bootstrapped one the Ninja
+build uses), and that + C++23 + uiss's whole header tree in one TU melts the
+compiler. Killed it; experiment reverted (tree clean).
+
+⇒ **Both VS-generator routes are now blocked, both implicating the new VS 2026 /
+v18 toolset:** App.xaml → XAML-compiler **hang**; no-App.xaml `UseWinUI` →
+`cl.exe` **pathological**. The default **Ninja** build is fast + fine; it just
+lacks the resource-load wiring.
+
+### Strong recommendation for next session
+**Try the stable VS 2022 / v143 toolset first:** `-G "Visual Studio 17 2022"
+-A x64 -T v143`. The XAML compiler + the cppwinrt projection PCH are far more
+mature there; both of this session's failures are plausibly v18/2026-preview
+regressions. If v143 builds the App.xaml shell (committed `2b117a2`, blocked
+only at the winmd dir — already fixed in `9cfbcea`'s PreBuild mkdir) without
+hanging, Windows likely renders. Iterate with a hard per-build timeout and
+kill-on-stall (watch a single cl.exe exceeding ~3 min / msbuild with no output).
+
 ## Status snapshot at handoff
 - All exploratory edits **reverted**; `git status` clean (only obsidian/
   Home/README CRLF noise). The committed tree is unaffected by this debugging.
