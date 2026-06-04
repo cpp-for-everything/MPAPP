@@ -35,3 +35,17 @@ TEST_CASE("image records source changes",
     REQUIRE(h.calls().size() == 1);
     CHECK(h.calls()[0].value_repr == "icon.png");
 }
+
+TEST_CASE("image records aspect changes",
+          "[mock][image]") {
+    internal::basic_image i;
+    internal::image_handler<platform::mock> h;
+
+    h.map_aspect(i);
+    h.clear_calls();
+
+    i.aspect = aspect_mode::center;     // 3
+    REQUIRE(h.calls().size() == 1);
+    CHECK(h.calls()[0].property_name == "aspect");
+    CHECK(h.calls()[0].value_repr    == "3");
+}

@@ -86,3 +86,17 @@ TEST_CASE("carousel_view mock handler records mappers + swipe",
         "position_changed=0",
     });
 }
+
+TEST_CASE("carousel_view records items_source changes after bind",
+          "[mock][carousel_view]") {
+    internal::basic_carousel_view c;
+    carousel_mock                 h;
+
+    h.map_items_source(c);
+    h.clear_calls();
+
+    c.items_source = std::vector<std::string>{ "a", "b", "c" };
+    REQUIRE(h.calls().size() == 1);
+    CHECK(h.calls()[0].property_name == "items_source.count");
+    CHECK(h.calls()[0].value_repr    == "3");
+}

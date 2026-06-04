@@ -34,6 +34,10 @@ public:
     std::string tag;
 };
 
+// A behavior that overrides nothing — exercises the base class's default
+// no-op on_attached/on_detached bodies.
+class plain_behavior : public behavior {};
+
 class shadow_effect : public effect {
 public:
     int attached = 0;
@@ -81,6 +85,15 @@ TEST_CASE("add_behavior forwards constructor arguments",
     auto& b = v.add_behavior<tagged_behavior>(std::string{ "validation" });
     CHECK(b.tag == "validation");
     CHECK(v.behaviors.size() == 1);
+}
+
+TEST_CASE("base behavior default lifecycle hooks are no-op-safe",
+          "[mock][behavior]") {
+    test_view v;
+    auto& b = v.add_behavior<plain_behavior>();   // base on_attached no-op
+    CHECK(v.behaviors.size() == 1);
+    v.remove_behavior(b);                          // base on_detached no-op
+    CHECK(v.behaviors.empty());
 }
 
 TEST_CASE("add_effect attaches + carries its resolution id",

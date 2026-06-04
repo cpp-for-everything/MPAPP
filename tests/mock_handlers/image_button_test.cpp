@@ -20,3 +20,16 @@ TEST_CASE("image_button mock records initial values on bind",
     CHECK(h.calls()[0].property_name == "source");
     CHECK(h.calls()[1].property_name == "aspect");
 }
+
+TEST_CASE("image_button records aspect changes after bind",
+          "[mock][image_button]") {
+    internal::basic_image_button b;
+    internal::image_button_handler<platform::mock> h;
+    h.map_aspect(b);
+    h.clear_calls();
+
+    b.aspect = aspect_mode::fill;       // 2
+    REQUIRE(h.calls().size() == 1);
+    CHECK(h.calls()[0].property_name == "aspect");
+    CHECK(h.calls()[0].value_repr    == "2");
+}
