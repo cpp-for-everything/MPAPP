@@ -20,6 +20,12 @@ function(mpapp_add_handler_library platform)
 
     file(GLOB _handler_srcs CONFIGURE_DEPENDS
         "${CMAKE_SOURCE_DIR}/src/handlers/${platform}/*.cpp")
+    # Real per-platform Essentials backends (clipboard, battery, launcher,
+    # connectivity, ...) compile into the same native library — they need the
+    # same native SDKs (Win32 / GLib-GIO / GTK) as the widget handlers.
+    file(GLOB _essential_srcs CONFIGURE_DEPENDS
+        "${CMAKE_SOURCE_DIR}/src/essentials/${platform}/*.cpp")
+    list(APPEND _handler_srcs ${_essential_srcs})
 
     if(platform STREQUAL "windows")
         include(WindowsAppSDK)
