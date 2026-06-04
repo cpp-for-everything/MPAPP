@@ -136,8 +136,11 @@ public:
         // pointer stored in the slot is stable (the vectors only grow,
         // never shrink, and we reserve ahead).
         slots_.push_back(std::make_unique<signal_slot<const bool&>>());
-        cbs_.push_back(cb_t{ this });
-        source.changed.subscribe(*slots_[idx], cbs_[idx]);
+        // cb_t must have a STABLE address: the signal stores a pointer to the
+        // callback, so a by-value vector would dangle on reallocation. Hold
+        // each cb_t via unique_ptr (like slots_) so growth never moves it.
+        cbs_.push_back(std::make_unique<cb_t>(cb_t{ this }));
+        source.changed.subscribe(*slots_[idx], *cbs_[idx]);
         evaluate();
         return *this;
     }
@@ -170,7 +173,7 @@ private:
 
     std::vector<Observable<bool>*>                       sources_{};
     std::vector<std::unique_ptr<signal_slot<const bool&>>> slots_{};
-    std::vector<cb_t>                                    cbs_{};
+    std::vector<std::unique_ptr<cb_t>>                   cbs_{};
     bool                                                 active_ = false;
 };
 
