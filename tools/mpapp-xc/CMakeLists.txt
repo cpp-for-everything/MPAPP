@@ -16,6 +16,7 @@ FetchContent_MakeAvailable(pugixml)
 add_library(mpapp-xc-lib STATIC
     src/parser.cpp
     src/emitter.cpp
+    src/type_registry.cpp
 )
 target_include_directories(mpapp-xc-lib PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)

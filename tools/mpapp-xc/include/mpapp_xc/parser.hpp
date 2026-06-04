@@ -33,8 +33,11 @@ struct xaml_attribute {
 struct xaml_element {
     std::string tag{};
     std::vector<xaml_attribute> attributes{};
-    // Child elements are recorded for traceability; the P0 emitter ignores
-    // them. P3 expansion fills this out.
+    // 1-based source line where this element opens. 0 means unknown -- the
+    // emitter falls back to a sensible default. Drives the `#line` directives
+    // so generated-code diagnostics surface at the original XAML location.
+    std::ptrdiff_t line{0};
+    // Child elements, lowered recursively by the emitter.
     std::vector<xaml_element> children{};
 };
 

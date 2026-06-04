@@ -3,14 +3,20 @@
 
 #pragma once
 
-#include <mpapp/mpapp.hpp>
+// Real mpapp API (umbrella: <mpapp/mpapp.hpp>). The precise
+// cross-platform surface headers below keep this generated unit
+// host-compilable without the per-platform native SDK.
+#include <mpapp/internal/basic_content_page.hpp>
+
+#include <memory>
 
 namespace mpapp::generated {
 
+// Builds the <ContentPage> visual tree and returns its root.
+inline auto build_MainPage() {
 #line 2 "empty.xaml"
-consteval auto build_MainPage() {
-    // TODO: emit children. Skeleton P0 only emits the root.
-    return /* stub: empty visual tree for <ContentPage> */ 0;
+    auto e0 = std::make_shared<mpapp::internal::basic_content_page>();
+    return e0;
 }
 
 } // namespace mpapp::generated

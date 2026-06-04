@@ -49,3 +49,12 @@ target_include_directories(mpapp_xc_empty_xaml_test PRIVATE
 add_dependencies(mpapp_xc_empty_xaml_test mpapp-xc)
 
 catch_discover_tests(mpapp_xc_empty_xaml_test)
+
+add_executable(mpapp_xc_lowering_test lowering_test.cpp)
+target_link_libraries(mpapp_xc_lowering_test PRIVATE mpapp-xc-lib Catch2::Catch2WithMain)
+target_include_directories(mpapp_xc_lowering_test PRIVATE
+    "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
+)
+add_dependencies(mpapp_xc_lowering_test mpapp-xc)
+
+catch_discover_tests(mpapp_xc_lowering_test)

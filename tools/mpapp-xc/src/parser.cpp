@@ -24,15 +24,19 @@ std::ptrdiff_t line_at(std::string_view source, std::ptrdiff_t offset) noexcept 
         1 + std::count(source.begin(), source.begin() + static_cast<std::ptrdiff_t>(end), '\n'));
 }
 
-xaml_element copy_element(const pugi::xml_node& node) {
+xaml_element copy_element(const pugi::xml_node& node, std::string_view source) {
     xaml_element out{};
     out.tag = node.name();
+    const auto offset = node.offset_debug();
+    if (offset >= 0) {
+        out.line = line_at(source, static_cast<std::ptrdiff_t>(offset));
+    }
     for (const auto& attr : node.attributes()) {
         out.attributes.push_back({attr.name(), attr.value()});
     }
     for (const auto& child : node.children()) {
         if (child.type() == pugi::node_element) {
-            out.children.push_back(copy_element(child));
+            out.children.push_back(copy_element(child, source));
         }
     }
     return out;
@@ -65,7 +69,7 @@ xaml_document parse(std::string_view source,
     }
 
     doc.has_root = true;
-    doc.root = copy_element(root);
+    doc.root = copy_element(root, source);
 
     const auto root_offset = root.offset_debug();
     if (root_offset >= 0) {
