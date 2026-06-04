@@ -26,10 +26,11 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 >
 > CRTP / abstract bases ([[Components/View|View]], [[Components/Layout|Layout]], [[Components/Cell|Cell]], [[Components/Element|Element]]) are inheritance roots, not leaf components, and do not participate in the surface / wrapper split.
 
-## Snapshot (2026-05-25)
+## Snapshot (2026-06-04)
 
 | Component | MAUI handler folder | Status |
 |---|---|---|
+| [[Components/AbsoluteLayout\|AbsoluteLayout]] | `Controls/Layout/AbsoluteLayout/` | mock (surface + mock handler + 13 tests; per-child `layout_bounds` rect + `layout_flags` proportional bitmask attached store mirroring Grid. Win `Canvas` / Linux `GtkFixed` / Android absolute-placement real handlers written blind, **unverified** — `<platform>-real` follow-up) |
 | [[Components/ActivityIndicator\|ActivityIndicator]] | `Handlers/ActivityIndicator/` | android-real (Windows mux::ProgressRing + Linux GtkSpinner + Android indeterminate ProgressBar; is_running toggle + color tint via brush_ref) |
 | [[Components/Application\|Application]] | `Handlers/Application/` | android-real (Windows + Linux + Android verified live) |
 | [[Components/BindableLayout\|BindableLayout]] | `Controls/BindableLayout/` | android-real (Win StackPanel + Linux GtkBox vertical + Android LinearLayout; items_source rebuilds children on collection change; item_template is recorded but template instantiation deferred to templating ADR) |
@@ -47,6 +48,7 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/Entry\|Entry]] | `Handlers/Entry/` | android-real (Windows + Linux + Android; bidirectional text-binding live-verified on Android) |
 | [[Components/FlyoutPage\|FlyoutPage]] | `Controls/FlyoutPage/` | android-real (Win mux::SplitView w/ Pane+Content + Linux GtkPaned horizontal + Android LinearLayout horizontal w/ flyout/detail FrameLayout pair; is_presented toggles flyout visibility / IsPaneOpen) |
 | [[Components/FlyoutView\|FlyoutView]] | `Handlers/FlyoutView/` | android-real (Win NavigationView + Linux GtkPaned drawer + Android DrawerLayout w/ LinearLayout fallback; flyout + detail + is_presented) |
+| [[Components/FlexLayout\|FlexLayout]] | `Controls/Layout/FlexLayout/` | mock (surface + mock handler + 11 tests; container direction/wrap/justify/align_items/align_content/position + per-child order/grow/shrink/basis/align_self attached store mirroring Grid. Win/Linux/Android real handlers written blind, **unverified**; a faithful flexbox arrange engine is the substantive `<platform>-real` follow-up) |
 | [[Components/Grid\|Grid]] | `Layouts/GridLayoutManager/` | android-real (Win mux::Controls::Grid w/ RowDefinitions+ColumnDefinitions populated from track_def via GridLength; Linux GtkGrid w/ track_def→hexpand/vexpand bridging; Android android.widget.GridLayout w/ GridLayout.LayoutParams from grid_layout::cell_placement. Per-child placement via grid.set_row/set_column/set_row_span/set_column_span keyed on the child view*. Row/column spacing wired on Win + Linux; Android spacing deferred per platform.) |
 | [[Components/Frame\|Frame]] | `Controls/Frame/` | android-real (Win mux::Border + Linux GtkBox + Android FrameLayout; [[deprecated]] alias for Border) |
 | [[Components/GraphicsView\|GraphicsView]] | `Handlers/GraphicsView/` | android-real (v1 native drawing host — Win muxc::Canvas + Linux GtkDrawingArea + Android android.view.View; width/height propagated to native widget. User-facing draw API still gated on ADR-0015 v2 canvas facade — invalidate()/draw_count/draw_requested signal keep the mock contract for consumers.) |
@@ -96,7 +98,10 @@ Generated from `D:\GitHub\MPAPP\references\maui\src\Core\src\Handlers\` and `D:\
 | [[Components/WebView\|WebView]] | `Handlers/WebView/` | android-real (Win muxc::WebView2 + NavigationStarting/Completed bound to is_loading/navigating/navigated + can_go_back/forward; Linux WebKitGTK 6.x via "load-changed" signal — LGPL dynamic-link per Rule 9; Android android.webkit.WebView w/ custom MppWebViewClient routing onPageStarted/onPageFinished + INTERNET perm + JS enabled. Linux stubs out cleanly if WebKitGTK is missing at configure time.) |
 | [[Components/Window\|Window]] | `Handlers/Window/` | android-real (Windows + Linux + Android verified live) |
 
-**Total: 66 components.** **61 widgets at `android-real`** on Win / Linux / Android, **1 at `mock`** (CarouselView — the last MAUI widget gap, filled mock-first; per-platform real handlers are follow-ups). The three abstract bases (View / Layout / Element) and the `Cell` abstract base remain terminal-mock by design — they don't have native primitives, only their subclasses do. ShapeView + GraphicsView v1 ship with per-platform native primitives; the unified canvas facade (Cairo / Skia compile-time selectable) remains v2 scope per [[ADR-0015-graphics-backend-dual]]. macOS + iOS pending Apple host.
+**Total: 68 components.** Most widgets are at `android-real` on Win / Linux / Android. **Two new MAUI-parity layouts — [[Components/AbsoluteLayout\|AbsoluteLayout]] and [[Components/FlexLayout\|FlexLayout]] — landed at `mock`** (2026-W23 parity push, [[2026-W23-Weekly]]): surface + mock handler + tests verified on the host harness; their Win/Linux/Android real handlers are written blind and remain `<platform>-real` follow-ups per [[ADR-0008-mock-first-implementation]]. The three abstract bases (View / Layout / Element) and the `Cell` abstract base remain terminal-mock by design — they don't have native primitives, only their subclasses do. ShapeView + GraphicsView v1 ship with per-platform native primitives; the unified canvas facade (Cairo / Skia compile-time selectable) remains v2 scope per [[ADR-0015-graphics-backend-dual]]. macOS + iOS pending Apple host.
+
+> [!note] Beyond the control inventory — MAUI-parity subsystems (2026-W23)
+> The same push added non-control surface that lives outside this table: **gradient brushes** (`view::background_brush`, `shadow`, `clip`), **page dialog services** (DisplayAlert / DisplayActionSheet / DisplayPrompt), **modal navigation**, **AppThemeBinding + Application.RequestedTheme**, **templating** (DataTemplateSelector / ControlTemplate / ContentPresenter), and **~33 .NET MAUI Essentials device APIs** (sensors, battery, geolocation, permissions, clipboard, file/media pickers, share, etc. — Essentials went 4 → ~37). See [[2026-W23-Weekly]].
 
 ## How to update
 

@@ -6,6 +6,15 @@ tags:
 
 # Current Focus
 
+> [!important] Status — 2026-W23 (Tier-2/3 MAUI-parity push)
+> A 34-agent autonomous run closed the bulk of the **Tier-2 + Tier-3** MAUI-parity gaps, all **mock-first** and verified by compiling **and running** the Catch2 suite (combined integration binary: **683 test cases / 2016 assertions green**). See [[2026-W23-Weekly]].
+>
+> **Tier 2:** [[Components/AbsoluteLayout|AbsoluteLayout]] + [[Components/FlexLayout|FlexLayout]] (full grid-mirrored components, `mock`; blind per-platform handlers); gradient brushes (`view::background_brush` + `shadow` + `clip`); page dialog services (DisplayAlert / DisplayActionSheet / DisplayPrompt); modal navigation; AppThemeBinding + `Application::requested_theme`; templating (DataTemplateSelector / ControlTemplate / ContentPresenter).
+>
+> **Tier 3 — Essentials 4 → ~37:** sensors (×6), battery, device_display, app_info, version_tracking, main_thread, clipboard, flashlight, vibration, haptic_feedback, share, launcher, browser, email, sms, phone_dialer, file_picker, media_picker, file_system, text_to_speech, permissions, geolocation, geocoding, contacts, screenshot, web_authenticator, app_actions — each interface + in-memory mock + tests.
+>
+> **Open follow-ups:** per-platform real handlers/backends for the above (host-gated); umbrella wiring deferred until handlers verified; XAML lowering into `mpapp-xc`. Full Rule-11 closure (coverage + screenshots) pending a platform host.
+
 > [!important] Status — 2026-W21 (close)
 > **M-04b done. M-04c SHIPPED — all gated ADRs accepted + all M-04c-era tasks archived per Rule 11.**
 >
