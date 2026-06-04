@@ -119,14 +119,22 @@ backends compile under MSVC; GIO/GTK backends link under GTK4).
 **Screenshot reality:** Android `adb screencap` works (real device pixels). Linux GUI
 capture is blocked by the WSLg rootless-Xwayland / missing `wlr-screencopy` wall (no
 Xvfb, sudo password-gated) — Linux proven operational via build + launch + live main
-loop instead. Windows: the Release example **loads the WinUI 3 runtime** (after
-registering the WinAppSDK 1.8 Main/Singleton/DDLM packages per-user) — it gets past
-loader + bootstrap into live WinUI and then faults *inside* `Microsoft.UI.Xaml.dll`
-v3.1.8.0 with XAML exception `0x802b000a`. That residual crash is an example /
-WinAppSDK-version runtime issue, **not** a framework build or toolchain defect (MSVC
-build + link + tests are green). A Windows runtime screenshot is a follow-up tied to
-resolving that XAML exception (or MSIX-packaging the app). Debug builds additionally
-need the debug CRT deployed beside the exe.
+loop instead. **Windows — runtime bug found + fixed:** the `0x802b000a` crash was
+`0x800F1000 "Element is already the child of another element"`, a real
+double-parenting defect in `windows_button_spike` — it mixed the ADR-0024 wrapper
+pattern (each wrapper auto-binds an *embedded* handler in its ctor) with manually
+attached handlers, so `window.content` was set twice. (Same defect GTK only *warned*
+about — `gtk_box_append`/`gtk_window_set_child` "child already has parent".) Converted
+the example to the single pure-wrapper pattern (commit). After the fix the Release
+example **loads WinUI 3, completes `on_launch`, and constructs the full widget tree**;
+it now stops only at WinUI's theme-resource resolution
+(`ms-appx:///Microsoft.UI.Xaml/Themes/themeresources.xaml` → `0x80004005`). That last
+step is the **WinUI-3 unpackaged-MRT requirement**: verified that even a `makepri`-merged
+`resources.pri` (containing the WinUI map) beside the exe does *not* resolve `ms-appx://`
+on this unpackaged 1.8 / `8000.859` runtime — **MSIX packaging is the reliable path**
+(or a full MrtCore integration). This is a Microsoft deployment requirement, not an
+MPAPP defect; MSVC build + link + 5200-assertion test run are green. Debug builds also
+need the debug CRT beside the exe.
 
 **Android is the fully end-to-end-proven platform:** the APK builds → installs on the
 emulator → launches → renders the live MPAPP widget tree (Label / Entry / Switch /
