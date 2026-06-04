@@ -19,6 +19,12 @@ file(GLOB MPAPP_ANDROID_HANDLERS CONFIGURE_DEPENDS
     ${MPAPP_ROOT}/src/handlers/android/*.cpp
 )
 
+# Real per-platform Essentials backends (clipboard, vibration, ...) — JNI
+# implementations behind the neutral interfaces. Globbed like the handlers.
+file(GLOB MPAPP_ANDROID_ESSENTIALS CONFIGURE_DEPENDS
+    ${MPAPP_ROOT}/src/essentials/android/*.cpp
+)
+
 # ADR-0015 graphics facade — backend-independent value types are
 # always compiled; the backend .cpp is selected based on
 # MPAPP_GRAPHICS_BACKEND. The graphics_sources list is appended to
@@ -97,8 +103,10 @@ endif()
 add_library(android_hello SHARED
     native_main.cpp
     ${MPAPP_ROOT}/src/mpapp.cpp
+    ${MPAPP_ROOT}/src/executor/mock.cpp
     ${MPAPP_GRAPHICS_SOURCES}
     ${MPAPP_ANDROID_HANDLERS}
+    ${MPAPP_ANDROID_ESSENTIALS}
 )
 
 target_include_directories(android_hello PRIVATE "${MPAPP_ROOT}/include")
