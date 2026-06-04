@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
 // GTK4 basic_flex_layout handler. GTK has no native flexbox container, so
-// this wraps a GtkBox-derived widget configured to emulate flexbox: the
-// container properties (direction, wrap, justify_content, align_items,
-// align_content) map to GtkOrientation + halign/valign + expand flags,
-// and per-child attached props (grow/shrink) map to child hexpand/vexpand.
-//
-// Note: full multi-line flex_wrap support degrades to single-line on GTK;
-// a future follow-up could wire a custom GtkLayoutManager for true wrap.
+// native_ is a plain GtkWidget host whose GtkLayoutManager is a custom
+// subclass (defined in the .cpp) that drives the neutral
+// `mpapp::flex_arrange` solver to real GTK4 pixels. The manager reads the
+// live container Observables (direction, wrap, justify_content, align_items,
+// align_content) plus the per-child attached props (order, grow, shrink,
+// align_self, basis) on each allocate pass — so apply_* simply queue a
+// relayout rather than pushing derived GTK state. This supports true
+// multi-line wrap, basis/grow/shrink resolution, and align_content.
 
 #ifndef MPAPP_HANDLERS_LINUX_FLEX_LAYOUT_HANDLER_HPP
 #define MPAPP_HANDLERS_LINUX_FLEX_LAYOUT_HANDLER_HPP
@@ -59,6 +60,11 @@ private:
     void apply_align_content(flex_align_content a);
     void apply_position(flex_position p);
 
+    // Bind the custom GtkLayoutManager's surface pointer to `f` (idempotent),
+    // and queue a fresh flex_arrange pass on the container.
+    void bind_surface(basic_flex_layout& f);
+    void queue_relayout();
+
     struct direction_cb_t {
         flex_layout_handler<platform::linux_>* self;
         void operator()(flex_direction d) const { self->apply_direction(d); }
@@ -84,7 +90,7 @@ private:
         void operator()(flex_position p) const { self->apply_position(p); }
     };
 
-    void* native_ = nullptr;  // GtkBox*
+    void* native_ = nullptr;  // GtkWidget* host with an MpappFlexLayout manager
 
     direction_cb_t     direction_cb_{this};
     wrap_cb_t          wrap_cb_{this};
