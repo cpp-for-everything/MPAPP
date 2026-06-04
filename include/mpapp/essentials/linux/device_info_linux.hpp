@@ -17,7 +17,7 @@ namespace mpapp {
 // Factory: query Linux sysfs / uname / /etc/os-release and return a filled
 // `device_info` struct.
 //
-//   platform     — device_platform::linux (always)
+//   platform     — device_platform::linux_ (always)
 //   idiom        — device_idiom::desktop (always for Linux desktop)
 //   model        — /sys/devices/virtual/dmi/id/product_name if readable,
 //                  otherwise "Linux"

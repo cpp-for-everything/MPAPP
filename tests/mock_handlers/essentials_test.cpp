@@ -85,7 +85,7 @@ TEST_CASE("connectivity reports access + fires on change", "[mock][essentials][c
 
 TEST_CASE("device_info value type + current_device_info", "[mock][essentials][device]") {
     device_info a;
-    a.platform = device_platform::linux;
+    a.platform = device_platform::linux_;
     a.idiom    = device_idiom::desktop;
     a.model    = "dev";
     device_info b = a;

@@ -29,7 +29,7 @@ enum class device_platform : std::uint8_t {
     unknown = 0,
     windows = 1,
     android = 2,
-    linux   = 3,
+    linux_  = 3,
     macos   = 4,
     ios     = 5,
 };
@@ -56,7 +56,7 @@ struct device_info {
         info.platform = device_platform::android;
         info.idiom    = device_idiom::phone;
     } else if constexpr (std::is_same_v<platform::current, platform::linux_>) {
-        info.platform = device_platform::linux;
+        info.platform = device_platform::linux_;
         info.idiom    = device_idiom::desktop;
     } else if constexpr (std::is_same_v<platform::current, platform::macos>) {
         info.platform = device_platform::macos;

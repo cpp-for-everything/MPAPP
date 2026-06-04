@@ -127,7 +127,7 @@ namespace mpapp {
 device_info linux_device_info()
 {
     device_info info;
-    info.platform     = device_platform::linux;
+    info.platform     = device_platform::linux_;
     info.idiom        = device_idiom::desktop;
     info.model        = query_model();
     info.manufacturer = query_manufacturer();
