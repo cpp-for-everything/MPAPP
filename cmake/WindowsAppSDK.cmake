@@ -234,4 +234,51 @@ function(mpapp_add_winappsdk_runtime target)
                 "$<TARGET_FILE_DIR:${target}>/Microsoft.Web.WebView2.Core.dll"
         COMMENT "MPAPP: copying WindowsAppRuntime + WebView2 DLLs next to ${target}"
         VERBATIM)
+
+    # --- Unpackaged resources.pri (WinUI control theme resources) ----------
+    # A code-only WinUI 3 exe (raw add_executable, no MSBuild project) emits no
+    # resources.pri, so `ms-appx:///Microsoft.UI.Xaml/Themes/themeresources.xaml`
+    # is unresolvable and XamlControlsResources fails at runtime (E_FAIL /
+    # stowed XAML exception ~300ms after the first templated control). Fix:
+    # merge the WinUI controls PRI into an app resources.pri whose primary
+    # resource map is "Application" (omit makepri /IndexName — the runtime
+    # infers the Application root for unpackaged apps). Built once, staged per
+    # exe. The bootstrap half (IXamlMetadataProvider + XamlControlsResources)
+    # lives in src/handlers/windows/application_handler.cpp.
+    if(NOT MPAPP_MAKEPRI)
+        find_program(MPAPP_MAKEPRI makepri PATHS
+            "C:/Program Files (x86)/Windows Kits/10/bin/10.0.26100.0/x64"
+            "C:/Program Files (x86)/Windows Kits/10/bin/10.0.22621.0/x64"
+            "C:/Program Files (x86)/Windows Kits/10/bin/x64")
+    endif()
+    set(_pri_ctrl
+        "${MPAPP_WINAPPSDK_WINUI_DIR}/runtimes-framework/win-x64/native/Microsoft.UI.Xaml.Controls.pri")
+    if(MPAPP_MAKEPRI AND EXISTS "${_pri_ctrl}")
+        set(_pri_dir  "${CMAKE_BINARY_DIR}/winui-pri")
+        set(_pri_proj "${_pri_dir}/proj")
+        set(_pri_out  "${_pri_dir}/resources.pri")
+        if(NOT TARGET mpapp_winui_resources_pri)
+            add_custom_command(
+                OUTPUT "${_pri_out}"
+                COMMAND "${CMAKE_COMMAND}" -E make_directory "${_pri_proj}"
+                COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                        "${_pri_ctrl}" "${_pri_proj}/Microsoft.UI.Xaml.Controls.pri"
+                COMMAND "${MPAPP_MAKEPRI}" new /pr "${_pri_proj}"
+                        /cf "${CMAKE_SOURCE_DIR}/cmake/winui_priconfig.xml"
+                        /of "${_pri_out}" /o
+                DEPENDS "${_pri_ctrl}" "${CMAKE_SOURCE_DIR}/cmake/winui_priconfig.xml"
+                COMMENT "MPAPP: makepri -> unpackaged resources.pri (Application map)"
+                VERBATIM)
+            add_custom_target(mpapp_winui_resources_pri DEPENDS "${_pri_out}")
+        endif()
+        add_dependencies(${target} mpapp_winui_resources_pri)
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+                    "${_pri_out}" "$<TARGET_FILE_DIR:${target}>/resources.pri"
+            COMMENT "MPAPP: staging resources.pri next to ${target}"
+            VERBATIM)
+    else()
+        message(WARNING "MPAPP: makepri or WinUI controls PRI not found — "
+            "unpackaged WinUI control resources may not resolve at runtime")
+    endif()
 endfunction()
