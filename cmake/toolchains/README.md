@@ -13,6 +13,7 @@ the broader build-system context lives in
 |---|---|---|
 | `zig.cmake` | (helper, not a toolchain) | — |
 | `windows-x64.cmake` | `x86_64-windows-gnu` | `Windows` |
+| `windows-arm64.cmake` | `aarch64-windows-gnu` | `Windows` |
 | `linux-x64.cmake` | `x86_64-linux-gnu` | `Linux` |
 | `linux-arm64.cmake` | `aarch64-linux-gnu` | `Linux` |
 | `android-arm64.cmake` | `aarch64-linux-android.24` | `Android` |

@@ -1,0 +1,115 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 28, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "all",
+      "displayName": "Superbuild — every host-supported platform (one build dir)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": { "MPAPP_SUPERBUILD": "ON" }
+    },
+    {
+      "name": "windows-only",
+      "displayName": "Superbuild — Windows cross targets only",
+      "inherits": "all",
+      "cacheVariables": { "MPAPP_PLATFORMS": "windows-x64;windows-arm64" }
+    },
+    {
+      "name": "linux-only",
+      "displayName": "Superbuild — Linux cross targets only",
+      "inherits": "all",
+      "cacheVariables": { "MPAPP_PLATFORMS": "linux-x64;linux-arm64" }
+    },
+    {
+      "name": "host",
+      "displayName": "Native host child — examples + tools + tests (native compiler)",
+      "binaryDir": "${sourceDir}/build/host",
+      "cacheVariables": { "MPAPP_SUPERBUILD": "OFF" }
+    },
+
+    {
+      "name": "quality-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "MPAPP_SUPERBUILD": "OFF",
+        "MPAPP_BUILD_EXAMPLES": "OFF",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "asan",
+      "displayName": "AddressSanitizer + LeakSanitizer (GCC)",
+      "inherits": "quality-base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "MPAPP_SANITIZER": "asan"
+      }
+    },
+    {
+      "name": "ubsan",
+      "displayName": "UndefinedBehaviorSanitizer (GCC)",
+      "inherits": "asan",
+      "cacheVariables": { "MPAPP_SANITIZER": "ubsan" }
+    },
+    {
+      "name": "tsan",
+      "displayName": "ThreadSanitizer (GCC)",
+      "inherits": "asan",
+      "cacheVariables": { "MPAPP_SANITIZER": "tsan" }
+    },
+    {
+      "name": "coverage",
+      "displayName": "Coverage — GCC / gcov",
+      "inherits": "quality-base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc",
+        "CMAKE_CXX_COMPILER": "g++",
+        "MPAPP_COVERAGE": "gcov"
+      }
+    },
+    {
+      "name": "coverage-llvm",
+      "displayName": "Coverage — Clang / llvm-cov",
+      "inherits": "quality-base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "MPAPP_COVERAGE": "llvm"
+      }
+    },
+    {
+      "name": "tidy",
+      "displayName": "clang-tidy + Clang Static Analyzer (first-party targets)",
+      "inherits": "quality-base",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "MPAPP_CLANG_TIDY": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "all", "configurePreset": "all" },
+    { "name": "windows-only", "configurePreset": "windows-only" },
+    { "name": "linux-only", "configurePreset": "linux-only" },
+    { "name": "host", "configurePreset": "host" },
+    { "name": "asan", "configurePreset": "asan" },
+    { "name": "ubsan", "configurePreset": "ubsan" },
+    { "name": "tsan", "configurePreset": "tsan" },
+    { "name": "coverage", "configurePreset": "coverage" },
+    { "name": "coverage-llvm", "configurePreset": "coverage-llvm" },
+    { "name": "tidy", "configurePreset": "tidy" }
+  ],
+  "testPresets": [
+    { "name": "host", "configurePreset": "host", "output": { "outputOnFailure": true } },
+    { "name": "asan", "configurePreset": "asan", "output": { "outputOnFailure": true } },
+    { "name": "ubsan", "configurePreset": "ubsan", "output": { "outputOnFailure": true } },
+    { "name": "tsan", "configurePreset": "tsan", "output": { "outputOnFailure": true } },
+    { "name": "coverage", "configurePreset": "coverage", "output": { "outputOnFailure": true } },
+    { "name": "coverage-llvm", "configurePreset": "coverage-llvm", "output": { "outputOnFailure": true } }
+  ]
+}

@@ -1,11 +1,15 @@
-# SPDX-License-Identifier: Apache-2.0
-# Part of MPAPP. Examples — one subdirectory per platform-specific spike.
+# examples/CMakeLists.txt — one add_subdirectory per example app.
 #
-# Each subdirectory is responsible for gating itself on the platforms it
-# supports. Windows hosts the WinUI 3 spikes; Linux (incl. WSLg from a
-# Windows host) hosts the GTK4 hello-window smoke target.
+# The per-platform handler library is built ONCE here (cmake/MpappHandlers.cmake)
+# and every example links the shared mpapp-handlers-<platform> target. Each
+# example's own CMakeLists.txt is a one-line recipe via the helpers in
+# cmake/MpappExample.cmake.
+include(MpappExample)
+include(MpappHandlers)
 
 if(WIN32)
+    mpapp_add_handler_library(windows)
+
     add_subdirectory(hot_reload_spike)
     add_subdirectory(windows_button_spike)
     add_subdirectory(windows_nav_spike)
@@ -27,6 +31,8 @@ if(WIN32)
 endif()
 
 if(UNIX AND NOT APPLE)
+    mpapp_add_handler_library(linux)
+
     add_subdirectory(gtk4_hello)
     add_subdirectory(gtk4_tableview_demo)
     add_subdirectory(gtk4_routes_demo)
@@ -46,14 +52,6 @@ if(UNIX AND NOT APPLE)
     add_subdirectory(hot_reload_spike)
 endif()
 
-# Cross-platform CLI demo of the canvas facade (ADR-0015). Renders
-# shapes to a PNG via the active backend; visible end-to-end proof
-# that the Cairo backend wiring is correct on each host.
+# Cross-platform demos of the canvas facade (ADR-0015) — render to PNG, no GUI.
 add_subdirectory(cairo_render_demo)
-
-# Closure evidence for T-0029 (graphics_view drawable through canvas
-# facade) + T-0031 (shape_view via shared render_shape_view). Headless
-# — writes PNGs to disk so Rule 11 doesn't depend on a live GUI / screen
-# capture. Self-gates on MPAPP_GRAPHICS_HAS_CAIRO inside its
-# CMakeLists.
 add_subdirectory(headless_canvas_demo)
