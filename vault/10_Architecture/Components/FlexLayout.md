@@ -17,7 +17,7 @@ tags:
 # FlexLayout
 
 > [!info] Status
-> **mock + linux-real + android-real (compile-verified, v1)** — surface + mock handler + Catch2 tests verified (1476-test suite green under g++ 14.2). **Real handlers implemented + compile-verified:** Linux `GtkBox` v1 handler links into `mpapp-handlers-linux` (WSL GTK4); Android `LinearLayout` v1 handler cross-compiles arm64+x86_64 (NDK 27.2). The v1 handlers map flex properties onto GtkBox/LinearLayout semantics — a **faithful CSS-flexbox solver** (e.g. Yoga / `com.google.android.flexbox`) is the substantive follow-up, alongside the Windows handler (MSVC+WinUI), macOS/iOS (Apple host), and on-device runtime verification. See [[2026-W23-Weekly]].
+> **mock + windows-real + linux-real + android-real (compile-verified)** — surface + mock handler + Catch2 tests verified. **A real CSS-flexbox solver now exists** — `include/mpapp/layout/flex_arrange.hpp` (pure neutral algorithm: grow/shrink/wrap/justify/align/align-content/order/gaps; 170-assertion test). **The Windows handler hosts children in a `mux::Canvas` and drives `flex_arrange` to real pixels** (SetLeft/SetTop + Width/Height from the computed rects, re-solving on SizeChanged); MSVC-linked into `mpapp-handlers-windows`. Linux `GtkBox` / Android `LinearLayout` v1 maps also link in; **wiring them to `flex_arrange`** (instead of the GtkBox/LinearLayout approximation) + on-device runtime + macOS/iOS are the follow-ups. See [[2026-W23-Weekly]].
 
 ## Overview
 

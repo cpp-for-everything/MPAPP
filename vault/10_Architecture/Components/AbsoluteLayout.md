@@ -17,7 +17,7 @@ tags:
 # AbsoluteLayout
 
 > [!info] Status
-> **mock + linux-real + android-real (compile-verified)** — surface + mock handler + Catch2 tests verified (1476-test suite green under g++ 14.2). **Real handlers implemented + compile-verified:** Linux `GtkFixed` handler compiles + links into `mpapp-handlers-linux` (WSL GTK4 4.14.5); Android `FrameLayout`+LayoutParams handler cross-compiles arm64+x86_64 (NDK 27.2). The earlier headers were declaration-only; the `.cpp` implementations landed this session ([[2026-W23-Weekly]]). **Remaining:** Windows (`mux::Canvas`, needs MSVC+WinUI), macOS/iOS (Apple host), and on-device runtime verification.
+> **mock + windows-real + linux-real + android-real (compile-verified)** — surface + mock handler + Catch2 tests verified. **Real handlers implemented + compile-verified on all three buildable platforms:** Windows `mux::Controls::Canvas` (SetLeft/SetTop + Width/Height, proportional `layout_flags` resolved against ActualWidth/Height) links into `mpapp-handlers-windows` under MSVC; Linux `GtkFixed`; Android `FrameLayout`+LayoutParams (arm64+x86_64, NDK 27.2). The earlier headers were declaration-only; the `.cpp` implementations landed this session ([[2026-W23-Weekly]]). **Remaining:** macOS/iOS (Apple host) + on-device runtime verification.
 
 ## Overview
 
