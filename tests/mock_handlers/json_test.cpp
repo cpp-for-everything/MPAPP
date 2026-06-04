@@ -6,9 +6,12 @@
 #include <string>
 #include <vector>
 
+#include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <mpapp/detail/json.hpp>
+
+using Catch::Approx;
 
 namespace mpapp_json = mpapp::detail::json;
 
@@ -280,6 +283,87 @@ bool from_json(mpapp_json::reader& r, point& p) {
     return r.ok();
 }
 } // namespace point_ns
+
+TEST_CASE("writer escapes the full control-character set",
+          "[detail][json][writer]") {
+    std::string out;
+    mpapp_json::writer w{out};
+    w.write(std::string{"\r\t\b\f"});
+    CHECK(out == "\"\\r\\t\\b\\f\"");
+}
+
+TEST_CASE("reader parses doubles with exponents",
+          "[detail][json][reader]") {
+    {
+        mpapp_json::reader r{"1.5e-3"};
+        double d = 0;
+        REQUIRE(r.read(d));
+        CHECK(d == Approx(0.0015));
+    }
+    {
+        mpapp_json::reader r{"2E2"};
+        double d = 0;
+        REQUIRE(r.read(d));
+        CHECK(d == Approx(200.0));
+    }
+}
+
+TEST_CASE("reader decodes every string escape",
+          "[detail][json][reader]") {
+    mpapp_json::reader r{R"("\\\/\n\r\t\b\f")"};
+    std::string s;
+    REQUIRE(r.read(s));
+    CHECK(s == std::string("\\/\n\r\t\b\f"));
+}
+
+TEST_CASE("reader decodes \\uXXXX across the UTF-8 byte-length ranges",
+          "[detail][json][reader]") {
+    // U+0041 'A' (1 byte), U+00E9 'é' (2 bytes), U+20AC '€' (3 bytes).
+    // Mixes lower- and upper-case hex digits to exercise every digit branch.
+    std::string in;
+    in += '"';
+    in += static_cast<char>(0x5C); in += "u0041";   // 0x5C = '\'
+    in += static_cast<char>(0x5C); in += "u00e9";
+    in += static_cast<char>(0x5C); in += "u20AC";
+    in += '"';
+    mpapp_json::reader r{in};
+    std::string s;
+    REQUIRE(r.read(s));
+    CHECK(s == std::string("A\xC3\xA9\xE2\x82\xAC"));
+}
+
+TEST_CASE("reader rejects malformed escapes",
+          "[detail][json][reader]") {
+    {   // non-hex digit in \u
+        mpapp_json::reader r{R"("\u00zz")"};
+        std::string s;
+        CHECK(!r.read(s));
+    }
+    {   // truncated \u (fewer than 4 hex digits before end)
+        mpapp_json::reader r{R"("\u12")"};
+        std::string s;
+        CHECK(!r.read(s));
+    }
+    {   // unknown escape letter
+        mpapp_json::reader r{R"("\x")"};
+        std::string s;
+        CHECK(!r.read(s));
+    }
+}
+
+TEST_CASE("reader skip_value walks over nested object values",
+          "[detail][json][reader]") {
+    mpapp_json::reader r{R"({"meta":{"a":1,"nested":{"x":[1,2]}},"id":9})"};
+    REQUIRE(r.expect_object_begin());
+    int id = 0;
+    std::string name;
+    while (r.next_field(name)) {
+        if (name == "id") { REQUIRE(r.read(id)); }
+        else               { REQUIRE(r.skip_value()); }  // skips the meta object
+    }
+    REQUIRE(r.ok());
+    CHECK(id == 9);
+}
 
 TEST_CASE("user type round-trips via ADL to_json/from_json",
           "[detail][json][adl]") {
