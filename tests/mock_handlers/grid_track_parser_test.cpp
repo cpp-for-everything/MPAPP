@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Tests for track_def::parse — the ADR-0017 MAUI-string DSL parser.
+// Tests for track_def::parse - the ADR-0017 MAUI-string DSL parser.
 
 #include <vector>
 

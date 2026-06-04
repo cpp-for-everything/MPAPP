@@ -41,14 +41,14 @@ TEST_CASE("mock_share starts with no recorded requests",
     // Arrange
     mock_share s;
 
-    // Act / Assert — nothing called yet
+    // Act / Assert - nothing called yet
     CHECK(s.request_count() == 0);
     CHECK_FALSE(s.last_text_request().has_value());
     CHECK_FALSE(s.last_file_request().has_value());
 }
 
 // ---------------------------------------------------------------------------
-// share_text_request — basic round-trip
+// share_text_request - basic round-trip
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_share records a share_text_request",
@@ -82,7 +82,7 @@ TEST_CASE("mock_share overwrites last_text_request on each call",
     s.request(first);
     s.request(second);
 
-    // Assert — only the most recent request is retained
+    // Assert - only the most recent request is retained
     REQUIRE(s.last_text_request().has_value());
     CHECK(s.last_text_request()->title == "Second");
     CHECK(s.last_text_request()->text  == "text two");
@@ -124,7 +124,7 @@ TEST_CASE("mock_share accepts share_text_request with uri only",
 }
 
 // ---------------------------------------------------------------------------
-// share_file_request — basic round-trip
+// share_file_request - basic round-trip
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_share records a share_file_request with one file",
@@ -213,7 +213,7 @@ TEST_CASE("mock_share overwrites last_file_request on each call",
 }
 
 // ---------------------------------------------------------------------------
-// Mixed overload calls — request_count accumulates across both overloads
+// Mixed overload calls - request_count accumulates across both overloads
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_share request_count accumulates across both overloads",
@@ -221,7 +221,7 @@ TEST_CASE("mock_share request_count accumulates across both overloads",
     // Arrange
     mock_share s;
 
-    // Act — interleave text and file requests
+    // Act - interleave text and file requests
     s.request(make_text("T1", "", "text", ""));
     s.request(share_file_request{});
     s.request(make_text("T2", "", "more", ""));
@@ -245,7 +245,7 @@ TEST_CASE("mock_share last_file_request is still set after subsequent text reque
     s.request(fr);
     s.request(make_text("text share", "", "hi", ""));
 
-    // Assert — both slots populated independently
+    // Assert - both slots populated independently
     REQUIRE(s.last_file_request().has_value());
     REQUIRE(s.last_text_request().has_value());
     CHECK(s.last_file_request()->title == "file share");

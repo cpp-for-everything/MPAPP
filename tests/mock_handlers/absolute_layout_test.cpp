@@ -91,7 +91,7 @@ TEST_CASE("attached store keys per child independently",
     CHECK(a.get_layout_bounds(first) == rect{1.0, 1.0, 1.0, 1.0});
     CHECK(a.get_layout_flags(first) == absolute_layout_flags::position_proportional);
     CHECK(a.get_layout_bounds(second) == rect{2.0, 2.0, 2.0, 2.0});
-    // second never had flags set — stays at the default.
+    // second never had flags set - stays at the default.
     CHECK(a.get_layout_flags(second) == absolute_layout_flags::none);
 }
 
@@ -113,7 +113,7 @@ TEST_CASE("has_handler is false on a freshly constructed surface",
           "[mock][absolute_layout]") {
     // The handler accessors are typed on platform::current (the real
     // per-platform handler), so the surface test can only assert the
-    // unbound default — binding a real handler needs the native SDK and
+    // unbound default - binding a real handler needs the native SDK and
     // lives in the wrapper. Mirrors grid_layout's surface test scope.
     internal::basic_absolute_layout a;
     CHECK_FALSE(a.has_handler());

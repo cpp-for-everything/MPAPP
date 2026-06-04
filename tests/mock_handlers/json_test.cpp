@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Tests for mpapp/detail/json.hpp — the JSON layer the future
+// Tests for mpapp/detail/json.hpp - the JSON layer the future
 // HybridWebView typed bridge (per ADR-0018) will sit on.
 
 #include <optional>
@@ -259,7 +259,7 @@ TEST_CASE("round-trip: writer output is reader input",
     CHECK(args[1] == "world");
 }
 
-// User-type extension via ADL — overload to_json/from_json in the
+// User-type extension via ADL - overload to_json/from_json in the
 // type's own namespace. The writer/reader's `write`/`read` methods
 // pick the overload up.
 namespace point_ns {

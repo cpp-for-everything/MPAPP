@@ -41,7 +41,7 @@ TEST_CASE("menu_flyout_sub_item mock tracks text + items changes",
     s.text  = "Open with";
     s.items = std::vector<view*>{&a, &b, &c};
     s.items = std::vector<view*>{&a};
-    s.text  = "Open with";  // idempotent — no row
+    s.text  = "Open with";  // idempotent - no row
 
     REQUIRE(h.calls().size() == 3);
     CHECK(h.calls()[0].property_name == "text");

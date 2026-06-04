@@ -3,7 +3,7 @@
 //
 // Covers resolve() for light/dark/unspecified with and without a
 // default_value, the free-function app_theme_value wrapper, and out-of-range
-// theme values — exercising every branch of the switch.  Instantiated with
+// theme values - exercising every branch of the switch.  Instantiated with
 // both T=double and T=std::string.  Follows the AAA pattern used throughout
 // the mock_handlers suite.
 
@@ -18,7 +18,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// resolve() — T = double, no default_value
+// resolve() - T = double, no default_value
 // ---------------------------------------------------------------------------
 
 TEST_CASE("app_theme_binding<double> resolves light and dark directly",
@@ -33,16 +33,16 @@ TEST_CASE("app_theme_binding<double> resolves light and dark directly",
 
 TEST_CASE("app_theme_binding<double> unspecified falls back to light without default",
           "[mock][theme][binding][fallback]") {
-    // Arrange — no default_value provided
+    // Arrange - no default_value provided
     app_theme_binding<double> b{.light = 1.0, .dark = 2.0};
 
-    // Act / Assert — unspecified must use the light value
+    // Act / Assert - unspecified must use the light value
     CHECK(b.resolve(app_theme::unspecified) == 1.0);
 }
 
 TEST_CASE("app_theme_binding<double> unspecified uses default_value when present",
           "[mock][theme][binding][fallback]") {
-    // Arrange — explicit default_value differs from light/dark
+    // Arrange - explicit default_value differs from light/dark
     app_theme_binding<double> b{.light = 1.0, .dark = 2.0, .default_value = 9.5};
 
     // Act / Assert
@@ -54,7 +54,7 @@ TEST_CASE("app_theme_binding<double> unspecified uses default_value when present
 
 TEST_CASE("app_theme_binding<double> out-of-range theme uses fallback branch",
           "[mock][theme][binding][fallback]") {
-    // Arrange — without default, an unknown theme value hits the default: arm
+    // Arrange - without default, an unknown theme value hits the default: arm
     app_theme_binding<double> no_default{.light = 3.0, .dark = 4.0};
     app_theme_binding<double> with_default{.light = 3.0, .dark = 4.0,
                                            .default_value = 7.0};
@@ -65,7 +65,7 @@ TEST_CASE("app_theme_binding<double> out-of-range theme uses fallback branch",
 }
 
 // ---------------------------------------------------------------------------
-// resolve() — T = std::string
+// resolve() - T = std::string
 // ---------------------------------------------------------------------------
 
 TEST_CASE("app_theme_binding<std::string> resolves light and dark directly",
@@ -109,7 +109,7 @@ TEST_CASE("default-constructed app_theme_binding yields value-initialized member
     app_theme_binding<double>      bd;
     app_theme_binding<std::string> bs;
 
-    // Assert — value-initialized members, absent default
+    // Assert - value-initialized members, absent default
     CHECK(bd.resolve(app_theme::light)       == 0.0);
     CHECK(bd.resolve(app_theme::dark)        == 0.0);
     CHECK(bd.resolve(app_theme::unspecified) == 0.0);

@@ -4,7 +4,7 @@
 // Mock-handler tests for the **deprecated** `mpapp::internal::basic_frame` control.
 // (CLAUDE Rule 6 / ADR-0008.) The deprecation diagnostic is suppressed
 // locally so the test target compiles with `-Werror`. New code should
-// use `mpapp::internal::basic_border` — Frame is retained for one-to-one XAML
+// use `mpapp::internal::basic_border` - Frame is retained for one-to-one XAML
 // compatibility with Forms / early MAUI codebases.
 
 #if defined(__GNUC__) || defined(__clang__)

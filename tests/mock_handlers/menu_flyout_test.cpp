@@ -39,7 +39,7 @@ TEST_CASE("menu_flyout mock handler tracks items + is_open changes",
     internal::basic_menu_flyout_item a, b;
     f.items     = std::vector<view*>{&a, &b};
     f.is_open   = true;
-    f.is_open   = true;  // idempotent — no extra record
+    f.is_open   = true;  // idempotent - no extra record
     f.items     = std::vector<view*>{&a};
     f.is_open   = false;
 

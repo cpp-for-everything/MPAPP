@@ -14,7 +14,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// placemark — value type
+// placemark - value type
 // ---------------------------------------------------------------------------
 
 TEST_CASE("placemark: default construction has empty strings and zero coords",
@@ -87,7 +87,7 @@ TEST_CASE("placemark: inequality when latitude differs",
 }
 
 // ---------------------------------------------------------------------------
-// mock_geocoding — forward geocoding (get_locations_for_address)
+// mock_geocoding - forward geocoding (get_locations_for_address)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geocoding: get_locations_for_address returns empty for unknown address",
@@ -173,7 +173,7 @@ TEST_CASE("mock_geocoding: last_address_query updates on each call",
     (void)geo.get_locations_for_address("First Street");
     (void)geo.get_locations_for_address("Second Avenue");
 
-    // Assert — only the latest query is retained
+    // Assert - only the latest query is retained
     CHECK(geo.last_address_query() == "Second Avenue");
 }
 
@@ -208,7 +208,7 @@ TEST_CASE("mock_geocoding: re-registering an address replaces previous results",
 }
 
 // ---------------------------------------------------------------------------
-// mock_geocoding — reverse geocoding (get_placemarks)
+// mock_geocoding - reverse geocoding (get_placemarks)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geocoding: get_placemarks returns empty for unknown coordinates",
@@ -291,7 +291,7 @@ TEST_CASE("mock_geocoding: last coordinate query updates on each call",
     (void)geo.get_placemarks(10.0, 20.0);
     (void)geo.get_placemarks(30.0, 40.0);
 
-    // Assert — only the latest coordinates are retained
+    // Assert - only the latest coordinates are retained
     CHECK(geo.last_latitude_query()  == 30.0);
     CHECK(geo.last_longitude_query() == 40.0);
 }
@@ -328,7 +328,7 @@ TEST_CASE("mock_geocoding: re-registering coordinates replaces previous results"
 }
 
 // ---------------------------------------------------------------------------
-// mock_geocoding — cross-method: independent address and coordinate tables
+// mock_geocoding - cross-method: independent address and coordinate tables
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geocoding: address and coordinate tables are independent",
@@ -364,7 +364,7 @@ TEST_CASE("mock_geocoding: forward query does not affect coordinate query",
     // Act
     (void)geo.get_locations_for_address("somewhere");
 
-    // Assert — coordinate query state untouched
+    // Assert - coordinate query state untouched
     CHECK(geo.last_latitude_query()  == 0.0);
     CHECK(geo.last_longitude_query() == 0.0);
 }
@@ -377,12 +377,12 @@ TEST_CASE("mock_geocoding: reverse query does not affect address query",
     // Act
     (void)geo.get_placemarks(5.0, 6.0);
 
-    // Assert — address query state untouched
+    // Assert - address query state untouched
     CHECK(geo.last_address_query().empty());
 }
 
 // ---------------------------------------------------------------------------
-// mock_geocoding — interface pointer usage (polymorphic dispatch)
+// mock_geocoding - interface pointer usage (polymorphic dispatch)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geocoding: usable through base geocoding pointer",
@@ -413,7 +413,7 @@ TEST_CASE("mock_geocoding: usable through base geocoding pointer",
 }
 
 // ---------------------------------------------------------------------------
-// mock_geocoding — empty registration (register empty vector)
+// mock_geocoding - empty registration (register empty vector)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geocoding: registering empty vector returns empty results",
@@ -427,7 +427,7 @@ TEST_CASE("mock_geocoding: registering empty vector returns empty results",
     auto fwd = geo.get_locations_for_address("ghost town");
     auto rev = geo.get_placemarks(99.0, 99.0);
 
-    // Assert — registered but empty; query was still recorded
+    // Assert - registered but empty; query was still recorded
     CHECK(fwd.empty());
     CHECK(rev.empty());
     CHECK(geo.last_address_query() == "ghost town");

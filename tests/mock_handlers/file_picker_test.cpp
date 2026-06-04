@@ -20,7 +20,7 @@ TEST_CASE("mock_file_picker starts with no recorded calls and nullopt results",
     // Arrange
     mock_file_picker fp;
 
-    // Assert — nothing called yet
+    // Assert - nothing called yet
     CHECK(fp.pick_call_count() == 0);
     CHECK(fp.pick_multiple_call_count() == 0);
     CHECK_FALSE(fp.last_pick_options().has_value());
@@ -28,7 +28,7 @@ TEST_CASE("mock_file_picker starts with no recorded calls and nullopt results",
 }
 
 // ---------------------------------------------------------------------------
-// pick() — canned result not set (default: nullopt / cancelled)
+// pick() - canned result not set (default: nullopt / cancelled)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_file_picker pick returns nullopt when no result is set",
@@ -49,7 +49,7 @@ TEST_CASE("mock_file_picker pick records default options when called with no arg
     // Arrange
     mock_file_picker fp;
 
-    // Act — discard result; we only care about the recorded options
+    // Act - discard result; we only care about the recorded options
     (void)fp.pick();
 
     // Assert
@@ -59,7 +59,7 @@ TEST_CASE("mock_file_picker pick records default options when called with no arg
 }
 
 // ---------------------------------------------------------------------------
-// pick() — canned result set
+// pick() - canned result set
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_file_picker pick returns the canned file_result",
@@ -89,7 +89,7 @@ TEST_CASE("mock_file_picker pick records the options passed by caller",
     opts.title      = "Select PDF";
     opts.file_types = { "application/pdf", ".pdf" };
 
-    // Act — discard result; we only care about the recorded options
+    // Act - discard result; we only care about the recorded options
     (void)fp.pick(opts);
 
     // Assert
@@ -144,14 +144,14 @@ TEST_CASE("mock_file_picker pick returns same canned result on repeated calls",
     auto r1 = fp.pick();
     auto r2 = fp.pick();
 
-    // Assert — canned result is not consumed/cleared
+    // Assert - canned result is not consumed/cleared
     REQUIRE(r1.has_value());
     REQUIRE(r2.has_value());
     CHECK(r1->full_path == r2->full_path);
 }
 
 // ---------------------------------------------------------------------------
-// pick() — set canned result back to nullopt (simulate cancellation)
+// pick() - set canned result back to nullopt (simulate cancellation)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_file_picker pick returns nullopt after set_pick_result(nullopt)",
@@ -169,7 +169,7 @@ TEST_CASE("mock_file_picker pick returns nullopt after set_pick_result(nullopt)"
 }
 
 // ---------------------------------------------------------------------------
-// pick_multiple() — default (empty / not supported)
+// pick_multiple() - default (empty / not supported)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_file_picker pick_multiple returns empty vector when no results set",
@@ -190,7 +190,7 @@ TEST_CASE("mock_file_picker pick_multiple records default options when called wi
     // Arrange
     mock_file_picker fp;
 
-    // Act — discard result; we only care about the recorded options
+    // Act - discard result; we only care about the recorded options
     (void)fp.pick_multiple();
 
     // Assert
@@ -200,7 +200,7 @@ TEST_CASE("mock_file_picker pick_multiple records default options when called wi
 }
 
 // ---------------------------------------------------------------------------
-// pick_multiple() — canned results set
+// pick_multiple() - canned results set
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_file_picker pick_multiple returns the canned results",
@@ -236,7 +236,7 @@ TEST_CASE("mock_file_picker pick_multiple records the options passed by caller",
     opts.title      = "Select Images";
     opts.file_types = { "image/*" };
 
-    // Act — discard result; we only care about the recorded options
+    // Act - discard result; we only care about the recorded options
     (void)fp.pick_multiple(opts);
 
     // Assert
@@ -289,7 +289,7 @@ TEST_CASE("mock_file_picker pick_multiple returns same canned results on repeate
     auto r1 = fp.pick_multiple();
     auto r2 = fp.pick_multiple();
 
-    // Assert — canned results not consumed
+    // Assert - canned results not consumed
     REQUIRE(r1.size() == 1u);
     REQUIRE(r2.size() == 1u);
     CHECK(r1[0].full_path == r2[0].full_path);
@@ -405,7 +405,7 @@ TEST_CASE("file_result equality operator works correctly",
     // Assert equal
     CHECK(a == b);
 
-    // Act — modify one field
+    // Act - modify one field
     b.content_type = "application/octet-stream";
 
     // Assert not equal
@@ -461,7 +461,7 @@ TEST_CASE("mock_file_picker pick forwards file_types filter in options",
     pick_options opts;
     opts.file_types = { ".txt", ".csv", ".json" };
 
-    // Act — discard result; testing that options are forwarded
+    // Act - discard result; testing that options are forwarded
     (void)fp.pick(opts);
 
     // Assert
@@ -478,7 +478,7 @@ TEST_CASE("mock_file_picker pick_multiple forwards empty file_types in options",
     opts.title = "All files";
     // file_types intentionally left empty → means all files
 
-    // Act — discard result; testing that options are forwarded
+    // Act - discard result; testing that options are forwarded
     (void)fp.pick_multiple(opts);
 
     // Assert
@@ -488,7 +488,7 @@ TEST_CASE("mock_file_picker pick_multiple forwards empty file_types in options",
 }
 
 // ---------------------------------------------------------------------------
-// pick() and pick_multiple() are independent — calls don't cross-contaminate
+// pick() and pick_multiple() are independent - calls don't cross-contaminate
 // ---------------------------------------------------------------------------
 
 TEST_CASE("pick and pick_multiple call counts are independent",
@@ -521,7 +521,7 @@ TEST_CASE("last_pick_options and last_pick_multiple_options are independent",
     (void)fp.pick(single_opts);
     (void)fp.pick_multiple(multi_opts);
 
-    // Assert — both recorded independently
+    // Assert - both recorded independently
     REQUIRE(fp.last_pick_options().has_value());
     REQUIRE(fp.last_pick_multiple_options().has_value());
     CHECK(fp.last_pick_options()->title == "Single");

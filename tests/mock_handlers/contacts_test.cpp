@@ -52,7 +52,7 @@ TEST_CASE("contact equality compares all fields",
                               {"ada@example.com"}, {"+1-555-0001"});
     contact b = a;
 
-    // Act / Assert — identical copies are equal
+    // Act / Assert - identical copies are equal
     CHECK(a == b);
 
     // Mutate each field and verify inequality
@@ -133,12 +133,12 @@ TEST_CASE("mock_contacts get_all can be replaced with a new list",
     contact c1 = make_contact("Ada", "Ada", "L");
     mc.set_contacts({c1});
 
-    // Act — replace
+    // Act - replace
     contact c2 = make_contact("Grace", "Grace", "H");
     mc.set_contacts({c2});
     auto result = mc.get_all();
 
-    // Assert — only the new list is present
+    // Assert - only the new list is present
     REQUIRE(result.size() == 1);
     CHECK(result[0] == c2);
 }
@@ -210,7 +210,7 @@ TEST_CASE("mock_contacts pick can be reset to nullopt after being set",
     mock_contacts mc;
     mc.set_pick_result(make_contact("Ada", "Ada", "L"));
 
-    // Act — reset to cancel
+    // Act - reset to cancel
     mc.set_pick_result(std::nullopt);
     auto result = mc.pick();
 

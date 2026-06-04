@@ -69,7 +69,7 @@ TEST_CASE("box_view sequence: fill then corners then fill back",
 
     b.fill    = color{0.5, 0.5, 0.5, 1.0};
     b.corners = corner_radius{4.0, 4.0, 4.0, 4.0};
-    b.fill    = color{0.5, 0.5, 0.5, 1.0};    // idempotent — same as previous
+    b.fill    = color{0.5, 0.5, 0.5, 1.0};    // idempotent - same as previous
     b.fill    = color{1.0, 1.0, 1.0, 1.0};
 
     REQUIRE(h.calls().size() == 3);

@@ -19,7 +19,7 @@ using namespace mpapp;
 
 namespace {
 
-// Concrete `view` subclass for tests — `view` is abstract because its
+// Concrete `view` subclass for tests - `view` is abstract because its
 // dtor is virtual but it is otherwise fully usable as a base. Tests
 // stand up small visual trees using these so we can exercise the
 // parent-pointer walker without depending on any concrete control's
@@ -29,7 +29,7 @@ public:
     test_view() = default;
 };
 
-// Tiny test-only layout subclass — `layout` requires a
+// Tiny test-only layout subclass - `layout` requires a
 // `create_layout_manager()` virtual in some configurations but for the
 // child-list / parent-pointer plumbing we don't need a real manager.
 class test_layout : public layout {
@@ -48,7 +48,7 @@ TEST_CASE("resource_dictionary stores + retrieves typed values",
     CHECK(d.try_get<std::string>("BrandPrimary") == "#264653");
     CHECK(d.try_get<double>("DefaultPadding")    == 16.0);
 
-    // Wrong type — try_get returns nullopt rather than throwing.
+    // Wrong type - try_get returns nullopt rather than throwing.
     CHECK_FALSE(d.try_get<double>("BrandPrimary").has_value());
 
     // Missing key.
@@ -83,7 +83,7 @@ TEST_CASE("resource_dictionary remove fires changed with null new_value",
 
     d.put("Temp", 1.0);
     d.remove("Temp");
-    d.remove("NeverThere");          // no-op — must not emit
+    d.remove("NeverThere");          // no-op - must not emit
 
     CHECK_FALSE(d.has("Temp"));
     REQUIRE(rec.calls_as_strings() == std::vector<std::string>{
@@ -151,7 +151,7 @@ TEST_CASE("find_in walks view -> parent -> ... and returns first typed match",
     test_layout mid;
     mid.resources = std::make_shared<resource_dictionary>();
     mid.resources->put("Accent",      std::string{ "#2A9D8F" });
-    // Padding shadowing — mid wins for closer-ancestor lookups.
+    // Padding shadowing - mid wins for closer-ancestor lookups.
     mid.resources->put("Padding",     8.0);
     root.add(mid);
 
@@ -169,7 +169,7 @@ TEST_CASE("find_in walks view -> parent -> ... and returns first typed match",
     // has the right-typed entry, then nullopt.
     CHECK_FALSE(find_in<int>(leaf, "Padding").has_value());
 
-    // Missing in the entire chain — nullopt.
+    // Missing in the entire chain - nullopt.
     CHECK_FALSE(find_in<std::string>(leaf, "Missing").has_value());
 }
 
@@ -239,7 +239,7 @@ TEST_CASE("style.based_on runs parent setters before this style's setters",
     derived.apply_to(v);
 
     // base.* runs before derived.* (so derived wins on duplicate keys).
-    // Within a single style the iteration order is unordered_map's —
+    // Within a single style the iteration order is unordered_map's -
     // we only assert that the base's entries precede the derived's, not
     // the relative order of entries within a single map.
     REQUIRE(order.size() == 4);

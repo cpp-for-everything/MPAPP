@@ -90,7 +90,7 @@ TEST_CASE("mock_media_picker default state", "[mock][media_picker]") {
     // Arrange
     mock_media_picker mp;
 
-    // Assert — capture is supported by default, no calls made yet
+    // Assert - capture is supported by default, no calls made yet
     CHECK(mp.is_capture_supported() == true);
     CHECK(mp.call_count() == 0);
     CHECK_FALSE(mp.last_pick_photo_options().has_value());
@@ -125,7 +125,7 @@ TEST_CASE("mock_media_picker set_capture_supported changes the flag",
     // Assert
     CHECK_FALSE(mp.is_capture_supported());
 
-    // Act — restore
+    // Act - restore
     mp.set_capture_supported(true);
 
     // Assert
@@ -187,7 +187,7 @@ TEST_CASE("mock_media_picker pick_photo records default options when called with
     // Act
     (void)mp.pick_photo();
 
-    // Assert — default-constructed options are recorded
+    // Assert - default-constructed options are recorded
     REQUIRE(mp.last_pick_photo_options().has_value());
     CHECK(mp.last_pick_photo_options()->title.empty());
 }
@@ -201,7 +201,7 @@ TEST_CASE("mock_media_picker pick_photo overwrites last options on repeated call
     (void)mp.pick_photo(media_pick_options{ "first" });
     (void)mp.pick_photo(media_pick_options{ "second" });
 
-    // Assert — most recent call wins
+    // Assert - most recent call wins
     REQUIRE(mp.last_pick_photo_options().has_value());
     CHECK(mp.last_pick_photo_options()->title == "second");
     CHECK(mp.call_count() == 2);
@@ -245,7 +245,7 @@ TEST_CASE("mock_media_picker capture_photo returns nullopt when capture not supp
     mock_media_picker mp{ false };
     mp.set_capture_photo_result(make_photo("capture.jpg"));
 
-    // Act — canned result should be ignored since capture unsupported
+    // Act - canned result should be ignored since capture unsupported
     auto result = mp.capture_photo();
 
     // Assert
@@ -276,7 +276,7 @@ TEST_CASE("mock_media_picker capture_photo records options even when unsupported
     // Act
     (void)mp.capture_photo(opts);
 
-    // Assert — options are still recorded
+    // Assert - options are still recorded
     REQUIRE(mp.last_capture_photo_options().has_value());
     CHECK(mp.last_capture_photo_options()->title == "Camera");
 }
@@ -454,10 +454,10 @@ TEST_CASE("mock_media_picker reset clears call count and canned results",
     // Act
     mp.reset();
 
-    // Assert — call count cleared
+    // Assert - call count cleared
     CHECK(mp.call_count() == 0);
 
-    // Assert — canned results cleared (all return nullopt)
+    // Assert - canned results cleared (all return nullopt)
     CHECK_FALSE(mp.pick_photo().has_value());
     CHECK_FALSE(mp.capture_photo().has_value());
     CHECK_FALSE(mp.pick_video().has_value());
@@ -493,7 +493,7 @@ TEST_CASE("mock_media_picker reset preserves capture_supported flag",
     // Act
     mp.reset();
 
-    // Assert — support flag unchanged by reset
+    // Assert - support flag unchanged by reset
     CHECK_FALSE(mp.is_capture_supported());
 }
 
@@ -510,7 +510,7 @@ TEST_CASE("mock_media_picker capture_photo becomes available after set_capture_s
     auto result_before = mp.capture_photo();
     CHECK_FALSE(result_before.has_value());
 
-    // Act — enable capture
+    // Act - enable capture
     mp.set_capture_supported(true);
     auto result_after = mp.capture_photo();
 
@@ -528,7 +528,7 @@ TEST_CASE("mock_media_picker capture_video becomes unavailable after set_capture
     auto result_before = mp.capture_video();
     REQUIRE(result_before.has_value());
 
-    // Act — disable capture
+    // Act - disable capture
     mp.set_capture_supported(false);
     auto result_after = mp.capture_video();
 

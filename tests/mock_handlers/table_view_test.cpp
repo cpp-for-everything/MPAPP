@@ -108,7 +108,7 @@ TEST_CASE("typed_sections starts empty + records count via mock handler",
 TEST_CASE("typed_sections + flat sections can coexist on the surface",
           "[mock][table_view][typed]") {
     // The handler picks typed_sections when non-empty; otherwise flat.
-    // The surface itself doesn't enforce mutual exclusion — both
+    // The surface itself doesn't enforce mutual exclusion - both
     // Observables hold values independently. Verify both can be set
     // and read back.
     internal::basic_table_view tv;
@@ -152,7 +152,7 @@ TEST_CASE("cell_at resolves typed-section coordinates",
 
 TEST_CASE("cell_at returns nullptr when typed_sections is empty",
           "[mock][table_view][typed]") {
-    // Flat sections only — cell_at can't resolve any coordinate.
+    // Flat sections only - cell_at can't resolve any coordinate.
     internal::basic_table_view tv;
     tv.add_section("Flat");
     tv.add_row(0, "Row 0");

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. Mock tests for the RFC-0010 composite (child-timeline)
-// animation — MAUI's Animation.Add(beginAt, finishAt, childAnimation).
+// animation - MAUI's Animation.Add(beginAt, finishAt, childAnimation).
 
 #include <vector>
 

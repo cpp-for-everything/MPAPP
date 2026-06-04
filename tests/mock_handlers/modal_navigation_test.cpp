@@ -14,7 +14,7 @@ using namespace mpapp;
 
 namespace {
 
-// Minimal concrete application — modal navigation is independent of the
+// Minimal concrete application - modal navigation is independent of the
 // platform handler, so the in-process application surface is enough.
 class test_app : public application {
 public:

@@ -112,11 +112,11 @@ TEST_CASE("attached bridge does NOT fire message_received for envelopes",
     signal_slot<const std::string&> slot{};
     h.message_received.subscribe(slot, cb);
 
-    // Envelope — bridge consumes; message_received should NOT fire.
+    // Envelope - bridge consumes; message_received should NOT fire.
     h.simulate_inbound(R"({"id":2,"method":"greet","args":["Ada"]})");
     CHECK(received_hits == 0);
 
-    // Non-envelope — bridge ignores; message_received fires.
+    // Non-envelope - bridge ignores; message_received fires.
     h.simulate_inbound("raw plain string");
     CHECK(received_hits == 1);
 }
@@ -178,7 +178,7 @@ TEST_CASE("invoke_js writes a typed JSON-RPC envelope through send_to_js",
     CHECK(outbound[1] == R"({"id":2,"method":"ping","args":[]})");
     CHECK(outbound[2] == R"({"id":3,"method":"addItems","args":[[1,2,3],true]})");
 
-    // The returned id matches what the envelope reports — caller can
+    // The returned id matches what the envelope reports - caller can
     // correlate responses by it.
     CHECK(id1 == 1);
     CHECK(id2 == 2);
@@ -207,7 +207,7 @@ TEST_CASE("invoke_js + bridge dispatch interleave on message_sent",
 
     // Outbound: id=1
     h.invoke_js("notify", std::string{"start"});
-    // Inbound bridge call with id=99 — response uses id=99
+    // Inbound bridge call with id=99 - response uses id=99
     h.simulate_inbound(R"({"id":99,"method":"add","args":[2,3]})");
     // Outbound: id=2
     h.invoke_js("notify", std::string{"done"});
@@ -332,7 +332,7 @@ TEST_CASE("invoke_js_async resolves the coroutine when JS posts a response",
     internal::basic_hybrid_web_view h;
     std::optional<int> received;
 
-    // Eager-start coroutine — runs until the first co_await suspends.
+    // Eager-start coroutine - runs until the first co_await suspends.
     auto t = drive_invoke_js_async(h, received);
 
     CHECK(h.pending_response_count() == 1);
@@ -407,7 +407,7 @@ TEST_CASE("bridge async method defers response across process_inbound",
     // yet.
     CHECK(outbound.empty());
 
-    // Resolve later — the same id should appear on the bridge response.
+    // Resolve later - the same id should appear on the bridge response.
     b.resolve();
     REQUIRE(outbound.size() == 1);
     CHECK(outbound[0] == R"({"id":42,"result":15})");

@@ -45,7 +45,7 @@ TEST_CASE("to_string(permission_type) covers every enumerator", "[mock][permissi
 }
 
 // ---------------------------------------------------------------------------
-// check_status — default and preset paths
+// check_status - default and preset paths
 // ---------------------------------------------------------------------------
 
 TEST_CASE("check_status returns unknown by default for every type", "[mock][permissions][check_status]") {
@@ -92,7 +92,7 @@ TEST_CASE("set_status is reflected by check_status", "[mock][permissions][check_
 }
 
 // ---------------------------------------------------------------------------
-// request — fallback and override paths
+// request - fallback and override paths
 // ---------------------------------------------------------------------------
 
 TEST_CASE("request without a request_result echoes check_status", "[mock][permissions][request]") {
@@ -118,7 +118,7 @@ TEST_CASE("request uses set_request_result and updates check_status", "[mock][pe
     // Act
     permission_status result = p.request(permission_type::microphone);
 
-    // Assert — request() returns the preset result.
+    // Assert - request() returns the preset result.
     CHECK(result == permission_status::granted);
     // check_status() is promoted to match the request result.
     CHECK(p.check_status(permission_type::microphone) == permission_status::granted);
@@ -169,7 +169,7 @@ TEST_CASE("request can be called multiple times on same type", "[mock][permissio
 }
 
 // ---------------------------------------------------------------------------
-// last_requested — before and after
+// last_requested - before and after
 // ---------------------------------------------------------------------------
 
 TEST_CASE("last_requested returns nullopt before any request", "[mock][permissions][last_requested]") {
@@ -188,7 +188,7 @@ TEST_CASE("should_show_rationale returns false by default", "[mock][permissions]
     // Arrange
     mock_permissions p;
 
-    // Assert — all types default to false.
+    // Assert - all types default to false.
     CHECK_FALSE(p.should_show_rationale(permission_type::camera));
     CHECK_FALSE(p.should_show_rationale(permission_type::microphone));
     CHECK_FALSE(p.should_show_rationale(permission_type::location_when_in_use));
@@ -267,7 +267,7 @@ TEST_CASE("permissions interface is usable via base pointer", "[mock][permission
 }
 
 // ---------------------------------------------------------------------------
-// All remaining permission_type values — request + check_status coverage
+// All remaining permission_type values - request + check_status coverage
 // ---------------------------------------------------------------------------
 
 TEST_CASE("all permission types can be set and requested", "[mock][permissions][all_types]") {
@@ -292,7 +292,7 @@ TEST_CASE("all permission types can be set and requested", "[mock][permissions][
         permission_type::network_state,
     };
 
-    // Act — preset each type to granted and request it.
+    // Act - preset each type to granted and request it.
     for (permission_type t : all_types) {
         p.set_status(t, permission_status::granted);
         p.set_request_result(t, permission_status::granted);
@@ -303,7 +303,7 @@ TEST_CASE("all permission types can be set and requested", "[mock][permissions][
         CHECK(p.request(t)      == permission_status::granted);
     }
 
-    // Assert — history contains one entry per type.
+    // Assert - history contains one entry per type.
     CHECK(p.requested_types().size() == 15);
 }
 
@@ -312,7 +312,7 @@ TEST_CASE("all permission types can be set and requested", "[mock][permissions][
 // ---------------------------------------------------------------------------
 
 TEST_CASE("request_result may differ from initial check_status", "[mock][permissions][request]") {
-    // Arrange — start denied, request grants.
+    // Arrange - start denied, request grants.
     mock_permissions p;
     p.set_status(permission_type::contacts, permission_status::denied);
     p.set_request_result(permission_type::contacts, permission_status::granted);

@@ -49,7 +49,7 @@ TEST_CASE("window mock handler fires once per real title change",
     h.clear_calls();
 
     w.title = "Hello";
-    w.title = "Hello";    // same value — Observable suppresses
+    w.title = "Hello";    // same value - Observable suppresses
     w.title = "World";
 
     REQUIRE(h.calls_as_strings() ==

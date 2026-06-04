@@ -152,7 +152,7 @@ TEST_CASE("push_async completes synchronously in the mock build",
     internal::basic_navigation_page nav(&home);
 
     auto t = nav.push_async(&details);
-    // The coroutine body just calls push() — no suspension point —
+    // The coroutine body just calls push() - no suspension point -
     // so the task is ready immediately after the eager-start.
     REQUIRE(t.is_ready());
     t.await_resume();   // void: no value to extract

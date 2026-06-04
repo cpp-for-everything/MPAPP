@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock tests for multi_value_converter — all_true, any_true,
+// Part of MPAPP. Mock tests for multi_value_converter - all_true, any_true,
 // concat, and chain_converter (two-stage composition).
 
 #include <string>
@@ -150,7 +150,7 @@ TEST_CASE("concat_strings() free function matches converter results",
 }
 
 // ===========================================================================
-// chain_converter — two-stage composition
+// chain_converter - two-stage composition
 // ===========================================================================
 
 TEST_CASE("chain_converter: int -> string -> string (length label)",
@@ -159,7 +159,7 @@ TEST_CASE("chain_converter: int -> string -> string (length label)",
     std::function<std::string(const int&)> to_str =
         [](const int& n) { return std::to_string(n); };
 
-    // Stage 2: std::string -> std::string — wrap in brackets
+    // Stage 2: std::string -> std::string - wrap in brackets
     std::function<std::string(const std::string&)> bracket =
         [](const std::string& s) { return "[" + s + "]"; };
 

@@ -63,7 +63,7 @@ TEST_CASE("battery_info default-constructs to all-unknown zeros and compares by 
 }
 
 // ---------------------------------------------------------------------------
-// mock_battery — default (supported) construction
+// mock_battery - default (supported) construction
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_battery default construction yields unknown / zero state",
@@ -80,7 +80,7 @@ TEST_CASE("mock_battery default construction yields unknown / zero state",
 }
 
 // ---------------------------------------------------------------------------
-// mock_battery — set_charge_level
+// mock_battery - set_charge_level
 // ---------------------------------------------------------------------------
 
 TEST_CASE("set_charge_level updates charge_level and emits battery_info_changed",
@@ -113,7 +113,7 @@ TEST_CASE("set_charge_level with same value does NOT emit",
     auto cb = [&](battery_info) { ++hits; };
     bat.battery_info_changed.subscribe(slot, cb);
 
-    // Act — set same value again
+    // Act - set same value again
     bat.set_charge_level(0.5);
 
     // Assert
@@ -121,7 +121,7 @@ TEST_CASE("set_charge_level with same value does NOT emit",
 }
 
 // ---------------------------------------------------------------------------
-// mock_battery — set_state
+// mock_battery - set_state
 // ---------------------------------------------------------------------------
 
 TEST_CASE("set_state updates state and emits battery_info_changed",
@@ -161,7 +161,7 @@ TEST_CASE("set_state with same value does NOT emit",
 }
 
 // ---------------------------------------------------------------------------
-// mock_battery — set_power_source
+// mock_battery - set_power_source
 // ---------------------------------------------------------------------------
 
 TEST_CASE("set_power_source updates power_source and emits battery_info_changed",
@@ -201,7 +201,7 @@ TEST_CASE("set_power_source with same value does NOT emit",
 }
 
 // ---------------------------------------------------------------------------
-// mock_battery — set_energy_saver
+// mock_battery - set_energy_saver
 // ---------------------------------------------------------------------------
 
 TEST_CASE("set_energy_saver updates status and emits energy_saver_status_changed",
@@ -241,7 +241,7 @@ TEST_CASE("set_energy_saver with same value does NOT emit",
 }
 
 // ---------------------------------------------------------------------------
-// mock_battery — not-supported path
+// mock_battery - not-supported path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_battery constructed with supported=false returns not-present defaults",
@@ -271,13 +271,13 @@ TEST_CASE("set_supported(false) then set_* calls are silently ignored",
     auto cb = [&](battery_info) { ++hits; };
     bat.battery_info_changed.subscribe(slot, cb);
 
-    // Act — disable support, then try to mutate
+    // Act - disable support, then try to mutate
     bat.set_supported(false);
     bat.set_charge_level(0.9);
     bat.set_state(battery_state::full);
     bat.set_power_source(battery_power_source::wireless);
 
-    // Assert — no signal fired, getters return not-present defaults
+    // Assert - no signal fired, getters return not-present defaults
     CHECK(hits == 0);
     CHECK(bat.charge_level() < 0.0);
     CHECK(bat.state()        == battery_state::not_present);
@@ -294,7 +294,7 @@ TEST_CASE("set_supported(true) re-enables mutations and getters",
     auto cb = [&](battery_info) { ++hits; };
     bat.battery_info_changed.subscribe(slot, cb);
 
-    // Act — re-enable, then set values
+    // Act - re-enable, then set values
     bat.set_supported(true);
     bat.set_charge_level(0.3);
     bat.set_state(battery_state::charging);
@@ -407,10 +407,10 @@ TEST_CASE("emitted battery_info snapshot is consistent with getter values",
     auto cb = [&](battery_info info) { emitted = info; };
     bat.battery_info_changed.subscribe(slot, cb);
 
-    // Act — one more change to fire the signal
+    // Act - one more change to fire the signal
     bat.set_charge_level(0.55);
 
-    // Assert — emitted snapshot agrees with getters
+    // Assert - emitted snapshot agrees with getters
     CHECK(emitted.charge_level  == bat.charge_level());
     CHECK(emitted.state         == bat.state());
     CHECK(emitted.power_source  == bat.power_source());

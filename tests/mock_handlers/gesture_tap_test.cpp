@@ -10,7 +10,7 @@
 //     tap recognizer found, regardless of how many recognizers are
 //     stacked on the view.
 //   * `simulate_tap(view&)` fans the synthetic event out to every
-//     attached tap recognizer's `tapped` signal — multiple recognizers
+//     attached tap recognizer's `tapped` signal - multiple recognizers
 //     on one view all receive the event.
 //   * Observable config (`number_of_taps_required`, `buttons`) is
 //     individually mutable per recognizer; the mock layer doesn't

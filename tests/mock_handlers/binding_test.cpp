@@ -262,7 +262,7 @@ TEST_CASE("binding drives a bound property through the mock handler",
 
     // Bind the VM-side Observable<string> to the button's text. The
     // binding writes through btn.text.set(...), which fires the same
-    // mapper a real Windows/Linux/Android handler installed — proving
+    // mapper a real Windows/Linux/Android handler installed - proving
     // binding is real on every platform via the existing pipeline.
     title = std::string{ "Save" };           // pre-seed the source
     binding<std::string> b{ title, btn.text, binding_mode::one_way };

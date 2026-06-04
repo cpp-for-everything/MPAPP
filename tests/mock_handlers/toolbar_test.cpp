@@ -40,7 +40,7 @@ TEST_CASE("toolbar records items.count when collection changes",
     CHECK(h.calls()[0].property_name == "items.count");
     CHECK(h.calls()[0].value_repr    == "3");
 
-    // Idempotent — equal vector should not re-record.
+    // Idempotent - equal vector should not re-record.
     t.items = std::vector<toolbar_item>{
         {"Compose", ""},
         {"Refresh", ""},

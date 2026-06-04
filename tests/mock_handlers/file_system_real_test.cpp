@@ -13,7 +13,7 @@
 
 namespace {
 
-// Unique app-id string used across all test cases — avoids polluting
+// Unique app-id string used across all test cases - avoids polluting
 // any real per-user config directory.
 constexpr const char* kTestAppId = "mpapp-real-fs-test-tmp";
 
@@ -62,11 +62,11 @@ TEST_CASE("real_file_system cache_directory is idempotent",
     // Arrange
     mpapp::real_file_system fs{ kTestAppId };
 
-    // Act — call twice
+    // Act - call twice
     const std::string first  = fs.cache_directory();
     const std::string second = fs.cache_directory();
 
-    // Assert — same path both times, still exists
+    // Assert - same path both times, still exists
     CHECK(first == second);
     CHECK(std::filesystem::exists(first));
 
@@ -113,12 +113,12 @@ TEST_CASE("real_file_system app_data_directory is idempotent",
 }
 
 // ---------------------------------------------------------------------------
-// open_app_package_file — file found
+// open_app_package_file - file found
 // ---------------------------------------------------------------------------
 
 TEST_CASE("real_file_system open_app_package_file returns contents when file exists",
           "[mock][essentials][file_system]") {
-    // Arrange — write a package file into a temp base directory
+    // Arrange - write a package file into a temp base directory
     const auto base = std::filesystem::temp_directory_path() /
                       "mpapp-real-fs-pkg-test";
     const std::string name    = "hello.txt";
@@ -151,7 +151,7 @@ TEST_CASE("real_file_system open_app_package_file works with empty content",
     // Act
     const auto result = fs.open_app_package_file(name);
 
-    // Assert — file exists but is empty; result should be present with ""
+    // Assert - file exists but is empty; result should be present with ""
     REQUIRE(result.has_value());
     CHECK(result->empty());
 
@@ -161,7 +161,7 @@ TEST_CASE("real_file_system open_app_package_file works with empty content",
 
 TEST_CASE("real_file_system open_app_package_file reads binary-safe text",
           "[mock][essentials][file_system]") {
-    // Arrange — content with backslashes, equals signs, newlines
+    // Arrange - content with backslashes, equals signs, newlines
     const auto base = std::filesystem::temp_directory_path() /
                       "mpapp-real-fs-pkg-tricky";
     const std::string name    = "tricky.txt";
@@ -182,12 +182,12 @@ TEST_CASE("real_file_system open_app_package_file reads binary-safe text",
 }
 
 // ---------------------------------------------------------------------------
-// open_app_package_file — file missing
+// open_app_package_file - file missing
 // ---------------------------------------------------------------------------
 
 TEST_CASE("real_file_system open_app_package_file returns nullopt when missing",
           "[mock][essentials][file_system]") {
-    // Arrange — base directory exists but the file does not
+    // Arrange - base directory exists but the file does not
     const auto base = std::filesystem::temp_directory_path() /
                       "mpapp-real-fs-pkg-missing";
     std::error_code ec;
@@ -207,7 +207,7 @@ TEST_CASE("real_file_system open_app_package_file returns nullopt when missing",
 
 TEST_CASE("real_file_system open_app_package_file returns nullopt when base missing",
           "[mock][essentials][file_system]") {
-    // Arrange — point to a non-existent base directory
+    // Arrange - point to a non-existent base directory
     const auto base = std::filesystem::temp_directory_path() /
                       "mpapp-real-fs-pkg-no-base-dir-xyz987";
     // Ensure it really doesn't exist
@@ -223,12 +223,12 @@ TEST_CASE("real_file_system open_app_package_file returns nullopt when base miss
 }
 
 // ---------------------------------------------------------------------------
-// open_app_package_file — defaults to app_data_directory when no base given
+// open_app_package_file - defaults to app_data_directory when no base given
 // ---------------------------------------------------------------------------
 
 TEST_CASE("real_file_system open_app_package_file uses app_data_dir as default base",
           "[mock][essentials][file_system]") {
-    // Arrange — construct without explicit package_base_dir
+    // Arrange - construct without explicit package_base_dir
     mpapp::real_file_system fs{ kTestAppId };
     const std::string appdata = fs.app_data_directory();
 

@@ -16,7 +16,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// is_main_thread — detection
+// is_main_thread - detection
 // ---------------------------------------------------------------------------
 
 TEST_CASE("real_main_thread: is_main_thread returns true on constructing thread",
@@ -24,7 +24,7 @@ TEST_CASE("real_main_thread: is_main_thread returns true on constructing thread"
     // Arrange + Act
     real_main_thread rmt;
 
-    // Assert — the test runner IS the constructing thread
+    // Assert - the test runner IS the constructing thread
     CHECK(rmt.is_main_thread());
 }
 
@@ -34,7 +34,7 @@ TEST_CASE("real_main_thread: is_main_thread returns false on a different thread"
     real_main_thread rmt;
     bool other_thread_result = true; // will be set to false
 
-    // Act — spawn a thread and query from there
+    // Act - spawn a thread and query from there
     std::thread worker([&] {
         other_thread_result = rmt.is_main_thread();
     });
@@ -45,7 +45,7 @@ TEST_CASE("real_main_thread: is_main_thread returns false on a different thread"
 }
 
 // ---------------------------------------------------------------------------
-// Inline dispatch — action runs immediately when on main thread
+// Inline dispatch - action runs immediately when on main thread
 // ---------------------------------------------------------------------------
 
 TEST_CASE("real_main_thread: begin_invoke_on_main_thread runs inline on main thread",
@@ -57,7 +57,7 @@ TEST_CASE("real_main_thread: begin_invoke_on_main_thread runs inline on main thr
     // Act
     rmt.begin_invoke_on_main_thread([&] { side_effect = 42; });
 
-    // Assert — ran synchronously, no pump needed
+    // Assert - ran synchronously, no pump needed
     CHECK(side_effect == 42);
 }
 
@@ -85,7 +85,7 @@ TEST_CASE("real_main_thread: null action inline does not crash and still increme
     real_main_thread rmt;
     std::function<void()> empty;
 
-    // Act + Assert — no exception/crash
+    // Act + Assert - no exception/crash
     rmt.begin_invoke_on_main_thread(empty);
     CHECK(rmt.invoke_count() == 1u);
 }
@@ -100,20 +100,20 @@ TEST_CASE("real_main_thread: action enqueued from worker thread, drained by pump
     real_main_thread rmt;
     std::atomic<int> value{ 0 };
 
-    // Act — enqueue from a worker thread
+    // Act - enqueue from a worker thread
     std::thread worker([&] {
         rmt.begin_invoke_on_main_thread([&] { value.store(99); });
     });
     worker.join();
 
-    // Assert — not yet executed (pump has not been called)
+    // Assert - not yet executed (pump has not been called)
     CHECK(value.load() == 0);
     CHECK(rmt.pending_count() == 1u);
 
-    // Act — drain on main thread
+    // Act - drain on main thread
     rmt.pump();
 
-    // Assert — now executed
+    // Assert - now executed
     CHECK(value.load() == 99);
     CHECK(rmt.pending_count() == 0u);
 }
@@ -125,7 +125,7 @@ TEST_CASE("real_main_thread: multiple workers enqueue, single pump drains all",
     std::atomic<int> counter{ 0 };
     constexpr int kWorkers = 5;
 
-    // Act — each worker enqueues one increment
+    // Act - each worker enqueues one increment
     std::vector<std::thread> workers;
     workers.reserve(kWorkers);
     for (int i = 0; i < kWorkers; ++i) {
@@ -150,7 +150,7 @@ TEST_CASE("real_main_thread: pump on empty queue is a no-op",
     // Arrange
     real_main_thread rmt;
 
-    // Act + Assert — should not throw or crash
+    // Act + Assert - should not throw or crash
     rmt.pump();
     CHECK(rmt.pending_count() == 0u);
     CHECK(rmt.invoke_count() == 0u);
@@ -163,7 +163,7 @@ TEST_CASE("real_main_thread: actions enqueued during pump deferred to next pump"
     int first  = 0;
     int second = 0;
 
-    // Enqueue from a worker — this action will itself enqueue a second action
+    // Enqueue from a worker - this action will itself enqueue a second action
     // via begin_invoke_on_main_thread from within pump (main thread context,
     // so second action runs inline during the nested call).
     std::thread worker([&] {
@@ -179,13 +179,13 @@ TEST_CASE("real_main_thread: actions enqueued during pump deferred to next pump"
     // Act
     rmt.pump(); // drains the outer action; inner runs inline during outer
 
-    // Assert — both executed
+    // Assert - both executed
     CHECK(first  == 1);
     CHECK(second == 2);
 }
 
 // ---------------------------------------------------------------------------
-// invoke_count() — both paths increment
+// invoke_count() - both paths increment
 // ---------------------------------------------------------------------------
 
 TEST_CASE("real_main_thread: invoke_count increments for inline dispatch",
@@ -206,7 +206,7 @@ TEST_CASE("real_main_thread: invoke_count increments for enqueued dispatch",
     // Arrange
     real_main_thread rmt;
 
-    // Act — enqueue two actions from a worker
+    // Act - enqueue two actions from a worker
     std::thread worker([&] {
         rmt.begin_invoke_on_main_thread([] {});
         rmt.begin_invoke_on_main_thread([] {});
@@ -223,7 +223,7 @@ TEST_CASE("real_main_thread: invoke_count reflects both inline and queued calls"
     // Arrange
     real_main_thread rmt;
 
-    // Act — one inline, one from worker
+    // Act - one inline, one from worker
     rmt.begin_invoke_on_main_thread([] {});
     std::thread worker([&] {
         rmt.begin_invoke_on_main_thread([] {});
@@ -253,25 +253,25 @@ TEST_CASE("real_main_thread: pending_count grows with each enqueue and drops aft
     // Arrange
     real_main_thread rmt;
 
-    // Act — enqueue 3 from a worker
+    // Act - enqueue 3 from a worker
     std::thread worker([&] {
         for (int i = 0; i < 3; ++i)
             rmt.begin_invoke_on_main_thread([] {});
     });
     worker.join();
 
-    // Assert — 3 pending
+    // Assert - 3 pending
     CHECK(rmt.pending_count() == 3u);
 
     // Act
     rmt.pump();
 
-    // Assert — 0 pending
+    // Assert - 0 pending
     CHECK(rmt.pending_count() == 0u);
 }
 
 // ---------------------------------------------------------------------------
-// Polymorphism — via abstract base pointer
+// Polymorphism - via abstract base pointer
 // ---------------------------------------------------------------------------
 
 TEST_CASE("real_main_thread: usable via main_thread abstract interface pointer",

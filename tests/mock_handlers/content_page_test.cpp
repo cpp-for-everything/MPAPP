@@ -74,7 +74,7 @@ TEST_CASE("content_page mock handler records single call per property change",
     REQUIRE(h.calls().size() == 1);
     CHECK(h.calls()[0].value_repr == "thickness(4,4,4,4)");
 
-    p.padding = thickness{4.0};       // idempotent — same value
+    p.padding = thickness{4.0};       // idempotent - same value
     REQUIRE(h.calls().size() == 1);
 
     p.padding = thickness{6.0};

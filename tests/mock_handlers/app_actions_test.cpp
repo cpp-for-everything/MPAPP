@@ -52,7 +52,7 @@ TEST_CASE("app_action equality operator", "[mock][app_actions][struct]") {
 }
 
 // ---------------------------------------------------------------------------
-// mock_app_actions — is_supported
+// mock_app_actions - is_supported
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_app_actions defaults to supported", "[mock][app_actions]") {
@@ -89,7 +89,7 @@ TEST_CASE("mock_app_actions set_supported changes the flag", "[mock][app_actions
 }
 
 // ---------------------------------------------------------------------------
-// mock_app_actions — get / set
+// mock_app_actions - get / set
 // ---------------------------------------------------------------------------
 
 TEST_CASE("get returns empty list when no actions set", "[mock][app_actions]") {
@@ -155,7 +155,7 @@ TEST_CASE("set with empty list clears all actions", "[mock][app_actions]") {
 }
 
 // ---------------------------------------------------------------------------
-// mock_app_actions — not-supported path
+// mock_app_actions - not-supported path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("set is ignored (no storage) when not supported", "[mock][app_actions]") {
@@ -166,7 +166,7 @@ TEST_CASE("set is ignored (no storage) when not supported", "[mock][app_actions]
     // Act
     m.set(actions);
 
-    // Assert — actions are NOT stored because not supported
+    // Assert - actions are NOT stored because not supported
     CHECK(m.get().empty());
 }
 
@@ -178,7 +178,7 @@ TEST_CASE("last_set records the argument even when not supported", "[mock][app_a
     // Act
     m.set(actions);
 
-    // Assert — last_set_ captures the call regardless
+    // Assert - last_set_ captures the call regardless
     REQUIRE(m.last_set().has_value());
     const auto& recorded = *m.last_set();
     REQUIRE(recorded.size() == 1);
@@ -186,7 +186,7 @@ TEST_CASE("last_set records the argument even when not supported", "[mock][app_a
 }
 
 // ---------------------------------------------------------------------------
-// mock_app_actions — last_set
+// mock_app_actions - last_set
 // ---------------------------------------------------------------------------
 
 TEST_CASE("last_set returns nullopt before any set call", "[mock][app_actions]") {
@@ -214,7 +214,7 @@ TEST_CASE("last_set tracks the most recent set call", "[mock][app_actions]") {
 }
 
 // ---------------------------------------------------------------------------
-// mock_app_actions — trigger + signal emission
+// mock_app_actions - trigger + signal emission
 // ---------------------------------------------------------------------------
 
 TEST_CASE("trigger fires app_action_activated with the correct action", "[mock][app_actions][signal]") {
@@ -337,11 +337,11 @@ TEST_CASE("disconnecting slot stops further emissions", "[mock][app_actions][sig
     m.trigger("go");
     REQUIRE(hit_count == 1);
 
-    // Act — disconnect
+    // Act - disconnect
     slot.disconnect();
     m.trigger("go");
 
-    // Assert — no additional emissions
+    // Assert - no additional emissions
     CHECK(hit_count == 1);
 }
 

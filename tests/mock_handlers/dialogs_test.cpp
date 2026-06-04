@@ -85,7 +85,7 @@ TEST_CASE("two-button display_alert tolerates an empty callback",
           "[mock][dialogs]") {
     mock_dialog_service d;
     d.set_next_alert_result(true);
-    // No callback supplied — must not crash, request still recorded.
+    // No callback supplied - must not crash, request still recorded.
     d.display_alert("a", "b", "ok", "no", {});
     REQUIRE(d.last_alert().has_value());
     CHECK(d.last_alert()->title == "a");

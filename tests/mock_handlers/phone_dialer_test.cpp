@@ -27,7 +27,7 @@ TEST_CASE("mock_phone_dialer default state: supported=true, no recorded calls",
 }
 
 // ---------------------------------------------------------------------------
-// open() — happy path
+// open() - happy path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_phone_dialer records number passed to open()",
@@ -68,7 +68,7 @@ TEST_CASE("mock_phone_dialer overwrites last_number on successive open() calls",
     d.open("222");
     d.open("333");
 
-    // Assert — only the most recent number is retained
+    // Assert - only the most recent number is retained
     REQUIRE(d.last_number().has_value());
     CHECK(*d.last_number() == "333");
     CHECK(d.open_count() == 3);
@@ -91,7 +91,7 @@ TEST_CASE("mock_phone_dialer open_count increments on every call",
 }
 
 // ---------------------------------------------------------------------------
-// open() — not-supported path
+// open() - not-supported path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_phone_dialer is_supported() returns false after set_supported(false)",
@@ -120,10 +120,10 @@ TEST_CASE("mock_phone_dialer open() does not record number when not supported",
     mock_phone_dialer d;
     d.set_supported(false);
 
-    // Act — ignore the thrown exception
+    // Act - ignore the thrown exception
     try { d.open("999"); } catch (...) {}
 
-    // Assert — state must remain unmodified
+    // Assert - state must remain unmodified
     CHECK_FALSE(d.last_number().has_value());
     CHECK(d.open_count() == 0);
 }
@@ -135,7 +135,7 @@ TEST_CASE("mock_phone_dialer can be re-enabled after set_supported(false)",
     d.set_supported(false);
     try { d.open("bad"); } catch (...) {}
 
-    // Act — re-enable
+    // Act - re-enable
     d.set_supported(true);
     d.open("+1-555-0100");
 
@@ -168,13 +168,13 @@ TEST_CASE("mock_phone_dialer reset() clears last_number and open_count",
 
 TEST_CASE("mock_phone_dialer reset() does not alter the supported flag",
           "[mock][essentials][phone_dialer]") {
-    // Arrange — supported stays true
+    // Arrange - supported stays true
     mock_phone_dialer d_true;
     d_true.open("+1");
     d_true.reset();
     CHECK(d_true.is_supported());
 
-    // Arrange — supported stays false
+    // Arrange - supported stays false
     mock_phone_dialer d_false;
     d_false.set_supported(false);
     d_false.reset();

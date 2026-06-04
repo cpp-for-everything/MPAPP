@@ -13,7 +13,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// No return-by-value helper — signal<> is non-copyable/non-movable.
+// No return-by-value helper - signal<> is non-copyable/non-movable.
 // Each test constructs mock_version_tracking in-place.
 // ---------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ TEST_CASE("version_tracking: pre-track state is empty/false",
     // Arrange
     mock_version_tracking vt{ "2.0", "200" };
 
-    // Assert — nothing tracked yet, all flags false, histories empty
+    // Assert - nothing tracked yet, all flags false, histories empty
     CHECK_FALSE(vt.is_first_launch_ever());
     CHECK_FALSE(vt.is_first_launch_for_current_version());
     CHECK_FALSE(vt.is_first_launch_for_current_build());
@@ -38,7 +38,7 @@ TEST_CASE("version_tracking: pre-track state is empty/false",
 }
 
 // ===========================================================================
-// First track() — first-ever launch
+// First track() - first-ever launch
 // ===========================================================================
 TEST_CASE("version_tracking: first track() sets all first-launch flags",
           "[mock][essentials][version_tracking]") {
@@ -59,7 +59,7 @@ TEST_CASE("version_tracking: first track() sets all first-launch flags",
 }
 
 // ===========================================================================
-// Second track() with same version+build — repeat launch
+// Second track() with same version+build - repeat launch
 // ===========================================================================
 TEST_CASE("version_tracking: second track() same version/build clears flags",
           "[mock][essentials][version_tracking]") {
@@ -67,7 +67,7 @@ TEST_CASE("version_tracking: second track() same version/build clears flags",
     mock_version_tracking vt{ "1.0", "100" };
     vt.track();
 
-    // Act — simulate another launch of the same version/build
+    // Act - simulate another launch of the same version/build
     vt.track();
 
     // Assert
@@ -87,11 +87,11 @@ TEST_CASE("version_tracking: second track() same version/build clears flags",
 // ===========================================================================
 TEST_CASE("version_tracking: new version sets per-version flag only",
           "[mock][essentials][version_tracking]") {
-    // Arrange — first launch with 1.0/100
+    // Arrange - first launch with 1.0/100
     mock_version_tracking vt{ "1.0", "100" };
     vt.track(); // first launch
     vt.track(); // second launch same version
-    // Act — simulate upgrade to 2.0, same build string
+    // Act - simulate upgrade to 2.0, same build string
     vt.set_current_version("2.0");
     vt.track();
 
@@ -114,7 +114,7 @@ TEST_CASE("version_tracking: new build sets per-build flag only",
     // Arrange
     mock_version_tracking vt{ "1.0", "100" };
     vt.track();
-    // Act — same version, different build
+    // Act - same version, different build
     vt.set_current_build("101");
     vt.track();
 
@@ -175,7 +175,7 @@ TEST_CASE("version_tracking: previous_version follows version history",
     // Arrange
     mock_version_tracking vt{ "1.0", "100" };
 
-    // Act / Assert — step by step
+    // Act / Assert - step by step
     vt.track();
     CHECK_FALSE(vt.previous_version().has_value()); // first ever
 
@@ -199,12 +199,12 @@ TEST_CASE("version_tracking: repeated same version not added again to history",
     mock_version_tracking vt{ "1.0", "100" };
     vt.track();
 
-    // Act — 3 more launches with the same version/build
+    // Act - 3 more launches with the same version/build
     vt.track();
     vt.track();
     vt.track();
 
-    // Assert — still exactly one entry each
+    // Assert - still exactly one entry each
     CHECK(vt.version_history().size() == 1);
     CHECK(vt.build_history().size()   == 1);
 }
@@ -262,12 +262,12 @@ TEST_CASE("version_tracking: tracked signal silent before track()",
     auto cb = [&]() { ++fire_count; };
     vt.tracked.subscribe(slot, cb);
 
-    // Assert — no track(), no signal
+    // Assert - no track(), no signal
     CHECK(fire_count == 0);
 }
 
 // ===========================================================================
-// Slot disconnect before track() — signal must not call the handler
+// Slot disconnect before track() - signal must not call the handler
 // ===========================================================================
 TEST_CASE("version_tracking: disconnected slot not called",
           "[mock][essentials][version_tracking][signal]") {

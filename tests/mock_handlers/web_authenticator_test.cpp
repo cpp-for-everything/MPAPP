@@ -89,7 +89,7 @@ TEST_CASE("web_authenticator_options: default-constructed has expected defaults"
 }
 
 // ---------------------------------------------------------------------------
-// mock_web_authenticator — initial state
+// mock_web_authenticator - initial state
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_web_authenticator: initial state has no calls and returns nullopt",
@@ -119,10 +119,10 @@ TEST_CASE("mock_web_authenticator: authenticate returns nullopt by default (not 
 }
 
 // ---------------------------------------------------------------------------
-// mock_web_authenticator — set_result with optional
+// mock_web_authenticator - set_result with optional
 // ---------------------------------------------------------------------------
 
-TEST_CASE("mock_web_authenticator: set_result(optional) — success path returns canned result",
+TEST_CASE("mock_web_authenticator: set_result(optional) - success path returns canned result",
           "[mock][essentials][web_authenticator]") {
     // Arrange
     mock_web_authenticator mock;
@@ -165,7 +165,7 @@ TEST_CASE("mock_web_authenticator: set_result(nullopt) simulates cancellation",
 }
 
 // ---------------------------------------------------------------------------
-// mock_web_authenticator — set_result with map (convenience overload)
+// mock_web_authenticator - set_result with map (convenience overload)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_web_authenticator: set_result(map) convenience overload works",
@@ -192,7 +192,7 @@ TEST_CASE("mock_web_authenticator: set_result(map) convenience overload works",
 }
 
 // ---------------------------------------------------------------------------
-// mock_web_authenticator — set_not_supported
+// mock_web_authenticator - set_not_supported
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_web_authenticator: set_not_supported returns nullopt",
@@ -217,7 +217,7 @@ TEST_CASE("mock_web_authenticator: set_not_supported returns nullopt",
 }
 
 // ---------------------------------------------------------------------------
-// mock_web_authenticator — last_options recording
+// mock_web_authenticator - last_options recording
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_web_authenticator: last_options records the options passed",
@@ -281,7 +281,7 @@ TEST_CASE("mock_web_authenticator: last_options updated on repeated calls",
 }
 
 // ---------------------------------------------------------------------------
-// mock_web_authenticator — call_count
+// mock_web_authenticator - call_count
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_web_authenticator: call_count increments on each authenticate()",
@@ -303,7 +303,7 @@ TEST_CASE("mock_web_authenticator: call_count increments on each authenticate()"
 }
 
 // ---------------------------------------------------------------------------
-// mock_web_authenticator — reset_calls
+// mock_web_authenticator - reset_calls
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_web_authenticator: reset_calls clears call_count and last_options",

@@ -8,7 +8,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// is_main_thread — default and toggled states
+// is_main_thread - default and toggled states
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_main_thread: is_main_thread defaults to true",
@@ -26,13 +26,13 @@ TEST_CASE("mock_main_thread: set_is_main_thread toggles the return value",
     mock_main_thread mt;
     CHECK(mt.is_main_thread()); // pre-condition: default true
 
-    // Act — set to false
+    // Act - set to false
     mt.set_is_main_thread(false);
 
     // Assert
     CHECK_FALSE(mt.is_main_thread());
 
-    // Act — restore to true
+    // Act - restore to true
     mt.set_is_main_thread(true);
 
     // Assert
@@ -40,7 +40,7 @@ TEST_CASE("mock_main_thread: set_is_main_thread toggles the return value",
 }
 
 // ---------------------------------------------------------------------------
-// begin_invoke_on_main_thread — invoke count
+// begin_invoke_on_main_thread - invoke count
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_main_thread: invoke_count starts at zero",
@@ -82,7 +82,7 @@ TEST_CASE("mock_main_thread: reset_invoke_count resets the counter to zero",
 }
 
 // ---------------------------------------------------------------------------
-// begin_invoke_on_main_thread — callback execution
+// begin_invoke_on_main_thread - callback execution
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_main_thread: callback is executed inline",
@@ -94,7 +94,7 @@ TEST_CASE("mock_main_thread: callback is executed inline",
     // Act
     mt.begin_invoke_on_main_thread([&] { side_effect = 42; });
 
-    // Assert — synchronous / inline execution
+    // Assert - synchronous / inline execution
     CHECK(side_effect == 42);
 }
 
@@ -119,16 +119,16 @@ TEST_CASE("mock_main_thread: null/empty callback does not crash and still increm
     // Arrange
     mock_main_thread mt;
 
-    // Act — pass a default-constructed (empty) std::function
+    // Act - pass a default-constructed (empty) std::function
     std::function<void()> empty_action;
     mt.begin_invoke_on_main_thread(empty_action);
 
-    // Assert — counter incremented, no crash
+    // Assert - counter incremented, no crash
     CHECK(mt.invoke_count() == 1u);
 }
 
 // ---------------------------------------------------------------------------
-// Interface polymorphism — use through the abstract base pointer
+// Interface polymorphism - use through the abstract base pointer
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_main_thread: usable via main_thread abstract interface pointer",

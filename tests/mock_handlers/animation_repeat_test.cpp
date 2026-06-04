@@ -37,7 +37,7 @@ TEST_CASE("two repeats with no reverse tick 0..1 twice then finish",
                            [&done]() { done = true; } };
     ticks.clear();  // drop the construction seed
 
-    // Act — cycle 1
+    // Act - cycle 1
     CHECK_FALSE(r.advance(50ms));  // progress 0.5
     CHECK(r.current() == Approx(0.5));
     CHECK(r.completed_cycles() == 0);
@@ -47,7 +47,7 @@ TEST_CASE("two repeats with no reverse tick 0..1 twice then finish",
     CHECK(r.current() == Approx(0.0));
     CHECK_FALSE(done);
 
-    // Act — cycle 2
+    // Act - cycle 2
     CHECK_FALSE(r.advance(50ms));  // progress 0.5 of cycle 2
     CHECK(r.current() == Approx(0.5));
 
@@ -55,7 +55,7 @@ TEST_CASE("two repeats with no reverse tick 0..1 twice then finish",
     CHECK(r.completed_cycles() == 2);
     CHECK(r.current() == Approx(1.0));
 
-    // Assert — saw forward progress only, ending at 1.0, fired once.
+    // Assert - saw forward progress only, ending at 1.0, fired once.
     CHECK(done);
     CHECK(r.is_finished());
     CHECK(ticks.front() == Approx(0.5));
@@ -77,19 +77,19 @@ TEST_CASE("auto_reverse plays the second cycle backwards 1..0",
     repeating_animation r{ [&last](double v) { last = v; }, 100ms,
                            /*repeat_count=*/2, /*auto_reverse=*/true };
 
-    // Act — cycle 0 is forward 0..1.
+    // Act - cycle 0 is forward 0..1.
     r.advance(50ms);
     CHECK(last == Approx(0.5));
     r.advance(50ms);              // ends cycle 0 (emits 1.0), seeds cycle 1 at 1.0
     CHECK(r.completed_cycles() == 1);
     CHECK(last == Approx(1.0));   // reversed cycle 1 starts at 1.0
 
-    // Act — cycle 1 is reversed 1..0.
+    // Act - cycle 1 is reversed 1..0.
     r.advance(50ms);
     CHECK(last == Approx(0.5));   // 1.0 - 0.5
     bool finished = r.advance(50ms);
 
-    // Assert — reversed cycle finishes at 0.0.
+    // Assert - reversed cycle finishes at 0.0.
     CHECK(finished);
     CHECK(last == Approx(0.0));
     CHECK(r.is_finished());
@@ -102,7 +102,7 @@ TEST_CASE("infinite repeat never finishes and keeps counting cycles",
     int                 cycles_seen = 0;
     repeating_animation r{ [](double) {}, 100ms, /*repeat_count=*/-1 };
 
-    // Act — drive well past any finite count.
+    // Act - drive well past any finite count.
     for (int i = 0; i < 10; ++i) {
         const bool finished = r.advance(100ms);
         CHECK_FALSE(finished);
@@ -116,10 +116,10 @@ TEST_CASE("infinite repeat never finishes and keeps counting cycles",
 
 TEST_CASE("multiple cycles complete inside one large advance",
           "[mock][animation][repeat]") {
-    // Arrange — 3 cycles of 100ms each.
+    // Arrange - 3 cycles of 100ms each.
     repeating_animation r{ [](double) {}, 100ms, /*repeat_count=*/3 };
 
-    // Act — a single 350ms step crosses all three cycle boundaries.
+    // Act - a single 350ms step crosses all three cycle boundaries.
     const bool finished = r.advance(350ms);
 
     // Assert
@@ -136,7 +136,7 @@ TEST_CASE("zero duration collapses each cycle to a single end-frame",
     repeating_animation r{ [&last](double v) { last = v; }, 0ms,
                            /*repeat_count=*/2 };
 
-    // Act — any non-zero advance completes all collapsed cycles at once.
+    // Act - any non-zero advance completes all collapsed cycles at once.
     const bool finished = r.advance(1ms);
 
     // Assert
@@ -157,7 +157,7 @@ TEST_CASE("cancel stops the animation without firing on_finished",
     CHECK_FALSE(r.is_finished());
     r.cancel();
 
-    // Assert — finished but on_finished never ran; advances are no-ops.
+    // Assert - finished but on_finished never ran; advances are no-ops.
     CHECK(r.is_finished());
     CHECK_FALSE(done);
     CHECK(r.advance(100ms));

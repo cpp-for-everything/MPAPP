@@ -20,7 +20,7 @@ using namespace mpapp;
 // First-ever launch
 // ---------------------------------------------------------------------------
 
-TEST_CASE("real_version_tracking first track — first-launch-ever true",
+TEST_CASE("real_version_tracking first track - first-launch-ever true",
           "[mock][version_tracking]") {
     // Arrange
     in_memory_preferences prefs;
@@ -48,10 +48,10 @@ TEST_CASE("real_version_tracking first track — first-launch-ever true",
 }
 
 // ---------------------------------------------------------------------------
-// Second launch — same version, same build
+// Second launch - same version, same build
 // ---------------------------------------------------------------------------
 
-TEST_CASE("real_version_tracking second track same version — flags false",
+TEST_CASE("real_version_tracking second track same version - flags false",
           "[mock][version_tracking]") {
     // Arrange
     in_memory_preferences prefs;
@@ -60,22 +60,22 @@ TEST_CASE("real_version_tracking second track same version — flags false",
         vt1.track();
     }
 
-    // Act — second launch, identical version + build
+    // Act - second launch, identical version + build
     real_version_tracking vt2{ prefs, "1.0.0", "100" };
     vt2.track();
 
-    // Assert — no first-launch flags for a repeat launch
+    // Assert - no first-launch flags for a repeat launch
     CHECK_FALSE(vt2.is_first_launch_ever());
     CHECK_FALSE(vt2.is_first_launch_for_current_version());
     CHECK_FALSE(vt2.is_first_launch_for_current_build());
     CHECK(vt2.current_version() == "1.0.0");
     CHECK(vt2.current_build()   == "100");
-    // previous_version is the last entry before this launch — still "1.0.0"
+    // previous_version is the last entry before this launch - still "1.0.0"
     REQUIRE(vt2.previous_version().has_value());
     CHECK(*vt2.previous_version() == "1.0.0");
     CHECK(vt2.first_installed_version() == "1.0.0");
 
-    // History should not grow — the version was already recorded
+    // History should not grow - the version was already recorded
     const auto vh = vt2.version_history();
     REQUIRE(vh.size() == 1);
     CHECK(vh[0] == "1.0.0");
@@ -86,19 +86,19 @@ TEST_CASE("real_version_tracking second track same version — flags false",
 }
 
 // ---------------------------------------------------------------------------
-// Version bump — is_first_launch_for_current_version becomes true
+// Version bump - is_first_launch_for_current_version becomes true
 // ---------------------------------------------------------------------------
 
-TEST_CASE("real_version_tracking version bump — for_current_version true",
+TEST_CASE("real_version_tracking version bump - for_current_version true",
           "[mock][version_tracking]") {
-    // Arrange — first launch at v1
+    // Arrange - first launch at v1
     in_memory_preferences prefs;
     {
         real_version_tracking vt1{ prefs, "1.0.0", "100" };
         vt1.track();
     }
 
-    // Act — app updated, new launch at v2 (same build slot, different string)
+    // Act - app updated, new launch at v2 (same build slot, different string)
     real_version_tracking vt2{ prefs, "2.0.0", "200" };
     vt2.track();
 
@@ -124,10 +124,10 @@ TEST_CASE("real_version_tracking version bump — for_current_version true",
 }
 
 // ---------------------------------------------------------------------------
-// Build bump only — version unchanged, build changes
+// Build bump only - version unchanged, build changes
 // ---------------------------------------------------------------------------
 
-TEST_CASE("real_version_tracking build bump — for_current_build true, version false",
+TEST_CASE("real_version_tracking build bump - for_current_build true, version false",
           "[mock][version_tracking]") {
     // Arrange
     in_memory_preferences prefs;
@@ -136,7 +136,7 @@ TEST_CASE("real_version_tracking build bump — for_current_build true, version 
         vt1.track();
     }
 
-    // Act — same version, new build
+    // Act - same version, new build
     real_version_tracking vt2{ prefs, "1.0.0", "101" };
     vt2.track();
 
@@ -156,10 +156,10 @@ TEST_CASE("real_version_tracking build bump — for_current_build true, version 
 }
 
 // ---------------------------------------------------------------------------
-// Three launches — full history growth
+// Three launches - full history growth
 // ---------------------------------------------------------------------------
 
-TEST_CASE("real_version_tracking three launches — history grows correctly",
+TEST_CASE("real_version_tracking three launches - history grows correctly",
           "[mock][version_tracking]") {
     // Arrange
     in_memory_preferences prefs;
@@ -169,12 +169,12 @@ TEST_CASE("real_version_tracking three launches — history grows correctly",
         real_version_tracking vt{ prefs, "1.0", "1" };
         vt.track();
     }
-    // Launch 2 — same
+    // Launch 2 - same
     {
         real_version_tracking vt{ prefs, "1.0", "1" };
         vt.track();
     }
-    // Launch 3 — new version
+    // Launch 3 - new version
     real_version_tracking vt3{ prefs, "1.1", "2" };
     vt3.track();
 
@@ -212,16 +212,16 @@ TEST_CASE("real_version_tracking tracked signal fires on track",
 }
 
 // ---------------------------------------------------------------------------
-// Accessors before track() — safe defaults
+// Accessors before track() - safe defaults
 // ---------------------------------------------------------------------------
 
-TEST_CASE("real_version_tracking accessors before track — safe defaults",
+TEST_CASE("real_version_tracking accessors before track - safe defaults",
           "[mock][version_tracking]") {
     // Arrange
     in_memory_preferences prefs;
     real_version_tracking vt{ prefs, "1.0.0", "100" };
 
-    // Assert — pre-track state: all false, empty histories
+    // Assert - pre-track state: all false, empty histories
     CHECK_FALSE(vt.is_first_launch_ever());
     CHECK_FALSE(vt.is_first_launch_for_current_version());
     CHECK_FALSE(vt.is_first_launch_for_current_build());
@@ -239,7 +239,7 @@ TEST_CASE("real_version_tracking accessors before track — safe defaults",
 
 TEST_CASE("real_version_tracking persists history via preferences",
           "[mock][version_tracking]") {
-    // Arrange — shared prefs simulates the same backing store across launches
+    // Arrange - shared prefs simulates the same backing store across launches
     in_memory_preferences prefs;
 
     {
@@ -247,11 +247,11 @@ TEST_CASE("real_version_tracking persists history via preferences",
         vt.track();
     }
 
-    // Act — new instance reads from the same prefs
+    // Act - new instance reads from the same prefs
     real_version_tracking vt2{ prefs, "1.0", "100" };
     vt2.track();
 
-    // Assert — history accumulated across instances
+    // Assert - history accumulated across instances
     CHECK(vt2.first_installed_version() == "0.9");
     CHECK(*vt2.previous_version()       == "0.9");
 
@@ -275,7 +275,7 @@ TEST_CASE("real_version_tracking storage keys are non-empty strings",
 }
 
 // ---------------------------------------------------------------------------
-// Repeated same-version launches beyond two — history stays deduplicated
+// Repeated same-version launches beyond two - history stays deduplicated
 // ---------------------------------------------------------------------------
 
 TEST_CASE("real_version_tracking repeated launches do not duplicate history",
@@ -291,7 +291,7 @@ TEST_CASE("real_version_tracking repeated launches do not duplicate history",
     real_version_tracking vt_final{ prefs, "1.0.0", "100" };
     vt_final.track();
 
-    // Assert — still only one entry in each history
+    // Assert - still only one entry in each history
     CHECK(vt_final.version_history().size() == 1);
     CHECK(vt_final.build_history().size()   == 1);
 }

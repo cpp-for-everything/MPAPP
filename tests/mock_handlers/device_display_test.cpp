@@ -89,7 +89,7 @@ TEST_CASE("display_info equality and inequality",
 }
 
 // ---------------------------------------------------------------------------
-// mock_device_display — basic state
+// mock_device_display - basic state
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_device_display default-constructed has zero-size display",
@@ -115,7 +115,7 @@ TEST_CASE("mock_device_display constructed with explicit info",
 }
 
 // ---------------------------------------------------------------------------
-// mock_device_display — keep_screen_on
+// mock_device_display - keep_screen_on
 // ---------------------------------------------------------------------------
 
 TEST_CASE("keep_screen_on defaults to false and is settable",
@@ -139,7 +139,7 @@ TEST_CASE("keep_screen_on defaults to false and is settable",
 }
 
 // ---------------------------------------------------------------------------
-// mock_device_display — set_main_display_info (no signal on same value)
+// mock_device_display - set_main_display_info (no signal on same value)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("set_main_display_info with same value does not fire signal",
@@ -161,7 +161,7 @@ TEST_CASE("set_main_display_info with same value does not fire signal",
 }
 
 // ---------------------------------------------------------------------------
-// mock_device_display — set_main_display_info fires signal on change
+// mock_device_display - set_main_display_info fires signal on change
 // ---------------------------------------------------------------------------
 
 TEST_CASE("set_main_display_info fires signal on new value",
@@ -206,7 +206,7 @@ TEST_CASE("set_main_display_info fires signal on each distinct change",
     dd.set_main_display_info(b);
     CHECK(hits == 2);
 
-    dd.set_main_display_info(b);   // same — no fire
+    dd.set_main_display_info(b);   // same - no fire
     CHECK(hits == 2);
 
     dd.set_main_display_info(c);
@@ -214,7 +214,7 @@ TEST_CASE("set_main_display_info fires signal on each distinct change",
 }
 
 // ---------------------------------------------------------------------------
-// mock_device_display — multiple subscribers
+// mock_device_display - multiple subscribers
 // ---------------------------------------------------------------------------
 
 TEST_CASE("multiple subscribers all receive the changed display_info",
@@ -241,7 +241,7 @@ TEST_CASE("multiple subscribers all receive the changed display_info",
 }
 
 // ---------------------------------------------------------------------------
-// mock_device_display — subscriber disconnect stops receiving
+// mock_device_display - subscriber disconnect stops receiving
 // ---------------------------------------------------------------------------
 
 TEST_CASE("disconnected slot stops receiving signal",
@@ -259,7 +259,7 @@ TEST_CASE("disconnected slot stops receiving signal",
     slot.disconnect();
 
     dd.set_main_display_info(make_info(1920.0, 1080.0));
-    CHECK(hits == 1);   // still 1 — slot was disconnected
+    CHECK(hits == 1);   // still 1 - slot was disconnected
 }
 
 // ---------------------------------------------------------------------------
@@ -282,7 +282,7 @@ TEST_CASE("display_rotation underlying values are stable",
 }
 
 // ---------------------------------------------------------------------------
-// mock_device_display — all display_rotation and display_orientation combos
+// mock_device_display - all display_rotation and display_orientation combos
 // ---------------------------------------------------------------------------
 
 TEST_CASE("display_info stores landscape orientation",

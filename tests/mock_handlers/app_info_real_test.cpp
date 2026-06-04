@@ -37,7 +37,7 @@ TEST_CASE("real_app_info default-constructed metadata", "[mock][app_info]") {
     // Arrange + Act
     real_app_info ai{};
 
-    // Assert — defaults must be non-empty sensible strings
+    // Assert - defaults must be non-empty sensible strings
     CHECK_FALSE(ai.package_name().empty());
     CHECK_FALSE(ai.name().empty());
     CHECK_FALSE(ai.version_string().empty());
@@ -75,7 +75,7 @@ TEST_CASE("real_app_info set_requested_theme round-trips", "[mock][app_info]") {
     // Assert
     CHECK(ai.requested_theme() == app_theme::dark);
 
-    // Act — switch to light
+    // Act - switch to light
     ai.set_requested_theme(app_theme::light);
 
     // Assert
@@ -90,10 +90,10 @@ TEST_CASE("real_app_info set_requested_theme same-value is no-op (no signal)", "
     auto cb = [&](app_theme) { ++hits; };
     ai.requested_theme_changed.subscribe(slot, cb);
 
-    // Act — set to same value (unspecified -> unspecified)
+    // Act - set to same value (unspecified -> unspecified)
     ai.set_requested_theme(app_theme::unspecified);
 
-    // Assert — signal must NOT fire
+    // Assert - signal must NOT fire
     CHECK(hits == 0);
     CHECK(ai.requested_theme() == app_theme::unspecified);
 }
@@ -114,7 +114,7 @@ TEST_CASE("real_app_info set_requested_theme emits signal on change", "[mock][ap
     CHECK(hits == 1);
     CHECK(last == app_theme::dark);
 
-    // Act — change again
+    // Act - change again
     ai.set_requested_theme(app_theme::light);
 
     // Assert
@@ -126,7 +126,7 @@ TEST_CASE("real_app_info set_requested_theme all three theme values", "[mock][ap
     // Arrange
     real_app_info ai{};
 
-    // Act + Assert — cycle through all enum values
+    // Act + Assert - cycle through all enum values
     ai.set_requested_theme(app_theme::light);
     CHECK(ai.requested_theme() == app_theme::light);
 
@@ -157,7 +157,7 @@ TEST_CASE("real_app_info set_requested_layout_direction round-trips", "[mock][ap
     // Assert
     CHECK(ai.requested_layout_direction() == layout_direction::right_to_left);
 
-    // Act — reset to LTR
+    // Act - reset to LTR
     ai.set_requested_layout_direction(layout_direction::left_to_right);
 
     // Assert
@@ -201,11 +201,11 @@ TEST_CASE("real_app_info show_settings_ui idempotent", "[mock][app_info]") {
     // Arrange
     real_app_info ai{};
 
-    // Act — call twice
+    // Act - call twice
     ai.show_settings_ui();
     ai.show_settings_ui();
 
-    // Assert — still true, no side-effects
+    // Assert - still true, no side-effects
     CHECK(ai.settings_ui_shown());
 }
 
@@ -221,7 +221,7 @@ TEST_CASE("real_app_info reset_settings_ui_shown clears the flag", "[mock][app_i
     // Assert
     CHECK_FALSE(ai.settings_ui_shown());
 
-    // Act — can be set again after reset
+    // Act - can be set again after reset
     ai.show_settings_ui();
     CHECK(ai.settings_ui_shown());
 }
@@ -229,11 +229,11 @@ TEST_CASE("real_app_info reset_settings_ui_shown clears the flag", "[mock][app_i
 // ---- Polymorphic interface ---------------------------------------------------
 
 TEST_CASE("real_app_info is usable through the abstract interface", "[mock][app_info]") {
-    // Arrange — hold via base pointer
+    // Arrange - hold via base pointer
     real_app_info concrete{ "com.poly.test", "Poly App", "0.1.0", "9" };
     app_info& iface = concrete;
 
-    // Act + Assert — all interface getters work through the vtable
+    // Act + Assert - all interface getters work through the vtable
     CHECK(iface.package_name()   == "com.poly.test");
     CHECK(iface.name()           == "Poly App");
     CHECK(iface.version_string() == "0.1.0");
@@ -241,10 +241,10 @@ TEST_CASE("real_app_info is usable through the abstract interface", "[mock][app_
     CHECK(iface.requested_theme() == app_theme::unspecified);
     CHECK(iface.requested_layout_direction() == layout_direction::left_to_right);
 
-    // Act — call show_settings_ui through the interface
+    // Act - call show_settings_ui through the interface
     iface.show_settings_ui();
 
-    // Assert — the concrete flag is set
+    // Assert - the concrete flag is set
     CHECK(concrete.settings_ui_shown());
 }
 
@@ -259,14 +259,14 @@ TEST_CASE("real_app_info signal does not fire after slot is disconnected", "[moc
         auto cb = [&](app_theme) { ++hits; };
         ai.requested_theme_changed.subscribe(slot, cb);
 
-        // Act — fire while slot is alive
+        // Act - fire while slot is alive
         ai.set_requested_theme(app_theme::dark);
         CHECK(hits == 1);
     } // slot destroyed here -> auto-disconnects
 
-    // Act — fire after slot is gone
+    // Act - fire after slot is gone
     ai.set_requested_theme(app_theme::light);
 
-    // Assert — no additional fires
+    // Assert - no additional fires
     CHECK(hits == 1);
 }

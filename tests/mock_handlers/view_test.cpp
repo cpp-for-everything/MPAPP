@@ -3,7 +3,7 @@
 //
 // Mock-handler tests for `mpapp::view` (CLAUDE Rule 6 / ADR-0008).
 // Asserts the recorded mapper sequence on the cross-cutting view
-// surface — every layout-group widget inherits this surface, so the
+// surface - every layout-group widget inherits this surface, so the
 // invariants here apply transitively to layout/border/box_view/etc.
 
 #include <catch2/catch_test_macros.hpp>
@@ -51,7 +51,7 @@ TEST_CASE("view mock handler ignores idempotent sets", "[mock][view][idempotent]
     h.map_is_enabled(v);
     h.clear_calls();
 
-    v.is_enabled = true;            // same value — Observable short-circuits
+    v.is_enabled = true;            // same value - Observable short-circuits
     v.is_enabled = true;
     CHECK(h.calls().empty());
 

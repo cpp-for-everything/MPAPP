@@ -49,7 +49,7 @@ TEST_CASE("swipe_view mock tracks content presence changes",
     CHECK(h.calls()[0].property_name == "content.present");
     CHECK(h.calls()[0].value_repr    == "true");
 
-    sv.content = &child;     // suppressed — Observable de-dupes
+    sv.content = &child;     // suppressed - Observable de-dupes
     REQUIRE(h.calls().size() == 1);
 
     sv.content = nullptr;

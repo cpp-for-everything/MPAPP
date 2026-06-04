@@ -23,7 +23,7 @@ public:
 };
 
 // Tiny counter the test setters drive instead of touching real
-// Observables — keeps each case's intent obvious + easy to assert.
+// Observables - keeps each case's intent obvious + easy to assert.
 struct counters {
     int normal   = 0;
     int pressed  = 0;
@@ -78,7 +78,7 @@ TEST_CASE("visual_state_manager same-state transition is a no-op",
     CHECK(vsm.go_to_state(v, visual_states::pressed) == 1);
     CHECK(hits == 1);
 
-    // Calling go_to_state with the same name is a no-op — setter
+    // Calling go_to_state with the same name is a no-op - setter
     // does not re-run + return value is 0 (zero groups transitioned).
     CHECK(vsm.go_to_state(v, visual_states::pressed) == 0);
     CHECK(hits == 1);
@@ -107,7 +107,7 @@ TEST_CASE("visual_state_manager transitions in every group that has the state",
     visual_state_manager vsm;
 
     // Two independent groups. "Disabled" lives in both groups so a
-    // single go_to_state call transitions both — matches MAUI's
+    // single go_to_state call transitions both - matches MAUI's
     // behaviour where the state name is the key, not the group.
     vsm.groups.push_back(visual_state_group{ std::string{ "Common" } });
     vsm.groups.back().states.push_back(
@@ -143,7 +143,7 @@ TEST_CASE("visual_state_manager only the matching group's state transitions",
     vsm.groups.back().states.back().setters["v"] = [&focus_focused_hits](view&) { ++focus_focused_hits; };
 
     test_view v;
-    // Normal hits Common only — FocusStates has no Normal entry, so
+    // Normal hits Common only - FocusStates has no Normal entry, so
     // its current_state stays empty.
     CHECK(vsm.go_to_state(v, visual_states::normal) == 1);
     CHECK(common_normal_hits == 1);
@@ -169,7 +169,7 @@ TEST_CASE("visual_state_manager setter exceptions are swallowed",
     test_view v;
     REQUIRE_NOTHROW(vsm.go_to_state(v, visual_states::pressed));
     CHECK(ran_after_throw);
-    // The bad setter being skipped does NOT roll back the transition —
+    // The bad setter being skipped does NOT roll back the transition -
     // current_state still reflects the target name.
     CHECK(vsm.groups[0].current_state == "Pressed");
 }

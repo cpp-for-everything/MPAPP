@@ -37,7 +37,7 @@ TEST_CASE("title_bar records title and subtitle changes",
     CHECK(h.calls()[0].property_name == "title");
     CHECK(h.calls()[0].value_repr    == "Notes");
 
-    t.title = "Notes";          // idempotent — no re-emit on equal set
+    t.title = "Notes";          // idempotent - no re-emit on equal set
     REQUIRE(h.calls().size() == 1);
 
     t.subtitle = "Untitled";

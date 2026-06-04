@@ -49,7 +49,7 @@ constexpr easing_kind kOvershoot[] = {
 } // namespace
 
 // ---------------------------------------------------------------------------
-// TEST 1 — endpoint anchors: ease(k,0)==0, ease(k,1)==1 for all new kinds
+// TEST 1 - endpoint anchors: ease(k,0)==0, ease(k,1)==1 for all new kinds
 // ---------------------------------------------------------------------------
 TEST_CASE("new easing kinds are anchored at 0 and 1", "[mock][animation][easing]") {
     // Arrange: all new easing_kind values
@@ -62,7 +62,7 @@ TEST_CASE("new easing kinds are anchored at 0 and 1", "[mock][animation][easing]
 }
 
 // ---------------------------------------------------------------------------
-// TEST 2 — non-overshoot kinds stay in [0,1] for interior t values
+// TEST 2 - non-overshoot kinds stay in [0,1] for interior t values
 // ---------------------------------------------------------------------------
 TEST_CASE("non-overshoot new kinds stay within [0,1] for interior t",
           "[mock][animation][easing]") {
@@ -78,7 +78,7 @@ TEST_CASE("non-overshoot new kinds stay within [0,1] for interior t",
 }
 
 // ---------------------------------------------------------------------------
-// TEST 3 — overshoot kinds still anchor exactly and may exceed [0,1] inside
+// TEST 3 - overshoot kinds still anchor exactly and may exceed [0,1] inside
 // ---------------------------------------------------------------------------
 TEST_CASE("overshoot new kinds anchor at 0 and 1 and may exceed [0,1] mid-range",
           "[mock][animation][easing]") {
@@ -91,7 +91,7 @@ TEST_CASE("overshoot new kinds anchor at 0 and 1 and may exceed [0,1] mid-range"
 }
 
 // ---------------------------------------------------------------------------
-// TEST 4 — quart family
+// TEST 4 - quart family
 // ---------------------------------------------------------------------------
 TEST_CASE("quart easing curves", "[mock][animation][easing]") {
     // Arrange: known analytic values
@@ -113,7 +113,7 @@ TEST_CASE("quart easing curves", "[mock][animation][easing]") {
 }
 
 // ---------------------------------------------------------------------------
-// TEST 5 — quint family
+// TEST 5 - quint family
 // ---------------------------------------------------------------------------
 TEST_CASE("quint easing curves", "[mock][animation][easing]") {
     // quint_in(0.5) = 0.5^5 = 0.03125
@@ -134,7 +134,7 @@ TEST_CASE("quint easing curves", "[mock][animation][easing]") {
 }
 
 // ---------------------------------------------------------------------------
-// TEST 6 — expo family
+// TEST 6 - expo family
 // ---------------------------------------------------------------------------
 TEST_CASE("expo easing curves", "[mock][animation][easing]") {
     // Special boundary cases: t==0 and t==1 are hard-coded.
@@ -160,7 +160,7 @@ TEST_CASE("expo easing curves", "[mock][animation][easing]") {
 }
 
 // ---------------------------------------------------------------------------
-// TEST 7 — circ family
+// TEST 7 - circ family
 // ---------------------------------------------------------------------------
 TEST_CASE("circ easing curves", "[mock][animation][easing]") {
     // circ_in(0.5) = 1 - sqrt(1 - 0.25) = 1 - sqrt(0.75)
@@ -183,14 +183,14 @@ TEST_CASE("circ easing curves", "[mock][animation][easing]") {
 }
 
 // ---------------------------------------------------------------------------
-// TEST 8 — back family (may overshoot)
+// TEST 8 - back family (may overshoot)
 // ---------------------------------------------------------------------------
 TEST_CASE("back easing curves overshoot mid-range and settle at endpoints",
           "[mock][animation][easing]") {
-    // back_in starts below 0 (undershoot at small t) — check at 0.2
+    // back_in starts below 0 (undershoot at small t) - check at 0.2
     CHECK(ease(easing_kind::back_in, 0.2) < 0.0 + 1e-9); // may be negative
 
-    // back_out goes above 1 mid-range — check at 0.8
+    // back_out goes above 1 mid-range - check at 0.8
     CHECK(ease(easing_kind::back_out, 0.8) > 1.0 - 1e-9);
 
     // back_in_out both halves exercise different branches
@@ -209,7 +209,7 @@ TEST_CASE("back easing curves overshoot mid-range and settle at endpoints",
 }
 
 // ---------------------------------------------------------------------------
-// TEST 9 — elastic family (may overshoot and undershoot)
+// TEST 9 - elastic family (may overshoot and undershoot)
 // ---------------------------------------------------------------------------
 TEST_CASE("elastic easing curves are anchored and oscillate mid-range",
           "[mock][animation][easing]") {
@@ -230,14 +230,14 @@ TEST_CASE("elastic easing curves are anchored and oscillate mid-range",
     // Both branches of elastic_in_out are exercised (t<0.5 and t>0.5)
     const double ein_lo = ease(easing_kind::elastic_in_out, 0.3);
     const double ein_hi = ease(easing_kind::elastic_in_out, 0.7);
-    // We just confirm they are computed (no NaN/Inf) — oscillation means
+    // We just confirm they are computed (no NaN/Inf) - oscillation means
     // we cannot assert simple ordering.
     CHECK(ein_lo == ein_lo); // NaN check: NaN != NaN
     CHECK(ein_hi == ein_hi);
 }
 
 // ---------------------------------------------------------------------------
-// TEST 10 — bounce_in family
+// TEST 10 - bounce_in family
 // ---------------------------------------------------------------------------
 TEST_CASE("bounce_in and bounce_in_out are anchored and in-range",
           "[mock][animation][easing]") {
@@ -268,7 +268,7 @@ TEST_CASE("bounce_in and bounce_in_out are anchored and in-range",
 }
 
 // ---------------------------------------------------------------------------
-// TEST 11 — spring_in and spring_in_out
+// TEST 11 - spring_in and spring_in_out
 // ---------------------------------------------------------------------------
 TEST_CASE("spring_in and spring_in_out are anchored at 0 and 1",
           "[mock][animation][easing]") {
@@ -299,7 +299,7 @@ TEST_CASE("spring_in and spring_in_out are anchored at 0 and 1",
 }
 
 // ---------------------------------------------------------------------------
-// TEST 12 — regression: original 12 easing kinds still compile and run
+// TEST 12 - regression: original 12 easing kinds still compile and run
 // ---------------------------------------------------------------------------
 TEST_CASE("original easing kinds still behave correctly (regression)",
           "[mock][animation][easing]") {

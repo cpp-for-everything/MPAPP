@@ -3,7 +3,7 @@
 // Only compiled when MPAPP_GRAPHICS_HAS_CAIRO is defined (i.e. CMake
 // detected libcairo at configure time and the backend was selected).
 // Verifies the backend actually renders by reading pixels back from
-// the image surface — sidesteps mocking the entire Cairo state
+// the image surface - sidesteps mocking the entire Cairo state
 // machine.
 
 #if defined(MPAPP_GRAPHICS_HAS_CAIRO)
@@ -33,7 +33,7 @@ struct argb_pixel {
 // To verify rendering end-to-end without exposing internal surfaces
 // through the abstract `canvas*` API, the parity test below creates
 // its OWN cairo_image_surface_t mirror and renders the same ops via
-// direct Cairo. The two paths share no state — they're independent
+// direct Cairo. The two paths share no state - they're independent
 // renders that should produce the same pixels. The facade-driven
 // canvas exercises the backend without crashing; the direct-Cairo
 // surface lets us read pixels back to confirm the expected behavior.
@@ -62,7 +62,7 @@ TEST_CASE("cairo backend make_canvas returns a usable canvas",
     CHECK(c->height_px() == 64);
     // The factory call must succeed and the returned canvas must
     // accept arbitrary ops without crashing. We don't inspect the
-    // result here — the pixel-readback tests below do that.
+    // result here - the pixel-readback tests below do that.
     c->clear(color::rgba(1, 1, 1, 1));
     c->set_fill(color::rgb(1, 0, 0));
     c->fill_rect(rect{0, 0, 10, 10});
@@ -120,7 +120,7 @@ TEST_CASE("cairo backend: facade-driven render matches direct Cairo",
     // facade and a parallel direct-Cairo render with the same ops;
     // inspect a few representative pixels and confirm parity.
     //
-    // Direct-Cairo target — what we expect the facade to produce.
+    // Direct-Cairo target - what we expect the facade to produce.
     auto* expected = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 32, 32);
     {
         auto* cr = cairo_create(expected);
@@ -142,7 +142,7 @@ TEST_CASE("cairo backend: facade-driven render matches direct Cairo",
     // crash and the EXPECTED render demonstrates Cairo behaves the
     // way our facade is wired to emulate. Pixel-perfect parity test
     // for the facade would need the abstract API to grow a
-    // `read_pixel` op — out of scope for v1.
+    // `read_pixel` op - out of scope for v1.
     auto c = make_canvas(32, 32);
     REQUIRE(c != nullptr);
     c->clear(color::rgba(1, 1, 1, 1));
@@ -165,7 +165,7 @@ TEST_CASE("cairo backend: save / restore actually balances",
     c->translate(5, 5);
     c->scale(2, 2);
     c->restore();
-    // No assertion on pixel state — just confirming the calls don't
+    // No assertion on pixel state - just confirming the calls don't
     // unbalance Cairo's state stack (which would crash on a
     // subsequent restore when there's nothing to pop).
     c->save();

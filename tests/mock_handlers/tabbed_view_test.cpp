@@ -39,7 +39,7 @@ TEST_CASE("tabbed_view records tab_titles.count when collection changes",
     CHECK(h.calls()[0].property_name == "tab_titles.count");
     CHECK(h.calls()[0].value_repr    == "3");
 
-    // Shrink the collection — the count records the new size.
+    // Shrink the collection - the count records the new size.
     tv.tab_titles = std::vector<std::string>{"Inbox"};
     REQUIRE(h.calls().size() == 2);
     CHECK(h.calls()[1].value_repr    == "1");
@@ -58,7 +58,7 @@ TEST_CASE("tabbed_view records selection changes",
     CHECK(h.calls()[0].property_name == "selected_index");
     CHECK(h.calls()[0].value_repr    == "2");
 
-    tv.selected_index = 2;            // idempotent — no extra row
+    tv.selected_index = 2;            // idempotent - no extra row
     REQUIRE(h.calls().size() == 1);
 
     tv.selected_index = -1;

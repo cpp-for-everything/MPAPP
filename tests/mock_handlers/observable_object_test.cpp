@@ -57,7 +57,7 @@ TEST_CASE("set_property returns false and emits nothing on equal value",
     vm.property_changing.subscribe(s_changing, on_changing);
     vm.property_changed.subscribe(s_changed, on_changed);
 
-    // Act — field starts empty; setting empty is a no-op.
+    // Act - field starts empty; setting empty is a no-op.
     const bool result = vm.set_name("");
 
     // Assert
@@ -180,7 +180,7 @@ TEST_CASE("raise_property_changed emits changed and runs the hook",
     // Act
     vm.touch("full_name");
 
-    // Assert — changed fires, changing does not, hook records the name.
+    // Assert - changed fires, changing does not, hook records the name.
     REQUIRE(changed_names.size() == 1);
     CHECK(changed_names.front() == "full_name");
     CHECK(changing == 0);
@@ -189,7 +189,7 @@ TEST_CASE("raise_property_changed emits changed and runs the hook",
 }
 
 TEST_CASE("observable_object base hook is a no-op by default", "[mock][mvvm]") {
-    // Arrange — a derived type that does NOT override on_property_changed,
+    // Arrange - a derived type that does NOT override on_property_changed,
     // exercising the base-class default implementation.
     struct plain_vm : observable_object {
         int value = 0;

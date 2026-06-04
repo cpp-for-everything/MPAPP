@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Part of MPAPP. Mock tests for `mpapp::image::source_object` —
+// Part of MPAPP. Mock tests for `mpapp::image::source_object` -
 // RFC-0004's rich-source path on the existing `image` control.
 
 #include <memory>

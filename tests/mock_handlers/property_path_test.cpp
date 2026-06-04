@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. Mock tests for the RFC-0007 typed nested property-path
-// accessor (mpapp::property_path) — the type-safe form of MAUI's string
+// accessor (mpapp::property_path) - the type-safe form of MAUI's string
 // binding paths "A.B.C".
 
 #include <memory>
@@ -135,7 +135,7 @@ TEST_CASE("property_path: three-level read and write through unique_ptr chain",
 
 TEST_CASE("property_path: null intermediate yields nullopt on get",
           "[mock][property_path]") {
-    // Arrange — mid is present, but its leaf pointer is null.
+    // Arrange - mid is present, but its leaf pointer is null.
     Mid  mid{ nullptr };
     Root root{ &mid };
 
@@ -151,7 +151,7 @@ TEST_CASE("property_path: null intermediate yields nullopt on get",
 
 TEST_CASE("property_path: null intermediate makes set a graceful no-op",
           "[mock][property_path]") {
-    // Arrange — the very first link is null (root.mid == nullptr).
+    // Arrange - the very first link is null (root.mid == nullptr).
     Leaf leaf{ 5 };
     Root root{ nullptr };
 
@@ -163,7 +163,7 @@ TEST_CASE("property_path: null intermediate makes set a graceful no-op",
     // Act
     const bool ok = path.set(root, 9999);
 
-    // Assert — set failed gracefully, untouched leaf, get is nullopt.
+    // Assert - set failed gracefully, untouched leaf, get is nullopt.
     CHECK_FALSE(ok);
     CHECK(leaf.n == 5);
     CHECK_FALSE(path.get(root).has_value());
@@ -171,7 +171,7 @@ TEST_CASE("property_path: null intermediate makes set a graceful no-op",
 
 TEST_CASE("property_path: terminal getter returning null yields nullopt",
           "[mock][property_path]") {
-    // Arrange — chain is intact but the leaf accessor itself returns null.
+    // Arrange - chain is intact but the leaf accessor itself returns null.
     Mid  mid{ nullptr };
     Root root{ &mid };
 

@@ -28,7 +28,7 @@ TEST_CASE("mock_text_to_speech starts with no spoken texts and zero count",
 }
 
 // ---------------------------------------------------------------------------
-// speak(text) — default overload
+// speak(text) - default overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("speak(text) records the text in spoken_texts",
@@ -90,7 +90,7 @@ TEST_CASE("speak(text) accepts empty string",
 }
 
 // ---------------------------------------------------------------------------
-// speak(text, options) — options overload
+// speak(text, options) - options overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("speak(text, opts) records text and stores last_options",
@@ -177,7 +177,7 @@ TEST_CASE("last_options reflects the MOST RECENT speak(text, opts) call",
     tts.speak("first", first_opts);
     tts.speak("second", second_opts);
 
-    // Assert — last call wins
+    // Assert - last call wins
     REQUIRE(tts.last_options().has_value());
     CHECK(tts.last_options()->volume == 0.9);
     CHECK(tts.last_options()->locale == "de-DE");
@@ -362,7 +362,7 @@ TEST_CASE("reset() does NOT clear the canned locale list",
     // Act
     tts.reset();
 
-    // Assert — locales survive reset
+    // Assert - locales survive reset
     REQUIRE(tts.get_locales().size() == 1);
     CHECK(tts.get_locales()[0].id == "keep-me");
 }
@@ -375,7 +375,7 @@ TEST_CASE("reset() can be called on a pristine instance without side effects",
     // Act
     tts.reset();
 
-    // Assert — still in default state
+    // Assert - still in default state
     CHECK(tts.speak_count() == 0);
     CHECK(tts.spoken_texts().empty());
     CHECK_FALSE(tts.last_options().has_value());

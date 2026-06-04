@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. Mock-handler smoke test for `mpapp::internal::basic_menu_flyout_separator`
-// (M-04b). The separator has no observable properties — this test
+// (M-04b). The separator has no observable properties - this test
 // exists to satisfy the per-widget test-file glob and to verify the
 // handler can bind without throwing.
 

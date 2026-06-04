@@ -15,7 +15,7 @@ TEST_CASE("mock_flashlight default state", "[mock][flashlight]") {
     // Arrange
     mock_flashlight fl;
 
-    // Act / Assert — initial state
+    // Act / Assert - initial state
     CHECK(fl.is_supported() == true);
     CHECK(fl.is_on()        == false);
     CHECK(fl.not_supported_attempts() == 0);
@@ -55,11 +55,11 @@ TEST_CASE("mock_flashlight turn_on is idempotent", "[mock][flashlight]") {
     // Arrange
     mock_flashlight fl;
 
-    // Act — call turn_on() twice
+    // Act - call turn_on() twice
     fl.turn_on();
     fl.turn_on();
 
-    // Assert — still on, no side-effects
+    // Assert - still on, no side-effects
     CHECK(fl.is_on());
     CHECK(fl.not_supported_attempts() == 0);
 }
@@ -68,7 +68,7 @@ TEST_CASE("mock_flashlight turn_off is idempotent", "[mock][flashlight]") {
     // Arrange
     mock_flashlight fl;
 
-    // Act — turn off when already off
+    // Act - turn off when already off
     fl.turn_off();
     fl.turn_off();
 
@@ -80,7 +80,7 @@ TEST_CASE("mock_flashlight toggle sequence", "[mock][flashlight]") {
     // Arrange
     mock_flashlight fl;
 
-    // Act / Assert — interleaved on/off
+    // Act / Assert - interleaved on/off
     fl.turn_on();
     CHECK(fl.is_on());
 
@@ -103,7 +103,7 @@ TEST_CASE("mock_flashlight with supported=false turn_on is a no-op", "[mock][fla
     // Act
     fl.turn_on();
 
-    // Assert — light stays off, attempt is recorded
+    // Assert - light stays off, attempt is recorded
     CHECK_FALSE(fl.is_on());
     CHECK(fl.not_supported_attempts() == 1);
 }
@@ -124,11 +124,11 @@ TEST_CASE("mock_flashlight not_supported_attempts accumulates", "[mock][flashlig
 
 TEST_CASE("mock_flashlight turn_off on unsupported device is still a no-op safe call",
           "[mock][flashlight]") {
-    // Arrange — unsupported device; turn_off should not crash or throw
+    // Arrange - unsupported device; turn_off should not crash or throw
     mock_flashlight fl{ false };
     REQUIRE_FALSE(fl.is_supported());
 
-    // Act — turn_off is always safe
+    // Act - turn_off is always safe
     fl.turn_off();
 
     // Assert
@@ -142,13 +142,13 @@ TEST_CASE("mock_flashlight turn_off on unsupported device is still a no-op safe 
 
 TEST_CASE("mock_flashlight set_supported true restores normal operation",
           "[mock][flashlight]") {
-    // Arrange — start unsupported, attempt to turn on
+    // Arrange - start unsupported, attempt to turn on
     mock_flashlight fl{ false };
     fl.turn_on();
     REQUIRE(fl.not_supported_attempts() == 1);
     REQUIRE_FALSE(fl.is_on());
 
-    // Act — re-enable support
+    // Act - re-enable support
     fl.set_supported(true);
     fl.turn_on();
 
@@ -161,16 +161,16 @@ TEST_CASE("mock_flashlight set_supported true restores normal operation",
 
 TEST_CASE("mock_flashlight set_supported false disables a currently-on light",
           "[mock][flashlight]") {
-    // Arrange — turn on first
+    // Arrange - turn on first
     mock_flashlight fl;
     fl.turn_on();
     REQUIRE(fl.is_on());
 
-    // Act — disable support (does not automatically turn off the light,
+    // Act - disable support (does not automatically turn off the light,
     // future turn_on() calls become no-ops)
     fl.set_supported(false);
 
-    // Assert — light state unchanged by set_supported itself
+    // Assert - light state unchanged by set_supported itself
     CHECK_FALSE(fl.is_supported());
     // turn_on() now blocked
     fl.turn_on();

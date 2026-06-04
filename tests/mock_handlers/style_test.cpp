@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. Mock tests for RFC-0005 style application
-// (mpapp/resources/style.hpp) — covers the based_on chain, null-setter skip,
+// (mpapp/resources/style.hpp) - covers the based_on chain, null-setter skip,
 // and the swallow-setter-exceptions contract (both std and non-std throws).
 
 #include <memory>

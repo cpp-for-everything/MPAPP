@@ -21,7 +21,7 @@ TEST_CASE("mock_file_system default cache_directory", "[mock][essentials][file_s
     // Act
     const std::string dir = fs.cache_directory();
 
-    // Assert — default is the constructor default ("/tmp/cache")
+    // Assert - default is the constructor default ("/tmp/cache")
     CHECK(dir == "/tmp/cache");
 }
 
@@ -59,7 +59,7 @@ TEST_CASE("mock_file_system default app_data_directory", "[mock][essentials][fil
     // Act
     const std::string dir = fs.app_data_directory();
 
-    // Assert — default is the constructor default ("/tmp/appdata")
+    // Assert - default is the constructor default ("/tmp/appdata")
     CHECK(dir == "/tmp/appdata");
 }
 
@@ -88,7 +88,7 @@ TEST_CASE("mock_file_system app_data_directory can be set to empty string",
 }
 
 // ---------------------------------------------------------------------------
-// open_app_package_file — found path
+// open_app_package_file - found path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_file_system open_app_package_file returns registered contents",
@@ -137,7 +137,7 @@ TEST_CASE("mock_file_system multiple package files coexist",
 }
 
 // ---------------------------------------------------------------------------
-// open_app_package_file — not-found path
+// open_app_package_file - not-found path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_file_system open_app_package_file returns nullopt for unknown file",
@@ -175,7 +175,7 @@ TEST_CASE("mock_file_system last_open_request is nullopt before any call",
     // Arrange
     mock_file_system fs;
 
-    // Act + Assert — no call yet
+    // Act + Assert - no call yet
     CHECK_FALSE(fs.last_open_request().has_value());
 }
 
@@ -185,7 +185,7 @@ TEST_CASE("mock_file_system last_open_request records successful open",
     mock_file_system fs;
     fs.register_package_file("icon.svg", "<svg/>");
 
-    // Act — discard return; we only need the side-effect on last_open_request_
+    // Act - discard return; we only need the side-effect on last_open_request_
     static_cast<void>(fs.open_app_package_file("icon.svg"));
 
     // Assert
@@ -198,7 +198,7 @@ TEST_CASE("mock_file_system last_open_request records failed open",
     // Arrange
     mock_file_system fs;
 
-    // Act — discard return; we only need the side-effect on last_open_request_
+    // Act - discard return; we only need the side-effect on last_open_request_
     static_cast<void>(fs.open_app_package_file("no_such_file.xml"));
 
     // Assert
@@ -213,11 +213,11 @@ TEST_CASE("mock_file_system last_open_request updates on each call",
     fs.register_package_file("first.txt", "1");
     fs.register_package_file("second.txt", "2");
 
-    // Act — discard returns; we only need the side-effect on last_open_request_
+    // Act - discard returns; we only need the side-effect on last_open_request_
     static_cast<void>(fs.open_app_package_file("first.txt"));
     static_cast<void>(fs.open_app_package_file("second.txt"));
 
-    // Assert — only the most recent request is stored
+    // Assert - only the most recent request is stored
     REQUIRE(fs.last_open_request().has_value());
     CHECK(*fs.last_open_request() == "second.txt");
 }
@@ -247,7 +247,7 @@ TEST_CASE("file_system interface pointer dispatches to mock impl",
     concrete.register_package_file("readme.txt", "hello");
     file_system& iface = concrete;
 
-    // Act + Assert — virtual dispatch works correctly
+    // Act + Assert - virtual dispatch works correctly
     CHECK(iface.cache_directory()    == "/c");
     CHECK(iface.app_data_directory() == "/d");
 
@@ -288,7 +288,7 @@ TEST_CASE("mock_file_system read methods are callable on const ref",
     fs.register_package_file("notes.txt", "content");
     const mock_file_system& cfs = fs;
 
-    // Act + Assert — all [[nodiscard]] const methods reachable via const ref
+    // Act + Assert - all [[nodiscard]] const methods reachable via const ref
     CHECK(cfs.cache_directory()    == "/cache");
     CHECK(cfs.app_data_directory() == "/data");
 

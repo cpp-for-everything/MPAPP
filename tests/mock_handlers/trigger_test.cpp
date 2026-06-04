@@ -59,7 +59,7 @@ TEST_CASE("trigger ignores same-value writes and re-fires on re-match edge",
 
     // Setters were attached AFTER construction, so the initial evaluate
     // marked active but had no setter to run. A subsequent re-match edge
-    // is what exercises them — verify same-value writes don't re-fire.
+    // is what exercises them - verify same-value writes don't re-fire.
     CHECK(t.is_active());
     mode = 2;                   // same value -> Observable no-op -> no edge
     CHECK(entered == 0);

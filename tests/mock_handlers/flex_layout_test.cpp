@@ -17,7 +17,7 @@ class plain_view : public view {};
 
 TEST_CASE("flex_layout enum to_string round-trips every value",
           "[mock][flex_layout]") {
-    // Arrange / Act / Assert — exhaustive coverage of every to_string arm.
+    // Arrange / Act / Assert - exhaustive coverage of every to_string arm.
     CHECK(to_string(flex_direction::row)            == "row");
     CHECK(to_string(flex_direction::row_reverse)    == "row_reverse");
     CHECK(to_string(flex_direction::column)         == "column");
@@ -58,7 +58,7 @@ TEST_CASE("flex_layout enum to_string round-trips every value",
 
 TEST_CASE("flex_layout to_string returns '?' for out-of-range values",
           "[mock][flex_layout]") {
-    // Arrange — values outside every defined enumerator hit the fallthrough.
+    // Arrange - values outside every defined enumerator hit the fallthrough.
     CHECK(to_string(static_cast<flex_direction>(99))     == "?");
     CHECK(to_string(static_cast<flex_wrap>(99))          == "?");
     CHECK(to_string(static_cast<flex_justify>(99))       == "?");
@@ -73,7 +73,7 @@ TEST_CASE("flex_layout exposes the expected container defaults",
     // Arrange / Act
     internal::basic_flex_layout f;
 
-    // Assert — MAUI FlexLayout defaults.
+    // Assert - MAUI FlexLayout defaults.
     CHECK(f.direction.get()       == flex_direction::row);
     CHECK(f.wrap.get()            == flex_wrap::no_wrap);
     CHECK(f.justify_content.get() == flex_justify::start);
@@ -129,7 +129,7 @@ TEST_CASE("flex_layout mock handler fires once per real property change",
     // Act
     f.direction       = flex_direction::column;
     f.wrap            = flex_wrap::wrap;
-    f.wrap            = flex_wrap::wrap;       // suppressed — no real change
+    f.wrap            = flex_wrap::wrap;       // suppressed - no real change
     f.justify_content = flex_justify::space_between;
     f.align_items     = flex_align_items::center;
     f.align_content   = flex_align_content::space_around;
@@ -152,10 +152,10 @@ TEST_CASE("flex_layout child attached props default correctly",
     internal::basic_flex_layout f;
     plain_view child;
 
-    // Act — never set anything for this child.
+    // Act - never set anything for this child.
     auto props = f.get_child_props(child);
 
-    // Assert — MAUI defaults: order 0, grow 0, shrink 1, align_self auto,
+    // Assert - MAUI defaults: order 0, grow 0, shrink 1, align_self auto,
     // basis -1 (auto).
     CHECK(props.order      == 0);
     CHECK(props.grow       == 0.0);
@@ -178,7 +178,7 @@ TEST_CASE("flex_layout stores and retrieves per-child attached props",
     f.set_align_self(a, flex_align_self::center);
     f.set_basis(a, 120.0);
 
-    // Assert — a holds its values; b is untouched (defaults).
+    // Assert - a holds its values; b is untouched (defaults).
     auto pa = f.get_child_props(a);
     CHECK(pa.order      == 3);
     CHECK(pa.grow       == 2.0);
@@ -236,7 +236,7 @@ TEST_CASE("flex_layout mock handler records child-list commands",
     h.map_remove(f, child);
     h.map_clear(f);
 
-    // Assert — bare events, no value payload.
+    // Assert - bare events, no value payload.
     REQUIRE(h.calls_as_strings() == std::vector<std::string>{
         "add",
         "remove",
@@ -253,16 +253,16 @@ TEST_CASE("flex_layout mock handler map_gestures is a no-op",
     // Act
     h.map_gestures(f);
 
-    // Assert — stub records nothing.
+    // Assert - stub records nothing.
     CHECK(h.calls().empty());
 }
 
 TEST_CASE("flex_layout is unbound from any handler by default",
           "[mock][flex_layout]") {
-    // Arrange / Act — a bare surface has no platform handler attached.
+    // Arrange / Act - a bare surface has no platform handler attached.
     // (set_handler / handler() take a platform::current handler and are
     // exercised through the wrapper on a real platform, not the mock
-    // surface — mirroring grid_layout_test staying on the surface.)
+    // surface - mirroring grid_layout_test staying on the surface.)
     internal::basic_flex_layout f;
 
     // Assert

@@ -93,7 +93,7 @@ TEST_CASE("data_template_selector passes null container without crashing",
     // Arrange
     alpha_selector sel;
 
-    // Act / Assert — no crash with nullptr container
+    // Act / Assert - no crash with nullptr container
     const data_template* result = sel.select_template("Avocado", nullptr);
     REQUIRE(result != nullptr);
     CHECK(result->name == "alpha-tpl");
@@ -107,7 +107,7 @@ TEST_CASE("data_template_selector handles empty item string",
     // Act
     const data_template* result = sel.select_template("", nullptr);
 
-    // Assert — falls through to other branch
+    // Assert - falls through to other branch
     REQUIRE(result != nullptr);
     CHECK(result->name == "other-tpl");
 }
@@ -192,7 +192,7 @@ TEST_CASE("control_template instantiate produces a fresh view on each call",
     auto first  = ct.instantiate();
     auto second = ct.instantiate();
 
-    // Assert — each call creates a distinct object
+    // Assert - each call creates a distinct object
     REQUIRE(first  != nullptr);
     REQUIRE(second != nullptr);
     CHECK(first.get()  != second.get());
@@ -296,7 +296,7 @@ TEST_CASE("content_presenter apply_template replaces a previous templated child"
     // Act
     cp.apply_template(second_ct);
 
-    // Assert — new child installed, old child dropped
+    // Assert - new child installed, old child dropped
     REQUIRE(cp.templated_child() != nullptr);
     CHECK(cp.templated_child() != first_ptr);
     CHECK(static_cast<test_view*>(cp.templated_child())->tag == 2);
@@ -315,7 +315,7 @@ TEST_CASE("content_presenter set_content and apply_template are independent",
     // Act
     cp.apply_template(ct);
 
-    // Assert — both slots are populated independently
+    // Assert - both slots are populated independently
     CHECK(cp.content()         == &presented_child);
     CHECK(cp.templated_child() != nullptr);
 }
@@ -325,7 +325,7 @@ TEST_CASE("content_presenter is a view subclass",
     // Arrange / Act
     content_presenter cp;
 
-    // Assert — static_cast compiles + runtime check via parent pointer
+    // Assert - static_cast compiles + runtime check via parent pointer
     view* as_view = &cp;
     CHECK(as_view != nullptr);
 }

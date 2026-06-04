@@ -41,7 +41,7 @@ TEST_CASE("menu_bar records items.count when collection changes",
     CHECK(h.calls()[0].property_name == "items.count");
     CHECK(h.calls()[0].value_repr    == "3");
 
-    // Idempotent — equal vector should not re-record.
+    // Idempotent - equal vector should not re-record.
     mb.items = std::vector<view*>{ &file, &edit, &view_ };
     REQUIRE(h.calls().size() == 1);
 

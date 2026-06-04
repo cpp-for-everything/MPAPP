@@ -11,7 +11,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// is_null — std::optional
+// is_null - std::optional
 // ---------------------------------------------------------------------------
 
 TEST_CASE("is_null_converter: empty optional -> true", "[mock][converters_null_bool]") {
@@ -37,7 +37,7 @@ TEST_CASE("is_null free function: empty optional -> true", "[mock][converters_nu
 }
 
 // ---------------------------------------------------------------------------
-// is_null — raw pointer
+// is_null - raw pointer
 // ---------------------------------------------------------------------------
 
 TEST_CASE("is_null_ptr_converter: null pointer -> true", "[mock][converters_null_bool]") {
@@ -62,7 +62,7 @@ TEST_CASE("is_null_ptr free function: null pointer -> true", "[mock][converters_
 }
 
 // ---------------------------------------------------------------------------
-// is_not_null — std::optional
+// is_not_null - std::optional
 // ---------------------------------------------------------------------------
 
 TEST_CASE("is_not_null_converter: has_value -> true", "[mock][converters_null_bool]") {
@@ -86,7 +86,7 @@ TEST_CASE("is_not_null free function: has_value -> true", "[mock][converters_nul
 }
 
 // ---------------------------------------------------------------------------
-// is_not_null — raw pointer
+// is_not_null - raw pointer
 // ---------------------------------------------------------------------------
 
 TEST_CASE("is_not_null_ptr_converter: non-null pointer -> true", "[mock][converters_null_bool]") {
@@ -111,7 +111,7 @@ TEST_CASE("is_not_null_ptr free function: non-null -> true", "[mock][converters_
 }
 
 // ---------------------------------------------------------------------------
-// is_not_null_or_empty — std::string
+// is_not_null_or_empty - std::string
 // ---------------------------------------------------------------------------
 
 TEST_CASE("is_not_null_or_empty_converter (string): non-empty -> true",
@@ -135,7 +135,7 @@ TEST_CASE("is_not_null_or_empty free function (string)",
 }
 
 // ---------------------------------------------------------------------------
-// is_not_null_or_empty — std::optional<std::string>
+// is_not_null_or_empty - std::optional<std::string>
 // ---------------------------------------------------------------------------
 
 TEST_CASE("is_not_null_or_empty_opt_converter: nullopt/empty -> false",
@@ -159,7 +159,7 @@ TEST_CASE("is_not_null_or_empty_opt free function",
 }
 
 // ---------------------------------------------------------------------------
-// is_string_not_null_or_whitespace — std::string
+// is_string_not_null_or_whitespace - std::string
 // ---------------------------------------------------------------------------
 
 TEST_CASE("is_string_not_null_or_whitespace_converter: whitespace-only -> false",
@@ -187,7 +187,7 @@ TEST_CASE("is_string_not_null_or_whitespace free function",
 }
 
 // ---------------------------------------------------------------------------
-// is_string_not_null_or_whitespace — std::optional<std::string>
+// is_string_not_null_or_whitespace - std::optional<std::string>
 // ---------------------------------------------------------------------------
 
 TEST_CASE("is_string_not_null_or_whitespace_opt_converter: nullopt/blank -> false",

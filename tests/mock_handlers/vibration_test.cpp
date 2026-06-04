@@ -23,7 +23,7 @@ TEST_CASE("mock_vibration starts with zero counts and no cancellation",
 }
 
 // ---------------------------------------------------------------------------
-// vibrate() — default duration overload
+// vibrate() - default duration overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("vibrate() with no argument uses vibration_default_ms",
@@ -41,7 +41,7 @@ TEST_CASE("vibrate() with no argument uses vibration_default_ms",
 }
 
 // ---------------------------------------------------------------------------
-// vibrate(double) — explicit duration overload
+// vibrate(double) - explicit duration overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("vibrate(ms) records the supplied duration",
@@ -210,7 +210,7 @@ TEST_CASE("reset() clears all recorded state",
 }
 
 // ---------------------------------------------------------------------------
-// Interface polymorphism — using base-class pointer
+// Interface polymorphism - using base-class pointer
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_vibration is usable through the base vibration pointer",

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. See vault/10_Architecture/Components/Brushes.md
 //
-// Unit tests for `mpapp::brush` — solid-color, linear-gradient, and
+// Unit tests for `mpapp::brush` - solid-color, linear-gradient, and
 // radial-gradient value types, the `brush` variant alias, and the
 // `to_string` / `is_gradient` free helpers.
 
@@ -116,14 +116,14 @@ TEST_CASE("linear_gradient_brush stores stops", "[brushes][linear]") {
     CHECK(lg.stops[1] == s1);
 }
 
-TEST_CASE("linear_gradient_brush equality — same stops", "[brushes][linear]") {
+TEST_CASE("linear_gradient_brush equality - same stops", "[brushes][linear]") {
     gradient_stop s{0.5, color{1.0, 1.0, 0.0, 1.0}};
     linear_gradient_brush a{{0,0},{1,1},{s}};
     linear_gradient_brush b{{0,0},{1,1},{s}};
     CHECK(a == b);
 }
 
-TEST_CASE("linear_gradient_brush inequality — different stops", "[brushes][linear]") {
+TEST_CASE("linear_gradient_brush inequality - different stops", "[brushes][linear]") {
     gradient_stop s0{0.0, color{0,0,0,1}};
     gradient_stop s1{1.0, color{1,1,1,1}};
     linear_gradient_brush a{{0,0},{1,1},{s0}};
@@ -131,7 +131,7 @@ TEST_CASE("linear_gradient_brush inequality — different stops", "[brushes][lin
     CHECK(!(a == b));
 }
 
-TEST_CASE("linear_gradient_brush inequality — different endpoints", "[brushes][linear]") {
+TEST_CASE("linear_gradient_brush inequality - different endpoints", "[brushes][linear]") {
     linear_gradient_brush a{{0,0},{1,0},{}};
     linear_gradient_brush b{{0,0},{0,1},{}};
     CHECK(!(a == b));
@@ -180,13 +180,13 @@ TEST_CASE("radial_gradient_brush equality", "[brushes][radial]") {
     CHECK(a == b);
 }
 
-TEST_CASE("radial_gradient_brush inequality — different radius", "[brushes][radial]") {
+TEST_CASE("radial_gradient_brush inequality - different radius", "[brushes][radial]") {
     radial_gradient_brush a{{0.5,0.5}, 0.5, {}};
     radial_gradient_brush b{{0.5,0.5}, 0.3, {}};
     CHECK(!(a == b));
 }
 
-TEST_CASE("radial_gradient_brush inequality — different center", "[brushes][radial]") {
+TEST_CASE("radial_gradient_brush inequality - different center", "[brushes][radial]") {
     radial_gradient_brush a{{0.5,0.5}, 0.5, {}};
     radial_gradient_brush b{{0.0,0.0}, 0.5, {}};
     CHECK(!(a == b));

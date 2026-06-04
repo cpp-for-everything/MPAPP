@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Tests for the 2D graphics facade per ADR-0015 — value types
+// Tests for the 2D graphics facade per ADR-0015 - value types
 // (color, path), the canvas interface contract via the stub backend,
 // and the make_canvas() factory.
 
@@ -211,7 +211,7 @@ TEST_CASE("make_canvas returns a usable canvas of the requested size",
     CHECK(c->width_px()  == 320);
     CHECK(c->height_px() == 240);
 
-    // Drive a couple of ops through the abstract interface — the
+    // Drive a couple of ops through the abstract interface - the
     // stub backend doesn't expose its recording vector through the
     // base class, so we just check that calls don't throw + the
     // factory returns the stub flavor.

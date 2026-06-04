@@ -107,7 +107,7 @@ TEST_CASE("binding_value::resolve uses fallback when source missing",
 
 TEST_CASE("binding_value::resolve uses target_null when no fallback",
           "[mock][binding]") {
-    // Arrange — only target_null configured.
+    // Arrange - only target_null configured.
     binding_value<std::string> resolver{};
     resolver.target_null = std::string{ "N/A" };
 
@@ -121,7 +121,7 @@ TEST_CASE("binding_value::resolve uses target_null when no fallback",
 
 TEST_CASE("binding_value::resolve prefers fallback over target_null",
           "[mock][binding]") {
-    // Arrange — both configured; FallbackValue wins for an unresolved source.
+    // Arrange - both configured; FallbackValue wins for an unresolved source.
     binding_value<int> resolver{};
     resolver.fallback = 1;
     resolver.target_null = 2;
@@ -135,7 +135,7 @@ TEST_CASE("binding_value::resolve defaults when nothing configured",
     // Arrange
     binding_value<int> resolver{};
 
-    // Act / Assert — default-constructed int -> "0".
+    // Act / Assert - default-constructed int -> "0".
     CHECK(resolver.resolve(std::optional<int>{}) == "0");
 }
 
@@ -154,7 +154,7 @@ TEST_CASE("binding_value::resolve applies string_format to present value",
 
 TEST_CASE("binding_value::resolve stringifies present value without format",
           "[mock][binding]") {
-    // Arrange — no string_format configured.
+    // Arrange - no string_format configured.
     binding_value<int> resolver{};
 
     // Act / Assert
@@ -163,7 +163,7 @@ TEST_CASE("binding_value::resolve stringifies present value without format",
 
 TEST_CASE("binding_value::resolve applies string_format to a fallback",
           "[mock][binding]") {
-    // Arrange — unresolved source falls back, then renders through format.
+    // Arrange - unresolved source falls back, then renders through format.
     binding_value<int> resolver{};
     resolver.fallback = 8;
     resolver.string_format = std::string{ "[{0:02}]" };

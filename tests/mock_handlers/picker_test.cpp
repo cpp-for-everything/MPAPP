@@ -76,7 +76,7 @@ TEST_CASE("picker executes its RFC-0014 command on selection change",
     p.selected_index = 2;
     CHECK(last == 2);
 
-    p.selected_index = 2;          // idempotent — command must not re-fire
+    p.selected_index = 2;          // idempotent - command must not re-fire
     CHECK(last == 2);
 
     // Clearing the command stops execution.

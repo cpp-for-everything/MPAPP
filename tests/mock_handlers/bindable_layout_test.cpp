@@ -2,7 +2,7 @@
 // Part of MPAPP. See vault/10_Architecture/Components/BindableLayout.md
 //
 // Mock-handler tests for `mpapp::bindable_layout` (attached-property
-// facility — CLAUDE Rule 6 / ADR-0008).
+// facility - CLAUDE Rule 6 / ADR-0008).
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -23,7 +23,7 @@ namespace {
 // not auto-clear (see bindable_layout.hpp: callers detach from the
 // host dtor). Without this, two stack `test_layout` objects in
 // different TEST_CASEs can reuse the same address (common under MSVC)
-// and the second test reads the first's stale entries — a real
+// and the second test reads the first's stale entries - a real
 // test-isolation bug surfaced once the suite started running on
 // Windows. Mirrors the documented real-world contract.
 class test_layout : public layout {

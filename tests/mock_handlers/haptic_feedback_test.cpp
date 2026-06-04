@@ -30,7 +30,7 @@ TEST_CASE("mock_haptic_feedback defaults to supported with no recorded calls",
           "[mock][essentials][haptic_feedback]") {
     mock_haptic_feedback hf;
 
-    // Arrange/Assert — initial state before any perform().
+    // Arrange/Assert - initial state before any perform().
     CHECK(hf.is_supported() == true);
     CHECK(hf.perform_count() == 0);
     CHECK_FALSE(hf.last_type().has_value());
@@ -101,7 +101,7 @@ TEST_CASE("perform() on not-supported mock is a no-op",
     hf.perform(haptic_feedback_type::click);
     hf.perform(haptic_feedback_type::long_press);
 
-    // Assert — state must not have changed.
+    // Assert - state must not have changed.
     CHECK(hf.perform_count() == 0);
     CHECK_FALSE(hf.last_type().has_value());
 }
@@ -113,11 +113,11 @@ TEST_CASE("set_supported(false) after calls stops further recording",
     hf.perform(haptic_feedback_type::click);     // count == 1, last == click
     REQUIRE(hf.perform_count() == 1);
 
-    // Act — disable support then try another call.
+    // Act - disable support then try another call.
     hf.set_supported(false);
     hf.perform(haptic_feedback_type::long_press);
 
-    // Assert — count and last_type must remain from before the disable.
+    // Assert - count and last_type must remain from before the disable.
     CHECK(hf.perform_count() == 1);
     REQUIRE(hf.last_type().has_value());
     CHECK(*hf.last_type() == haptic_feedback_type::click);
@@ -130,7 +130,7 @@ TEST_CASE("set_supported(true) re-enables recording after disabled period",
     hf.perform(haptic_feedback_type::click);   // ignored
     CHECK(hf.perform_count() == 0);
 
-    // Act — re-enable then perform.
+    // Act - re-enable then perform.
     hf.set_supported(true);
     hf.perform(haptic_feedback_type::long_press);
 

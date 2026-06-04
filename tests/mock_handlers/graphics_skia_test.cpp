@@ -3,7 +3,7 @@
 // Only compiled when MPAPP_GRAPHICS_HAS_SKIA is defined (i.e. CMake
 // detected the Skia prebuilt at configure time and the backend was
 // selected). Drives the abstract `canvas*` API and reads pixels back
-// via the public `pixel_data()` / `pixel_stride_bytes()` surface — no
+// via the public `pixel_data()` / `pixel_stride_bytes()` surface - no
 // direct Skia headers needed, the test stays backend-agnostic at the
 // source level.
 //
@@ -12,7 +12,7 @@
 // little-endian platforms MPAPP supports), which matches Cairo's
 // `CAIRO_FORMAT_ARGB32` byte ordering and the format documented on
 // `canvas::pixel_data()`. The pixel-readback assertions below therefore
-// look the same as the Cairo ones — same byte order, same alpha
+// look the same as the Cairo ones - same byte order, same alpha
 // premultiplication rule.
 
 #if defined(MPAPP_GRAPHICS_HAS_SKIA)
@@ -92,7 +92,7 @@ TEST_CASE("skia backend: fill_rect draws to expected pixels",
     c->set_fill(color::rgb(0, 0, 0));
     c->fill_rect(rect{8, 8, 16, 16});
 
-    // Inside the black rect — exactly black.
+    // Inside the black rect - exactly black.
     auto p_inside = sample(*c, 12, 12);
     CHECK(p_inside.r == 0);
     CHECK(p_inside.g == 0);
@@ -111,7 +111,7 @@ TEST_CASE("skia backend: BGRA byte order matches facade contract",
           "[graphics][skia]") {
     // Paint a known non-grey, non-axis color so a byte-order swap
     // (RGBA vs BGRA, accidentally surfacing Skia's raw kRGBA layout
-    // through the facade) would be immediately visible. #E63946 — the
+    // through the facade) would be immediately visible. #E63946 - the
     // same red shape_view fill MPAPP's smoke tests use.
     auto c = make_canvas(8, 8);
     REQUIRE(c != nullptr);
@@ -136,7 +136,7 @@ TEST_CASE("skia backend: save / restore actually balances",
     c->translate(5, 5);
     c->scale(2, 2);
     c->restore();
-    // No assertion on pixel state — just confirming the calls don't
+    // No assertion on pixel state - just confirming the calls don't
     // unbalance Skia's state stack (which would crash on a subsequent
     // restore when there's nothing to pop, same way Cairo's would).
     c->save();
@@ -152,7 +152,7 @@ TEST_CASE("skia backend: path emission accepts every op kind",
     c->set_stroke(color::rgb(0, 0, 0));
     c->set_stroke_width(2.0);
 
-    // move / line / quad / cubic / close — the full set the facade's
+    // move / line / quad / cubic / close - the full set the facade's
     // SVG-path subset exposes. Skia's backend builds via SkPathBuilder
     // (per the immutability change in m140+); this case exercises
     // every branch of the to_skia_path() switch.

@@ -34,7 +34,7 @@ public:
     std::string tag;
 };
 
-// A behavior that overrides nothing — exercises the base class's default
+// A behavior that overrides nothing - exercises the base class's default
 // no-op on_attached/on_detached bodies.
 class plain_behavior : public behavior {};
 
@@ -57,7 +57,7 @@ TEST_CASE("add_behavior attaches + forwards ctor args; remove detaches",
     CHECK(b.detached == 0);
 
     v.remove_behavior(b);
-    // `b` is dangling after erase — but we captured the counts via the
+    // `b` is dangling after erase - but we captured the counts via the
     // detach call, which ran before the shared_ptr dropped. Assert on a
     // fresh behavior instead:
     CHECK(v.behaviors.empty());

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Tests for mpapp::hybrid_bridge — the typed JSON-RPC bridge layer
+// Tests for mpapp::hybrid_bridge - the typed JSON-RPC bridge layer
 // underneath HybridWebView per ADR-0018.
 
 #include <functional>
@@ -154,12 +154,12 @@ namespace {
 class async_bridge : public mpapp::hybrid_bridge {
 public:
     async_bridge() {
-        // Sync method registered the normal way — for "sync goes
+        // Sync method registered the normal way - for "sync goes
         // through async path" coverage.
         register_method("add_sync", &async_bridge::add_sync);
 
         // Async method that responds inline (calls respond before
-        // returning) — for "async fires before dispatch_async
+        // returning) - for "async fires before dispatch_async
         // returns".
         register_async_method<int>("add_async_sync",
                                    &async_bridge::add_async_sync);
@@ -173,7 +173,7 @@ public:
         register_async_method<std::string>("defer_greet",
                                            &async_bridge::defer_greet);
 
-        // Async method that intentionally calls respond twice — the
+        // Async method that intentionally calls respond twice - the
         // shared_ptr<bool> guard should drop the second.
         register_async_method<int>("double_respond",
                                    &async_bridge::double_respond);
@@ -244,7 +244,7 @@ TEST_CASE("dispatch_async defers when method captures respond",
     bool         fired = false;
     b.dispatch_async(R"({"id":3,"method":"defer_add","args":[7,8]})",
                      [&](std::string r) { captured = std::move(r); fired = true; });
-    // Method captured the callback — no envelope yet.
+    // Method captured the callback - no envelope yet.
     CHECK_FALSE(fired);
     CHECK(captured.empty());
 

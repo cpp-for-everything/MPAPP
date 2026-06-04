@@ -79,7 +79,7 @@ TEST_CASE("linux runtime rebuilds and swaps the .so on source change",
     mpapp::hot_reload::runtime rt{src};
     rt.set_compiler(cc);
     // The ctor already built with the default compiler; if that default
-    // wasn't present the load failed — rebuild once with the picked cc.
+    // wasn't present the load failed - rebuild once with the picked cc.
     if (rt.compute() == nullptr) {
         bump_mtime(src);
         rt.poll();

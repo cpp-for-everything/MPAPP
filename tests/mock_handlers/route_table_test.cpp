@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-// Tests for mpapp::route_table — the compile-time route table per
+// Tests for mpapp::route_table - the compile-time route table per
 // ADR-0016. Mostly compile-time assertions (anything that compiles
 // is a passing test); a small number of runtime checks cover the
 // URI-building + runtime_has lookup paths.
@@ -17,7 +17,7 @@ using namespace mpapp;
 
 namespace {
 
-// Stand-in page subclasses — instances are never created in tests but
+// Stand-in page subclasses - instances are never created in tests but
 // the types flow through the route_table for compile-time lookups.
 struct home_page    : internal::basic_page {};
 struct details_page : internal::basic_page {};

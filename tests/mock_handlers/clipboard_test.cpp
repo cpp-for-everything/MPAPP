@@ -148,7 +148,7 @@ TEST_CASE("mock_clipboard emits signal on every set_text call",
     cb.set_text("b");
     cb.set_text("");
 
-    // Assert — three distinct calls, three emissions.
+    // Assert - three distinct calls, three emissions.
     CHECK(emit_count == 3);
 }
 
@@ -165,7 +165,7 @@ TEST_CASE("mock_clipboard signal disconnects on slot destruction",
 
         cb.set_text("fire once");
         CHECK(emit_count == 1);
-    } // slot destroyed here — auto-unsubscribes
+    } // slot destroyed here - auto-unsubscribes
 
     // Act: emit again after slot is gone.
     cb.set_text("no listener");
@@ -220,7 +220,7 @@ TEST_CASE("clipboard interface get_text returns nullopt when empty",
     mock_clipboard impl;
     clipboard& iface = impl;
 
-    // Assert — not set yet.
+    // Assert - not set yet.
     CHECK_FALSE(iface.has_text());
     CHECK_FALSE(iface.get_text().has_value());
 }

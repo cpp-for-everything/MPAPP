@@ -2,7 +2,7 @@
 // Part of MPAPP. Mock tests for the RFC-0013 Essentials sensor APIs.
 //
 // Covers: accelerometer, gyroscope, magnetometer, barometer, compass,
-// orientation_sensor — including sensors_common types/enums.
+// orientation_sensor - including sensors_common types/enums.
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -18,7 +18,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// sensors_common — value types and enum to_string
+// sensors_common - value types and enum to_string
 // ---------------------------------------------------------------------------
 
 TEST_CASE("vector3 default construction and equality", "[mock][sensors][common]") {
@@ -102,7 +102,7 @@ TEST_CASE("accelerometer: start while already monitoring is a no-op",
     mock_accelerometer acc;
     acc.start(sensor_speed::game);
 
-    // Act — second start with a different speed; speed must not change
+    // Act - second start with a different speed; speed must not change
     acc.start(sensor_speed::fastest);
 
     // Assert
@@ -127,7 +127,7 @@ TEST_CASE("accelerometer: stop while not monitoring is a no-op",
     // Arrange
     mock_accelerometer acc;
 
-    // Act / Assert — must not throw or crash
+    // Act / Assert - must not throw or crash
     acc.stop();
     CHECK_FALSE(acc.is_monitoring());
 }

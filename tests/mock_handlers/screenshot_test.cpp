@@ -52,7 +52,7 @@ TEST_CASE("screenshot_result compares by value",
 }
 
 // ---------------------------------------------------------------------------
-// mock_screenshot — default (supported) construction
+// mock_screenshot - default (supported) construction
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_screenshot default construction is supported with zero capture_count",
@@ -66,7 +66,7 @@ TEST_CASE("mock_screenshot default construction is supported with zero capture_c
 }
 
 // ---------------------------------------------------------------------------
-// mock_screenshot — capture() with canned result
+// mock_screenshot - capture() with canned result
 // ---------------------------------------------------------------------------
 
 TEST_CASE("capture returns canned result when supported and increments capture_count",
@@ -116,7 +116,7 @@ TEST_CASE("capture returns default-constructed result when no canned result is s
 }
 
 // ---------------------------------------------------------------------------
-// mock_screenshot — set_result round-trip
+// mock_screenshot - set_result round-trip
 // ---------------------------------------------------------------------------
 
 TEST_CASE("set_result + capture returns the exact seeded value",
@@ -138,7 +138,7 @@ TEST_CASE("set_result + capture returns the exact seeded value",
 }
 
 // ---------------------------------------------------------------------------
-// mock_screenshot — not-supported path
+// mock_screenshot - not-supported path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_screenshot constructed with supported=false returns nullopt from capture",
@@ -165,7 +165,7 @@ TEST_CASE("set_captured_supported(false) makes subsequent captures return nullop
     auto first = s.capture();
     REQUIRE(first.has_value());
 
-    // Act — disable support
+    // Act - disable support
     s.set_captured_supported(false);
     auto second = s.capture();
 
@@ -204,7 +204,7 @@ TEST_CASE("capture_count tracks calls regardless of supported flag",
     s.set_captured_supported(true);
     (void)s.capture();
 
-    // Assert — three calls total even though first two returned nullopt
+    // Assert - three calls total even though first two returned nullopt
     CHECK(s.capture_count() == 3);
 }
 

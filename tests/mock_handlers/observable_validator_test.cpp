@@ -83,7 +83,7 @@ TEST_CASE("has_errors transitions true then false", "[mock][validator]") {
     observable_validator v;
     attach_rules(v, model);
 
-    // Act / Assert — starts clean (no validation run yet)
+    // Act / Assert - starts clean (no validation run yet)
     CHECK_FALSE(v.has_errors());
 
     v.validate();
@@ -106,13 +106,13 @@ TEST_CASE("errors_changed fires when error-set changes", "[mock][validator]") {
     auto cb = [&](std::string_view property) { fired.emplace_back(property); };
     v.errors_changed.subscribe(slot, cb);
 
-    // Act — name invalid, age valid: only "name" should fire.
+    // Act - name invalid, age valid: only "name" should fire.
     v.validate();
 
     // Assert
     CHECK(fired == std::vector<std::string>{ "name" });
 
-    // Act — fix name: "name" cleared, fires again.
+    // Act - fix name: "name" cleared, fires again.
     fired.clear();
     model.name = "Linus";
     v.validate();
@@ -134,7 +134,7 @@ TEST_CASE("errors_changed does not fire on idempotent re-validation",
     auto cb = [&](std::string_view) { ++hits; };
     v.errors_changed.subscribe(slot, cb);
 
-    // Act — same invalid state: no change, no emission.
+    // Act - same invalid state: no change, no emission.
     v.validate();
 
     // Assert
@@ -149,15 +149,15 @@ TEST_CASE("validate_property runs only one property's rules",
     observable_validator v;
     attach_rules(v, model);
 
-    // Act — validate only age.
+    // Act - validate only age.
     const bool age_ok = v.validate_property("age");
 
-    // Assert — age recorded as invalid; name untouched (no rule run).
+    // Assert - age recorded as invalid; name untouched (no rule run).
     CHECK_FALSE(age_ok);
     CHECK(v.get_errors("age") == std::vector<std::string>{ "age out of range" });
     CHECK(v.get_errors("name").empty());
 
-    // Act — fix age, re-validate the single property.
+    // Act - fix age, re-validate the single property.
     model.age          = 10;
     const bool age_ok2 = v.validate_property("age");
 
@@ -193,7 +193,7 @@ TEST_CASE("multiple rules on one property accumulate messages",
                                 : std::nullopt;
     });
 
-    // Act — empty value violates both rules.
+    // Act - empty value violates both rules.
     v.validate();
 
     // Assert
@@ -213,7 +213,7 @@ TEST_CASE("get_errors returns empty for unknown property", "[mock][validator]") 
 
 TEST_CASE("errors_changed fires when message set changes but stays non-empty",
           "[mock][validator]") {
-    // Arrange — a rule whose message text depends on the model.
+    // Arrange - a rule whose message text depends on the model.
     int                  code = 1;
     observable_validator v;
     v.add_rule("status", [&code]() -> std::optional<std::string> {
@@ -228,11 +228,11 @@ TEST_CASE("errors_changed fires when message set changes but stays non-empty",
     auto cb = [&](std::string_view p) { fired.emplace_back(p); };
     v.errors_changed.subscribe(slot, cb);
 
-    // Act — first failure.
+    // Act - first failure.
     v.validate();
     CHECK(fired == std::vector<std::string>{ "status" });
 
-    // Act — different message, still in error: should fire again.
+    // Act - different message, still in error: should fire again.
     fired.clear();
     code = 2;
     v.validate();

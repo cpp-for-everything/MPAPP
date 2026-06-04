@@ -11,7 +11,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — equal
+// compare_state_trigger - equal
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger equal: inactive when value != target",
@@ -88,7 +88,7 @@ TEST_CASE("compare_state_trigger equal: same-value write does not re-emit",
 }
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — not_equal
+// compare_state_trigger - not_equal
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger not_equal: inactive when value == target",
@@ -132,7 +132,7 @@ TEST_CASE("compare_state_trigger not_equal: transitions on value change",
 }
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — less
+// compare_state_trigger - less
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger less: active when value < target",
@@ -172,7 +172,7 @@ TEST_CASE("compare_state_trigger less: inactive when value > target",
 }
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — greater
+// compare_state_trigger - greater
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger greater: active when value > target",
@@ -202,7 +202,7 @@ TEST_CASE("compare_state_trigger greater: inactive when value <= target",
 }
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — less_equal
+// compare_state_trigger - less_equal
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger less_equal: active when value <= target",
@@ -220,7 +220,7 @@ TEST_CASE("compare_state_trigger less_equal: active when value <= target",
 }
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — greater_equal
+// compare_state_trigger - greater_equal
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger greater_equal: active when value >= target",
@@ -238,7 +238,7 @@ TEST_CASE("compare_state_trigger greater_equal: active when value >= target",
 }
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — active_changed not emitted on construction
+// compare_state_trigger - active_changed not emitted on construction
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger: active_changed NOT emitted on construction",
@@ -259,13 +259,13 @@ TEST_CASE("compare_state_trigger: active_changed NOT emitted on construction",
     } cb{ &emit_count };
     t.active_changed.subscribe(sl, cb);
 
-    // The trigger was already active at construction — no emission yet.
+    // The trigger was already active at construction - no emission yet.
     CHECK(t.is_active());
     CHECK(emit_count == 0);
 }
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — double edge: active stays active, no re-emit
+// compare_state_trigger - double edge: active stays active, no re-emit
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger: no spurious emission on stable state",
@@ -290,7 +290,7 @@ TEST_CASE("compare_state_trigger: no spurious emission on stable state",
 }
 
 // ---------------------------------------------------------------------------
-// and_multi_trigger — empty (no sources: inactive by default until any source is added)
+// and_multi_trigger - empty (no sources: inactive by default until any source is added)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("and_multi_trigger: empty trigger (no sources) is inactive",
@@ -303,7 +303,7 @@ TEST_CASE("and_multi_trigger: empty trigger (no sources) is inactive",
 }
 
 // ---------------------------------------------------------------------------
-// and_multi_trigger — single source
+// and_multi_trigger - single source
 // ---------------------------------------------------------------------------
 
 TEST_CASE("and_multi_trigger: single source, inactive when false",
@@ -352,7 +352,7 @@ TEST_CASE("and_multi_trigger: single source transitions and emits active_changed
 }
 
 // ---------------------------------------------------------------------------
-// and_multi_trigger — two sources
+// and_multi_trigger - two sources
 // ---------------------------------------------------------------------------
 
 TEST_CASE("and_multi_trigger: active only when ALL sources true",
@@ -409,7 +409,7 @@ TEST_CASE("and_multi_trigger: emits active_changed only on real edge",
 }
 
 // ---------------------------------------------------------------------------
-// and_multi_trigger — three sources (coverage of multi-source path)
+// and_multi_trigger - three sources (coverage of multi-source path)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("and_multi_trigger: three sources all must be true",
@@ -432,7 +432,7 @@ TEST_CASE("and_multi_trigger: three sources all must be true",
 }
 
 // ---------------------------------------------------------------------------
-// and_multi_trigger — fluent chaining
+// and_multi_trigger - fluent chaining
 // ---------------------------------------------------------------------------
 
 TEST_CASE("and_multi_trigger: add_source returns *this for fluent chaining",
@@ -450,7 +450,7 @@ TEST_CASE("and_multi_trigger: add_source returns *this for fluent chaining",
 }
 
 // ---------------------------------------------------------------------------
-// compare_state_trigger — double-edge guard (flip-flop back to same state)
+// compare_state_trigger - double-edge guard (flip-flop back to same state)
 // ---------------------------------------------------------------------------
 
 TEST_CASE("compare_state_trigger: flip-flop emits on each real edge",

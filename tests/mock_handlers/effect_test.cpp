@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. Mock tests for the RFC-0009 effect attach-point
-// (mpapp/effects/effect.hpp) — exercises the base resolution_id() accessor
+// (mpapp/effects/effect.hpp) - exercises the base resolution_id() accessor
 // and the on_attached/on_detached lifecycle hooks (both the default no-op
 // bodies and a derived override).
 

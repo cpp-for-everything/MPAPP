@@ -34,7 +34,7 @@ TEST_CASE("sms_message equality reflects body and recipients",
 
     sms_message b = a;
 
-    // Act / Assert — equal copies
+    // Act / Assert - equal copies
     CHECK(a == b);
 
     // Mutate body → no longer equal
@@ -48,7 +48,7 @@ TEST_CASE("sms_message equality reflects body and recipients",
 }
 
 // ---------------------------------------------------------------------------
-// mock_sms — default (supported) behaviour
+// mock_sms - default (supported) behaviour
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_sms starts supported with zero compose count and no last message",
@@ -129,14 +129,14 @@ TEST_CASE("mock_sms::last_message reflects the most recent call",
 
     m.compose(second);
 
-    // Assert — last_message is now the second
+    // Assert - last_message is now the second
     REQUIRE(m.last_message().has_value());
     CHECK(m.last_message()->body       == "second");
     CHECK(m.last_message()->recipients == std::vector<std::string>{"x"});
 }
 
 // ---------------------------------------------------------------------------
-// mock_sms — reset()
+// mock_sms - reset()
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_sms::reset clears count and last_message but keeps supported flag",
@@ -152,7 +152,7 @@ TEST_CASE("mock_sms::reset clears count and last_message but keeps supported fla
     // Act
     m.reset();
 
-    // Assert — state cleared
+    // Assert - state cleared
     CHECK(m.compose_count() == 0);
     CHECK_FALSE(m.last_message().has_value());
 
@@ -169,14 +169,14 @@ TEST_CASE("mock_sms::reset on unsupported mock preserves unsupported flag",
     // Act
     m.reset();
 
-    // Assert — supported flag still false after reset
+    // Assert - supported flag still false after reset
     CHECK_FALSE(m.is_supported());
     CHECK(m.compose_count() == 0);
     CHECK_FALSE(m.last_message().has_value());
 }
 
 // ---------------------------------------------------------------------------
-// mock_sms — not-supported path
+// mock_sms - not-supported path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_sms::compose() throws when not supported",
@@ -213,16 +213,16 @@ TEST_CASE("mock_sms can be toggled between supported and unsupported",
     sms_message msg;
     msg.body = "hi";
 
-    // Act — supported → call succeeds
+    // Act - supported → call succeeds
     m.compose(msg);
     CHECK(m.compose_count() == 1);
 
-    // Act — disable support → subsequent call throws
+    // Act - disable support → subsequent call throws
     m.set_supported(false);
     CHECK_THROWS_AS(m.compose(msg), std::runtime_error);
     CHECK(m.compose_count() == 1);   // count unchanged after throw
 
-    // Act — re-enable → call succeeds again
+    // Act - re-enable → call succeeds again
     m.set_supported(true);
     m.compose(msg);
     CHECK(m.compose_count() == 2);
@@ -246,7 +246,7 @@ TEST_CASE("sms interface can be used via base pointer",
     iface->compose();
     iface->compose(msg);
 
-    // Assert — inspect through the concrete mock
+    // Assert - inspect through the concrete mock
     CHECK(concrete.compose_count() == 2);
     REQUIRE(concrete.last_message().has_value());
     CHECK(concrete.last_message()->body == "via interface");

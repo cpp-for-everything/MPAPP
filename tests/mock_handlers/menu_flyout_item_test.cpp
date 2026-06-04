@@ -35,7 +35,7 @@ TEST_CASE("menu_flyout_item mock tracks text + is_enabled changes",
     h.clear_calls();
 
     i.text       = "Cut";
-    i.text       = "Cut";   // idempotent — no extra row
+    i.text       = "Cut";   // idempotent - no extra row
     i.is_enabled = false;
     i.text       = "Copy";
 
@@ -59,7 +59,7 @@ TEST_CASE("menu_flyout_item clicked signal fires for subscribers",
 
     // The mock handler doesn't drive `clicked`; that's a real-handler
     // concern. We verify the signal works end-to-end via direct emit
-    // — this is what a real platform handler would do after the
+    // - this is what a real platform handler would do after the
     // native control's click callback fires.
     i.clicked.emit();
     i.clicked.emit();

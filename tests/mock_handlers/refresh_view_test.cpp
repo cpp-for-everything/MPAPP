@@ -46,7 +46,7 @@ TEST_CASE("refresh_view mock records is_refreshing transitions",
     REQUIRE(h.calls().size() == 1);
     CHECK(h.calls()[0].value_repr == "true");
 
-    rv.is_refreshing = true;             // idempotent — no extra row
+    rv.is_refreshing = true;             // idempotent - no extra row
     REQUIRE(h.calls().size() == 1);
 
     rv.is_refreshing = false;

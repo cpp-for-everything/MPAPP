@@ -2,7 +2,7 @@
 // Part of MPAPP. Mock tests for the RFC-0013 Essentials geolocation API.
 //
 // Covers: geolocation_accuracy to_string, geo_location value type,
-// geolocation_request defaults, mock_geolocation — every public method,
+// geolocation_request defaults, mock_geolocation - every public method,
 // signal emission, and default/not-supported paths.
 
 #include <catch2/catch_test_macros.hpp>
@@ -13,7 +13,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// geolocation_accuracy — to_string
+// geolocation_accuracy - to_string
 // ---------------------------------------------------------------------------
 
 TEST_CASE("geolocation_accuracy to_string covers all enumerators",
@@ -26,7 +26,7 @@ TEST_CASE("geolocation_accuracy to_string covers all enumerators",
 }
 
 // ---------------------------------------------------------------------------
-// geo_location — value type
+// geo_location - value type
 // ---------------------------------------------------------------------------
 
 TEST_CASE("geo_location default construction has zeroed fields",
@@ -105,7 +105,7 @@ TEST_CASE("geo_location optional fields hold the values set",
 }
 
 // ---------------------------------------------------------------------------
-// geolocation_request — defaults
+// geolocation_request - defaults
 // ---------------------------------------------------------------------------
 
 TEST_CASE("geolocation_request default accuracy is medium and timeout is 0",
@@ -119,7 +119,7 @@ TEST_CASE("geolocation_request default accuracy is medium and timeout is 0",
 }
 
 // ---------------------------------------------------------------------------
-// mock_geolocation — initial state
+// mock_geolocation - initial state
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geolocation: initially not listening", "[mock][geolocation]") {
@@ -149,7 +149,7 @@ TEST_CASE("mock_geolocation: get_location returns nullopt by default",
 }
 
 // ---------------------------------------------------------------------------
-// mock_geolocation — set_last_known / set_current
+// mock_geolocation - set_last_known / set_current
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geolocation: set_last_known makes get_last_known return value",
@@ -216,7 +216,7 @@ TEST_CASE("mock_geolocation: set_current with nullopt returns nullopt from get_l
 }
 
 // ---------------------------------------------------------------------------
-// mock_geolocation — get_location records the request
+// mock_geolocation - get_location records the request
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geolocation: get_location records the supplied request",
@@ -248,7 +248,7 @@ TEST_CASE("mock_geolocation: get_location with default request records medium ac
 }
 
 // ---------------------------------------------------------------------------
-// mock_geolocation — start_listening / stop_listening
+// mock_geolocation - start_listening / stop_listening
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geolocation: start_listening sets is_listening true",
@@ -287,7 +287,7 @@ TEST_CASE("mock_geolocation: start_listening while already listening is a no-op"
     req1.accuracy = geolocation_accuracy::low;
     geo.start_listening(req1);
 
-    // Act — second start with different accuracy; request must not change
+    // Act - second start with different accuracy; request must not change
     geolocation_request req2;
     req2.accuracy = geolocation_accuracy::best;
     geo.start_listening(req2);
@@ -317,13 +317,13 @@ TEST_CASE("mock_geolocation: stop_listening while not listening is a no-op",
     mock_geolocation geo;
     REQUIRE_FALSE(geo.is_listening());
 
-    // Act / Assert — must not throw or crash
+    // Act / Assert - must not throw or crash
     geo.stop_listening();
     CHECK_FALSE(geo.is_listening());
 }
 
 // ---------------------------------------------------------------------------
-// mock_geolocation — push_location signal emission
+// mock_geolocation - push_location signal emission
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geolocation: push_location emits location_changed while listening",
@@ -485,7 +485,7 @@ TEST_CASE("mock_geolocation: last push_location value reflected in get_last_know
 }
 
 // ---------------------------------------------------------------------------
-// mock_geolocation — start → push → stop → no-emit cycle
+// mock_geolocation - start → push → stop → no-emit cycle
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geolocation: start-push-stop-no-emit lifecycle",
@@ -502,7 +502,7 @@ TEST_CASE("mock_geolocation: start-push-stop-no-emit lifecycle",
     fix.latitude  = 52.52;
     fix.longitude = 13.405;
 
-    // Act — start, push (should emit), stop, push (should not emit)
+    // Act - start, push (should emit), stop, push (should not emit)
     geo.start_listening();
     geo.push_location(fix);
     CHECK(hits == 1);
@@ -516,7 +516,7 @@ TEST_CASE("mock_geolocation: start-push-stop-no-emit lifecycle",
 }
 
 // ---------------------------------------------------------------------------
-// mock_geolocation — interface pointer polymorphism
+// mock_geolocation - interface pointer polymorphism
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_geolocation: usable via abstract geolocation pointer",

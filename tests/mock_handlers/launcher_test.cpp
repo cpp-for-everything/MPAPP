@@ -10,7 +10,7 @@
 using namespace mpapp;
 
 // ---------------------------------------------------------------------------
-// can_open — default (allow-all) mode
+// can_open - default (allow-all) mode
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_launcher default allow-all: can_open returns true for any URI",
@@ -24,7 +24,7 @@ TEST_CASE("mock_launcher default allow-all: can_open returns true for any URI",
 }
 
 // ---------------------------------------------------------------------------
-// can_open — whitelist mode via constructor
+// can_open - whitelist mode via constructor
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_launcher whitelist constructor: can_open respects the set",
@@ -38,7 +38,7 @@ TEST_CASE("mock_launcher whitelist constructor: can_open respects the set",
 }
 
 // ---------------------------------------------------------------------------
-// try_open — allow-all path
+// try_open - allow-all path
 // ---------------------------------------------------------------------------
 
 TEST_CASE("try_open succeeds and records URI in allow-all mode",
@@ -59,7 +59,7 @@ TEST_CASE("try_open succeeds and records URI in allow-all mode",
 }
 
 // ---------------------------------------------------------------------------
-// try_open — blocked URI
+// try_open - blocked URI
 // ---------------------------------------------------------------------------
 
 TEST_CASE("try_open returns false and does NOT update last_opened when blocked",
@@ -79,7 +79,7 @@ TEST_CASE("try_open returns false and does NOT update last_opened when blocked",
 }
 
 // ---------------------------------------------------------------------------
-// try_open — multiple calls; last URI wins
+// try_open - multiple calls; last URI wins
 // ---------------------------------------------------------------------------
 
 TEST_CASE("try_open successive calls accumulate call count and update last URI",
@@ -97,7 +97,7 @@ TEST_CASE("try_open successive calls accumulate call count and update last URI",
 }
 
 // ---------------------------------------------------------------------------
-// open — always records regardless of can_open
+// open - always records regardless of can_open
 // ---------------------------------------------------------------------------
 
 TEST_CASE("open records URI and increments counter",
@@ -119,20 +119,20 @@ TEST_CASE("open records URI and increments counter",
 
 TEST_CASE("open works even when URI is not in whitelist",
           "[mock][essentials][launcher]") {
-    // Arrange — whitelist only allows 'https://ok.com'
+    // Arrange - whitelist only allows 'https://ok.com'
     mock_launcher l{ std::unordered_set<std::string>{ "https://ok.com" } };
 
-    // Act — open a URI that would fail can_open
+    // Act - open a URI that would fail can_open
     l.open("https://blocked.com");
 
-    // Assert — open records unconditionally
+    // Assert - open records unconditionally
     REQUIRE(l.last_open_uri().has_value());
     CHECK(*l.last_open_uri() == "https://blocked.com");
     CHECK(l.open_call_count() == 1);
 }
 
 // ---------------------------------------------------------------------------
-// open vs try_open — last_opened is shared across both
+// open vs try_open - last_opened is shared across both
 // ---------------------------------------------------------------------------
 
 TEST_CASE("last_opened reflects the most recent open or successful try_open",
@@ -212,7 +212,7 @@ TEST_CASE("reset_history clears recorded URIs and counters but keeps config",
 }
 
 // ---------------------------------------------------------------------------
-// Initial state — no calls yet
+// Initial state - no calls yet
 // ---------------------------------------------------------------------------
 
 TEST_CASE("fresh mock_launcher has empty history and zero counters",
@@ -247,7 +247,7 @@ TEST_CASE("mock_launcher is usable through the launcher base interface",
 }
 
 // ---------------------------------------------------------------------------
-// try_open returns false for blocked URI — last_open_uri NOT polluted
+// try_open returns false for blocked URI - last_open_uri NOT polluted
 // ---------------------------------------------------------------------------
 
 TEST_CASE("try_open failure does not update last_open_uri",

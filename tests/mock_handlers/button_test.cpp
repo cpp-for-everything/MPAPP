@@ -4,7 +4,7 @@
 // Validates that the mock `internal::button_handler<platform::mock>`
 // records the initial value at mapper-attach time and one entry per real
 // change. Setting the Observable to the same value must NOT log a new
-// entry — that's `Observable::set`'s compare-on-write contract; this
+// entry - that's `Observable::set`'s compare-on-write contract; this
 // test pins it in via the handler boundary.
 //
 // Tests run against `mpapp::internal::basic_button` (the platform-

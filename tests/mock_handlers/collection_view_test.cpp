@@ -173,17 +173,17 @@ TEST_CASE("item_template re-materializes when template changes",
     internal::basic_collection_view cv;
     cv.items_source = std::vector<std::string>{"a", "b", "c"};
 
-    // No template set yet — materialized is empty.
+    // No template set yet - materialized is empty.
     CHECK(cv.materialized_count() == 0);
 
     cv.item_template = [](int) { return std::make_unique<internal::basic_text_cell>(); };
     CHECK(cv.materialized_count() == 3);
 
-    // Replace with a different template — re-materialize.
+    // Replace with a different template - re-materialize.
     cv.item_template = [](int) { return std::make_unique<internal::basic_label>(); };
     CHECK(cv.materialized_count() == 3);
 
-    // Clear the template — materialized clears.
+    // Clear the template - materialized clears.
     cv.item_template = internal::basic_collection_view::item_factory_t{};
     CHECK(cv.materialized_count() == 0);
 }
@@ -193,7 +193,7 @@ TEST_CASE("item_template factory receives the row index",
     internal::basic_collection_view  cv;
     std::vector<int> seen;
 
-    // Capture by value won't survive — capture by reference into a
+    // Capture by value won't survive - capture by reference into a
     // member-like external so the lambda is short-lived but the
     // observed-during-materialize behavior is recorded.
     cv.item_template = [&seen](int i) -> std::unique_ptr<view> {
@@ -288,7 +288,7 @@ TEST_CASE("layout change does not perturb items_source or selection",
     cv.select(0);
     cv.select(2);
 
-    // Cycle layout — items + selection survive untouched.
+    // Cycle layout - items + selection survive untouched.
     for (auto l : {collection_layout::horizontal_list,
                    collection_layout::vertical_grid,
                    collection_layout::horizontal_grid,

@@ -40,7 +40,7 @@ TEST_CASE("indicator_view records count changes",
     CHECK(h.calls()[0].property_name == "count");
     CHECK(h.calls()[0].value_repr    == "3");
 
-    iv.count = 3;                  // idempotent — no extra record
+    iv.count = 3;                  // idempotent - no extra record
     REQUIRE(h.calls().size() == 1);
 
     iv.count = 5;

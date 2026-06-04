@@ -76,7 +76,7 @@ TEST_CASE("mock_browser starts with no recorded calls",
 }
 
 // ---------------------------------------------------------------------------
-// open(uri) — default options overload
+// open(uri) - default options overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_browser open(uri) returns true by default",
@@ -132,7 +132,7 @@ TEST_CASE("mock_browser open(uri) increments open_count",
 }
 
 // ---------------------------------------------------------------------------
-// open(uri, browser_launch_mode) — mode overload
+// open(uri, browser_launch_mode) - mode overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_browser open(uri, mode) records the specified mode",
@@ -176,7 +176,7 @@ TEST_CASE("mock_browser open(uri, system_preferred) records system_preferred",
 }
 
 // ---------------------------------------------------------------------------
-// open(uri, browser_launch_options) — full options overload
+// open(uri, browser_launch_options) - full options overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_browser open(uri, options) records full options",
@@ -224,7 +224,7 @@ TEST_CASE("mock_browser open(uri, options) returns true by default",
 }
 
 // ---------------------------------------------------------------------------
-// set_result — failure simulation
+// set_result - failure simulation
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_browser set_result(false) makes all open overloads return false",
@@ -250,7 +250,7 @@ TEST_CASE("mock_browser open_count increments even when result is false",
     (void)b.open("https://example.com", browser_launch_mode::external);
     (void)b.open("https://example.com", browser_launch_options{});
 
-    // Assert — all three calls recorded despite returning false.
+    // Assert - all three calls recorded despite returning false.
     CHECK(b.open_count() == 3);
 }
 
@@ -334,7 +334,7 @@ TEST_CASE("mock_browser reset() does not change the result flag",
     // Act
     b.reset();
 
-    // Assert — result flag is still false.
+    // Assert - result flag is still false.
     CHECK(b.open("https://example.com") == false);  // NOLINT: result intentionally checked
 }
 

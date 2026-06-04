@@ -14,7 +14,7 @@ using namespace mpapp;
 namespace {
 
 // `layout` is abstract in the vault spec; the mock-test layer subclasses
-// it directly to instantiate. The subclass adds no behaviour — it exists
+// it directly to instantiate. The subclass adds no behaviour - it exists
 // only to allow construction. A real `create_layout_manager()` lives
 // with the concrete strategy subclasses (grid, stack, …) and is not
 // needed for the mock contract.

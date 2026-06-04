@@ -16,7 +16,7 @@ namespace {
 using namespace mpapp;
 
 // Minimal application subclass that records its own override calls into
-// a string vector — distinct from the handler's call log so tests can
+// a string vector - distinct from the handler's call log so tests can
 // assert framework-vs-user observation independently.
 class spy_app : public application {
 public:
@@ -73,7 +73,7 @@ TEST_CASE("application mock handler simulators dispatch to user overrides",
 
 TEST_CASE("application default lifecycle hooks are no-ops",
           "[mock][application]") {
-    // The base-class on_suspend / on_resume / on_terminate are empty —
+    // The base-class on_suspend / on_resume / on_terminate are empty -
     // user apps override only the hooks they care about. Verify that
     // calling them on a stock application doesn't crash and produces
     // no observable state change.
@@ -89,7 +89,7 @@ TEST_CASE("application default lifecycle hooks are no-ops",
     h.simulate_resume(app);
     h.simulate_terminate(app);
 
-    // Nothing to assert on the user side — they're no-ops; the handler
+    // Nothing to assert on the user side - they're no-ops; the handler
     // recorded the framework-side simulator dispatches.
     REQUIRE(h.calls().size() == 3);
 }

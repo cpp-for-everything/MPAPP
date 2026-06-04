@@ -68,14 +68,14 @@ TEST_CASE("mock handler records drawable install + clear",
     CHECK(h.last_drawable_set == false);
     h.clear_calls();
 
-    // Install a callback — observe last_drawable_set flip + record.
+    // Install a callback - observe last_drawable_set flip + record.
     gv.drawable = [](detail::graphics::canvas&) { /* no-op for the test */ };
     CHECK(h.last_drawable_set == true);
     REQUIRE(h.calls_as_strings().size() == 1);
     CHECK(h.calls_as_strings()[0] == "drawable=1");
     h.clear_calls();
 
-    // Clear it — should record back to 0.
+    // Clear it - should record back to 0.
     gv.drawable = internal::basic_graphics_view::draw_callback_t{};
     CHECK(h.last_drawable_set == false);
     REQUIRE(h.calls_as_strings().size() == 1);
@@ -100,7 +100,7 @@ TEST_CASE("drawable callback receives a canvas from make_canvas",
         c.fill_rect({10.0, 10.0, 40.0, 20.0});
     };
 
-    // The graphics_view surface itself doesn't invoke the callback —
+    // The graphics_view surface itself doesn't invoke the callback -
     // that's the real handler's job. We simulate the handler by
     // pulling the callback out and running it manually against a
     // canvas the test owns. This validates the surface contract

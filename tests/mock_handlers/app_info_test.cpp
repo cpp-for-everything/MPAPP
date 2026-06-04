@@ -45,17 +45,17 @@ TEST_CASE("mock_app_info default state is sensible and non-empty",
     // Arrange
     mock_app_info ai;
 
-    // Assert — identity strings are non-empty by default
+    // Assert - identity strings are non-empty by default
     CHECK_FALSE(ai.package_name().empty());
     CHECK_FALSE(ai.name().empty());
     CHECK_FALSE(ai.version_string().empty());
     CHECK_FALSE(ai.build_string().empty());
 
-    // Assert — defaults for enum fields
+    // Assert - defaults for enum fields
     CHECK(ai.requested_theme()            == app_theme::unspecified);
     CHECK(ai.requested_layout_direction() == layout_direction::left_to_right);
 
-    // Assert — settings page not yet shown
+    // Assert - settings page not yet shown
     CHECK_FALSE(ai.settings_ui_shown());
 }
 
@@ -97,7 +97,7 @@ TEST_CASE("show_settings_ui sets the shown flag; reset clears it",
     // Assert
     CHECK(ai.settings_ui_shown());
 
-    // Act — reset
+    // Act - reset
     ai.reset_settings_ui_shown();
 
     // Assert
@@ -128,7 +128,7 @@ TEST_CASE("set_requested_layout_direction updates the value",
     // Assert
     CHECK(ai.requested_layout_direction() == layout_direction::right_to_left);
 
-    // Act — set to unknown
+    // Act - set to unknown
     ai.set_requested_layout_direction(layout_direction::unknown);
 
     // Assert
@@ -172,14 +172,14 @@ TEST_CASE("set_requested_theme fires requested_theme_changed on change",
     };
     ai.requested_theme_changed.subscribe(slot, cb);
 
-    // Act — change from unspecified to dark
+    // Act - change from unspecified to dark
     ai.set_requested_theme(app_theme::dark);
 
     // Assert
     CHECK(call_count == 1);
     CHECK(last_theme == app_theme::dark);
 
-    // Act — change again to light
+    // Act - change again to light
     ai.set_requested_theme(app_theme::light);
 
     // Assert
@@ -198,13 +198,13 @@ TEST_CASE("set_requested_theme does NOT fire signal when value is unchanged",
     auto cb = [&](app_theme) { ++call_count; };
     ai.requested_theme_changed.subscribe(slot, cb);
 
-    // Act — same value — must be a no-op
+    // Act - same value - must be a no-op
     ai.set_requested_theme(app_theme::dark);
 
     // Assert
     CHECK(call_count == 0);
 
-    // Act — different value — must fire
+    // Act - different value - must fire
     ai.set_requested_theme(app_theme::light);
 
     // Assert
@@ -241,15 +241,15 @@ TEST_CASE("requested_theme_changed: disconnecting a slot stops delivery",
     auto cb = [&](app_theme) { ++call_count; };
     ai.requested_theme_changed.subscribe(slot, cb);
 
-    // Act — fire once while connected
+    // Act - fire once while connected
     ai.set_requested_theme(app_theme::dark);
     CHECK(call_count == 1);
 
-    // Act — disconnect, then fire again
+    // Act - disconnect, then fire again
     slot.disconnect();
     ai.set_requested_theme(app_theme::light);
 
-    // Assert — count must not have increased
+    // Assert - count must not have increased
     CHECK(call_count == 1);
 }
 
@@ -266,7 +266,7 @@ TEST_CASE("mock_app_info is usable through the app_info abstract interface",
 
     app_info& ref = concrete;
 
-    // Assert — all pure virtual methods are callable via the interface
+    // Assert - all pure virtual methods are callable via the interface
     CHECK(ref.name()             == "Polymorphic App");
     CHECK(ref.requested_theme()  == app_theme::dark);
     CHECK(ref.requested_layout_direction() == layout_direction::left_to_right);
@@ -274,9 +274,9 @@ TEST_CASE("mock_app_info is usable through the app_info abstract interface",
     CHECK_FALSE(ref.version_string().empty());
     CHECK_FALSE(ref.build_string().empty());
 
-    // Act — show_settings_ui through base reference
+    // Act - show_settings_ui through base reference
     ref.show_settings_ui();
 
-    // Assert — recorded in the concrete mock
+    // Assert - recorded in the concrete mock
     CHECK(concrete.settings_ui_shown());
 }

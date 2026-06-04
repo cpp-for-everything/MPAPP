@@ -46,7 +46,7 @@ TEST_CASE("menu_bar_item records title and items changes",
     CHECK(h.calls()[0].property_name == "title");
     CHECK(h.calls()[0].value_repr    == "File");
 
-    m.title = "File";          // idempotent — no re-emit on equal set
+    m.title = "File";          // idempotent - no re-emit on equal set
     REQUIRE(h.calls().size() == 1);
 
     plain_view a, b;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 // Part of MPAPP. Tests for the VSM input-routing layer
-// (mpapp::visual_state_input_router) — maps enabled/pressed/pointer-over/
+// (mpapp::visual_state_input_router) - maps enabled/pressed/pointer-over/
 // focused input state onto the canonical CommonStates and drives the VSM.
 
 #include <string>

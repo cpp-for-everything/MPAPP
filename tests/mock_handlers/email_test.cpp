@@ -88,14 +88,14 @@ TEST_CASE("mock_email starts with no recorded composes",
     // Arrange
     mock_email e;
 
-    // Assert — nothing called yet
+    // Assert - nothing called yet
     CHECK(e.compose_count() == 0);
     CHECK(e.blank_compose_count() == 0);
     CHECK_FALSE(e.last_message().has_value());
 }
 
 // ---------------------------------------------------------------------------
-// compose() — blank overload
+// compose() - blank overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_email compose() increments compose_count and blank_compose_count",
@@ -129,7 +129,7 @@ TEST_CASE("mock_email compose() called multiple times accumulates counts",
 }
 
 // ---------------------------------------------------------------------------
-// compose(email_message) — message overload
+// compose(email_message) - message overload
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_email compose(message) records the message",
@@ -201,7 +201,7 @@ TEST_CASE("mock_email compose(message) overwrites last_message on each call",
     e.compose(first);
     e.compose(second);
 
-    // Assert — only the most recent message is retained
+    // Assert - only the most recent message is retained
     REQUIRE(e.last_message().has_value());
     CHECK(e.last_message()->subject == "Second");
     CHECK(e.compose_count() == 2);
@@ -227,7 +227,7 @@ TEST_CASE("mock_email compose(message) accepts a default-constructed email_messa
 }
 
 // ---------------------------------------------------------------------------
-// Mixed overload calls — compose_count accumulates across both overloads
+// Mixed overload calls - compose_count accumulates across both overloads
 // ---------------------------------------------------------------------------
 
 TEST_CASE("mock_email compose_count accumulates across both overloads",
@@ -235,7 +235,7 @@ TEST_CASE("mock_email compose_count accumulates across both overloads",
     // Arrange
     mock_email e;
 
-    // Act — interleave blank and message composes
+    // Act - interleave blank and message composes
     e.compose();
     email_message m1;
     m1.subject = "First message";
@@ -277,7 +277,7 @@ TEST_CASE("mock_email last_message is still set after subsequent blank compose",
 
     // Act
     e.compose(m);
-    e.compose(); // blank — should NOT wipe last_message_
+    e.compose(); // blank - should NOT wipe last_message_
 
     // Assert
     REQUIRE(e.last_message().has_value());

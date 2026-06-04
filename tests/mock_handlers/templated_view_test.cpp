@@ -45,7 +45,7 @@ TEST_CASE("templated_view mock handler tracks content + template_id changes",
 
     t.content     = std::make_shared<plain_view>();
     t.template_id = "card-template";
-    t.template_id = "card-template";   // idempotent — no record
+    t.template_id = "card-template";   // idempotent - no record
     t.content     = nullptr;
 
     REQUIRE(h.calls_as_strings() == std::vector<std::string>{
