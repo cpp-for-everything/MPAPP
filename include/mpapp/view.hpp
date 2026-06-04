@@ -34,6 +34,7 @@
 
 #include "behaviors/behavior.hpp"                  // for view::behaviors (RFC-0009)
 #include "binding/binding_context.hpp"            // for view::binding_context (RFC-0007)
+#include "brushes/brush.hpp"                        // for view::background_brush (rich gradient brushes)
 #include "command.hpp"
 #include "effects/effect.hpp"                      // for view::effects (RFC-0009)
 #include "internal/basic_gesture_recognizer.hpp"  // for view::gesture_recognizers
@@ -92,6 +93,22 @@ struct shadow_desc {
     bool operator==(const shadow_desc&) const = default;
 };
 
+// Clip primitive — a rounded-rectangle clip region applied to the view's
+// rendered output. `radius_x` / `radius_y` give the corner ellipse radii
+// (0 = sharp corners). Mirrors MAUI's `VisualElement.Clip` reduced to the
+// rounded-rect case the mock surface needs. The full geometry-path clip
+// lands with the real handlers in P3+.
+struct clip_geometry {
+    double x        = 0.0;
+    double y        = 0.0;
+    double width    = 0.0;
+    double height   = 0.0;
+    double radius_x = 0.0;
+    double radius_y = 0.0;
+
+    bool operator==(const clip_geometry&) const = default;
+};
+
 // Forward-declared so the cross-platform header doesn't pull in the mock
 // (or any real) backend. Each platform specialises this template under
 // `mpapp/handlers/<platform>/view_handler.hpp`.
@@ -133,7 +150,13 @@ public:
     Observable<bool>                        is_enabled{true};
     Observable<double>                      opacity{1.0};
     Observable<brush_ref>                   background{};
+    // Rich gradient-capable background. Complements the legacy symbolic
+    // `background` (kept for the ~61 components that depend on it): when set
+    // the real handler prefers this over `background`. std::nullopt = unset.
+    Observable<std::optional<mpapp::brush>> background_brush{};
     Observable<shadow_desc>                 shadow{};
+    // Rounded-rectangle clip region. std::nullopt = no clip (default).
+    Observable<std::optional<clip_geometry>> clip{};
 
     // ----- Transforms ---------------------------------------------------
     Observable<double>                      translation_x{0.0};
