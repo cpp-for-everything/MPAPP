@@ -94,7 +94,7 @@ public:
 
     // Returns the argument of the most recent set() call (std::nullopt
     // if set() has never been called).
-    [[nodiscard]] std::optional<std::vector<app_action>> last_set() const {
+    [[nodiscard]] const std::optional<std::vector<app_action>>& last_set() const noexcept {
         return last_set_;
     }
 

@@ -103,7 +103,7 @@ public:
 
     // Returns the most recent email_message passed to compose(message), or
     // std::nullopt if that overload has never been called.
-    [[nodiscard]] std::optional<email_message> last_message() const {
+    [[nodiscard]] const std::optional<email_message>& last_message() const noexcept {
         return last_message_;
     }
 
