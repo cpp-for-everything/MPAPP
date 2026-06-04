@@ -151,22 +151,44 @@ screenshot saved at `vault/_Assets/android_hello_emulator.png`. Fixing the build
 surfaced + repaired a real pre-existing Android link break (`install_main_dispatcher`
 undefined: `src/executor/mock.cpp` was missing from the APK source list).
 
-## What's next (follow-ups)
+## Session 4 — MAUI-parity closure push (34 agents across 4 workflows)
 
-1. **Windows real layout handlers** (mux::Canvas/custom) — needs MSVC + WinUI
-   (MinGW can't build C++/WinRT); plus macOS/iOS layout handlers (Apple host).
-   FlexLayout needs a faithful flexbox solver on every platform (current = v1 map).
-2. **On-device / runtime** verification — current per-platform gate is compile/link,
-   not runtime (headless WSL has no display/DBus; Android/Windows backends not yet
-   run on a device). GTK clipboard async reads + Android Context plumbing are runtime TODOs.
-3. **Per-platform real backends** for the remaining Essentials APIs (sensors,
-   geolocation, battery on Linux via UPower, etc.) + license review (Rule 9) for native deps.
-4. **CMake wiring — DONE** for Windows/Linux (essentials backends now glob into
-   `mpapp-handlers-{windows,linux}`). Remaining: wire the Android essentials backends into
-   the gradle/NDK `externalNativeBuild` glob; umbrella (`mpapp.hpp`) still excludes the new
-   layout wrappers (deliberate until all platforms' handlers verified).
-5. **XAML lowering** of the new surface (brushes, AppThemeBinding, templating, dialogs)
-   into `mpapp-xc` — M-09 tooling scope.
+Closed the remaining parity bands that are verifiable on this host. WSL
+gold-standard ctest grew to **1837 / 100%**.
+
+- **CommunityToolkit / extra controls (10, mock-first, Catch2):** Popup, Snackbar,
+  Toast, Expander, AvatarView, MediaElement, TwoPaneView, DrawingView, CameraView,
+  and the .NET MAUI Map.
+- **Neutral subsystems:** `localization/string_localizer` (resx-equivalent),
+  `accessibility/semantics` (SemanticProperties + screen-reader), `assets/asset_catalog`
+  (single-project asset model), more CTK converters + validation behaviors.
+- **Real per-OS Essentials backends (15, compile-verified per toolchain):** Win32
+  (device_info, app_info, connectivity, file_picker), Linux GIO/GTK (device_info,
+  app_info, battery/UPower, file_picker), Android JNI (battery, connectivity,
+  device_info, permissions, share, flashlight, geolocation).
+- **XAML compiler (`mpapp-xc`) — now real:** a tag→type/attr→setter registry (16 MAUI
+  tags) + a recursive emitter that lowers a MAUI-XAML page into C++ constructing the
+  mpapp visual tree (shared_ptr elements, `parent->add(*child)`, `#line` mapping).
+  **Verified end-to-end: `mpapp-xc counter_page.xaml` → generated header `-fsyntax-only`
+  compiles against the real mpapp surface.** (Targets the `basic_*` host-validation
+  surface; the umbrella pulls WinRT on Windows.)
+- **FlexLayout real solver:** `layout/flex_arrange.hpp` — a pure CSS-flexbox arrange
+  engine (grow/shrink/wrap/justify/align/align-content/order/gaps), 170 assertions.
+
+## What's next (the genuinely-remaining tail)
+
+1. **macOS / iOS** — the one true host gate (no Mac). Seed handlers only; 0 backends.
+2. **Skia graphics backend** — heavy auto-fetched dep (Cairo is real on Linux; Skia +
+   Windows/Android Cairo still stub).
+3. **Windows AbsoluteLayout/FlexLayout `.cpp`** (mux::Canvas) — Linux + Android done;
+   Windows is the incremental remainder (MSVC-verified). Wiring `flex_arrange` into the
+   per-platform flex handlers is the next step to make the solver drive real pixels.
+4. **On-device / runtime** verification for the per-OS Essentials backends (current gate
+   is compile/link; sensors/geolocation/etc. need device runs) + Android backends into the
+   gradle/NDK `externalNativeBuild` glob.
+5. **XAML compiler depth** — markup extensions ({Binding}/{StaticResource}/x:Name wiring),
+   ResourceDictionary/Style lowering, event handlers, DataTemplate; the core element/
+   property pipeline now works.
 
 ## Notes
 

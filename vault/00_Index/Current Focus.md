@@ -6,7 +6,9 @@ tags:
 
 # Current Focus
 
-> [!important] Status — 2026-W23 (operational: MSVC toolchain + multi-platform build verification)
+> [!important] Status — 2026-W23 (MAUI-parity closure + operational on all buildable platforms)
+> **Parity surface is now broadly complete and verified.** Closure push added CommunityToolkit/extra controls (Popup, Snackbar, Toast, Expander, AvatarView, MediaElement, TwoPaneView, DrawingView, CameraView, Map), neutral subsystems (Localization, Accessibility/Semantics, AssetCatalog), **15 real per-OS Essentials backends** (Win32/Linux-GIO/Android-JNI), a working **`mpapp-xc` XAML compiler** (lowers a MAUI page → C++ that compiles against the real mpapp API), and a **real FlexLayout flexbox solver**. WSL gold-standard ctest: **1837 / 100%**. Genuine remaining tail: macOS/iOS (no Mac), Skia backend, Windows layout `.cpp`, XAML markup-extension depth. See [[2026-W23-Weekly]] (session 4).
+>
 > **Windows MSVC toolchain is fixed and Windows now runs end-to-end** (VS Build Tools 2026 / cl 14.51): the full **WinUI 3 handler library** + example compile + link, the MSVC test exe passes 5200 assertions, and **`windows_button_spike` launches + renders the styled WinUI 3 widget tree** (screenshot `vault/_Assets/windows_button_spike_winui.png`). The runtime fix: implement `IXamlMetadataProvider` + merge `XamlControlsResources` in `OnLaunched`, and auto-generate an unpackaged "Application"-map `resources.pri` (build-staged). **Runtime-verified with screenshots on Windows (WinUI 3), Android (emulator), and live under WSLg on Linux.** **macOS/iOS are the only targets with no path here (no Mac).** Full matrix in [[2026-W23-Weekly]] (session 3).
 >
 > [!note]- Earlier W23 sessions (Tier-2/3 parity + MVVM/animation/backends)
