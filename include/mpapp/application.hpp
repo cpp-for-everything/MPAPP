@@ -20,7 +20,13 @@
 #ifndef MPAPP_APPLICATION_HPP
 #define MPAPP_APPLICATION_HPP
 
+#include <cstddef>
+
+#include "detail/modal_stack.hpp"
+#include "essentials/app_info.hpp"   // for mpapp::app_theme
 #include "platform.hpp"
+#include "signal.hpp"
+#include "view.hpp"
 
 namespace mpapp {
 
@@ -51,6 +57,50 @@ public:
     virtual void on_resume()    {}
     virtual void on_terminate() {}
 
+    // ----- Modal navigation (MAUI Navigation.PushModalAsync) -------------
+    // A modal page sits above the regular navigation surface and is
+    // dismissed LIFO. `push_modal` / `pop_modal` are the sync primitives;
+    // `modal_pushed` / `modal_popped` fire around each mutation.
+
+    void push_modal(view& page) { modal_stack_.push(&page); }
+
+    // Returns the dismissed modal (nullptr if no modal was showing).
+    view* pop_modal() { return modal_stack_.pop(); }
+
+    [[nodiscard]] std::size_t modal_stack_depth() const noexcept {
+        return modal_stack_.depth();
+    }
+
+    // The top-most modal, or nullptr when nothing is presented modally.
+    [[nodiscard]] view* current_modal() const noexcept {
+        return modal_stack_.current();
+    }
+
+    // Engine access for handlers / advanced callers.
+    detail::modal_stack&       modal_stack() noexcept       { return modal_stack_; }
+    const detail::modal_stack& modal_stack() const noexcept { return modal_stack_; }
+
+    // Re-exposed from the modal engine so callers can subscribe without
+    // reaching into the stack.
+    signal<view*>& modal_pushed() noexcept { return modal_stack_.modal_pushed; }
+    signal<view*>& modal_popped() noexcept { return modal_stack_.modal_popped; }
+
+    // ----- Requested theme (MAUI Application.RequestedTheme) -------------
+    // The app-level requested theme. Setting a new value emits
+    // `requested_theme_changed`; setting the same value is a no-op.
+
+    [[nodiscard]] mpapp::app_theme requested_theme() const noexcept {
+        return requested_theme_;
+    }
+
+    void set_requested_theme(mpapp::app_theme theme) {
+        if (theme == requested_theme_) return;
+        requested_theme_ = theme;
+        requested_theme_changed.emit(theme);
+    }
+
+    signal<mpapp::app_theme> requested_theme_changed{};
+
     // ----- Handler access ------------------------------------------------
     // The framework wires this up from `mpapp::run<App>` before invoking
     // `on_launch`; user code may read it (e.g. to call `request_exit()`)
@@ -62,6 +112,8 @@ public:
 
 private:
     application_handler<platform::current>* handler_ = nullptr;
+    detail::modal_stack                     modal_stack_{};
+    mpapp::app_theme                        requested_theme_ = mpapp::app_theme::unspecified;
 };
 
 } // namespace mpapp
