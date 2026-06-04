@@ -20,17 +20,58 @@ A multi-year project to build a **C++ cross-platform UI framework** analogous to
 
 | Path | Contents |
 |---|---|
+| `src/` | Portable `mpapp-core` library + per-platform native handlers (`src/handlers/<platform>/`) |
+| `include/` | Public headers (`mpapp/...`) |
+| `examples/` | Platform spike apps — WinUI 3 (`windows_*`), GTK4 (`gtk4_*`), the УИСС reference app, headless demos |
+| `tests/` | Catch2 unit tests (run via CTest) |
+| `tools/` | Host developer tools — `mpapp` CLI, `mpapp-xc` XAML compiler |
+| `cmake/` | All build logic: superbuild orchestrator, target helpers, Zig toolchains |
 | `vault/` | Obsidian knowledge base — all design, decisions, roadmap, components, tasks |
-| `maui/` | Submodule: [dotnet/maui](https://github.com/dotnet/maui) — the spec MPAPP mirrors |
-| `maui-toolkit/` | Submodule: [syncfusion/maui-toolkit](https://github.com/syncfusion/maui-toolkit) |
-| `maui-community-toolkit/` | Submodule: [CommunityToolkit/Maui](https://github.com/CommunityToolkit/Maui) |
-| `dotnet-community-toolkit/` | Submodule: [CommunityToolkit/dotnet](https://github.com/CommunityToolkit/dotnet) |
+| `references/` | Submodules (research-only, not build deps): [dotnet/maui](https://github.com/dotnet/maui), [syncfusion/maui-toolkit](https://github.com/syncfusion/maui-toolkit), [CommunityToolkit/Maui](https://github.com/CommunityToolkit/Maui), [CommunityToolkit/dotnet](https://github.com/CommunityToolkit/dotnet) |
 
-No C++ source code yet — that lands in phase P1 ([`vault/40_Roadmap/M-02-Infrastructure.md`](vault/40_Roadmap/M-02-Infrastructure.md)).
+## Building
+
+The build is a CMake **superbuild**: one configure builds every target the host
+supports (portable core for each platform via [Zig](https://ziglang.org), plus
+the native example apps with the host SDK). No `.bat` scripts, no WSL — it runs
+the same on Linux, macOS, and Windows.
+
+```sh
+# Build every host-supported platform into build/<platform>/
+cmake --preset all
+cmake --build build
+
+# Or just one platform's real native build (core + tests + tools + examples):
+cmake --preset host
+cmake --build build/host
+```
+
+Pass `--preset windows-only` / `linux-only` to restrict the cross matrix. Under
+the hood each platform is a *child* build (`-DMPAPP_SUPERBUILD=OFF`); invoke that
+directly when you want a single tree. See
+[`vault/10_Architecture/Build System.md`](vault/10_Architecture/Build%20System.md)
+and [`cmake/toolchains/README.md`](cmake/toolchains/README.md).
+
+### Quality gates
+
+Opt-in presets run sanitizers, coverage, and clang-tidy over the portable core
++ tests (native compiler — Clang/GCC). Off in normal builds.
+
+```sh
+cmake --preset ubsan && cmake --build build/ubsan && ctest --preset ubsan
+cmake --preset asan  && cmake --build build/asan  && ctest --preset asan
+cmake --preset tsan  && cmake --build build/tsan  && ctest --preset tsan
+cmake --preset coverage && cmake --build build/coverage && ctest --preset coverage   # gcov
+cmake --preset tidy  && cmake --build build/tidy        # clang-tidy (report-only)
+```
+
+`asan`/`ubsan`/`tidy` also run in CI (`linux-quality` job). The gate machinery
+lives in [`cmake/MpappHardening.cmake`](cmake/MpappHardening.cmake); tidy checks
+in [`.clang-tidy`](.clang-tidy).
 
 ## Status
 
-**Phase P0 — Foundations** (active). 9 ADRs accepted on day 1; 2 RFCs open; 56 MAUI components stubbed. See [`vault/00_Index/Current Focus.md`](vault/00_Index/Current%20Focus.md) for live status.
+See [`vault/00_Index/Current Focus.md`](vault/00_Index/Current%20Focus.md) for live status.
 
 ## License
 

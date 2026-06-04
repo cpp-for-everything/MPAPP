@@ -80,6 +80,7 @@ jobs:
         # run inside ctest.
         run: |
           cmake -S . -B build -G Ninja \
+            -DMPAPP_SUPERBUILD=OFF \
             -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
@@ -126,6 +127,7 @@ jobs:
       - name: Configure (examples OFF — core is platform-neutral; WinUI examples need WindowsAppSDK)
         run: >
           cmake -S . -B build -G Ninja
+          -DMPAPP_SUPERBUILD=OFF
           -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
           -DMPAPP_BUILD_EXAMPLES=OFF
           -DCMAKE_C_COMPILER_LAUNCHER=sccache
@@ -136,6 +138,49 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --output-on-failure --parallel
+
+  # Quality gates (ADR-0003 matrix): AddressSanitizer + UndefinedBehaviorSanitizer
+  # over the portable core + tests, plus a clang-tidy pass. These run natively on
+  # Linux (the sanitizer runtimes + clang-tidy need a native sysroot — they don't
+  # mix with the Zig cross toolchains). Examples are OFF (the presets disable
+  # them); core + tests are the instrumented surface.
+  linux-quality:
+    name: linux-quality (asan/ubsan/tidy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout (no submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: false
+          fetch-depth: 1
+
+      - name: Install toolchains + Cairo
+        # GCC drives the sanitizers (libasan/libubsan ship with g++ — no
+        # compiler-rt package matching); Clang + clang-tidy drive the tidy pass.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            g++ clang clang-tidy ninja-build cmake pkg-config libcairo2-dev
+
+      - name: UndefinedBehaviorSanitizer (GCC)
+        run: |
+          cmake --preset ubsan
+          cmake --build build/ubsan --parallel
+          ctest --preset ubsan --parallel
+
+      - name: AddressSanitizer + LeakSanitizer (GCC)
+        run: |
+          cmake --preset asan
+          cmake --build build/asan --parallel
+          ctest --preset asan --parallel
+
+      - name: clang-tidy (report-only)
+        # Findings are informational until the backlog is burned down; flip the
+        # gate on with -DMPAPP_TIDY_WERROR=ON once clean.
+        run: |
+          cmake --preset tidy
+          cmake --build build/tidy --parallel
 
   # Self-hosted Android emulator run. Non-blocking + only for in-repo PRs
   # (fork PRs would expose the self-hosted machine — security boundary
@@ -158,6 +203,7 @@ jobs:
         run: |
           if (Test-Path cmake/toolchains/android-arm64.cmake) {
             cmake -S . -B build-android `
+              -DMPAPP_SUPERBUILD=OFF `
               -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/android-arm64.cmake `
               -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }}
             cmake --build build-android --parallel

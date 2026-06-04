@@ -55,6 +55,7 @@ jobs:
           CXX: clang++
         run: |
           cmake -S . -B build -G Ninja \
+            -DMPAPP_SUPERBUILD=OFF \
             -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} \
             -DCMAKE_C_COMPILER_LAUNCHER=ccache \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
@@ -87,6 +88,7 @@ jobs:
         shell: pwsh
         run: |
           cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+            -DMPAPP_SUPERBUILD=OFF `
             -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} `
             -DMPAPP_BUILD_EXAMPLES=OFF
 
@@ -120,6 +122,7 @@ jobs:
         # until macOS handler set is complete (M-07).
         run: |
           cmake -S . -B build-macos-arm64 -G Xcode \
+            -DMPAPP_SUPERBUILD=OFF \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
             -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} \
             -DMPAPP_BUILD_EXAMPLES=OFF
@@ -133,6 +136,7 @@ jobs:
       - name: Configure ios-arm64 (Simulator)
         run: |
           cmake -S . -B build-ios-arm64 -G Xcode \
+            -DMPAPP_SUPERBUILD=OFF \
             -DCMAKE_SYSTEM_NAME=iOS \
             -DCMAKE_OSX_SYSROOT=iphonesimulator \
             -DCMAKE_OSX_ARCHITECTURES=arm64 \
