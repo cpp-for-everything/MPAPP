@@ -26,6 +26,9 @@ extern "C" HRESULT __stdcall WindowsAppRuntime_EnsureIsLoaded();
 #include <winrt/Windows.Foundation.Collections.h>  // IVector<>::Append (MergedDictionaries)
 #include <winrt/Microsoft.UI.Xaml.h>
 #include <winrt/Microsoft.UI.Xaml.Controls.h>   // XamlControlsResources
+#include <winrt/Windows.UI.Xaml.Interop.h>        // TypeName (IXamlMetadataProvider)
+#include <winrt/Microsoft.UI.Xaml.Markup.h>       // IXamlMetadataProvider / IXamlType
+#include <winrt/Microsoft.UI.Xaml.XamlTypeInfo.h> // XamlControlsXamlMetaDataProvider
 
 #include "mpapp/handlers/windows/dispatcher_queue.hpp"
 
@@ -61,29 +64,39 @@ struct launcher_handoff {
 
 std::atomic<launcher_handoff*> g_handoff{nullptr};
 
-class mpapp_winui_app : public mux::ApplicationT<mpapp_winui_app> {
+class mpapp_winui_app : public mux::ApplicationT<
+                            mpapp_winui_app,
+                            ::winrt::Microsoft::UI::Xaml::Markup::IXamlMetadataProvider> {
 public:
+    // Real XAML type metadata for the WinUI controls. Without an
+    // IXamlMetadataProvider, a code-only host (no App.xaml) cannot resolve
+    // control types (AcrylicBrush, …), so `XamlControlsResources{}` fail-fasts
+    // with E_FAIL and the first templated control dies with a stowed XAML
+    // exception. Delegating to XamlControlsXamlMetaDataProvider is what lets a
+    // no-XAML C++ app load the default control styles + theme resources.
+    ::winrt::Microsoft::UI::Xaml::XamlTypeInfo::XamlControlsXamlMetaDataProvider provider_{};
+
+    ::winrt::Microsoft::UI::Xaml::Markup::IXamlType
+    GetXamlType(::winrt::Windows::UI::Xaml::Interop::TypeName const& type) {
+        return provider_.GetXamlType(type);
+    }
+    ::winrt::Microsoft::UI::Xaml::Markup::IXamlType
+    GetXamlType(::winrt::hstring const& full_name) {
+        return provider_.GetXamlType(full_name);
+    }
+    ::winrt::com_array<::winrt::Microsoft::UI::Xaml::Markup::XmlnsDefinition>
+    GetXmlnsDefinitions() {
+        return provider_.GetXmlnsDefinitions();
+    }
+
     mpapp_winui_app() {
         mpapp_diag_log("mpapp_winui_app: ctor enter");
 
-        // Merge the WinUI control theme resources (themeresources.xaml) into the
-        // application resources. In a code-only host (no App.xaml) this MUST be
-        // done explicitly — otherwise the first templated control (TextBox, etc.)
-        // can't resolve its default style at the deferred layout pass and the app
-        // dies with 0x80070002 (FILE_NOT_FOUND) a few hundred ms after launch.
-        // This is the C++ equivalent of <XamlControlsResources/> in App.xaml.
-        try {
-            auto xcr = ::winrt::Microsoft::UI::Xaml::Controls::XamlControlsResources{};
-            Resources().MergedDictionaries().Append(xcr);
-            mpapp_diag_log("mpapp_winui_app: XamlControlsResources merged");
-        } catch (winrt::hresult_error const& e) {
-            char buf[256]; std::snprintf(buf, sizeof(buf),
-                                          "XamlControlsResources merge FAILED hr=0x%08X",
-                                          static_cast<unsigned>(e.code().value));
-            mpapp_diag_log(buf);
-        } catch (...) {
-            mpapp_diag_log("XamlControlsResources merge FAILED (unknown)");
-        }
+        // NOTE: XamlControlsResources is merged in OnLaunched (after the
+        // metadata provider above is fully in place + the app is started),
+        // NOT here — that is the supported code-only-WinUI ordering. Merging
+        // it in the ctor (before the provider can satisfy type resolution)
+        // fails with E_FAIL.
 
         try {
             // Capture exceptions raised on deferred layout passes / event
@@ -116,6 +129,24 @@ public:
 
     void OnLaunched(mux::LaunchActivatedEventArgs const&) {
         mpapp_diag_log("OnLaunched: enter");
+
+        // Merge the WinUI default control styles + theme resources now that the
+        // IXamlMetadataProvider is in place. This is the C++ equivalent of
+        // <XamlControlsResources/> in App.xaml; doing it here (not the ctor)
+        // is the supported code-only ordering — see MAUI++ winui_app.hpp.
+        try {
+            Resources().MergedDictionaries().Append(
+                ::winrt::Microsoft::UI::Xaml::Controls::XamlControlsResources{});
+            mpapp_diag_log("OnLaunched: XamlControlsResources merged");
+        } catch (winrt::hresult_error const& e) {
+            char buf[256]; std::snprintf(buf, sizeof(buf),
+                "OnLaunched XamlControlsResources merge FAILED hr=0x%08X",
+                static_cast<unsigned>(e.code().value));
+            mpapp_diag_log(buf);
+        } catch (...) {
+            mpapp_diag_log("OnLaunched XamlControlsResources merge FAILED (unknown)");
+        }
+
         auto* h = g_handoff.load();
         if (h == nullptr || h->launcher.construct == nullptr) {
             mpapp_diag_log("OnLaunched: handoff missing");
