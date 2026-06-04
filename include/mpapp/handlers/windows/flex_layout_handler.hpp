@@ -64,6 +64,11 @@ private:
     void apply_align_content(flex_align_content a);
     void apply_position(flex_position p);
 
+    // Recompute child rectangles via the neutral mpapp::flex_arrange solver and
+    // push them onto the Canvas (Canvas.SetLeft/SetTop + Width/Height). Called
+    // on every container-property change, on add_child, and on SizeChanged.
+    void relayout();
+
     struct direction_cb_t {
         flex_layout_handler<platform::windows>* self;
         void operator()(flex_direction d) const { self->apply_direction(d); }
@@ -90,6 +95,12 @@ private:
     };
 
     winrt::Microsoft::UI::Xaml::Controls::Panel native_{nullptr};
+
+    // The bound surface (for iterating children + reading container/child flex
+    // props during relayout) + one-time SizeChanged hook so resizes re-solve.
+    basic_flex_layout*    bound_       = nullptr;
+    bool                  size_hooked_ = false;
+    winrt::event_token    size_token_{};
 
     direction_cb_t     direction_cb_{this};
     wrap_cb_t          wrap_cb_{this};
