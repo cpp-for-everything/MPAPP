@@ -47,11 +47,9 @@ struct view_model {
 class spike_app : public mpapp::application {
 public:
     void on_launch() override {
-        // 1. Wire handlers to widgets.
-        lbl_.set_handler(lbl_handler_);
-        name_.set_handler(name_handler_);
-        shout_.set_handler(shout_handler_);
-        layout_.set_handler(layout_handler_);
+        // 1. Handlers are wired automatically: each wrapper type embeds its
+        //    platform handler and binds it in its constructor (ADR-0024), so
+        //    there are no manual handlers to attach here.
 
         // 2. Initial property values via the MPAPP surface.
         btn_.text         = "Click me";
@@ -59,11 +57,10 @@ public:
         name_.placeholder = "Type your name";
         shout_.is_on      = false;
 
-        // 3. Map properties + events onto native widgets.
-        lbl_handler_.map_text(lbl_);
-        name_handler_.map_text(name_);
-        name_handler_.map_placeholder(name_);
-        shout_handler_.map_is_on(shout_);
+        // 3. Properties already drive the native widgets: each wrapper
+        //    (mpapp::label / entry / switch_ / button) auto-binds its embedded
+        //    handler in its ctor (ADR-0024), so assigning the surface
+        //    properties above already mapped them — no manual handler needed.
 
         // 4. VM ↔ view wiring through cross-platform signals only.
         btn_.clicked.subscribe(click_slot_, click_cb_);
@@ -83,18 +80,17 @@ public:
         layout_.add(shout_);
         layout_.add(btn_);
 
-        // Bind the layout handler — pushes the property values into
-        // the native StackPanel and replays the child list.
-        layout_handler_.bind(layout_);
+        // The layout wrapper's embedded handler bound in its ctor while the
+        // layout was still empty; re-bind now to replay the freshly-added
+        // children into its native panel (bind() appends the current child
+        // list — this is the single, authoritative handler for the layout).
+        layout_.handler().bind(layout_);
 
-        // 6. Window setup. `window.content` is a non-owning view*.
-        window_.title    = "MPAPP T-0011 - app-shell rewrite";
-        window_.set_handler(window_handler_);
-        window_handler_.bind(window_);
-
-        // Assign content AFTER binding so the handler's content
-        // mapper picks up the change-signal and routes the new value
-        // into the native window's Content slot.
+        // 6. Window setup. `window.content` is a non-owning view*. The window
+        //    wrapper auto-binds its embedded handler; assigning content fires
+        //    the content-changed signal which routes the layout's native panel
+        //    into the window's Content slot (exactly once — single handler).
+        window_.title   = "MPAPP T-0011 - app-shell rewrite";
         window_.content = &layout_;
 
         // 7. Show the window.
@@ -148,11 +144,6 @@ private:
     mpapp::stack_layout     layout_{};
     mpapp::window           window_{};
 
-    mpapp::label_handler<>        lbl_handler_{};
-    mpapp::entry_handler<>        name_handler_{};
-    mpapp::switch_handler<>       shout_handler_{};
-    mpapp::stack_layout_handler<> layout_handler_{};
-    mpapp::window_handler<>       window_handler_{};
 
     click_cb_t                             click_cb_{this};
     count_cb_t                             count_cb_{this};
