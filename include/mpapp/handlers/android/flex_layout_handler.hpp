@@ -1,9 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0
-// Android basic_flex_layout handler. Wraps the AndroidX FlexboxLayout
-// (com.google.android.flexbox.FlexboxLayout). Container properties map to
-// setFlexDirection / setFlexWrap / setJustifyContent / setAlignItems /
-// setAlignContent. Per-child attached props (order, grow, shrink,
-// align_self, basis) map to FlexboxLayout.LayoutParams in add_child.
+// Android basic_flex_layout handler. Hosts children in a plain
+// android.widget.FrameLayout and drives the neutral, platform-independent
+// `mpapp::flex_arrange` solver to compute each child's pixel rectangle, then
+// applies that rect via FrameLayout.LayoutParams {width, height, leftMargin,
+// topMargin}. Container properties (direction/wrap/justify/align_items/
+// align_content) and per-child attached props (order, grow, shrink,
+// align_self, basis) feed the solver inputs in relayout(). The solve re-runs
+// whenever the FrameLayout is resized, via an OnLayoutChangeListener
+// (io.mpapp.MppFlexLayoutListener) that calls back into native.
 
 #ifndef MPAPP_HANDLERS_ANDROID_FLEX_LAYOUT_HANDLER_HPP
 #define MPAPP_HANDLERS_ANDROID_FLEX_LAYOUT_HANDLER_HPP
@@ -37,6 +41,16 @@ public:
     void map_position(basic_flex_layout& f);
 
     void add_child(basic_flex_layout& f, view& child);
+
+    // Re-run the flex solve against the FrameLayout's current measured size
+    // and reposition every child. Safe to call before Android has sized the
+    // container (it bails when getWidth/getHeight are 0).
+    void relayout();
+
+    // Called from the MppFlexLayoutListener JNI trampoline when the
+    // FrameLayout's allocated bounds change. (w, h) are a change trigger;
+    // the authoritative size is read inside relayout().
+    void on_layout_changed(int w, int h);
 
     jobject native() const noexcept { return native_; }
 
@@ -84,7 +98,12 @@ private:
         void operator()(flex_position p) const { self->apply_position(p); }
     };
 
-    jobject native_ = nullptr;  // com.google.android.flexbox.FlexboxLayout
+    jobject native_ = nullptr;  // android.widget.FrameLayout host
+
+    // The bound flex layout, captured by the map_* / add_child entry points.
+    // relayout() reads its container properties + iterates child_at(i) to
+    // build the solver inputs. Non-owning.
+    basic_flex_layout* bound_ = nullptr;
 
     direction_cb_t     direction_cb_{this};
     wrap_cb_t          wrap_cb_{this};
