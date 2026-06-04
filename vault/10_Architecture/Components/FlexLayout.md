@@ -17,7 +17,7 @@ tags:
 # FlexLayout
 
 > [!info] Status
-> **mock** — surface + mock handler + Catch2 tests landed and verified (compiles + runs green via the host harness, see [[2026-W23-Weekly]]). Per-platform real handlers are written blind mirroring [[Grid]]'s handler set but are **not yet verified on a platform host** — `<platform>-real` is a follow-up per [[ADR-0008-mock-first-implementation]] (Rule 6). A real CSS-flexbox arrange engine (or wrapping a native flex container) is the substantive real-handler work.
+> **mock + linux-real + android-real (compile-verified, v1)** — surface + mock handler + Catch2 tests verified (1476-test suite green under g++ 14.2). **Real handlers implemented + compile-verified:** Linux `GtkBox` v1 handler links into `mpapp-handlers-linux` (WSL GTK4); Android `LinearLayout` v1 handler cross-compiles arm64+x86_64 (NDK 27.2). The v1 handlers map flex properties onto GtkBox/LinearLayout semantics — a **faithful CSS-flexbox solver** (e.g. Yoga / `com.google.android.flexbox`) is the substantive follow-up, alongside the Windows handler (MSVC+WinUI), macOS/iOS (Apple host), and on-device runtime verification. See [[2026-W23-Weekly]].
 
 ## Overview
 

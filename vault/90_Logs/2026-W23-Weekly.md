@@ -60,21 +60,57 @@ barometer, compass, orientation_sensor + `sensors_common`), **battery**, **devic
 **text_to_speech**, **permissions**, **geolocation**, **geocoding**, **contacts**,
 **screenshot**, **web_authenticator**, **app_actions**.
 
-## What's next (follow-ups this push created)
+## Session 2 — MVVM/binding/animation + per-platform backends (verified)
 
-1. **Per-platform real handlers** for AbsoluteLayout / FlexLayout — the Win/Linux/Android
-   handlers are written blind and need verification on each host; FlexLayout additionally
-   needs a faithful flexbox arrange engine. macOS/iOS unwritten (pending Apple host).
-2. **Per-platform real backends** for the new Essentials APIs (the original 4 are also
-   mostly in-memory; real backends are per-platform follow-ups + license review per Rule 9
-   for any new native deps).
-3. **Umbrella wiring** — deliberately NOT added to `include/mpapp/mpapp.hpp` yet, to avoid
-   coupling the unverified per-platform layout handlers into the default include. Wire in
-   once a host verifies them.
-4. **XAML lowering** of the new surface (brushes, AppThemeBinding, templating, dialogs)
+A second autonomous run (25 + 5 + 4 agents across three workflows) added the
+framework-richness layer and the per-platform backends, this time with a
+**full cross-platform verification harness** discovered mid-session (see
+[[host-test-harness]] in agent memory): WSL Ubuntu-24.04 (g++ 14.2 + GTK4 4.14.5
++ WebKitGTK-6.0 + GIO — the project's real CI compiler), the Windows MinGW
+toolchain, and the real Android NDK 27.2 clang (arm64 + x86_64). macOS/iOS remain
+the only host-gated targets.
+
+**The WSL gold-standard `ctest` (g++ 14.2) caught 3 real undefined-behaviour bugs
+the MinGW static-link harness silently tolerated** — all fixed + committed:
+`and_multi_trigger` dangling callback (by-value vector reallocation), and
+`app_actions`/`email` returning `std::optional` by value while tests bound
+`const auto& = *getter()` (dangling into a destroyed temporary). Full mock suite
+is **1476 tests / 100%** under g++ 14.2.
+
+- **MVVM / CommunityToolkit.Mvvm:** `observable_object`, `messenger`,
+  `observable_validator`, `async_relay_command`.
+- **Binding:** fallback/target-null/string-format resolver, typed `property_path`,
+  CTK converters (null/bool, value-map, string/color, multi-value + chaining).
+- **Animation:** full MAUI easing set, composite/child timeline, repeat/auto-reverse,
+  `color_to` + generic Observable animation, fluent extensions + cancel registry.
+- **Behaviors/Triggers:** event-to-command, text-validation, compare-state trigger.
+- **Real cross-platform backends** (no-ifdef): `real_file_system`,
+  `real_version_tracking`, `real_app_info`, `real_main_thread`.
+- **Windows Win32 backends** (compile+link under MinGW): clipboard, battery,
+  launcher/browser, device_display.
+- **Linux GIO/GTK4 backends** (compile-verified in WSL): launcher/browser
+  (`g_app_info`), connectivity (`GNetworkMonitor`), clipboard (`GdkClipboard`).
+- **Android JNI backends** (cross-compiled arm64+x86_64): clipboard
+  (`ClipboardManager`), vibration (`Vibrator`).
+- **Real layout handlers** — AbsoluteLayout/FlexLayout were declaration-only headers;
+  implemented for **Linux** (`GtkFixed`/`GtkBox`, links into `mpapp-handlers-linux`)
+  and **Android** (`FrameLayout`/`LinearLayout` v1, cross-compiled both ABIs).
+
+## What's next (follow-ups)
+
+1. **Windows real layout handlers** (mux::Canvas/custom) — needs MSVC + WinUI
+   (MinGW can't build C++/WinRT); plus macOS/iOS layout handlers (Apple host).
+   FlexLayout needs a faithful flexbox solver on every platform (current = v1 map).
+2. **On-device / runtime** verification — current per-platform gate is compile/link,
+   not runtime (headless WSL has no display/DBus; Android/Windows backends not yet
+   run on a device). GTK clipboard async reads + Android Context plumbing are runtime TODOs.
+3. **Per-platform real backends** for the remaining Essentials APIs (sensors,
+   geolocation, battery on Linux via UPower, etc.) + license review (Rule 9) for native deps.
+4. **CMake wiring** — the new `src/essentials/{windows,linux,android}/` backends compile
+   standalone but are not yet added to a build target; the layout handler `.cpp`s already
+   build (globbed). Umbrella (`mpapp.hpp`) still excludes the new layout wrappers.
+5. **XAML lowering** of the new surface (brushes, AppThemeBinding, templating, dialogs)
    into `mpapp-xc` — M-09 tooling scope.
-5. **Coverage + per-component docs** for AbsoluteLayout/FlexLayout reach Rule-11 closure
-   only after real handlers + screenshots on a host.
 
 ## Notes
 
