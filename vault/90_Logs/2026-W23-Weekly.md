@@ -125,16 +125,24 @@ double-parenting defect in `windows_button_spike` — it mixed the ADR-0024 wrap
 pattern (each wrapper auto-binds an *embedded* handler in its ctor) with manually
 attached handlers, so `window.content` was set twice. (Same defect GTK only *warned*
 about — `gtk_box_append`/`gtk_window_set_child` "child already has parent".) Converted
-the example to the single pure-wrapper pattern (commit). After the fix the Release
-example **loads WinUI 3, completes `on_launch`, and constructs the full widget tree**;
-it now stops only at WinUI's theme-resource resolution
-(`ms-appx:///Microsoft.UI.Xaml/Themes/themeresources.xaml` → `0x80004005`). That last
-step is the **WinUI-3 unpackaged-MRT requirement**: verified that even a `makepri`-merged
-`resources.pri` (containing the WinUI map) beside the exe does *not* resolve `ms-appx://`
-on this unpackaged 1.8 / `8000.859` runtime — **MSIX packaging is the reliable path**
-(or a full MrtCore integration). This is a Microsoft deployment requirement, not an
-MPAPP defect; MSVC build + link + 5200-assertion test run are green. Debug builds also
-need the debug CRT beside the exe.
+the example to the single pure-wrapper pattern. **Then the second (deeper) cause:**
+the code-only host did not implement `IXamlMetadataProvider`, so `XamlControlsResources`
+failed (`E_FAIL`) — the XAML parser couldn't resolve control types — and theme-resource
+resolution then died with `0x80004005`. **Fixed both halves** (recipe cross-checked
+against the sibling `D:\GitHub\MAUI++` project, which had solved it):
+> 1. `mpapp_winui_app` now derives from `ApplicationT<…, IXamlMetadataProvider>` delegating
+>    to `XamlControlsXamlMetaDataProvider`, and merges `XamlControlsResources` in
+>    `OnLaunched` (after the provider is in place), not the ctor.
+> 2. The build (`mpapp_add_winappsdk_runtime`) now generates an unpackaged `resources.pri`
+>    whose primary map is **"Application"** — `makepri new` with **no `/IndexName`** + a
+>    PRI-indexer priconfig that merges `Microsoft.UI.Xaml.Controls.pri` — and stages it
+>    beside every WinUI exe. (The earlier failures used `/in <exe>`, giving the wrong root
+>    map, so `ms-resource:///`→`Application` never matched.)
+>
+> **Result: `windows_button_spike` now launches and renders the full *styled* WinUI 3
+> widget tree** (Label / TextBox / ToggleSwitch / Button) — screenshot at
+> `vault/_Assets/windows_button_spike_winui.png`. Windows is operational end-to-end.
+> (Debug builds additionally need the debug CRT staged beside the exe.)
 
 **Android is the fully end-to-end-proven platform:** the APK builds → installs on the
 emulator → launches → renders the live MPAPP widget tree (Label / Entry / Switch /
