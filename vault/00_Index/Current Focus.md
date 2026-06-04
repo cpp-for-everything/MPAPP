@@ -6,7 +6,10 @@ tags:
 
 # Current Focus
 
-> [!important] Status — 2026-W23 (Tier-2/3 MAUI-parity push)
+> [!important] Status — 2026-W23 (operational: MSVC toolchain + multi-platform build verification)
+> **Windows MSVC toolchain is fixed and green** (VS Build Tools 2026 / cl 14.51): core + tests + the full **WinUI 3 handler library** + a windows example all compile + link; the MSVC test exe passes 5200 assertions / 1449 cases. Build-verified on **every platform with a toolchain on this host**: Windows (MSVC), Linux (WSL GTK4 — example runs under WSLg), Android (NDK 27.2 — both ABIs; emulator boots + `adb screencap` works). **macOS/iOS are the only targets with no verification path here (no Mac).** Full matrix + details in [[2026-W23-Weekly]] (session 3).
+>
+> [!note]- Earlier W23 sessions (Tier-2/3 parity + MVVM/animation/backends)
 > A 34-agent autonomous run closed the bulk of the **Tier-2 + Tier-3** MAUI-parity gaps, all **mock-first** and verified by compiling **and running** the Catch2 suite (combined integration binary: **683 test cases / 2016 assertions green**). See [[2026-W23-Weekly]].
 >
 > **Tier 2:** [[Components/AbsoluteLayout|AbsoluteLayout]] + [[Components/FlexLayout|FlexLayout]] (full grid-mirrored components; Linux + Android real handlers now compile-verified — see session 2 below); gradient brushes (`view::background_brush` + `shadow` + `clip`); page dialog services (DisplayAlert / DisplayActionSheet / DisplayPrompt); modal navigation; AppThemeBinding + `Application::requested_theme`; templating (DataTemplateSelector / ControlTemplate / ContentPresenter).

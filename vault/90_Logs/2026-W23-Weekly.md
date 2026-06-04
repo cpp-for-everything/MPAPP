@@ -96,6 +96,45 @@ is **1476 tests / 100%** under g++ 14.2.
   implemented for **Linux** (`GtkFixed`/`GtkBox`, links into `mpapp-handlers-linux`)
   and **Android** (`FrameLayout`/`LinearLayout` v1, cross-compiled both ABIs).
 
+## Session 3 — operational state: MSVC toolchain + per-platform build verification
+
+Brought the framework to a build-verified state on **every platform with a toolchain
+on this host** (only macOS/iOS lack one — no Mac). Verification matrix:
+
+| Platform | Toolchain | Result |
+|---|---|---|
+| Cross-platform mock suite | WSL g++ 14.2 (real CI) + MSVC 14.51 | **ctest 1476/100% (g++); MSVC exe 5200 assertions/1449 cases pass** |
+| **Windows** | **VS Build Tools 2026 / cl 14.51 (MSVC)** | core + tests + **`mpapp-handlers-windows` (WinUI 3, 62 handlers + C++/WinRT projection)** + `windows_button_spike.exe` all **compile + link** |
+| Linux | WSL Ubuntu GTK4 4.14.5 + WebKitGTK-6.0 + GIO | `mpapp-handlers-linux` (all handlers + GIO essentials) builds; **gtk4 example runs under WSLg (window mapped, main loop live)** |
+| Android | NDK 27.2 / 26.1 clang | handlers + essentials cross-compile **arm64 + x86_64**; **emulator boots + `adb screencap` works**; APK build via Gradle 8.10.2 + JDK 21 |
+
+**MSVC toolchain fix (the headline ask):** drove CMake with the *Visual Studio 18 2026*
+generator via the VS dev shell + Ninja. Resolved two real infra issues: `C1060`
+(MSVC heap exhaustion on C++/WinRT TUs — capped to `-j2`) and **em-dashes in Catch2
+test names breaking `ctest` discovery on the Windows codepage** (replaced U+2014 with
+`-` across all test files; reverified green on both g++ and MSVC). Wired the new
+per-platform Essentials backends into `mpapp-handlers-{windows,linux}` (verified: Win32
+backends compile under MSVC; GIO/GTK backends link under GTK4).
+
+**Screenshot reality:** Android `adb screencap` works (real device pixels). Linux GUI
+capture is blocked by the WSLg rootless-Xwayland / missing `wlr-screencopy` wall (no
+Xvfb, sudo password-gated) — Linux proven operational via build + launch + live main
+loop instead. Windows: the Release example **loads the WinUI 3 runtime** (after
+registering the WinAppSDK 1.8 Main/Singleton/DDLM packages per-user) — it gets past
+loader + bootstrap into live WinUI and then faults *inside* `Microsoft.UI.Xaml.dll`
+v3.1.8.0 with XAML exception `0x802b000a`. That residual crash is an example /
+WinAppSDK-version runtime issue, **not** a framework build or toolchain defect (MSVC
+build + link + tests are green). A Windows runtime screenshot is a follow-up tied to
+resolving that XAML exception (or MSIX-packaging the app). Debug builds additionally
+need the debug CRT deployed beside the exe.
+
+**Android is the fully end-to-end-proven platform:** the APK builds → installs on the
+emulator → launches → renders the live MPAPP widget tree (Label / Entry / Switch /
+CheckBox / Slider / Button / BoxView / ShapeView / Account+Preferences sections) —
+screenshot saved at `vault/_Assets/android_hello_emulator.png`. Fixing the build
+surfaced + repaired a real pre-existing Android link break (`install_main_dispatcher`
+undefined: `src/executor/mock.cpp` was missing from the APK source list).
+
 ## What's next (follow-ups)
 
 1. **Windows real layout handlers** (mux::Canvas/custom) — needs MSVC + WinUI
@@ -106,9 +145,10 @@ is **1476 tests / 100%** under g++ 14.2.
    run on a device). GTK clipboard async reads + Android Context plumbing are runtime TODOs.
 3. **Per-platform real backends** for the remaining Essentials APIs (sensors,
    geolocation, battery on Linux via UPower, etc.) + license review (Rule 9) for native deps.
-4. **CMake wiring** — the new `src/essentials/{windows,linux,android}/` backends compile
-   standalone but are not yet added to a build target; the layout handler `.cpp`s already
-   build (globbed). Umbrella (`mpapp.hpp`) still excludes the new layout wrappers.
+4. **CMake wiring — DONE** for Windows/Linux (essentials backends now glob into
+   `mpapp-handlers-{windows,linux}`). Remaining: wire the Android essentials backends into
+   the gradle/NDK `externalNativeBuild` glob; umbrella (`mpapp.hpp`) still excludes the new
+   layout wrappers (deliberate until all platforms' handlers verified).
 5. **XAML lowering** of the new surface (brushes, AppThemeBinding, templating, dialogs)
    into `mpapp-xc` — M-09 tooling scope.
 
